@@ -9,11 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Data Exploration
 
-- [ ] **DATA-01**: Load and examine the structure of crime incidents dataset
-- [ ] **DATA-02**: Assess data quality (missing values, duplicates, inconsistencies)
-- [ ] **DATA-03**: Identify data types and ranges for each column
-- [ ] **DATA-04**: Detect outliers and anomalies in the data
-- [ ] **DATA-05**: Understand relationships between variables
+- [x] **DATA-01**: Load and examine the structure of crime incidents dataset
+- [x] **DATA-02**: Assess data quality (missing values, duplicates, inconsistencies)
+- [x] **DATA-03**: Identify data types and ranges for each column
+- [x] **DATA-04**: Detect outliers and anomalies in the data
+- [x] **DATA-05**: Understand relationships between variables
 
 ### Statistical Analysis
 
@@ -74,11 +74,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| DATA-05 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
+| DATA-04 | Phase 1 | Complete |
+| DATA-05 | Phase 1 | Complete |
 | STAT-01 | Phase 2 | Pending |
 | STAT-02 | Phase 2 | Pending |
 | STAT-03 | Phase 2 | Pending |
