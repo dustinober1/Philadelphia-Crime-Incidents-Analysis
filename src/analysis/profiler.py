@@ -45,3 +45,25 @@ class DataProfiler:
             pd.Series: Series containing dtypes of each column.
         """
         return self.df.dtypes
+
+    def check_missing_values(self) -> pd.DataFrame:
+        """
+        Calculates the count and percentage of missing values per column.
+
+        Returns:
+            pd.DataFrame: DataFrame with columns 'missing_count' and 'missing_percentage'.
+        """
+        missing_count = self.df.isnull().sum()
+        missing_percentage = (missing_count / len(self.df)) * 100
+        return pd.DataFrame(
+            {"missing_count": missing_count, "missing_percentage": missing_percentage}
+        )
+
+    def check_duplicates(self) -> int:
+        """
+        Returns the number of duplicate rows in the dataset.
+
+        Returns:
+            int: Count of duplicate rows.
+        """
+        return self.df.duplicated().sum()
