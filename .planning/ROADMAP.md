@@ -23,7 +23,7 @@ Success criteria: All findings defensible under peer review; methodology transpa
 ### Phase 1: Data Foundation (Weeks 1-3)
 **Goal:** Understand data completely; establish clean dataset; identify confounds
 **Plans:** 3 plans
-- [ ] 01-01-PLAN.md — Setup Project Structure & Config
+- [x] 01-01-PLAN.md — Setup Project Structure & Config
 - [ ] 01-02-PLAN.md — Data Loading & Basic Validation
 - [ ] 01-03-PLAN.md — Advanced Diagnostics & Cleaning
 
