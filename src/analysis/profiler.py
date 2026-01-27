@@ -136,3 +136,33 @@ class DataProfiler:
         if numeric_cols.empty:
             return pd.DataFrame()
         return numeric_cols.corr()
+
+    def analyze_time_series(self, date_col: str, freq: str = "M") -> pd.DataFrame:
+        """
+        Aggregates data by time frequency.
+
+        Args:
+            date_col (str): Name of the datetime column.
+            freq (str): Frequency string (e.g., 'D', 'W', 'M', 'Y'). Defaults to 'M'.
+
+        Returns:
+            pd.DataFrame: DataFrame with time index and counts.
+
+        Raises:
+            ValueError: If date_col does not exist or cannot be converted to datetime.
+        """
+        if date_col not in self.df.columns:
+            raise ValueError(f"Column '{date_col}' not found in DataFrame.")
+
+        # Ensure datetime type
+        if not pd.api.types.is_datetime64_any_dtype(self.df[date_col]):
+            try:
+                self.df[date_col] = pd.to_datetime(self.df[date_col])
+            except Exception as e:
+                raise ValueError(
+                    f"Could not convert '{date_col}' to datetime: {e}"
+                ) from e
+
+        # Set index and resample
+        # using size() to count occurrences in each period
+        return self.df.set_index(date_col).resample(freq).size().to_frame(name="count")
