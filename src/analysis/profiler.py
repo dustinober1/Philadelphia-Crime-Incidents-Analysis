@@ -1,4 +1,5 @@
 import pandas as pd
+from typing import Optional
 
 
 class DataProfiler:
@@ -166,3 +167,63 @@ class DataProfiler:
         # Set index and resample
         # using size() to count occurrences in each period
         return self.df.set_index(date_col).resample(freq).size().to_frame(name="count")
+
+    def analyze_bivariate_categorical(self, col1: str, col2: str) -> pd.DataFrame:
+        """
+        Creates a cross-tabulation (contingency table) of two categorical columns.
+
+        Args:
+            col1 (str): Name of the first categorical column.
+            col2 (str): Name of the second categorical column.
+
+        Returns:
+            pd.DataFrame: Cross-tabulation of the two columns.
+
+        Raises:
+            ValueError: If columns are not found in the DataFrame.
+        """
+        if col1 not in self.df.columns or col2 not in self.df.columns:
+            raise ValueError(f"Columns '{col1}' and/or '{col2}' not found.")
+
+        return pd.crosstab(self.df[col1], self.df[col2])
+
+    def analyze_group_stats(
+        self, group_col: str, agg_col: Optional[str] = None, agg_func: str = "count"
+    ) -> pd.DataFrame:
+        """
+        Computes statistics for groups.
+
+        Args:
+            group_col (str): Column to group by.
+            agg_col (str, optional): Column to aggregate. Defaults to None (counts rows).
+            agg_func (str): Aggregation function name (e.g., 'mean', 'sum', 'count').
+                            Defaults to 'count'.
+
+        Returns:
+            pd.DataFrame: Grouped statistics.
+
+        Raises:
+            ValueError: If columns not found.
+        """
+        if group_col not in self.df.columns:
+            raise ValueError(f"Column '{group_col}' not found.")
+
+        if agg_col and agg_col not in self.df.columns:
+            raise ValueError(f"Column '{agg_col}' not found.")
+
+        if agg_col is None:
+            # Just count rows per group
+            return (
+                self.df.groupby(group_col)
+                .size()
+                .to_frame(name="count")
+                .sort_values("count", ascending=False)
+            )
+
+        # Aggregate specific column
+        return (
+            self.df.groupby(group_col)[agg_col]
+            .agg(agg_func)
+            .to_frame(name=agg_func)
+            .sort_values(agg_func, ascending=False)
+        )
