@@ -1,5 +1,5 @@
 import pandas as pd
-import pandera as pa
+import pandera.pandas as pa
 from pandera import errors
 from pandera.typing import DataFrame, Series
 import scripts.config as config
