@@ -57,7 +57,15 @@ Success criteria: All findings defensible under peer review; methodology transpa
 
 **Why Sequential:** Depends on Phase 1 clean data. Outputs feed into Phase 3 (dashboard/report).
 
-**Parallelizable Components:** Notebooks 02-06 can run in parallel (all read cleaned data, write independent outputs).
+**Parallelizable Components:** Notebooks 02-07 can run in parallel (all read cleaned data, write independent outputs).
+
+**Plans:** 6 plans in 1 wave (all parallel)
+- [ ] 02-01-PLAN.md — Exploratory Analysis (Notebook 02)
+- [ ] 02-02-PLAN.md — Temporal Analysis (Notebook 03)
+- [ ] 02-03-PLAN.md — Geographic Analysis (Notebook 04)
+- [ ] 02-04-PLAN.md — Offense Breakdown (Notebook 05)
+- [ ] 02-05-PLAN.md — Disparity Analysis (Notebook 06)
+- [ ] 02-06-PLAN.md — Cross-Factor Analysis (Notebook 07)
 
 **Deliverables:**
 - Temporal analysis: 20-year trends, seasonality, day/hour patterns, trends by crime type
