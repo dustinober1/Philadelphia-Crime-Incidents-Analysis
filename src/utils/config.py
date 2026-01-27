@@ -29,3 +29,14 @@ def load_config(config_path: str = "config.ini") -> configparser.ConfigParser:
     config = configparser.ConfigParser()
     config.read(config_file)
     return config
+
+def get_processed_data_path() -> Path:
+    """
+    Get the path to the processed data directory.
+
+    Returns:
+        Path: The processed data directory path.
+    """
+    config = load_config()
+    processed_path = config["data_paths"]["processed_data_path"]
+    return PROJECT_ROOT / processed_path

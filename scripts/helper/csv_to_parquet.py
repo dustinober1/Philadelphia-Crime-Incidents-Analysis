@@ -15,8 +15,8 @@ import time
 import sys
 
 # Configuration
-CSV_DIR = Path(__file__).parent / "raw" / "philly_crime_data"
-OUTPUT_FILE = Path(__file__).parent / "processed" / "crime_incidents_combined.parquet"
+CSV_DIR = Path(__file__).parent.parent.parent / "notebooks" / "phase_01_data_ingestion" / "data" / "raw" / "philly_crime_data"
+OUTPUT_FILE = Path(__file__).parent.parent / "data" / "processed" / "crime_incidents_combined.parquet"
 CHUNK_SIZE = 20  # Process CSVs in chunks to manage memory
 
 def get_csv_files():
