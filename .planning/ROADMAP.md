@@ -28,6 +28,10 @@ This roadmap delivers a comprehensive exploratory data analysis of Philadelphia 
 ### Phase 2 - Statistical Analysis
 **Goal:** User can compute and interpret descriptive statistics and patterns in crime data
 
+**Plans:**
+- [ ] 02-statistical-analysis/02-01-PLAN.md — Extend DataProfiler logic
+- [ ] 02-statistical-analysis/02-02-PLAN.md — Create analysis runner
+
 **Dependencies:** Phase 1 - Data Exploration
 
 **Requirements:** STAT-01, STAT-02, STAT-03, STAT-04, STAT-05
