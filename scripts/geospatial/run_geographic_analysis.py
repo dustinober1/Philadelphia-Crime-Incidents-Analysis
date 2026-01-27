@@ -63,41 +63,71 @@ def main():
         df = load_crime_data(args.input)
         print(f"✓ Loaded {len(df)} crime incidents")
 
-        # Initialize GeoAnalyzer
-        print("\nStep 2: Initializing geographic analyzer...")
-        analyzer = GeoAnalyzer(df)
+        # Filter out rows with NaN coordinates before processing
+        print("\nStep 2: Filtering valid coordinates...")
+        df_filtered = df.dropna(subset=["point_x", "point_y"])
+        print(
+            f"✓ Filtered from {len(df)} to {len(df_filtered)} records with valid coordinates"
+        )
+
+        # Initialize GeoAnalyzer with filtered data
+        print("\nStep 3: Initializing geographic analyzer...")
+        analyzer = GeoAnalyzer(df_filtered)
+        print("✓ GeoAnalyzer initialized")
+
+        # Filter out rows with NaN coordinates and keep only Philadelphia area coordinates
+        print("\nStep 2: Filtering valid Philadelphia area coordinates...")
+        # Drop NaN values first
+        df_no_nan = df.dropna(subset=["point_x", "point_y"])
+
+        # Keep only coordinates in the Philadelphia area (approximate bounds)
+        philly_bounds = (
+            (df_no_nan["point_x"] >= -75.5)
+            & (df_no_nan["point_x"] <= -74.5)  # longitude
+            & (df_no_nan["point_y"] >= 39.8)
+            & (df_no_nan["point_y"] <= 40.2)  # latitude
+        )
+        df_filtered = df_no_nan[philly_bounds]
+
+        print(
+            f"✓ Filtered from {len(df)} to {len(df_filtered)} records in Philadelphia area"
+        )
+
+        # Initialize GeoAnalyzer with filtered data
+        print("\nStep 3: Initializing geographic analyzer...")
+        analyzer = GeoAnalyzer(df_filtered)
         print("✓ GeoAnalyzer initialized")
 
         # Initialize GeoDataFrame from coordinates
-        print("\nStep 3: Creating GeoDataFrame from coordinates...")
-        gdf = analyzer.initialize_geodataframe(lat_col="latitude", lon_col="longitude")
+        print("\nStep 4: Creating GeoDataFrame from coordinates...")
+        gdf = analyzer.initialize_geodataframe(lat_col="point_y", lon_col="point_x")
         print(f"✓ Created GeoDataFrame with {len(gdf)} geometries")
 
         # Validate coordinates
-        print("\nStep 4: Validating coordinates...")
+        print("\nStep 5: Validating coordinates...")
         is_valid = analyzer.validate_coordinates(
-            df, lat_col="latitude", lon_col="longitude"
+            df_filtered, lat_col="point_y", lon_col="point_x"
         )
         if is_valid:
             print("✓ All coordinates are valid")
 
         # Generate interactive map if requested
         if args.generate_maps:
-            print("\nStep 5: Generating interactive map...")
+            print("\nStep 6: Generating interactive map...")
             map_file = str(output_dir / "crime_incidents_map.html")
             map_obj = analyzer.create_interactive_map(
-                lat_col="latitude",
-                lon_col="longitude",
+                lat_col="point_y",
+                lon_col="point_x",
                 crime_type_col="ucr_general",
                 output_file=map_file,
             )
             print(f"✓ Interactive map saved to {map_file}")
 
             # Identify hotspots
-            print("\nStep 6: Identifying geographic hotspots...")
+            print("\nStep 7: Identifying geographic hotspots...")
             hotspots = analyzer.identify_hotspots(
-                lat_col="latitude",
-                lon_col="longitude",
+                lat_col="point_y",
+                lon_col="point_x",
                 bandwidth=0.01,
                 grid_size=50,
             )
@@ -108,9 +138,9 @@ def main():
             print(f"✓ Hotspot data saved to {hotspots_file}")
 
         # Analyze spatial distribution
-        print("\nStep 7: Analyzing spatial distribution patterns...")
+        print("\nStep 8: Analyzing spatial distribution patterns...")
         distribution = analyzer.analyze_spatial_distribution(
-            lat_col="latitude", lon_col="longitude"
+            lat_col="point_y", lon_col="point_x"
         )
         distribution_file = str(output_dir / "spatial_distribution.json")
         with open(distribution_file, "w") as f:
@@ -125,12 +155,12 @@ def main():
         )
 
         # Compare area density
-        if args.district_col and args.district_col in df.columns:
-            print(f"\nStep 8: Comparing crime density across {args.district_col}s...")
+        if args.district_col and args.district_col in df_filtered.columns:
+            print(f"\nStep 9: Comparing crime density across {args.district_col}s...")
             area_density = analyzer.compare_area_density(
                 area_col=args.district_col,
-                lat_col="latitude",
-                lon_col="longitude",
+                lat_col="point_y",
+                lon_col="point_x",
             )
             density_file = str(output_dir / "area_density.parquet")
             area_density.to_parquet(density_file)
@@ -143,13 +173,13 @@ def main():
                 )
 
         # Save summary statistics
-        print("\nStep 9: Saving summary statistics...")
+        print("\nStep 10: Saving summary statistics...")
         summary = {
-            "total_incidents": len(df),
-            "total_areas": len(df[args.district_col].unique())
-            if args.district_col in df.columns
+            "total_incidents": len(df_filtered),
+            "total_areas": len(df_filtered[args.district_col].unique())
+            if args.district_col in df_filtered.columns
             else 0,
-            "data_columns": list(df.columns),
+            "data_columns": list(df_filtered.columns),
             "spatial_distribution": distribution,
         }
         summary_file = str(output_dir / "analysis_summary.json")
