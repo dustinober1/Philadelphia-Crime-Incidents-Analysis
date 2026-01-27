@@ -9,6 +9,11 @@ This roadmap delivers a comprehensive exploratory data analysis of Philadelphia 
 ### Phase 1 - Data Exploration
 **Goal:** User can load and understand the structure and quality of the crime incidents dataset
 
+**Plans:**
+- [ ] 01-data-exploration/01-01-PLAN.md — Foundation & Loading Infrastructure
+- [ ] 01-data-exploration/01-02-PLAN.md — Profiling Logic Implementation
+- [ ] 01-data-exploration/01-03-PLAN.md — Exploration Runner Script
+
 **Dependencies:** None
 
 **Requirements:** DATA-01, DATA-02, DATA-03, DATA-04, DATA-05
