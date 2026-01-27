@@ -1,0 +1,12 @@
+Variable 1,Variable 2,Correlation
+mean_lat,mean_lon,0.9999999999927875
+total_incidents,Other,0.9115237582682845
+mean_hour,Other,-0.8983147647991171
+total_incidents,Violent,0.8654144944310395
+Other,Violent,0.805713512108544
+total_incidents,mean_hour,-0.7728653433291128
+mean_hour,Violent,-0.7547730276195497
+active_districts,Violent,0.7044702445694928
+mean_hour,active_districts,-0.6883539150409327
+active_districts,Other,0.6483245403122623
+total_incidents,active_districts,0.6180380713733971

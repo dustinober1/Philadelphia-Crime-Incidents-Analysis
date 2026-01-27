@@ -1,0 +1,22 @@
+column,missing_count,missing_pct,dtype
+the_geom_webmercator,55697,1.6032481196081763,category
+lat,55682,1.6028163419218713,float64
+lng,55682,1.6028163419218713,float64
+the_geom,55580,1.599880253654998,category
+psa,1296,0.03730559209674123,str
+location_block,187,0.005382828489267446,str
+ucr_general,0,0.0,int64
+day_name,0,0.0,str
+day_of_week,0,0.0,int32
+month,0,0.0,int32
+year,0,0.0,int32
+text_general_code,0,0.0,str
+dc_key,0,0.0,float64
+cartodb_id,0,0.0,int64
+hour,0,0.0,int32
+dispatch_time,0,0.0,category
+dispatch_date,0,0.0,category
+dispatch_date_time,0,0.0,"datetime64[ns, UTC]"
+dc_dist,0,0.0,int64
+objectid,0,0.0,int64
+offense_category,0,0.0,str
