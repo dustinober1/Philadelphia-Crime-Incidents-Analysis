@@ -24,7 +24,7 @@ Success criteria: All findings defensible under peer review; methodology transpa
 **Goal:** Understand data completely; establish clean dataset; identify confounds
 **Plans:** 3 plans
 - [x] 01-01-PLAN.md — Setup Project Structure & Config
-- [ ] 01-02-PLAN.md — Data Loading & Basic Validation
+- [x] 01-02-PLAN.md — Data Loading & Basic Validation
 - [ ] 01-03-PLAN.md — Advanced Diagnostics & Cleaning
 
 **Why First:** All downstream analysis depends on data quality. Confound identification (seasonality, reporting lag, geocoding gaps) informs all analytical choices.
