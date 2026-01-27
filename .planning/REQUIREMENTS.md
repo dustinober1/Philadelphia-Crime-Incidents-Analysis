@@ -180,13 +180,13 @@ This document specifies functional and non-functional requirements for the Crime
 
 | Requirement ID | Phase | Notebook | Status | Owner |
 |---|---|---|---|---|
-| QUAL-01 | 1 | 01_data_loading | — Pending | — |
-| QUAL-02 | 1 | 01_data_loading | — Pending | — |
-| QUAL-03 | 1 | 01_data_loading | — Pending | — |
-| QUAL-04 | 1 | 01_data_loading | — Pending | — |
-| QUAL-05 | 1 | 01_data_loading | — Pending | — |
-| QUAL-06 | 1 | 01_data_loading | — Pending | — |
-| QUAL-07 | 1 | 01_data_loading | — Pending | — |
+| QUAL-01 | 1 | 01_data_loading | ✓ Complete | — |
+| QUAL-02 | 1 | 01_data_loading | ✓ Complete | — |
+| QUAL-03 | 1 | 01_data_loading | ✓ Complete | — |
+| QUAL-04 | 1 | 01_data_loading | ✓ Complete | — |
+| QUAL-05 | 1 | 01_data_loading | ✓ Complete | — |
+| QUAL-06 | 1 | 01_data_loading | ✓ Complete | — |
+| QUAL-07 | 1 | 01_data_loading | ✓ Complete | — |
 | TEMP-01 | 2 | 03_temporal_analysis | — Pending | — |
 | TEMP-02 | 2 | 03_temporal_analysis | — Pending | — |
 | TEMP-03 | 2 | 03_temporal_analysis | — Pending | — |
@@ -224,12 +224,12 @@ This document specifies functional and non-functional requirements for the Crime
 | REPORT-05 | 3 | 09_report_generation | — Pending | — |
 | REPORT-06 | 3 | 09_report_generation | — Pending | — |
 | REPORT-07 | 2-3 | All | — Pending | — |
-| STAT-01 | 1 | 02_exploratory_analysis | — Pending | — |
+| STAT-01 | 1 | 02_exploratory_analysis | ✓ Complete | — |
 | STAT-02 | 2-3 | All | — Pending | — |
 | STAT-03 | 3 | 09_report_generation | — Pending | — |
 | STAT-04 | 2-3 | All | — Pending | — |
 | STAT-05 | 2-3 | All | — Pending | — |
-| DATA-01 | 1 | 01_data_loading | — Pending | — |
+| DATA-01 | 1 | 01_data_loading | ✓ Complete | — |
 | DATA-02 | 2 | 02_exploratory_analysis | — Pending | — |
 | DATA-03 | 3 | 09_report_generation | — Pending | — |
 

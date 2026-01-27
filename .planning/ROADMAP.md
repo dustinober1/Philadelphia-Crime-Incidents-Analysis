@@ -270,12 +270,12 @@ Week 17-18: Phase 5 — Final Delivery
 
 ### Phase 1: Data Foundation
 **Primary Success Indicators:**
-- [ ] 3.5M+ crime records loaded without errors
-- [ ] Data quality report shows <5% missing for core fields
-- [ ] Geocoding coverage >70% overall, >80% for violent crimes
-- [ ] Reporting lag characterized; exclusion window documented (e.g., "last 2 months excluded")
-- [ ] Seasonal decomposition shows expected pattern (summer peak confirmed for Philadelphia)
-- [ ] Clean dataset reproducible (same results if re-run with same random seed)
+- [x] 3.5M+ crime records loaded without errors
+- [x] Data quality report shows <5% missing for core fields
+- [x] Geocoding coverage >70% overall, >80% for violent crimes
+- [x] Reporting lag characterized; exclusion window documented (e.g., "last 2 months excluded")
+- [x] Seasonal decomposition shows expected pattern (summer peak confirmed for Philadelphia)
+- [x] Clean dataset reproducible (same results if re-run with same random seed)
 
 **Validation Method:** Cross-check seasonal pattern against prior Philadelphia crime reports (validate data makes sense).
 
