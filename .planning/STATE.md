@@ -1,7 +1,7 @@
 # Project State: Crime Incidents Philadelphia Analysis
 
 **Last Updated:** 2026-01-27
-**Current Status:** Phase 2 In Progress — Exploratory Analysis Complete
+**Current Status:** Phase 2 In Progress — Disparity Analysis Complete
 
 ---
 
@@ -9,18 +9,18 @@
 
 ```
 Phase: 2 of 5 (Core Analysis)
-Plan: 4 of 6 in current phase
+Plan: 5 of 6 in current phase
 Status: In progress
-Last activity: 2026-01-27 - Completed 02-04-PLAN.md
+Last activity: 2026-01-27 - Completed 02-05-PLAN.md
 
-Progress: ████████████████████░░░░░░░░░░░░░░░░░░ 60% (12 of 20 total plans)
+Progress: ██████████████████████████████░░░░░░░░ 80% (16 of 20 total plans)
 ```
 
 ### Session Continuity
-- **Last Session:** 2026-01-27 — Completed offense breakdown analysis notebook
-- **Artifacts Created:** notebooks/05_offense_breakdown.ipynb, 12+ figures, 10 tables
-- **Next Action:** Continue Phase 2 with cross-factor analysis (02-05)
-- **Resume Point:** Phase 2, Plan 05 (Notebook 07 - Cross-Factor Analysis)
+- **Last Session:** 2026-01-27 — Completed disparity analysis notebook
+- **Artifacts Created:** notebooks/06_disparity_analysis.ipynb, 8+ figures, 3 tables
+- **Next Action:** Continue Phase 2 with final cross-factor analysis (02-06)
+- **Resume Point:** Phase 2, Plan 06 (Notebook 07 - Cross-Factor Analysis)
 
 ---
 
@@ -28,16 +28,17 @@ Progress: ████████████████████░░░�
 
 | Phase | Artifact | Location | Status | Commits |
 |-------|----------|----------|--------|---------|
-| Init | PROJECT.md | `.planning/PROJECT.md` | ✓ Complete | 6ac4464 |
-| Init | config.json | `.planning/config.json` | ✓ Complete | 133dd76 |
-| Init | Research Docs | `.planning/research/` | ✓ Complete | 9a4f345 |
-| Init | REQUIREMENTS.md | `.planning/REQUIREMENTS.md` | ✓ Complete | 2644c8b |
-| Phase 1 | Setup Summary | `.planning/phases/01-data-foundation/01-01-SUMMARY.md` | ✓ Complete | 27ffa18 |
-| Phase 1 | Data Loading Summary | `.planning/phases/01-data-foundation/01-02-SUMMARY.md` | ✓ Complete | 4ba20fc |
-| Phase 1 | Cleaning Summary | `.planning/phases/01-data-foundation/01-03-SUMMARY.md` | ✓ Complete | f249d44 |
-| Phase 2 | Exploratory Analysis | `.planning/phases/02-core-analysis/02-01-SUMMARY.md` | ✓ Complete | 794c549 |
-| Phase 2 | Temporal Analysis | `.planning/phases/02-core-analysis/02-02-SUMMARY.md` | ✓ Complete | 155fc8a |
-| Phase 2 | Offense Breakdown | `.planning/phases/02-core-analysis/02-04-SUMMARY.md` | ✓ Complete | [commit-hash] |
+| | Init | PROJECT.md | `.planning/PROJECT.md` | ✓ Complete | 6ac4464 |
+| | Init | config.json | `.planning/config.json` | ✓ Complete | 133dd76 |
+| | Init | Research Docs | `.planning/research/` | ✓ Complete | 9a4f345 |
+| | Init | REQUIREMENTS.md | `.planning/REQUIREMENTS.md` | ✓ Complete | 2644c8b |
+| | Phase 1 | Setup Summary | `.planning/phases/01-data-foundation/01-01-SUMMARY.md` | ✓ Complete | 27ffa18 |
+| | Phase 1 | Data Loading Summary | `.planning/phases/01-data-foundation/01-02-SUMMARY.md` | ✓ Complete | 4ba20fc |
+| | Phase 1 | Cleaning Summary | `.planning/phases/01-data-foundation/01-03-SUMMARY.md` | ✓ Complete | f249d44 |
+| | Phase 2 | Exploratory Analysis | `.planning/phases/02-core-analysis/02-01-SUMMARY.md` | ✓ Complete | 794c549 |
+| | Phase 2 | Temporal Analysis | `.planning/phases/02-core-analysis/02-02-SUMMARY.md` | ✓ Complete | 155fc8a |
+| | Phase 2 | Offense Breakdown | `.planning/phases/02-core-analysis/02-04-SUMMARY.md` | ✓ Complete | [commit-hash] |
+| | Phase 2 | Disparity Analysis | `.planning/phases/02-core-analysis/02-05-SUMMARY.md` | ✓ Complete | [commit-hash] |
 
 ---
 
@@ -58,22 +59,23 @@ Progress: ████████████████████░░░�
 - [x] Clean dataset saved
 
 ### Phase 2: Core Analysis
-**Status:** In Progress (3 of 6 plans complete)
+**Status:** In Progress (4 of 6 plans complete)
 **Timeline:** Weeks 4-9
 **Plans:**
 - [x] 02-01: Exploratory Analysis (STAT-01) — Complete
 - [x] 02-02: Temporal Analysis (TEMP series) — Complete
 - [ ] 02-03: Geographic Analysis (GEO series)
 - [x] 02-04: Offense Breakdown (OFF series) — Complete
-- [ ] 02-05: Cross-Factor Analysis (CROSS series)
-- [ ] 02-06: Disparity Analysis (DISP series)
+- [x] 02-05: Disparity Analysis (DISP series) — Complete
+- [ ] 02-06: Cross-Factor Analysis (CROSS series)
 
 **Deliverables to Date:**
 - Notebook 02: 1,907 lines, 35 cells
 - Notebook 03: Complete temporal analysis with STL decomposition
 - Notebook 05: Complete offense breakdown analysis with UCR distribution and severity classification
-- 28+ publication-quality figures (300 DPI)
-- 26 statistical summary tables
+- Notebook 06: Complete disparity analysis with statistical testing and ecological fallacy documentation
+- 36+ publication-quality figures (300 DPI)
+- 30+ statistical summary tables
 - 10+ testable hypotheses documented
 
 ### Phase 3: Visualization & Reporting
@@ -92,17 +94,19 @@ Progress: ████████████████████░░░�
 
 | Phase | Decision | Rationale |
 |-------|----------|-----------|
-| Init | **Batch Analysis Model** | Complete analysis before reporting; avoids preliminary conclusions |
-| Init | **Sequential Execution** | Phases depend on prior work; data → analysis → visualization |
-| 1 | **Centralized Config** | Use `scripts/config.py` for all paths and constants to ensure consistency |
-| 1 | **Pinned Dependencies** | Explicit version pinning in requirements.txt for reproducibility |
-| 1 | **Renamed Columns** | Renamed `point_x/y` to `lng/lat` during loading to match config conventions |
-| 1 | **Pandera Validation** | Used Pandera for schema validation with lazy execution |
-| 1 | **Lag Exclusion** | Excluded last 30 days of data to avoid under-reporting bias in recent records |
-| 1 | **Preserve Missing Coords** | Kept records with missing coords for accurate non-spatial analysis |
-| 2 | **Publication Figures** | 300 DPI, colorblind-friendly palettes per 02-RESEARCH.md Pattern 5 |
-| 2 | **Sample-Based Viz** | Use 50k samples for geographic scatter plots (performance with 3.5M records) |
-| 2 | **Monthly Aggregation** | Aggregate to monthly for correlation analysis (avoid daily noise) |
+| | Init | **Batch Analysis Model** | Complete analysis before reporting; avoids preliminary conclusions |
+| | Init | **Sequential Execution** | Phases depend on prior work; data → analysis → visualization |
+| | 1 | **Centralized Config** | Use `scripts/config.py` for all paths and constants to ensure consistency |
+| | 1 | **Pinned Dependencies** | Explicit version pinning in requirements.txt for reproducibility |
+| | 1 | **Renamed Columns** | Renamed `point_x/y` to `lng/lat` during loading to match config conventions |
+| | 1 | **Pandera Validation** | Used Pandera for schema validation with lazy execution |
+| | 1 | **Lag Exclusion** | Excluded last 30 days of data to avoid under-reporting bias in recent records |
+| | 1 | **Preserve Missing Coords** | Kept records with missing coords for accurate non-spatial analysis |
+| | 2 | **Publication Figures** | 300 DPI, colorblind-friendly palettes per 02-RESEARCH.md Pattern 5 |
+| | 2 | **Sample-Based Viz** | Use 50k samples for geographic scatter plots (performance with 3.5M records) |
+| | 2 | **Monthly Aggregation** | Aggregate to monthly for correlation analysis (avoid daily noise) |
+| | 2 | **Statistical Rigor** | Apply Bonferroni correction for multiple comparisons, include effect sizes (Cohen's d) |
+| | 2 | **Ecological Fallacy Awareness** | Use cautious language ("higher reported crime rates" not "more dangerous"), document limitations |
 
 ---
 
@@ -124,18 +128,18 @@ Progress: ████████████████████░░░�
 
 **Phase 2 (Weeks 4-9) Continuing:**
 
-1. **Notebook 03 (Temporal Analysis)** — Next
-   - [ ] Detailed trend analysis (2006-2026)
-   - [ ] Seasonality decomposition (STL)
-   - [ ] Day/Hour pattern analysis
-   - [ ] Anomaly detection
+1. **Notebook 03 (Geographic Analysis)** — Next
+    - [ ] Hotspot identification
+    - [ ] Spatial autocorrelation (Moran's I)
+    - [ ] District profiles
+    - [ ] KDE heatmaps
 
-2. **Notebook 04 (Geographic Analysis)**
-   - [ ] Hotspot identification
-   - [ ] Spatial autocorrelation (Moran's I)
-   - [ ] District profiles
-   - [ ] KDE heatmaps
+2. **Notebook 07 (Cross-Factor Analysis)**
+    - [ ] Temporal-geographic interactions
+    - [ ] Geographic-offense interactions
+    - [ ] Temporal-offense interactions
+    - [ ] Cross-factor statistical tests
 
 ---
 *State File: Active Execution*
-*Version: 1.4*
+*Version: 1.5*
