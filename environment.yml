@@ -1,0 +1,21 @@
+name: crime-analysis
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.10
+  - pandas>=2.2
+  - geopandas>=0.14
+  - pandera>=0.20
+  - statsmodels>=0.14
+  - plotly
+  - folium
+  - matplotlib
+  - seaborn
+  - pyarrow
+  - scipy
+  - ipykernel
+  - jupyterlab
+  - pip
+  - pip:
+    - nbconvert
