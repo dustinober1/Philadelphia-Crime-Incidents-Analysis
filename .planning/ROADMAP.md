@@ -60,10 +60,10 @@ Success criteria: All findings defensible under peer review; methodology transpa
 **Parallelizable Components:** Notebooks 02-07 can run in parallel (all read cleaned data, write independent outputs).
 
 **Plans:** 6 plans in 1 wave (all parallel)
-- [ ] 02-01-PLAN.md — Exploratory Analysis (Notebook 02)
-- [ ] 02-02-PLAN.md — Temporal Analysis (Notebook 03)
+- [x] 02-01-PLAN.md — Exploratory Analysis (Notebook 02)
+- [x] 02-02-PLAN.md — Temporal Analysis (Notebook 03)
 - [ ] 02-03-PLAN.md — Geographic Analysis (Notebook 04)
-- [ ] 02-04-PLAN.md — Offense Breakdown (Notebook 05)
+- [x] 02-04-PLAN.md — Offense Breakdown (Notebook 05)
 - [ ] 02-05-PLAN.md — Disparity Analysis (Notebook 06)
 - [ ] 02-06-PLAN.md — Cross-Factor Analysis (Notebook 07)
 
