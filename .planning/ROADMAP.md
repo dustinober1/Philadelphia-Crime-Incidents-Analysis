@@ -29,8 +29,8 @@ This roadmap delivers a comprehensive exploratory data analysis of Philadelphia 
 **Goal:** User can compute and interpret descriptive statistics and patterns in crime data
 
 **Plans:**
-- [ ] 02-statistical-analysis/02-01-PLAN.md — Extend DataProfiler logic
-- [ ] 02-statistical-analysis/02-02-PLAN.md — Create analysis runner
+- [x] 02-statistical-analysis/02-01-PLAN.md — Extend DataProfiler logic
+- [x] 02-statistical-analysis/02-02-PLAN.md — Create analysis runner
 
 **Dependencies:** Phase 1 - Data Exploration
 
@@ -45,6 +45,10 @@ This roadmap delivers a comprehensive exploratory data analysis of Philadelphia 
 
 ### Phase 3 - Geographic Analysis
 **Goal:** User can analyze and visualize crime patterns based on geographic location
+
+**Plans:**
+- [x] 03-geographic-analysis/03-01-PLAN.md — Geospatial Analysis Module
+- [x] 03-geographic-analysis/03-02-PLAN.md — Geographic Analysis Runner
 
 **Dependencies:** Phase 1 - Data Exploration, Phase 2 - Statistical Analysis
 
@@ -87,8 +91,8 @@ This roadmap delivers a comprehensive exploratory data analysis of Philadelphia 
 
 | Phase | Status | Completion |
 |-------|--------|------------|
-| Phase 1 | Completed | 5/5 |
-| Phase 2 | Pending | 0/5 |
-| Phase 3 | Pending | 0/4 |
-| Phase 4 | Pending | 0/6 |
-| Phase 5 | Pending | 0/4 |
+| Phase 1 | Completed | 3/3 |
+| Phase 2 | Completed | 2/2 |
+| Phase 3 | Completed | 2/2 |
+| Phase 4 | Pending | 0/2 |
+| Phase 5 | Pending | 0/1 |

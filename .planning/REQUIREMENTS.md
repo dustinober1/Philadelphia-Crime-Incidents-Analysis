@@ -17,18 +17,18 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Statistical Analysis
 
-- [ ] **STAT-01**: Generate descriptive statistics for all crime categories
-- [ ] **STAT-02**: Calculate crime frequencies by type, time, and location
-- [ ] **STAT-03**: Identify most and least common crime types
-- [ ] **STAT-04**: Analyze temporal patterns (daily, weekly, monthly, yearly)
-- [ ] **STAT-05**: Compute correlations between different variables
+- [x] **STAT-01**: Generate descriptive statistics for all crime categories
+- [x] **STAT-02**: Calculate crime frequencies by type, time, and location
+- [x] **STAT-03**: Identify most and least common crime types
+- [x] **STAT-04**: Analyze temporal patterns (daily, weekly, monthly, yearly)
+- [x] **STAT-05**: Compute correlations between different variables
 
 ### Geographic Analysis
 
-- [ ] **GEO-01**: Map crime incidents by location coordinates
-- [ ] **GEO-02**: Identify geographic hotspots for different crime types
-- [ ] **GEO-03**: Analyze spatial distribution patterns
-- [ ] **GEO-04**: Compare crime density across different areas
+- [x] **GEO-01**: Map crime incidents by location coordinates
+- [x] **GEO-02**: Identify geographic hotspots for different crime types
+- [x] **GEO-03**: Analyze spatial distribution patterns
+- [x] **GEO-04**: Compare crime density across different areas
 
 ### Visualization
 
@@ -79,15 +79,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-03 | Phase 1 | Complete |
 | DATA-04 | Phase 1 | Complete |
 | DATA-05 | Phase 1 | Complete |
-| STAT-01 | Phase 2 | Pending |
-| STAT-02 | Phase 2 | Pending |
-| STAT-03 | Phase 2 | Pending |
-| STAT-04 | Phase 2 | Pending |
-| STAT-05 | Phase 2 | Pending |
-| GEO-01 | Phase 3 | Pending |
-| GEO-02 | Phase 3 | Pending |
-| GEO-03 | Phase 3 | Pending |
-| GEO-04 | Phase 3 | Pending |
+| STAT-01 | Phase 2 | Complete |
+| STAT-02 | Phase 2 | Complete |
+| STAT-03 | Phase 2 | Complete |
+| STAT-04 | Phase 2 | Complete |
+| STAT-05 | Phase 2 | Complete |
+| GEO-01 | Phase 3 | Complete |
+| GEO-02 | Phase 3 | Complete |
+| GEO-03 | Phase 3 | Complete |
+| GEO-04 | Phase 3 | Complete |
 | VIZ-01 | Phase 4 | Pending |
 | VIZ-02 | Phase 4 | Pending |
 | VIZ-03 | Phase 4 | Pending |
