@@ -1,0 +1,10 @@
+metric,value,ci_lower,ci_upper,p_value,category
+Overall Annual Change,-317.56516999516407,-336.1465586760921,-298.983781314236,2.7506701577061105e-92,Trend Statistics
+Violent Annual Change,-36.88589223387477,-38.66822914295123,-35.10355532479831,4.362809741653897e-109,Trend Statistics
+Property Annual Change,24.676721356854586,6.738966703038396,42.61447601067078,0.0072171563946302605,Trend Statistics
+Other Annual Change,-313.5557033366685,-322.4647464785547,-304.6466601947824,2.234661658209145e-159,Trend Statistics
+Seasonality Magnitude (% difference Summer vs Winter),19.947165180672467,,,,Seasonal Statistics
+Weekend vs Weekday Difference (%),-9.362961545189485,,,0.05,Day/Week Statistics
+Peak Hour - Overall,21.0,,,,Hour Statistics
+Peak Hour - Violent,4.0,,,,Hour Statistics
+Peak Hour - Property,21.0,,,,Hour Statistics
