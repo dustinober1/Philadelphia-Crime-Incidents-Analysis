@@ -1,2 +1,3 @@
 data/processed/crime_incidents_combined.parquet
-.venv/
+.venv/-e .github/
+analysis_output.log
