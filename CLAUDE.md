@@ -16,6 +16,16 @@ source .venv/bin/activate
 pip install pandas pyarrow matplotlib seaborn scipy pillow
 ```
 
+## Research and External Information
+
+**Always use the `gemini` agent for internet research**. When you need to:
+- Look up current information about Philadelphia crime patterns, policing policies, or demographics
+- Research Python libraries, visualization techniques, or statistical methods
+- Find documentation for pandas, matplotlib, seaborn, scipy, etc.
+- Investigate external factors that may influence crime data (weather, events, economic indicators)
+
+Use the gemini agent via Task tool with subagent_type `gemini` rather than WebSearch directly.
+
 ## Running Analysis
 
 ### Generate Full EDA Report
