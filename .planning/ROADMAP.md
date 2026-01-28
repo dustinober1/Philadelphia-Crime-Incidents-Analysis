@@ -107,18 +107,30 @@ Success criteria: All findings defensible under peer review; methodology transpa
 
 **Why After Phase 2:** Requires complete analysis data. Creates public-facing outputs.
 
+**Plans:** 5 plans in 2 waves
+- [ ] 03-01-PLAN.md — Dashboard Pre-computation (Wave 1)
+- [ ] 03-02-PLAN.md — Dashboard Application (Wave 1)
+- [ ] 03-03-PLAN.md — Quarto Report Setup (Wave 1)
+- [ ] 03-04-PLAN.md — Report Content Generation (Wave 1)
+- [ ] 03-05-PLAN.md — Integration & Finalization (Wave 2)
+
 **Deliverables:**
-- Interactive dashboard (HTML, Plotly + Folium, filterable by date/location/offense)
-- Formal academic report structure (methodology, results, discussion, limitations)
-- Figure integration into report
-- Executive summary (1 page, non-technical)
-- Reproducibility documentation
+- Interactive dashboard (HTML, Plotly + Dash, filterable by date/location/offense)
+- Formal academic report (PDF, HTML, Word) with methodology, results, discussion, limitations
+- Figure integration into report (55+ figures from Phase 2)
+- Executive summary (1 page, non-technical, standalone + integrated)
+- Reproducibility documentation (checklist, README)
 
 **Notebooks:**
-- `08_dashboard.ipynb` — Create interactive HTML dashboard
-- `09_report_generation.ipynb` — Compile figures, generate report template
+- `08_dashboard_precomputation.ipynb` — Data aggregations for dashboard performance
+- `09_dashboard_application.ipynb` — Create interactive Dash app with multi-tab navigation
+- `10_report_setup.ipynb` — Quarto project setup, figures, executive summary
+- `11_report_content.ipynb` — Populate chapters with Phase 2 findings
+- `12_integration.ipynb` — Report generation, cross-linking, documentation
 
 **Quarto Files (Report):**
+- `_quarto.yml` — Project configuration (book type, multi-format output)
+- `index.qmd` — Main document with integrated executive summary
 - `01_methodology.qmd` — Data sources, analysis approach, statistical methods
 - `02_data_quality.qmd` — Data quality findings, handling decisions
 - `03_temporal_findings.qmd` — Temporal analysis results
@@ -128,16 +140,23 @@ Success criteria: All findings defensible under peer review; methodology transpa
 - `07_cross_factor_findings.qmd` — Interaction analyses
 - `08_discussion.qmd` — Interpretation, implications, confounding
 - `09_limitations_conclusion.qmd` — Limitations, future work, conclusion
+- `executive_summary.qmd` — Standalone executive summary
+- `references.bib` — Bibliography with APA citations
+
+**Dashboard Files:**
+- `dashboard/app.py` — Exported Dash app for production deployment
+- `output/dashboard/*.parquet` — Pre-computed aggregations for performance
 
 **Requirements Addressed:** DASH-01 to DASH-03, REPORT-01 to REPORT-07, STAT-01 (summary), DATA-03
 
 **Success Criteria:**
-- ✓ Dashboard loads without errors; filters work (date, offense, geography)
-- ✓ Report structure complete with substantive content in each section
-- ✓ Limitations section explicit; confounds documented; causation claims avoided
-- ✓ All figures integrated with captions
-- ✓ Executive summary one page, understandable to non-technical audience
-- ✓ Reproducibility checklist: requirements.txt, environment.yml, README with execution order
+- [ ] Dashboard loads without errors; filters work (date, offense, geography)
+- [ ] Report structure complete (9 chapters, 50-100 pages)
+- [ ] Limitations section explicit; confounds documented; causation claims avoided
+- [ ] All figures integrated with captions (55+ figures)
+- [ ] Executive summary one page, understandable to non-technical audience
+- [ ] Reproducibility documentation: requirements.txt, README with execution order
+- [ ] Cross-linking established between dashboard and report sections
 
 ---
 
@@ -226,7 +245,7 @@ Success criteria: All findings defensible under peer review; methodology transpa
 | REPORT-01 to REPORT-07 | Academic Report | 3 critical, 4 high |
 | DATA-03 | Output Versioning | Medium |
 
-**Phase 3 Summary:** 10 requirements (3 critical, 7 high). Packages analysis into consumable formats.
+**Phase 3 Summary:** 10 requirements (3 critical, 7 high). Packages analysis into consumable formats. Currently 0 of 5 plans ready for execution.
 
 ### Phase 4: Advanced (Conditional)
 
@@ -263,11 +282,18 @@ Week 4-9:  Phase 2 — Core Analysis (Notebooks 02-07 parallelizable)
            └─ 07_cross_factor_analysis.ipynb
            └─ Deliverable: 30-50 figures + aggregations
 
-Week 10-12: Phase 3 — Visualization & Reporting
-           ├─ 08_dashboard.ipynb
-           ├─ 09_report_generation.ipynb
-           ├─ Quarto: Report structure (01_methodology.qmd → 09_conclusion.qmd)
-           └─ Deliverable: Interactive dashboard + report template
+Week 10-12: Phase 3 — Visualization & Reporting (Wave 1: Parallel; Wave 2: Sequential)
+            Wave 1 (Parallel):
+            ├─ 08_dashboard_precomputation.ipynb
+            ├─ 09_dashboard_application.ipynb
+            ├─ 10_report_setup.ipynb
+            └─ 11_report_content.ipynb
+            Wave 2 (Sequential):
+            └─ 12_integration.ipynb
+            ├─ Dashboard: app.py, 6 tabs, 18+ charts, Apply-button filters
+            ├─ Report: PDF/HTML/Word output, 9 chapters, 55+ figures
+            ├─ Cross-linking: Dashboard ↔ Report bidirectional links
+            └─ Deliverable: Interactive dashboard + full academic report
 
 Week 13-16: Phase 4 — Advanced & Validation (Optional)
            └─ Demographic analysis, sensitivity checks, peer review
