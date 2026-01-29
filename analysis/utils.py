@@ -22,6 +22,25 @@ from analysis.config import (
 )
 
 
+# =============================================================================
+# UCR CODE CLASSIFICATION
+# =============================================================================
+
+# FBI UCR (Uniform Crime Reporting) standard classification
+VIOLENT_CRIME_UCR = [100, 200, 300, 400]  # Homicide, Rape, Robbery, Aggravated Assault
+PROPERTY_CRIME_UCR = [500, 600, 700]      # Burglary, Theft, Motor Vehicle Theft
+
+UCR_CATEGORY_NAMES = {
+    100: "Homicide",
+    200: "Rape",
+    300: "Robbery",
+    400: "Aggravated Assault",
+    500: "Burglary",
+    600: "Theft/Larceny",
+    700: "Motor Vehicle Theft",
+}
+
+
 def load_data(clean: bool = False) -> pd.DataFrame:
     """
     Load the crime incidents dataset.
@@ -102,6 +121,28 @@ def validate_coordinates(df: pd.DataFrame) -> pd.DataFrame:
         )
         df.loc[invalid_lat & ~invalid_lon, "coord_issue"] = "invalid_latitude"
 
+    return df
+
+
+def classify_crime_category(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add crime_category column classifying crimes as 'Violent', 'Property', or 'Other'.
+
+    Based on FBI UCR (Uniform Crime Reporting) standard classification:
+    - Violent Crimes (UCR 100-499): Homicide, Rape, Robbery, Aggravated Assault
+    - Property Crimes (UCR 500-799): Burglary, Theft, Motor Vehicle Theft
+    - Other (UCR 800+): All other offenses
+
+    Args:
+        df: DataFrame with ucr_general column.
+
+    Returns:
+        DataFrame with added crime_category column.
+    """
+    df = df.copy()
+    df["crime_category"] = "Other"
+    df.loc[df["ucr_general"].isin(VIOLENT_CRIME_UCR), "crime_category"] = "Violent"
+    df.loc[df["ucr_general"].isin(PROPERTY_CRIME_UCR), "crime_category"] = "Property"
     return df
 
 
