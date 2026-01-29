@@ -105,3 +105,49 @@ SECTION_HEADERS = {
     "cross": "## Phase 5: Cross-Dimensional Analysis",
     "summary": "## Phase 6: Summary and Key Findings",
 }
+
+# =============================================================================
+# CLUSTERING / RED ZONES ANALYSIS
+# =============================================================================#
+
+# Philadelphia center point for map initialization
+PHILADELPHIA_CENTER = {"lat": 39.9526, "lon": -75.1652}
+
+# DBSCAN parameters for hotspot detection
+# eps_meters: radius for clustering (150m ~ 500ft, patrol-relevant scale)
+# min_samples: minimum incidents to form a hotspot
+DBSCAN_CONFIG = {
+    "eps_meters": 150,  # ~500ft radius for clustering
+    "min_samples": 50,  # Minimum incidents for a hotspot
+}
+
+# Sampling for performance (full dataset too large for clustering)
+CLUSTERING_SAMPLE_SIZE = 500_000  # Sample size for overall hotspot detection
+
+# Crime type groupings for focused hotspot analysis
+CRIME_TYPE_FOCUS = {
+    "narcotics": ["Narcotics", "Drug Violations"],
+    "violent": [
+        "Homicide - Criminal",
+        "Homicide - Gross Negligence",
+        "Rape",
+        "Robbery Firearm",
+        "Robbery No Firearm",
+        "Aggravated Assault Firearm",
+        "Aggravated Assault No Firearm",
+    ],
+    "property": [
+        "Burglary Residential",
+        "Burglary Non-Residential",
+        "Thefts",
+        "Theft from Vehicle",
+        "Motor Vehicle Theft",
+    ],
+}
+
+# Hotspot ranking criteria weights
+HOTSPOT_WEIGHTS = {
+    "incident_count": 0.5,    # 50% weight on total incidents
+    "density": 0.3,            # 30% weight on incidents per square km
+    "consistency": 0.2,        # 20% weight on year-over-year consistency
+}

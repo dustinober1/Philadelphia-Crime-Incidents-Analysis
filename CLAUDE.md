@@ -13,7 +13,7 @@ Philadelphia Crime Incidents Analysis - exploratory data analysis of 3.5M crime 
 source .venv/bin/activate
 
 # Install dependencies (if needed)
-pip install pandas pyarrow matplotlib seaborn scipy pillow
+pip install pandas pyarrow matplotlib seaborn scipy pillow scikit-learn folium
 ```
 
 ## Research and External Information
@@ -53,6 +53,7 @@ python analysis/cross_analysis.py      # Multi-dimensional patterns
 ```bash
 python analysis/07_report_safety_trend.py   # "Is Philadelphia getting safer?"
 python analysis/08_report_summer_spike.py   # "Summer crime spike: myth or fact?"
+python analysis/09_report_red_zones.py      # "Red Zones: Where do patrols matter most?"
 python analysis/10_report_covid_lockdown.py # "How did COVID-19 lockdowns impact crime?"
 ```
 
@@ -64,22 +65,27 @@ Focused reports follow pattern: `analysis/[name].py` contains analysis functions
 
 ```
 analysis/
-├── config.py                 # Centralized configuration (paths, colors, figure sizes)
-├── utils.py                  # Data loading, coordinate validation, temporal features, image helpers
+├── config.py                 # Centralized configuration (paths, colors, figure sizes, clustering params)
+├── utils.py                  # Data loading, coordinate validation, temporal features, clustering utilities
 ├── data_quality.py           # Phase 1: Data quality assessment
 ├── temporal_analysis.py      # Phase 2: Temporal patterns
 ├── categorical_analysis.py   # Phase 3: Crime types and districts
 ├── spatial_analysis.py       # Phase 4: Geographic analysis
 ├── cross_analysis.py         # Phase 5: Multi-dimensional analysis
 ├── safety_trend.py           # Safety trend analysis
+├── summer_spike.py           # Summer crime spike analysis
+├── red_zones.py              # Red zones/hotspot clustering analysis
 ├── covid_lockdown.py         # COVID-19 lockdown impact analysis
 ├── 06_generate_report.py     # Orchestrator - runs all phases, compiles EDA report
 ├── 07_report_safety_trend.py # Safety trend report generator
 ├── 08_report_summer_spike.py # Summer spike report generator
+├── 09_report_red_zones.py    # Red zones report generator
 └── 10_report_covid_lockdown.py # COVID lockdown report generator
 ```
 
 **Naming convention**: Core analysis modules (01-05) have no prefix. Focused report generators use `##_report_[name].py` numbering.
+
+**CLI entry point pattern**: Report generator scripts (##_report_*.py) add PROJECT_ROOT to sys.path before importing analysis modules.
 
 ### Data Flow
 
@@ -95,6 +101,9 @@ analysis/
 - `PHILADELPHIA_BBOX`: Coordinate bounds for validation
 - `FIGURE_SIZES`: Predefined figure dimensions for consistent plotting
 - `COLORS`: Color scheme constants for visualizations
+- `PHILADELPHIA_CENTER`: Map center coordinates for folium
+- `DBSCAN_CONFIG`: Clustering parameters (eps_meters=150, min_samples=50)
+- `CRIME_TYPE_FOCUS`: Crime type groupings for hotspot analysis
 
 ### Dataset Columns
 
@@ -122,11 +131,13 @@ Each analysis module follows this pattern:
 1. `analyze_*()` function - runs analysis, returns dict with results and base64 plots
 2. `generate_markdown_report()` function - converts results dict to markdown
 3. Plots converted via `image_to_base64(fig)` → HTML `<img>` tag with data URI
+4. Interactive maps (folium) saved as standalone HTML files in `reports/`
 
 ## Data Location
 
 - **Raw data**: `data/crime_incidents_combined.parquet` (~184 MB, 3.5M rows)
-- **Reports**: `reports/01_eda_report.md`, `reports/02_safety_trend_report.md`, `reports/03_summer_spike_report.md`, `reports/04_covid_lockdown_report.md`
+- **Reports**: `reports/01_eda_report.md`, `reports/02_safety_trend_report.md`, `reports/03_summer_spike_report.md`, `reports/04_covid_lockdown_report.md`, `reports/05_red_zones_report.md`
+- **Interactive Maps**: `reports/red_zones_map.html`
 - **Processed**: `data/processed/` (reserved for cleaned data)
 
 ## Known Issues
@@ -141,3 +152,21 @@ Each analysis module follows this pattern:
 - **format_number()**: Already adds comma separators; don't use `:,` format specifier in f-strings or it will raise `ValueError`
 - **Period types**: `year_month` column is Period type; convert to string for comparisons: `df["year_month"].astype(str)`
 - **Burglary codes**: Use "Burglary Residential" and "Burglary Non-Residential" for displacement analysis
+- **CLI entry point**: Always add PROJECT_ROOT to sys.path before importing from analysis package (see 08_report_summer_spike.py for pattern)
+
+## Clustering and Hotspot Analysis
+
+The `red_zones.py` module provides DBSCAN clustering for geographic hotspot detection:
+
+**Utilities in utils.py:**
+- `haversine_distance(lon1, lat1, lon2, lat2)` - Calculate great-circle distance in meters
+- `dbscan_clustering(df, eps_meters, min_samples, sample_size)` - Run DBSCAN with Haversine metric
+- `calculate_cluster_centroids(df)` - Get cluster centers and counts
+- `calculate_cluster_stats(df, centroids)` - Detailed statistics per cluster
+
+**DBSCAN configuration (config.py):**
+- `eps_meters`: 150m (~500ft) - patrol-relevant scale
+- `min_samples`: 50 incidents minimum for a hotspot
+- `CLUSTERING_SAMPLE_SIZE`: 500,000 records for performance
+
+**Key insight:** DBSCAN with Haversine distance is preferred over K-means for crime hotspots because it handles irregular shapes and uses true geographic distance.
