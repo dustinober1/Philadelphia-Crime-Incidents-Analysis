@@ -48,6 +48,16 @@ python analysis/spatial_analysis.py    # Geographic distribution, density
 python analysis/cross_analysis.py      # Multi-dimensional patterns
 ```
 
+### Run Focused Reports
+
+```bash
+python analysis/07_report_safety_trend.py   # "Is Philadelphia getting safer?"
+python analysis/08_report_summer_spike.py   # "Summer crime spike: myth or fact?"
+python analysis/10_report_covid_lockdown.py # "How did COVID-19 lockdowns impact crime?"
+```
+
+Focused reports follow pattern: `analysis/[name].py` contains analysis functions, `analysis/[0-9]_report_[name].py` is the generator script.
+
 ## Architecture
 
 ### Module Structure
@@ -61,8 +71,15 @@ analysis/
 ├── categorical_analysis.py   # Phase 3: Crime types and districts
 ├── spatial_analysis.py       # Phase 4: Geographic analysis
 ├── cross_analysis.py         # Phase 5: Multi-dimensional analysis
-└── 06_generate_report.py     # Orchestrator - runs all phases, compiles report
+├── safety_trend.py           # Safety trend analysis
+├── covid_lockdown.py         # COVID-19 lockdown impact analysis
+├── 06_generate_report.py     # Orchestrator - runs all phases, compiles EDA report
+├── 07_report_safety_trend.py # Safety trend report generator
+├── 08_report_summer_spike.py # Summer spike report generator
+└── 10_report_covid_lockdown.py # COVID lockdown report generator
 ```
+
+**Naming convention**: Core analysis modules (01-05) have no prefix. Focused report generators use `##_report_[name].py` numbering.
 
 ### Data Flow
 
@@ -109,7 +126,7 @@ Each analysis module follows this pattern:
 ## Data Location
 
 - **Raw data**: `data/crime_incidents_combined.parquet` (~184 MB, 3.5M rows)
-- **Reports**: `reports/eda_report.md`
+- **Reports**: `reports/01_eda_report.md`, `reports/02_safety_trend_report.md`, `reports/03_summer_spike_report.md`, `reports/04_covid_lockdown_report.md`
 - **Processed**: `data/processed/` (reserved for cleaned data)
 
 ## Known Issues
@@ -118,3 +135,9 @@ Each analysis module follows this pattern:
 - **Hour column**: 2.92% missing values
 - **Coordinates**: ~1.6% missing or invalid (some have positive longitude incorrectly)
 - **PSA values**: May contain non-numeric values (e.g., "A"), handle with try/except when converting to int
+
+### Code Gotchas
+
+- **format_number()**: Already adds comma separators; don't use `:,` format specifier in f-strings or it will raise `ValueError`
+- **Period types**: `year_month` column is Period type; convert to string for comparisons: `df["year_month"].astype(str)`
+- **Burglary codes**: Use "Burglary Residential" and "Burglary Non-Residential" for displacement analysis
