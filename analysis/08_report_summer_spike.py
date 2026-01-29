@@ -583,7 +583,7 @@ if __name__ == "__main__":
     results = analyze_summer_spike()
     report = generate_markdown_report(results)
 
-    report_path = PROJECT_ROOT / "reports" / "summer_spike_report.md"
+    report_path = PROJECT_ROOT / "reports" / "03_summer_spike_report.md"
     report_path.parent.mkdir(exist_ok=True)
     with open(report_path, "w") as f:
         f.write(report)

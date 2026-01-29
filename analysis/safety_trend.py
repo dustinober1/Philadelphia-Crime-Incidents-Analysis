@@ -593,7 +593,7 @@ if __name__ == "__main__":
     results = analyze_safety_trends()
     report = generate_markdown_report(results)
 
-    report_path = PROJECT_ROOT / "reports" / "safety_trend_report.md"
+    report_path = PROJECT_ROOT / "reports" / "02_safety_trend_report.md"
     report_path.parent.mkdir(exist_ok=True)
     with open(report_path, "w") as f:
         f.write(report)
