@@ -80,8 +80,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STAT-02 | Phase 1 | Pending |
 | STAT-03 | Phase 1 | Pending |
 | STAT-04 | Phase 1 | Pending |
-| PUB-01 | Phase 5 | Pending |
-| PUB-02 | Phase 5 | Pending |
+| PUB-01 | Phase 6 | Pending |
+| PUB-02 | Phase 6 | Pending |
 | PUB-03 | Phase 1 | Pending |
 | PUB-04 | Phase 1 | Pending |
 | CORR-01 | Phase 2 | Pending |
@@ -93,7 +93,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-01 | Phase 4 | Pending |
 | DASH-02 | Phase 4 | Pending |
 | DASH-03 | Phase 4 | Pending |
-| DASH-04 | Phase 4 | Pending |
+| DASH-04 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
@@ -102,4 +102,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2025-01-30*
-*Last updated: 2025-01-30 after initial definition*
+*Last updated: 2025-01-30 after roadmap creation*
