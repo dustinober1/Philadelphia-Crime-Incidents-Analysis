@@ -86,13 +86,17 @@ Plans:
   2. User can view individual crime type analysis for homicide, burglary, theft, vehicle theft, aggravated assault with temporal trends, spatial distribution, and seasonality
   3. User can view shift-by-shift temporal analysis (morning 6AM-12PM, afternoon 12PM-6PM, evening 6PM-12AM, late night 12AM-6AM) with statistical comparisons
   4. All temporal analyses include confidence intervals and significance tests from Phase 1 infrastructure
-**Plans**: TBD
+**Plans**: 4 plans in 2 waves
+
+**Wave Structure:**
+- Wave 1 (parallel): 03-01 holiday effects, 03-02 crime type profiles, 03-03 shift analysis
+- Wave 2 (sequential): 03-04 unified report generator
 
 Plans:
-- [ ] 03-01: Implement holiday effects analysis module
-- [ ] 03-02: Implement individual crime type analysis module (homicide, burglary, theft, vehicle theft, aggravated assault)
-- [ ] 03-03: Implement shift-by-shift temporal analysis module
-- [ ] 03-04: Generate advanced temporal analysis report
+- [ ] 03-01-PLAN.md — Holiday effects analysis module (workalendar integration, chi-square tests)
+- [ ] 03-02-PLAN.md — Individual crime type profiles (homicide, burglary, theft, vehicle theft, aggravated assault)
+- [ ] 03-03-PLAN.md — Shift-by-shift temporal analysis (4 shifts, ANOVA + FDR post-hoc)
+- [ ] 03-04-PLAN.md — Unified advanced temporal report generator
 
 ### Phase 4: Dashboard Foundation
 **Goal**: Interactive Streamlit dashboard with time range, geographic area, and crime type filters displaying existing analyses
