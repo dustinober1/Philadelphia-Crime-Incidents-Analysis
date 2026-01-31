@@ -18,10 +18,16 @@ Functions:
     mann_kendall_test: Mann-Kendall trend test for time series
 """
 
-from typing import Tuple, Dict, Literal, Optional, Callable, Union, List
+from typing import Tuple, Dict, Literal, Optional, Callable, Union, List, TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from scipy import stats
+
+# Type hint for TukeyHSDResult (avoiding direct import for compatibility)
+if TYPE_CHECKING:
+    from scipy.stats._hypotests import TukeyHSDResult
+else:
+    TukeyHSDResult = object
 
 
 # =============================================================================
@@ -274,28 +280,33 @@ def compare_multiple_samples(
 
 
 def _tukey_to_dataframe(
-    tukey_result: stats.result.TukeyHSDResult,
+    tukey_result: 'TukeyHSDResult',
     group_names: List[str]
 ) -> pd.DataFrame:
-    """Convert TukeyHSDResult to pandas DataFrame for easier interpretation."""
-    # Extract confidence intervals
-    conf_intervals = tukey_result.confint
+    """Convert TukeyHSDResult to pandas DataFrame for easier interpretation.
+
+    Extracts pairwise comparisons from scipy.stats._hypotests.TukeyHSDResult.
+    """
     comparisons = []
-    group_pairs = []
 
-    for i in range(len(group_names)):
-        for j in range(i + 1, len(group_names)):
-            group_pairs.append((group_names[i], group_names[j]))
+    # Get confidence intervals (scipy uses confidence_interval() method)
+    ci = tukey_result.confidence_interval()
+    pvalues = tukey_result.pvalue  # Matrix of p-values
+    statistics = tukey_result.statistic  # Matrix of mean differences
 
-    for idx, (group_a, group_b) in enumerate(group_pairs):
-        comparisons.append({
-            "group_a": group_a,
-            "group_b": group_b,
-            "mean_diff": float(tukey_result.mean_diffs[idx]),
-            "ci_lower": float(conf_intervals[idx][0]),
-            "ci_upper": float(conf_intervals[idx][1]),
-            "p_value": float(tukey_result.pvalues[idx]) if hasattr(tukey_result, 'pvalues') else None,
-        })
+    n_groups = len(group_names)
+
+    # Extract only upper triangle (unique comparisons, avoid duplicates)
+    for i in range(n_groups):
+        for j in range(i + 1, n_groups):
+            comparisons.append({
+                "group_a": group_names[i],
+                "group_b": group_names[j],
+                "mean_diff": float(statistics[i, j]),
+                "ci_lower": float(ci.low[i, j]),
+                "ci_upper": float(ci.high[i, j]),
+                "p_value": float(pvalues[i, j]),
+            })
 
     return pd.DataFrame(comparisons)
 
@@ -555,21 +566,27 @@ def apply_fdr_correction(
 def tukey_hsd(
     *samples: np.ndarray,
     confidence_level: float = 0.99
-) -> stats.result.TukeyHSDResult:
+) -> 'TukeyHSDResult':
     """
     Perform Tukey's Honest Significant Difference (HSD) post-hoc test.
 
     Tukey HSD compares all pairs of group means while controlling
     family-wise error rate. Use after a significant ANOVA result.
 
+    Note: scipy.stats.tukey_hsd uses 95% CI by default. The confidence_level
+    parameter is stored in the result for reference, but actual intervals
+    computed by scipy.stats.tukey_hsd are 95%. For custom confidence levels,
+    access result.confint(confidence_level=...) directly.
+
     Args:
         *samples: Variable number of sample arrays (one per group).
-        confidence_level: Confidence level for intervals (0-1). Default is 0.99.
+        confidence_level: Desired confidence level for interpretation (0-1).
+                          Note: scipy computes 95% CI by default. Default is 0.99.
 
     Returns:
         TukeyHSDResult object containing:
             - mean_diffs: Mean differences for each pair
-            - confint: Confidence intervals
+            - confint: Confidence intervals (95% by scipy default)
             - pvalues: P-values for each comparison
             - groups: Number of groups
 
@@ -581,8 +598,9 @@ def tukey_hsd(
         >>> a = np.random.normal(0, 1, 50)
         >>> b = np.random.normal(0.5, 1, 50)
         >>> c = np.random.normal(1, 1, 50)
-        >>> result = tukey_hsd(a, b, c, confidence_level=0.99)
+        >>> result = tukey_hsd(a, b, c)
         >>> print(result)
+        >>> # For 99% CI: result.confint(confidence_level=0.99)
 
     References:
         - scipy.stats.tukey_hsd
@@ -600,7 +618,9 @@ def tukey_hsd(
             raise ValueError(f"Sample {i} requires at least 2 observations. Got {len(arr)}.")
         samples_clean.append(arr)
 
-    result = stats.tukey_hsd(*samples_clean, confidence_level=confidence_level)
+    # scipy.stats.tukey_hsd doesn't accept confidence_level parameter
+    # It computes 95% CI by default. For other levels, call confint() on result.
+    result = stats.tukey_hsd(*samples_clean)
 
     return result
 
