@@ -27,20 +27,25 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Requirements**: STAT-01, STAT-02, STAT-03, STAT-04, PUB-03, PUB-04
 **Success Criteria** (what must be TRUE):
   1. User can view p-values for all trend analyses, temporal comparisons, and spatial correlations across all 11 analysis modules
-  2. User can view 95% confidence intervals on all visualizations showing point estimates (trend lines, comparisons, spatial clusters)
+  2. User can view 99% confidence intervals on all visualizations showing point estimates (trend lines, comparisons, spatial clusters)
   3. User can view effect sizes (Cohen's d for comparisons, odds ratios for proportions, standardized coefficients for correlations) to assess practical significance
   4. User can view results with FDR (Benjamini-Hochberg) correction applied to all omnibus comparisons with multiple tests
   5. User can view comprehensive data quality audit documenting missing data patterns, coordinate coverage by crime type/district, and analysis limitations
   6. User can reproduce all analyses through documented random seeds, data version tracking, and explicit parameter documentation in analysis outputs
-**Plans**: TBD
+**Plans**: 6 plans in 3 waves
+
+**Wave Structure:**
+- Wave 1 (parallel): 01-01 stats_utils, 01-05 reproducibility infrastructure
+- Wave 2 (parallel): 01-02 temporal analyses, 01-03 spatial/categorical analyses
+- Wave 3 (sequential): 01-04 effect sizes & FDR, 01-06 data quality audit
 
 Plans:
-- [ ] 01-01: Create statistical testing utilities module
-- [ ] 01-02: Add significance testing and confidence intervals to temporal analyses
-- [ ] 01-03: Add significance testing and confidence intervals to spatial analyses
-- [ ] 01-04: Add effect size calculations and multiple testing correction
-- [ ] 01-05: Implement reproducibility infrastructure (seeds, versioning, parameter docs)
-- [ ] 01-06: Generate data quality audit report
+- [ ] 01-01-PLAN.md — Create statistical testing utilities module (stats_utils.py with 10+ functions, STAT_CONFIG)
+- [ ] 01-05-PLAN.md — Implement reproducibility infrastructure (DataVersion, seed management, parameter docs)
+- [ ] 01-02-PLAN.md — Add significance testing and CIs to temporal analyses (temporal, summer_spike, covid_lockdown, safety_trend, robbery_timing)
+- [ ] 01-03-PLAN.md — Add significance testing and CIs to spatial analyses (spatial, red_zones, categorical, cross_analysis, weighted_severity)
+- [ ] 01-04-PLAN.md — Add effect sizes and FDR correction (Cliff's delta, odds ratios, verify all modules)
+- [ ] 01-06-PLAN.md — Generate comprehensive data quality audit report
 
 ### Phase 2: External Data Integration
 **Goal**: Weather, economic, and policing data sources are ingested, cached, and aligned with crime data for correlation analysis
