@@ -4,6 +4,9 @@ Robbery Timing Analysis
 Answers the question: "If I want to prevent robberies, what time of day should my officers be visible?"
 
 Analyzes robbery patterns by hour and day of week to identify optimal patrol visibility times.
+
+Enhanced with statistical significance testing including chi-square tests for
+temporal distributions and multi-group comparisons for time period analysis.
 """
 
 import pandas as pd
@@ -11,8 +14,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from analysis.config import COLORS, FIGURE_SIZES
+from analysis.config import COLORS, FIGURE_SIZES, STAT_CONFIG
 from analysis.utils import load_data, extract_temporal_features, image_to_base64, create_image_tag, format_number
+from analysis.stats_utils import chi_square_test, compare_multiple_samples, bootstrap_ci
+from analysis.reproducibility import set_global_seed, get_analysis_metadata, format_metadata_markdown, DataVersion
 
 
 # =============================================================================
@@ -395,11 +400,20 @@ def create_time_period_bar_chart(df: pd.DataFrame, period_stats: dict) -> str:
 
 def analyze_robbery_timing() -> dict:
     """
-    Run full robbery timing analysis.
+    Run full robbery timing analysis with statistical testing.
 
     Returns:
         Dictionary containing analysis results and base64-encoded plots.
+
+    Statistical tests performed:
+        - Chi-square test for time-of-day uniformity
+        - Chi-square test for day-of-week uniformity
+        - Multi-group comparison across time periods
+        - Bootstrap 99% CI for time period means
     """
+    # Set seed for reproducibility
+    set_global_seed(STAT_CONFIG["random_seed"])
+
     print("Loading data for robbery timing analysis...")
     df = load_data(clean=False)
 
@@ -409,6 +423,114 @@ def analyze_robbery_timing() -> dict:
 
     results = {}
     results["total_robberies"] = len(robbery)
+
+    # Add time_period column to robbery dataframe for statistical tests
+    robbery["time_period"] = pd.cut(
+        robbery["hour"],
+        bins=TIME_PERIOD_BINS,
+        labels=TIME_PERIOD_LABELS,
+        right=False,
+        include_lowest=True
+    )
+
+    # Store analysis metadata
+    try:
+        data_version = DataVersion(PROJECT_ROOT / "data" / "crime_incidents_combined.parquet")
+        metadata = get_analysis_metadata(
+            data_version=data_version,
+            analysis_type="robbery_timing",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
+    except Exception as e:
+        print(f"Warning: Could not create data version: {e}")
+        metadata = get_analysis_metadata(
+            analysis_type="robbery_timing",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
+
+    # ========================================================================
+    # STATISTICAL TESTS: Time-of-Day Uniformity
+    # ========================================================================
+    print("Running time-of-day uniformity test...")
+
+    hourly_counts = robbery.groupby("hour").size()
+    observed_hourly = hourly_counts.values
+    expected_hourly = np.full(len(observed_hourly), observed_hourly.mean())
+
+    # Chi-square test for uniform distribution across hours
+    contingency_hourly = np.array([observed_hourly, expected_hourly])
+    hourly_test = chi_square_test(contingency_hourly)
+    hourly_test["is_significant"] = hourly_test["p_value"] < STAT_CONFIG["alpha"]
+    results["hourly_uniformity_test"] = hourly_test
+
+    print(f"  Hourly uniformity: chi2={hourly_test['statistic']:.2f}, p={hourly_test['p_value']:.4f}")
+
+    # ========================================================================
+    # STATISTICAL TESTS: Day-of-Week Uniformity
+    # ========================================================================
+    print("Running day-of-week uniformity test...")
+
+    dow_counts = robbery.groupby("day_of_week").size()
+    observed_dow = dow_counts.reindex(range(7), fill_value=0).values
+    expected_dow = np.full(len(observed_dow), observed_dow.mean())
+
+    # Chi-square test for uniform distribution across days
+    contingency_dow = np.array([observed_dow, expected_dow])
+    dow_test = chi_square_test(contingency_dow)
+    dow_test["is_significant"] = dow_test["p_value"] < STAT_CONFIG["alpha"]
+    results["dow_uniformity_test"] = dow_test
+
+    print(f"  Day-of-week uniformity: chi2={dow_test['statistic']:.2f}, p={dow_test['p_value']:.4f}")
+
+    # ========================================================================
+    # STATISTICAL TESTS: Time Period Comparison
+    # ========================================================================
+    print("Running time period comparison test...")
+
+    # Group by time periods
+    period_groups = {}
+    for period in TIME_PERIOD_LABELS:
+        period_data = robbery[robbery["time_period"] == period]
+        # Use daily counts for more stable estimates
+        if len(period_data) > 0:
+            daily_counts = period_data.groupby(["year", "month", "day"]).size().values
+            if len(daily_counts) >= 10:
+                period_groups[period] = daily_counts
+
+    if len(period_groups) >= 2:
+        period_comparison = compare_multiple_samples(period_groups, alpha=STAT_CONFIG["alpha"])
+        results["time_period_test"] = period_comparison
+
+        sig = "**significant**" if period_comparison["is_significant"] else "not significant"
+        print(f"  Time period comparison: {period_comparison['omnibus_test']}, p={period_comparison['p_value']:.4f} ({sig})")
+
+        # Bootstrap CI for each period
+        period_cis = {}
+        for period_name, daily_data in period_groups.items():
+            try:
+                ci_lower, ci_upper, point_est, se = bootstrap_ci(
+                    daily_data,
+                    statistic='mean',
+                    confidence_level=STAT_CONFIG["confidence_level"],
+                    n_resamples=2000,  # Fewer resamples for speed
+                    random_state=STAT_CONFIG["random_seed"]
+                )
+                period_cis[period_name] = {
+                    "ci_lower": ci_lower,
+                    "ci_upper": ci_upper,
+                    "point_estimate": point_est,
+                    "standard_error": se
+                }
+            except Exception as e:
+                print(f"  Warning: Could not calculate CI for {period_name}: {e}")
+
+        results["time_period_cis"] = period_cis
 
     # ========================================================================
     # ANALYSIS: Hourly Distribution
@@ -475,9 +597,14 @@ def generate_markdown_report(results: dict) -> str:
         results: Dictionary from analyze_robbery_timing().
 
     Returns:
-        Markdown string with analysis results.
+        Markdown string with analysis results including statistical tests.
     """
     md = []
+
+    # Analysis Configuration section
+    if "metadata" in results:
+        md.append(format_metadata_markdown(results["metadata"]))
+        md.append("\n")
 
     # ========================================================================
     # TITLE
@@ -511,6 +638,26 @@ def generate_markdown_report(results: dict) -> str:
     md.append(f"**{format_number(dow['peak_day']['count'])}** robberies\n")
     md.append(f"- **Worst Time Slot**: **{peak_combo['day']} at {peak_combo['hour']}:00** - ")
     md.append(f"**{format_number(peak_combo['count'])}** robberies ({peak_combo['pct_of_total']}% of total)\n\n")
+
+    # Add statistical test results
+    if "hourly_uniformity_test" in results:
+        ht = results["hourly_uniformity_test"]
+        sig = "**significant**" if ht["is_significant"] else "not significant"
+        md.append(f"**Time-of-Day Uniformity Test**: Chi-square = {ht['statistic']:.2f}, p = {ht['p_value']:.4f} ({sig} at alpha = {STAT_CONFIG['alpha']})\n")
+        if ht["is_significant"]:
+            md.append("**Interpretation**: Robberies are NOT uniformly distributed across hours of the day\n\n")
+
+    if "dow_uniformity_test" in results:
+        dt = results["dow_uniformity_test"]
+        sig = "**significant**" if dt["is_significant"] else "not significant"
+        md.append(f"**Day-of-Week Uniformity Test**: Chi-square = {dt['statistic']:.2f}, p = {dt['p_value']:.4f} ({sig} at alpha = {STAT_CONFIG['alpha']})\n")
+        if dt["is_significant"]:
+            md.append("**Interpretation**: Robberies are NOT uniformly distributed across days of the week\n\n")
+
+    if "time_period_test" in results:
+        tp = results["time_period_test"]
+        sig = "**significant**" if tp["is_significant"] else "not significant"
+        md.append(f"**Time Period Comparison**: {tp['omnibus_test']}, p = {tp['p_value']:.4f} ({sig} at alpha = {STAT_CONFIG['alpha']})\n\n")
 
     md.append(f"**Total Robberies Analyzed**: {format_number(results['total_robberies'])}\n\n")
 
