@@ -699,7 +699,15 @@ def aggregate_crime_by_period(
 
     # Ensure date column is datetime
     df = crime_df.copy()
-    df[date_column] = pd.to_datetime(df[date_column])
+
+    # Handle categorical date columns (common in this dataset)
+    if pd.api.types.is_categorical_dtype(df[date_column]):
+        df[date_column] = df[date_column].astype(str)
+
+    df[date_column] = pd.to_datetime(df[date_column], errors='coerce')
+
+    # Drop rows with invalid dates
+    df = df.dropna(subset=[date_column])
 
     # Set date as index and count incidents per period
     df = df.set_index(date_column)
