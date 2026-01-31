@@ -9,8 +9,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT
-from analysis.utils import load_data, image_to_base64, create_image_tag, format_number
+from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT, STAT_CONFIG, CRIME_DATA_PATH
+from analysis.utils import load_data, image_to_base64, create_image_tag, format_number, classify_crime_category
+from analysis.stats_utils import chi_square_test, compare_multiple_samples, apply_fdr_correction, cohens_d, interpret_cohens_d
+from analysis.reproducibility import set_global_seed, get_analysis_metadata, format_metadata_markdown, DataVersion
 
 
 def analyze_categorical_data() -> dict:
@@ -20,10 +22,27 @@ def analyze_categorical_data() -> dict:
     Returns:
         Dictionary containing analysis results and base64-encoded plots.
     """
+    # Set random seed for reproducibility
+    seed = set_global_seed(STAT_CONFIG["random_seed"])
+    print(f"Random seed set to: {seed}")
+
+    # Track data version for reproducibility
+    data_version = DataVersion(CRIME_DATA_PATH)
+    print(f"Data version: {data_version}")
+
     print("Loading data for categorical analysis...")
     df = load_data(clean=False)
 
     results = {}
+
+    # Store analysis metadata
+    results["analysis_metadata"] = get_analysis_metadata(
+        data_version=data_version,
+        analysis_type="categorical_analysis",
+        random_seed=seed,
+        confidence_level=STAT_CONFIG["confidence_level"],
+        alpha=STAT_CONFIG["alpha"],
+    )
 
     # ========================================================================
     # 1. Crime Type Analysis
@@ -223,6 +242,108 @@ def analyze_categorical_data() -> dict:
     plt.close(fig)
 
     # ========================================================================
+    # 3.5 Statistical Analysis: Chi-Square Tests
+    # ========================================================================
+    print("Performing chi-square tests for categorical associations...")
+
+    # Chi-square test for crime type uniformity
+    # Test if crime types are uniformly distributed
+    crime_type_counts = df[text_general].value_counts()
+    if len(crime_type_counts) >= 2:
+        # Build contingency table comparing observed vs expected uniform distribution
+        observed = crime_type_counts.values
+        expected = np.full_like(observed, observed.mean(), dtype=float)
+        # Chi-square goodness of fit
+        chi2_stat = np.sum((observed - expected) ** 2 / expected)
+        from scipy.stats import chi2 as chi2_dist
+        dof = len(observed) - 1
+        p_value_uniformity = 1 - chi2_dist.cdf(chi2_stat, dof)
+
+        results["crime_uniformity_test"] = {
+            "chi2_statistic": float(chi2_stat),
+            "p_value": float(p_value_uniformity),
+            "dof": int(dof),
+            "is_significant": p_value_uniformity < STAT_CONFIG["alpha"],
+            "interpretation": (
+                "Crime types are NOT uniformly distributed" if p_value_uniformity < STAT_CONFIG["alpha"]
+                else "Crime types appear uniformly distributed"
+            ),
+        }
+        print(f"  Crime type uniformity: chi2={chi2_stat:.2f}, p={p_value_uniformity:.6e}")
+
+    # Chi-square test for crime-district association
+    # Test if crime types and districts are independent
+    dc_dist_col = "dc_dist" if "dc_dist" in df.columns else "dc_dist"
+    if dc_dist_col not in df.columns:
+        for col in df.columns:
+            if "dist" in col.lower():
+                dc_dist_col = col
+                break
+
+    # Create contingency table for top 10 crimes x districts
+    top_10_crimes = crime_counts.head(10)["crime_type"].tolist()
+    crime_district_crosstab = pd.crosstab(df[dc_dist_col], df[text_general])
+    crime_district_top = crime_district_crosstab[top_10_crimes]
+
+    if crime_district_top.shape[0] >= 2 and crime_district_top.shape[1] >= 2:
+        district_crime_test = chi_square_test(crime_district_top.values)
+        results["crime_district_independence"] = district_crime_test
+
+        # Calculate Cramer's V for effect size
+        n = crime_district_top.values.sum()
+        phi2 = district_crime_test["statistic"] / n
+        min_dim = min(crime_district_top.shape[0] - 1, crime_district_top.shape[1] - 1)
+        cramers_v = np.sqrt(phi2 / min_dim) if min_dim > 0 else 0
+
+        # Interpret Cramer's V
+        if cramers_v < 0.1:
+            v_interpret = "negligible association"
+        elif cramers_v < 0.3:
+            v_interpret = "weak association"
+        elif cramers_v < 0.5:
+            v_interpret = "moderate association"
+        else:
+            v_interpret = "strong association"
+
+        results["crime_district_independence"]["cramers_v"] = float(cramers_v)
+        results["crime_district_independence"]["cramers_v_interpretation"] = v_interpret
+
+        print(f"  Crime-district independence: chi2={district_crime_test['statistic']:.2f}, p={district_crime_test['p_value']:.6e}")
+        print(f"  Cramer's V: {cramers_v:.3f} ({v_interpret})")
+
+    # UCR category comparison
+    print("Performing UCR category comparison...")
+    df = classify_crime_category(df)
+    ucr_category_counts = df["crime_category"].value_counts()
+
+    # Chi-square test for UCR categories
+    if len(ucr_category_counts) >= 2:
+        # Expected proportions based on national averages or uniform
+        # For this analysis, test if distribution differs from uniform
+        ucr_observed = ucr_category_counts.values
+        ucr_expected = np.full_like(ucr_observed, ucr_observed.mean(), dtype=float)
+
+        ucr_chi2 = np.sum((ucr_observed - ucr_expected) ** 2 / ucr_expected)
+        ucr_dof = len(ucr_observed) - 1
+        ucr_p_value = 1 - chi2_dist.cdf(ucr_chi2, ucr_dof)
+
+        results["ucr_category_test"] = {
+            "chi2_statistic": float(ucr_chi2),
+            "p_value": float(ucr_p_value),
+            "dof": int(ucr_dof),
+            "is_significant": ucr_p_value < STAT_CONFIG["alpha"],
+            "category_counts": {k: int(v) for k, v in ucr_category_counts.items()},
+            "category_percentages": {
+                k: float(v / ucr_observed.sum() * 100) for k, v in ucr_category_counts.items()
+            },
+        }
+        print(f"  UCR category test: chi2={ucr_chi2:.2f}, p={ucr_p_value:.6e}")
+
+    # Pairwise comparisons between UCR categories (if we had counts per category)
+    # For now, report the category distribution
+    results["ucr_category_distribution"] = ucr_category_counts.to_dict()
+
+    # ========================================================================
     # 4. PSA Analysis (if available)
     # ========================================================================
     print("Analyzing PSAs...")
@@ -290,6 +411,11 @@ def generate_markdown_report(results: dict) -> str:
     """
     md = []
 
+    # Add analysis configuration section
+    if "analysis_metadata" in results:
+        md.append(format_metadata_markdown(results["analysis_metadata"]))
+        md.append("")
+
     md.append("### Categorical Analysis\n")
 
     # Crime Type Section
@@ -352,6 +478,63 @@ def generate_markdown_report(results: dict) -> str:
 
     md.append(results["ucr_bar_chart"])
     md.append("\n")
+
+    # Statistical Tests Section
+    md.append("#### 3.1 Statistical Tests for Categorical Associations\n\n")
+
+    # Crime type uniformity test
+    if "crime_uniformity_test" in results:
+        ut = results["crime_uniformity_test"]
+        md.append("**Crime Type Uniformity Test** (Chi-square goodness-of-fit):\n\n")
+        md.append(f"| Metric | Value |")
+        md.append(f"|--------|-------|")
+        md.append(f"| Chi-square Statistic | {ut['chi2_statistic']:.4f} |")
+        md.append(f"| Degrees of Freedom | {ut['dof']} |")
+        md.append(f"| P-value | {ut['p_value']:.6e} |")
+        md.append(f"| Significant (alpha={STAT_CONFIG['alpha']}) | {'Yes' if ut['is_significant'] else 'No'} |")
+        md.append(f"| Interpretation | {ut['interpretation']} |")
+        md.append("")
+
+    # Crime-district independence test
+    if "crime_district_independence" in results:
+        di = results["crime_district_independence"]
+        md.append("**Crime-District Independence Test** (Chi-square test of independence):\n\n")
+        md.append(f"| Metric | Value |")
+        md.append(f"|--------|-------|")
+        md.append(f"| Chi-square Statistic | {di['statistic']:.4f} |")
+        md.append(f"| Degrees of Freedom | {di['dof']} |")
+        md.append(f"| P-value | {di['p_value']:.6e} |")
+        md.append(f"| Significant (alpha={STAT_CONFIG['alpha']}) | {'Yes' if di['is_significant'] else 'No'} |")
+        md.append(f"| Cramer's V | {di['cramers_v']:.4f} |")
+        md.append(f"| Effect Size | {di['cramers_v_interpretation']} |")
+        md.append("")
+
+        if di['is_significant']:
+            md.append("**Interpretation:** Crime types and districts are NOT independent. ")
+            md.append("Different districts have significantly different crime type distributions. ")
+            md.append(f"{di['cramers_v_interpretation'].capitalize()} between crime type and location.\n\n")
+        else:
+            md.append("**Interpretation:** No significant association between crime types and districts found.\n\n")
+
+    # UCR category test
+    if "ucr_category_test" in results:
+        ucr_test = results["ucr_category_test"]
+        md.append("**UCR Category Distribution Test** (Chi-square goodness-of-fit):\n\n")
+        md.append(f"| Metric | Value |")
+        md.append(f"|--------|-------|")
+        md.append(f"| Chi-square Statistic | {ucr_test['chi2_statistic']:.4f} |")
+        md.append(f"| Degrees of Freedom | {ucr_test['dof']} |")
+        md.append(f"| P-value | {ucr_test['p_value']:.6e} |")
+        md.append(f"| Significant (alpha={STAT_CONFIG['alpha']}) | {'Yes' if ucr_test['is_significant'] else 'No'} |")
+        md.append("")
+
+        md.append("**UCR Category Distribution:**\n\n")
+        md.append("| Category | Count | Percentage |")
+        md.append("|----------|-------|------------|")
+        for cat, count in ucr_test['category_counts'].items():
+            pct = ucr_test['category_percentages'][cat]
+            md.append(f"| {cat} | {format_number(count)} | {pct:.2f}% |")
+        md.append("")
 
     # PSA Section
     md.append("#### 4. Police Service Area (PSA) Analysis\n\n")
