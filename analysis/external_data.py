@@ -850,3 +850,218 @@ def create_lagged_features(
             result[f'{col}_lag{lag}'] = result[col].shift(lag)
 
     return result
+
+
+# =============================================================================
+# POLICING DATA AVAILABILITY ASSESSMENT
+# =============================================================================
+
+
+def assess_policing_data_availability() -> dict:
+    """
+    Assess availability of Philadelphia policing data for correlation analysis.
+
+    CORR-03 requires correlation analysis between crime outcomes and policing
+    data (resource allocation, arrest rates). This function documents the
+    availability of such data.
+
+    Returns:
+        Dictionary with:
+            - available: Boolean, whether policing data is accessible
+            - sources: Dict of known data sources with URLs and limitations
+            - variables: List of policing variables of interest
+            - recommendation: How to proceed given data limitations
+            - manual_options: Potential manual data collection approaches
+
+    Note:
+        Philadelphia policing data exists but lacks programmatic access:
+            - Controller's Office: Static PDF reports (2022, 2024)
+            - DAO Dashboard: Interactive web visualization
+            - OpenDataPhilly: May have historical datasets (requires search)
+
+        For automated correlation analysis, consider:
+            1. Manual data entry from PDF reports (small dataset, feasible)
+            2. Web scraping (fragile, may violate ToS)
+            3. Contact data owners directly for CSV access
+
+    Example:
+        >>> assessment = assess_policing_data_availability()
+        >>> print(assessment['available'])  # False
+        >>> print(assessment['recommendation'])
+    """
+    from analysis.config import POLICING_DATA_CONFIG
+
+    sources = POLICING_DATA_CONFIG['sources']
+
+    # Detailed assessment for each source
+    detailed_assessment = {}
+
+    for source_key, source_info in sources.items():
+        detailed_assessment[source_key] = {
+            'name': source_info['name'],
+            'url': source_info['url'],
+            'format': source_info['format'],
+            'has_api': source_info['api'],
+            'notes': source_info['notes'],
+            'feasibility_for_automation': _assess_automation_feasibility(source_info),
+        }
+
+    # Manual data collection options
+    manual_options = {
+        "pdf_data_entry": {
+            "effort": "Medium (2-4 hours)",
+            "feasibility": "High",
+            "description": "Manually extract data from Controller's Office PDF reports",
+            "variables_possible": [
+                "police_officer_count_by_district",
+                "arrest_counts_by_district",
+                "budget_by_district",
+            ],
+            "years_covered": [2022, 2024],
+        },
+        "web_scraping": {
+            "effort": "High (8-16 hours)",
+            "feasibility": "Low to Medium",
+            "description": "Scrape DAO dashboard or Controller's Office website",
+            "risks": [
+                "Fragile (breaks if website changes)",
+                "May violate Terms of Service",
+                "Requires maintenance",
+            ],
+        },
+        "direct_request": {
+            "effort": "Low (1-2 hours)",
+            "feasibility": "Uncertain",
+            "description": "Contact agencies directly for CSV/data access",
+            "contacts": [
+                "Philadelphia Controller's Office: data@controller.phila.gov",
+                "OpenDataPhilly: opendata@phila.gov",
+            ],
+        },
+    }
+
+    return {
+        'available': POLICING_DATA_CONFIG['available_for_correlation'],
+        'sources': detailed_assessment,
+        'variables_of_interest': POLICING_DATA_CONFIG['variables_of_interest'],
+        'recommendation': POLICING_DATA_CONFIG['recommendation'],
+        'manual_options': manual_options,
+        'correlation_implications': {
+            'status': 'CORR-03 partially addressable',
+            'note': 'Automated correlation analysis not possible without API access. '
+                    'Manual data entry from PDF reports could enable limited analysis '
+                    'for 2022 and 2024 data points only.',
+            'alternative': 'Consider district-level crime trend analysis without '
+                          'policing data as a control variable.',
+        },
+    }
+
+
+def _assess_automation_feasibility(source_info: dict) -> str:
+    """
+    Assess whether a data source is feasible for automated retrieval.
+
+    Args:
+        source_info: Source information dict from POLICING_DATA_CONFIG.
+
+    Returns:
+        Feasibility assessment: 'High', 'Medium', 'Low', or 'Not Feasible'.
+    """
+    if source_info.get('api') is True:
+        return 'High'
+    elif source_info.get('format') == 'PDF reports':
+        return 'Low (requires OCR or manual entry)'
+    elif source_info.get('format') == 'Interactive web dashboard':
+        return 'Low (requires web scraping)'
+    elif 'CSV' in source_info.get('format', ''):
+        return 'Medium'
+    else:
+        return 'Not Feasible'
+
+
+def generate_policing_data_report() -> str:
+    """
+    Generate a markdown report on policing data availability.
+
+    Returns:
+        Markdown string documenting policing data sources, limitations,
+        and recommendations for addressing CORR-03.
+
+    Example:
+        >>> report = generate_policing_data_report()
+        >>> print(report)
+    """
+    assessment = assess_policing_data_availability()
+
+    md_lines = [
+        "# Philadelphia Policing Data Availability Assessment",
+        "",
+        "## Summary",
+        "",
+        f"**Automated correlation analysis (CORR-03):** {'Possible' if assessment['available'] else 'Not Currently Possible'}",
+        "",
+        f"**Limitation:** {assessment['recommendation']}",
+        "",
+        "## Known Data Sources",
+        "",
+    ]
+
+    for source_key, source in assessment['sources'].items():
+        md_lines.extend([
+            f"### {source['name']}",
+            "",
+            f"- **URL:** {source['url']}",
+            f"- **Format:** {source['format']}",
+            f"- **API Access:** {'Yes' if source['has_api'] else 'No'}",
+            f"- **Automation Feasibility:** {source['feasibility_for_automation']}",
+            f"- **Notes:** {source['notes']}",
+            "",
+        ])
+
+    md_lines.extend([
+        "## Variables of Interest",
+        "",
+    ])
+
+    for var in assessment['variables_of_interest']:
+        md_lines.append(f"- {var}")
+
+    md_lines.extend([
+        "",
+        "## Manual Data Collection Options",
+        "",
+    ])
+
+    for option_key, option in assessment['manual_options'].items():
+        md_lines.extend([
+            f"### {option_key.replace('_', ' ').title()}",
+            "",
+            f"- **Effort:** {option['effort']}",
+            f"- **Feasibility:** {option['feasibility']}",
+            f"- **Description:** {option['description']}",
+        ])
+
+        if 'risks' in option:
+            md_lines.append(f"- **Risks:** {', '.join(option['risks'])}")
+
+        if 'variables_possible' in option:
+            md_lines.append(f"- **Variables:** {', '.join(option['variables_possible'])}")
+
+        md_lines.append("")
+
+    md_lines.extend([
+        "## Recommendations",
+        "",
+    ])
+
+    implications = assessment['correlation_implications']
+    md_lines.extend([
+        f"**Status:** {implications['status']}",
+        "",
+        implications['note'],
+        "",
+        implications['alternative'],
+        "",
+    ])
+
+    return "\n".join(md_lines)
