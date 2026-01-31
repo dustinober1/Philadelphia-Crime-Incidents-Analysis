@@ -1,7 +1,7 @@
 """
 Configuration constants for Philadelphia Crime Incidents EDA.
 
-Defines paths, plot settings, and analysis parameters.
+Defines paths, plot settings, analysis parameters, and statistical configuration.
 """
 
 from pathlib import Path
@@ -77,11 +77,35 @@ PHILADELPHIA_BBOX = {
 # STATISTICAL ANALYSIS CONFIGURATION
 # =============================================================================
 
-# Random seed for reproducibility (used across all statistical operations)
+# Statistical parameters for rigorous analysis
+# 99% CI chosen for more conservative analysis appropriate to exploratory nature
 STAT_CONFIG = {
-    "random_seed": 42,  # Default seed for all random operations
-    "confidence_level": 0.99,  # 99% confidence intervals
-    "significance_threshold": 0.01,  # p-value threshold for significance
+    # Confidence level for all intervals (99% for conservative analysis)
+    "confidence_level": 0.99,
+
+    # Significance alpha for tests (matches 99% CI)
+    "alpha": 0.01,
+
+    # Bootstrap parameters
+    "bootstrap_n_resamples": 9999,
+    "bootstrap_random_state": 42,
+
+    # Normality test threshold
+    "normality_alpha": 0.05,
+
+    # Effect size benchmarks (Cohen's d interpretation)
+    "effect_size_small": 0.2,
+    "effect_size_medium": 0.5,
+    "effect_size_large": 0.8,
+
+    # FDR correction method ('bh' = Benjamini-Hochberg, 'by' = Benjamini-Yekutieli)
+    "fdr_method": "bh",
+
+    # Random seed for reproducibility (used across all statistical operations)
+    "random_seed": 42,
+
+    # Legacy key for backward compatibility
+    "significance_threshold": 0.01,  # Same as alpha
 }
 
 # =============================================================================
