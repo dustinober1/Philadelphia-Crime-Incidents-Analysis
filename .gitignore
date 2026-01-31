@@ -1,5 +1,14 @@
+# Environment variables
+.env
+
+# External data cache (API-fetched data)
+data/external/.cache/
+data/external/*.parquet
+
+# Existing entries
 data/processed/crime_incidents_combined.parquet
-.venv/-e .github/
+.venv/
+-e .github/
 analysis_output.log
 *.pyc
 __pycache__/
