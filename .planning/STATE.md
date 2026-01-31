@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 2 of 6 (External Data Integration)
-Plan: 6 of 8 in current phase
+Plan: 5 of 8 in current phase
 Status: In progress
-Last activity: 2026-01-31 — Completed 02-06-PLAN.md (Economic-Crime Correlation Analysis)
+Last activity: 2026-01-31 — Completed 02-05-PLAN.md (Weather-Crime Correlation Analysis)
 
 Progress: [███░░░░░░░░] 24% (11/37 plans)
 
@@ -125,6 +125,14 @@ Recent decisions affecting current work:
 - Resolution trade-offs: daily=weather only, monthly=weather+FRED, annual=all sources
 - 2026 excluded from analysis (incomplete year), annual limited to 2010-2023 (ACS availability)
 
+**From 02-05 (Weather-Crime Correlation Analysis):**
+- Detrending utilities added to external_data.py: detrend_series(), first_difference(), cross_correlation()
+- statsmodels integration for linear detrending with graceful import fallback
+- analyze_weather_crime_correlation() tests temp, tmax, tmin, prcp against daily crime
+- Lagged correlations (1-7 days) test delayed weather effects (e.g., hot today -> crime tomorrow)
+- Mean centering chosen for detrending: simpler than linear, sufficient for correlation
+- FDR correction applied across multiple weather variables
+
 **From 02-06 (Economic-Crime Correlation Analysis):**
 - correlation_analysis.py module created with analyze_economic_crime_correlation() function
 - Spearman correlation chosen over Pearson for robustness to non-normal time series data
@@ -149,6 +157,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-31 19:20 UTC
-Stopped at: Completed 02-06-PLAN.md (Economic-Crime Correlation Analysis) - 6 of 8 in Phase 2
+Last session: 2026-01-31 18:59 UTC
+Stopped at: Completed 02-05-PLAN.md (Weather-Crime Correlation Analysis) - 5 of 8 in Phase 2
 Resume file: None
