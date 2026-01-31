@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 2 of 6 (External Data Integration)
-Plan: 4 of 8 in current phase
+Plan: 6 of 8 in current phase
 Status: In progress
-Last activity: 2026-01-31 — Completed 02-04-PLAN.md (Temporal Alignment Utilities)
+Last activity: 2026-01-31 — Completed 02-06-PLAN.md (Economic-Crime Correlation Analysis)
 
-Progress: [██░░░░░░░░░] 22% (10/37 plans)
+Progress: [███░░░░░░░░] 24% (11/37 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: ~8 min
-- Total execution time: 1h 18m
+- Total execution time: 1h 23m
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1     | 6/6   | -     | ~10 min  |
-| 2     | 4/8   | -     | ~5 min   |
+| 2     | 6/8   | -     | ~5 min   |
 
 **Recent Trend:**
-- Last 10 plans: 01-01, 01-05, 01-02, 01-03, 01-04, 01-06, 02-02, 02-01, 02-03, 02-04
-- Trend: Phase 2 progressing - Weather, economic, caching, and temporal alignment infrastructure ready
+- Last 10 plans: 01-01, 01-05, 01-02, 01-03, 01-04, 01-06, 02-02, 02-01, 02-03, 02-04, 02-06
+- Trend: Phase 2 progressing - Weather, economic, caching, temporal alignment, and correlation analysis ready
 
 *Updated after each plan completion*
 
@@ -125,6 +125,14 @@ Recent decisions affecting current work:
 - Resolution trade-offs: daily=weather only, monthly=weather+FRED, annual=all sources
 - 2026 excluded from analysis (incomplete year), annual limited to 2010-2023 (ACS availability)
 
+**From 02-06 (Economic-Crime Correlation Analysis):**
+- correlation_analysis.py module created with analyze_economic_crime_correlation() function
+- Spearman correlation chosen over Pearson for robustness to non-normal time series data
+- Linear detrending (detrend_series()) implemented to avoid spurious correlations from shared trends
+- Bootstrap 99% CI and FDR correction applied to all correlations
+- compare_periods() function for high/low economic condition comparison
+- compute_district_level_correlation() placeholder deferred (needs Census crosswalk)
+
 ### Pending Todos
 
 None yet.
@@ -136,8 +144,11 @@ None yet.
 - Census API key needed for ACS income/poverty data (free, email approval)
 - See .env.example for signup instructions
 
+**Data Dependencies:**
+- District-level economic correlation blocked on Census tract to police district crosswalk (OpenDataPhilly)
+
 ## Session Continuity
 
-Last session: 2026-01-31 18:51 UTC
-Stopped at: Completed 02-04-PLAN.md (Temporal Alignment Utilities) - 4 of 8 in Phase 2
+Last session: 2026-01-31 19:20 UTC
+Stopped at: Completed 02-06-PLAN.md (Economic-Crime Correlation Analysis) - 6 of 8 in Phase 2
 Resume file: None
