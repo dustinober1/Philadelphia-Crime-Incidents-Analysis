@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 2 of 6 (External Data Integration)
-Plan: 7 of 8 in current phase
-Status: In progress
-Last activity: 2026-01-31 — Completed 02-07-PLAN.md (Policing Data Availability Assessment)
+Plan: 8 of 8 in current phase
+Status: Phase complete
+Last activity: 2026-01-31 — Completed 02-08-PLAN.md (Correlation Analysis Report Generator)
 
-Progress: [███░░░░░░░░] 27% (13/37 plans)
+Progress: [███░░░░░░░░] 29% (14/37 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: ~7 min
-- Total execution time: 1h 29m
+- Total execution time: 1h 36m
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1     | 6/6   | -     | ~10 min  |
-| 2     | 7/8   | -     | ~5 min   |
+| 2     | 8/8   | -     | ~5 min   |
 
 **Recent Trend:**
-- Last 10 plans: 01-01, 01-05, 01-02, 01-03, 01-04, 01-06, 02-02, 02-01, 02-03, 02-04, 02-06, 02-07
-- Trend: Phase 2 nearly complete - Weather, economic, caching, temporal alignment, correlation analysis, and policing assessment done
+- Last 10 plans: 01-01, 01-05, 01-02, 01-03, 01-04, 01-06, 02-02, 02-01, 02-03, 02-04, 02-06, 02-07, 02-08
+- Trend: Phase 2 complete - All external data integration, correlation analysis, and reporting done
 
 *Updated after each plan completion*
 
@@ -149,6 +149,15 @@ Recent decisions affecting current work:
 - CORR-03 partially addressable: manual PDF entry for 2022/2024 only
 - Sources: Controller's Office (PDF), DAO Dashboard (web), OpenDataPhilly (varies)
 
+**From 02-08 (Correlation Analysis Report Generator):**
+- Created analysis/12_report_correlations.py for comprehensive correlation reporting
+- Base64 image embedding for self-contained markdown reports (no external image files)
+- Report sections: Executive Summary, Weather-Crime, Economic-Crime, Policing Data, Methodology, Conclusions
+- Statistical tables include: correlation, p-value, FDR-adjusted p-value, significance, effect size
+- Plots: horizontal bar charts (correlations), heatmaps (lagged), time series (trends)
+- Graceful degradation: Economic analysis skips if FRED_API_KEY not set
+- Fixed bug: aggregate_crime_by_period() now handles categorical date columns correctly
+
 ### Pending Todos
 
 None yet.
@@ -166,6 +175,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-31 19:00 UTC
-Stopped at: Completed 02-07-PLAN.md (Policing Data Availability Assessment) - 7 of 8 in Phase 2
+Last session: 2026-01-31 19:01 UTC
+Stopped at: Completed 02-08-PLAN.md (Correlation Analysis Report Generator) - 8 of 8 in Phase 2
 Resume file: None
