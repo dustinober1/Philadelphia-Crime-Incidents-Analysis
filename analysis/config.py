@@ -74,6 +74,17 @@ PHILADELPHIA_BBOX = {
 }
 
 # =============================================================================
+# STATISTICAL ANALYSIS CONFIGURATION
+# =============================================================================
+
+# Random seed for reproducibility (used across all statistical operations)
+STAT_CONFIG = {
+    "random_seed": 42,  # Default seed for all random operations
+    "confidence_level": 0.99,  # 99% confidence intervals
+    "significance_threshold": 0.01,  # p-value threshold for significance
+}
+
+# =============================================================================
 # ANALYSIS PARAMETERS
 # =============================================================================
 
