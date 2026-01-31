@@ -994,7 +994,7 @@ def tukey_hsd(
 
 def chi_square_test(
     contingency_table: Union[np.ndarray, pd.DataFrame]
-) -> Dict[str, Union[float, int, np.ndarray]]:
+) -> Dict[str, Union[float, int, np.ndarray, str]]:
     """
     Perform chi-square test of independence on a contingency table.
 
@@ -1010,6 +1010,8 @@ def chi_square_test(
             - p_value: P-value of the test
             - dof: Degrees of freedom
             - expected_freq: Array of expected frequencies under independence
+            - cramers_v: Cramer's V effect size
+            - effect_size_interpretation: Interpretation of Cramer's V
             - is_significant: Whether to reject null hypothesis (p < 0.05 default)
 
     Raises:
@@ -1020,9 +1022,11 @@ def chi_square_test(
         >>> observed = np.array([[10, 20, 30], [20, 15, 25]])
         >>> result = chi_square_test(observed)
         >>> print(f"Chi-square: {result['statistic']:.3f}, p: {result['p_value']:.4f}")
+        >>> print(f"Cramer's V: {result['cramers_v']:.3f} ({result['effect_size_interpretation']})")
 
     References:
         - scipy.stats.chi2_contingency
+        - Cramer, C. (1946). Mathematical Methods of Statistics.
     """
     if isinstance(contingency_table, pd.DataFrame):
         contingency_table = contingency_table.values
@@ -1038,11 +1042,45 @@ def chi_square_test(
     # Perform chi-square test
     statistic, p_value, dof, expected_freq = stats.chi2_contingency(contingency_table)
 
+    # Calculate Cramer's V (effect size for chi-square test)
+    n = contingency_table.sum()  # Total sample size
+    min_dim = min(contingency_table.shape[0] - 1, contingency_table.shape[1] - 1)
+
+    if min_dim == 0:
+        cramers_v = 0.0
+    else:
+        cramers_v = np.sqrt(statistic / (n * min_dim))
+
+    # Interpret Cramer's V effect size
+    # Based on Cohen (1988) and Rea & Parker (1992)
+    if min_dim <= 2:
+        # For 2x2 or 2xk tables
+        if abs(cramers_v) < 0.1:
+            interpretation = "negligible association"
+        elif abs(cramers_v) < 0.3:
+            interpretation = "weak association"
+        elif abs(cramers_v) < 0.5:
+            interpretation = "moderate association"
+        else:
+            interpretation = "strong association"
+    else:
+        # For larger tables (effect sizes tend to be smaller)
+        if abs(cramers_v) < 0.05:
+            interpretation = "negligible association"
+        elif abs(cramers_v) < 0.15:
+            interpretation = "weak association"
+        elif abs(cramers_v) < 0.25:
+            interpretation = "moderate association"
+        else:
+            interpretation = "strong association"
+
     return {
         "statistic": float(statistic),
         "p_value": float(p_value),
         "dof": int(dof),
         "expected_freq": expected_freq,
+        "cramers_v": float(cramers_v),
+        "effect_size_interpretation": interpretation,
         "is_significant": p_value < 0.05,
     }
 

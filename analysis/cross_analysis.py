@@ -233,9 +233,11 @@ def analyze_cross_dimensional() -> dict:
             "statistic": float(crime_period_test["statistic"]),
             "p_value": float(crime_period_test["p_value"]),
             "dof": int(crime_period_test["dof"]),
+            "cramers_v": float(crime_period_test.get("cramers_v", 0.0)),
+            "effect_size_interpretation": crime_period_test.get("effect_size_interpretation", ""),
             "is_significant": crime_period_test["p_value"] < STAT_CONFIG["alpha"],
         }
-        print(f"    Crime vs Time: chi2={crime_period_test['statistic']:.2f}, p={crime_period_test['p_value']:.6e}")
+        print(f"    Crime vs Time: chi2={crime_period_test['statistic']:.2f}, p={crime_period_test['p_value']:.6e}, V={crime_period_test.get('cramers_v', 0):.3f}")
 
     # Test 2: Crime type vs day of week
     print("  Testing crime type vs day of week...")
@@ -249,9 +251,11 @@ def analyze_cross_dimensional() -> dict:
             "statistic": float(crime_dow_test["statistic"]),
             "p_value": float(crime_dow_test["p_value"]),
             "dof": int(crime_dow_test["dof"]),
+            "cramers_v": float(crime_dow_test.get("cramers_v", 0.0)),
+            "effect_size_interpretation": crime_dow_test.get("effect_size_interpretation", ""),
             "is_significant": crime_dow_test["p_value"] < STAT_CONFIG["alpha"],
         }
-        print(f"    Crime vs Day: chi2={crime_dow_test['statistic']:.2f}, p={crime_dow_test['p_value']:.6e}")
+        print(f"    Crime vs Day: chi2={crime_dow_test['statistic']:.2f}, p={crime_dow_test['p_value']:.6e}, V={crime_dow_test.get('cramers_v', 0):.3f}")
 
     # Test 3: District vs hour (sample of districts)
     print("  Testing district vs hour...")
@@ -272,9 +276,11 @@ def analyze_cross_dimensional() -> dict:
             "statistic": float(district_period_test["statistic"]),
             "p_value": float(district_period_test["p_value"]),
             "dof": int(district_period_test["dof"]),
+            "cramers_v": float(district_period_test.get("cramers_v", 0.0)),
+            "effect_size_interpretation": district_period_test.get("effect_size_interpretation", ""),
             "is_significant": district_period_test["p_value"] < STAT_CONFIG["alpha"],
         }
-        print(f"    District vs Time: chi2={district_period_test['statistic']:.2f}, p={district_period_test['p_value']:.6e}")
+        print(f"    District vs Time: chi2={district_period_test['statistic']:.2f}, p={district_period_test['p_value']:.6e}, V={district_period_test.get('cramers_v', 0):.3f}")
 
     # Test 4: District vs crime type (top 10 x top 10)
     print("  Testing district vs crime type...")
@@ -294,9 +300,11 @@ def analyze_cross_dimensional() -> dict:
             "statistic": float(district_crime_test["statistic"]),
             "p_value": float(district_crime_test["p_value"]),
             "dof": int(district_crime_test["dof"]),
+            "cramers_v": float(district_crime_test.get("cramers_v", 0.0)),
+            "effect_size_interpretation": district_crime_test.get("effect_size_interpretation", ""),
             "is_significant": district_crime_test["p_value"] < STAT_CONFIG["alpha"],
         }
-        print(f"    District vs Crime: chi2={district_crime_test['statistic']:.2f}, p={district_crime_test['p_value']:.6e}")
+        print(f"    District vs Crime: chi2={district_crime_test['statistic']:.2f}, p={district_crime_test['p_value']:.6e}, V={district_crime_test.get('cramers_v', 0):.3f}")
 
     results["crosstab_tests"] = crosstab_tests
 
@@ -317,6 +325,9 @@ def analyze_cross_dimensional() -> dict:
         if test.get("is_significant_fdr", test["is_significant"]):
             notable_associations.append({
                 "variables": test["variables"],
+                "chi2": test.get("statistic", 0.0),
+                "cramers_v": test.get("cramers_v", 0.0),
+                "effect_size_interpretation": test.get("effect_size_interpretation", ""),
                 "p_value": test["p_value"],
                 "p_value_fdr": test.get("p_value_adjusted", test["p_value"]),
                 "interpretation": f"Significant association between {test['variables'].lower()}"
@@ -484,14 +495,16 @@ def generate_markdown_report(results: dict) -> str:
     if "crosstab_tests" in results and len(results["crosstab_tests"]) > 0:
         md.append("#### 5.1 Statistical Tests for Cross-Tabulations\n\n")
         md.append("**Chi-Square Tests of Independence** (with FDR correction):\n\n")
-        md.append("| Variables | Chi-square | DoF | P-value | P-value (FDR) | Significant |")
-        md.append("|-----------|------------|-----|---------|---------------|------------|")
+        md.append("| Variables | Chi-square | DoF | Cramer's V | P-value | P-value (FDR) | Significant |")
+        md.append("|-----------|------------|-----|------------|---------|---------------|------------|")
 
         for key, test in results["crosstab_tests"].items():
             p_val = test["p_value"]
             p_fdr = test.get("p_value_adjusted", p_val)
             sig_mark = "Yes" if test.get("is_significant_fdr", test["is_significant"]) else "No"
-            md.append(f"| {test['variables']} | {test['statistic']:.2f} | {test['dof']} | {p_val:.6e} | {p_fdr:.6e} | {sig_mark} |")
+            cramers_v = test.get("cramers_v", 0.0)
+            effect_interp = test.get("effect_size_interpretation", "")
+            md.append(f"| {test['variables']} | {test['statistic']:.2f} | {test['dof']} | {cramers_v:.3f} ({effect_interp}) | {p_val:.6e} | {p_fdr:.6e} | {sig_mark} |")
 
         md.append("")
 
@@ -499,7 +512,9 @@ def generate_markdown_report(results: dict) -> str:
         if "notable_associations" in results and len(results["notable_associations"]) > 0:
             md.append("**Significant Associations After FDR Correction:**\n\n")
             for assoc in results["notable_associations"]:
-                md.append(f"- **{assoc['variables']}**: p={assoc['p_value']:.6e} (FDR-adjusted: {assoc['p_value_fdr']:.6e})\n")
+                cramers_v = assoc.get("cramers_v", 0.0)
+                effect_interp = assoc.get("effect_size_interpretation", "")
+                md.append(f"- **{assoc['variables']}**: chi2={assoc.get('chi2', 'N/A')}, Cramer's V={cramers_v:.3f} ({effect_interp}), p={assoc['p_value']:.6e} (FDR-adjusted: {assoc['p_value_fdr']:.6e})\n")
             md.append("")
 
         md.append("**Interpretation:** All tested cross-dimensional associations show significant dependencies. ")
