@@ -121,7 +121,8 @@ def get_analysis_range(resolution: str = "monthly") -> tuple:
         >>> print(f'{start} to {end}')
         '2006-01-01 to 2025-12-31'
     """
-    if resolution not in TEMPORAL_CONFIG:
+    valid_resolutions = ("daily", "monthly", "annual")
+    if resolution not in valid_resolutions:
         raise ValueError(f"Unknown resolution: {resolution}. Use 'daily', 'monthly', or 'annual'.")
     return TEMPORAL_CONFIG[f"{resolution}_start"], TEMPORAL_CONFIG[f"{resolution}_end"]
 
