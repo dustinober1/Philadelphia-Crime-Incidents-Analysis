@@ -497,6 +497,281 @@ def cliffs_delta(x: np.ndarray, y: np.ndarray) -> Tuple[float, str]:
     return float(delta), interpretation
 
 
+def odds_ratio(
+    counts1: np.ndarray,
+    counts2: np.ndarray,
+    ci_level: float = 0.99
+) -> Dict[str, Union[float, bool]]:
+    """
+    Calculate odds ratio with confidence interval for two proportions.
+
+    Odds ratio is commonly used in epidemiology and crime research for
+    comparing the odds of an event occurring between two groups.
+
+    The odds ratio represents the ratio of the odds of an event in group 1
+    to the odds of the same event in group 2.
+    - OR = 1: Equal odds in both groups
+    - OR > 1: Higher odds in group 1
+    - OR < 1: Higher odds in group 2
+
+    Args:
+        counts1: Array of [successes, failures] for group 1
+        counts2: Array of [successes, failures] for group 2
+        ci_level: Confidence level (default 0.99 for 99% CI)
+
+    Returns:
+        Dict with:
+        - or: Odds ratio value
+        - ci_lower: Lower bound of confidence interval
+        - ci_upper: Upper bound of confidence interval
+        - p_value: P-value from Fisher's exact test
+        - is_significant: Whether p < 0.01 (matches 99% CI)
+        - ci_level: The confidence level used
+
+    Raises:
+        ValueError: If counts don't have 2 elements or contain invalid values.
+
+    Example:
+        >>> import numpy as np
+        >>> # Summer: 1000 crimes out of 10000 observations
+        >>> # Winter: 800 crimes out of 10000 observations
+        >>> result = odds_ratio(np.array([1000, 9000]), np.array([800, 9200]))
+        >>> print(f"OR: {result['or']:.3f}, 99% CI: [{result['ci_lower']:.3f}, {result['ci_upper']:.3f}]")
+
+    References:
+        - Fisher's exact test: scipy.stats.fisher_exact
+        - Woolf method for log-odds ratio CI
+    """
+    counts1 = np.asarray(counts1)
+    counts2 = np.asarray(counts2)
+
+    if counts1.shape != (2,) or counts2.shape != (2,):
+        raise ValueError(
+            f"counts1 and counts2 must be arrays of shape (2,). "
+            f"Got {counts1.shape} and {counts2.shape}."
+        )
+
+    if np.any(counts1 < 0) or np.any(counts2 < 0):
+        raise ValueError("Counts cannot be negative.")
+
+    # 2x2 contingency table
+    #         Group1   Group2
+    # Success  a       b
+    # Failure  c       d
+    a, b = counts1[0], counts2[0]
+    c, d = counts1[1], counts2[1]
+
+    # Check for zero cells
+    if (b == 0 and c > 0) or (c == 0 and b > 0):
+        # OR would be 0 or infinite
+        # Add small continuity correction (Haldane-Anscombe correction)
+        a, b, c, d = a + 0.5, b + 0.5, c + 0.5, d + 0.5
+
+    table = [[a, b], [c, d]]
+
+    # Odds ratio
+    numerator = a * d
+    denominator = b * c
+
+    if denominator == 0:
+        if numerator == 0:
+            or_val = 1.0  # Indeterminate case, assume no effect
+        else:
+            or_val = float('inf')
+    else:
+        or_val = numerator / denominator
+
+    # Fisher's exact test for p-value
+    try:
+        _, p_value = stats.fisher_exact(table, alternative='two-sided')
+    except ValueError:
+        # Fallback to chi-square if Fisher's fails
+        _, p_value, _, _ = stats.chi2_contingency(table, correction=True)
+
+    # Log-based CI for odds ratio (Woolf method)
+    # Add small continuity correction to avoid log(0)
+    if or_val == float('inf'):
+        log_or = np.log((a * d + 0.5) / (b * c + 0.5))
+    elif or_val == 0:
+        log_or = np.log((a * d + 0.5) / (b * c + 0.5))
+    else:
+        log_or = np.log(or_val) if or_val > 0 else 0
+
+    # Standard error of log odds ratio
+    se = np.sqrt(1/(a + 0.5) + 1/(b + 0.5) + 1/(c + 0.5) + 1/(d + 0.5))
+
+    # Z-score for confidence level
+    z = stats.norm.ppf(1 - (1 - ci_level) / 2)
+
+    log_ci_low = log_or - z * se
+    log_ci_high = log_or + z * se
+
+    ci_lower = np.exp(log_ci_low)
+    ci_upper = np.exp(log_ci_high)
+
+    return {
+        "or": or_val,
+        "ci_lower": ci_lower,
+        "ci_upper": ci_upper,
+        "p_value": float(p_value),
+        "is_significant": float(p_value) < 0.01,
+        "ci_level": ci_level
+    }
+
+
+def standardized_coefficient(
+    x: np.ndarray,
+    y: np.ndarray
+) -> Dict[str, Union[float, bool]]:
+    """
+    Calculate standardized regression coefficient (beta) for correlation.
+
+    The standardized coefficient represents the change in Y (in standard deviation units)
+    for a 1 standard deviation increase in X. It's the slope of the regression line
+    when both variables are z-scored.
+
+    Also known as:
+    - Beta coefficient in standardized regression
+    - Path coefficient in path analysis
+    - Effect size for linear relationships
+
+    Interpretation:
+    - beta = 0: No linear relationship
+    - |beta| < 0.2: Weak effect
+    - 0.2 <= |beta| < 0.5: Small to moderate effect
+    - 0.5 <= |beta| < 0.8: Moderate to large effect
+    - |beta| >= 0.8: Large effect
+
+    Args:
+        x: Predictor variable (1D array)
+        y: Outcome variable (1D array, same length as x)
+
+    Returns:
+        Dict with:
+        - beta: Standardized coefficient (slope when both variables z-scored)
+        - ci_lower: Lower bound of 99% bootstrap CI
+        - ci_upper: Upper bound of 99% bootstrap CI
+        - p_value: P-value for testing beta = 0
+        - is_significant: Whether p < 0.01
+        - interpretation: Effect size interpretation
+
+    Raises:
+        ValueError: If x and y have different lengths or < 3 observations.
+
+    Example:
+        >>> import numpy as np
+        >>> x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        >>> y = np.array([2, 4, 5, 4, 5, 7, 8, 6, 9, 11])
+        >>> result = standardized_coefficient(x, y)
+        >>> print(f"Beta: {result['beta']:.3f}, 99% CI: [{result['ci_lower']:.3f}, {result['ci_upper']:.3f}]")
+
+    References:
+        - Standardized regression: Cohen et al. (2003). Applied Multiple Regression.
+    """
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    # Remove pairwise NaN values
+    mask = ~(np.isnan(x) | np.isnan(y))
+    x = x[mask]
+    y = y[mask]
+
+    if len(x) != len(y):
+        raise ValueError(f"x and y must have same length. Got {len(x)} and {len(y)}.")
+    if len(x) < 3:
+        raise ValueError(f"Standardized coefficient requires at least 3 observations. Got {len(x)}.")
+
+    # Z-score both variables
+    x_mean = np.mean(x)
+    x_std = np.std(x, ddof=1)
+    y_mean = np.mean(y)
+    y_std = np.std(y, ddof=1)
+
+    if x_std == 0 or y_std == 0:
+        raise ValueError("Cannot compute standardized coefficient: one variable has zero variance.")
+
+    x_z = (x - x_mean) / x_std
+    y_z = (y - y_mean) / y_std
+
+    # Simple regression of y_z on x_z
+    result = stats.linregress(x_z, y_z)
+
+    # Bootstrap CI for beta
+    def beta_stat(data):
+        x_b, y_b = data
+        x_mean = np.mean(x_b)
+        x_std = np.std(x_b, ddof=1)
+        y_mean = np.mean(y_b)
+        y_std = np.std(y_b, ddof=1)
+
+        if x_std == 0 or y_std == 0:
+            return 0.0
+
+        x_z = (x_b - x_mean) / x_std
+        y_z = (y_b - y_mean) / y_std
+        return np.polyval(np.polyfit(x_z, y_z, 1), x_z).mean()  # Slope via polyfit
+
+    # Use scipy's bootstrap
+    try:
+        res = stats.bootstrap(
+            data=(x, y),
+            statistic=lambda data, axis: np.polyfit(
+                (data[0] - np.mean(data[0])) / np.std(data[0], ddof=1),
+                (data[1] - np.mean(data[1])) / np.std(data[1], ddof=1),
+                1
+            )[0] if axis is None else 0,
+            confidence_level=0.99,
+            n_resamples=9999,
+            random_state=42,
+            method='BCa'
+        )
+        ci_lower = float(res.confidence_interval.low)
+        ci_upper = float(res.confidence_interval.high)
+    except Exception:
+        # Fallback: use simple percentile CI from manual bootstrap
+        n_boot = 9999
+        boot_betas = []
+        rng = np.random.default_rng(42)
+
+        for _ in range(n_boot):
+            idx = rng.choice(len(x), size=len(x), replace=True)
+            x_boot = x[idx]
+            y_boot = y[idx]
+
+            x_std = np.std(x_boot, ddof=1)
+            y_std = np.std(y_boot, ddof=1)
+
+            if x_std > 0 and y_std > 0:
+                x_z_boot = (x_boot - np.mean(x_boot)) / x_std
+                y_z_boot = (y_boot - np.mean(y_boot)) / y_std
+                beta = np.corrcoef(x_z_boot, y_z_boot)[0, 1]
+                boot_betas.append(beta)
+
+        boot_betas = np.array(boot_betas)
+        ci_lower = float(np.percentile(boot_betas, 0.5))
+        ci_upper = float(np.percentile(boot_betas, 99.5))
+
+    # Interpretation
+    abs_beta = abs(result.slope)
+    if abs_beta < 0.2:
+        interpretation = "weak effect"
+    elif abs_beta < 0.5:
+        interpretation = "small to moderate effect"
+    elif abs_beta < 0.8:
+        interpretation = "moderate to large effect"
+    else:
+        interpretation = "large effect"
+
+    return {
+        "beta": float(result.slope),
+        "ci_lower": ci_lower,
+        "ci_upper": ci_upper,
+        "p_value": float(result.pvalue),
+        "is_significant": result.pvalue < 0.01,
+        "interpretation": interpretation
+    }
+
+
 # =============================================================================
 # BOOTSTRAP CONFIDENCE INTERVALS
 # =============================================================================
