@@ -2,7 +2,7 @@
 External data fetching module for Philadelphia Crime Incidents EDA.
 
 Provides functions to fetch and cache external data sources:
-- Weather data from Meteostat (historical weather)
+- Weather data from Meteostat (historical daily weather)
 - Economic data from FRED (unemployment rates)
 - Census data from U.S. Census Bureau (income, poverty rates)
 
@@ -13,63 +13,84 @@ from pathlib import Path
 
 import pandas as pd
 
-from analysis.config import PROJECT_ROOT
+from analysis.config import EXTERNAL_DATA_DIR, PHILADELPHIA_CENTER
 
 # =============================================================================
-# PATHS
-# =============================================================================
-
-EXTERNAL_DATA_DIR = PROJECT_ROOT / "data" / "external"
-
-
-# =============================================================================
-# WEATHER DATA (Met eostat)
+# WEATHER DATA (Meteostat v2)
 # =============================================================================
 
 def fetch_weather_data(
-    station_id: str = "724060-93740",
     start_date: str = "2006-01-01",
     end_date: str = "2026-01-31",
     cache_path: Path = None,
     force_refresh: bool = False,
+    station_id: str = "72408",
 ) -> pd.DataFrame:
     """
-    Fetch historical weather data from Meteostat.
+    Fetch daily weather data for Philadelphia using Meteostat API.
+
+    Retrieves temperature (temp, tmin, tmax) and precipitation (prcp) data
+    for the specified date range. Uses local cache to avoid repeated API calls.
 
     Args:
-        station_id: Meteostat station ID. Default is Philadelphia International Airport.
-        start_date: Start date in YYYY-MM-DD format.
-        end_date: End date in YYYY-MM-DD format.
-        cache_path: Path to cache file. If None, uses default.
+        start_date: Start date in YYYY-MM-DD format. Default is "2006-01-01".
+        end_date: End date in YYYY-MM-DD format. Default is "2026-01-31".
+        cache_path: Path to cache file. If None, uses EXTERNAL_DATA_DIR.
         force_refresh: If True, bypass cache and fetch from API.
+        station_id: Meteostat station ID. Default is "72408" (Philadelphia International Airport).
 
     Returns:
-        DataFrame with hourly weather data including temperature,
-        precipitation, wind speed, etc.
+        DataFrame with columns:
+            - time: Date index
+            - temp: Average temperature (C)
+            - tmin: Minimum temperature (C)
+            - tmax: Maximum temperature (C)
+            - prcp: Precipitation (mm)
+            - snwd: Snow depth (mm)
+            - wspd: Wind speed (km/h)
+            - wpgt: Wind peak gust (km/h)
+            - pres: Sea-level air pressure (hPa)
+
+    Raises:
+        ValueError: If dates are invalid or API returns no data.
 
     Example:
-        >>> df = fetch_weather_data("2006-01-01", "2006-12-31")
-        >>> print(df.head())
+        >>> df = fetch_weather_data("2020-01-01", "2020-12-31")
+        >>> print(df[['temp', 'prcp']].head())
     """
+    from datetime import datetime
+
+    from meteostat import Point, daily
+
     if cache_path is None:
-        cache_path = EXTERNAL_DATA_DIR / f"weather_{station_id}_{start_date}_{end_date}.parquet"
+        cache_path = EXTERNAL_DATA_DIR / "weather_philly_2006_2026.parquet"
 
     # Check cache first
     if cache_path.exists() and not force_refresh:
-        return pd.read_parquet(cache_path)
+        cached_data = pd.read_parquet(cache_path)
+        # Ensure requested range is covered
+        cached_data['date'] = pd.to_datetime(cached_data.index)
+        cached_start = cached_data['date'].min()
+        cached_end = cached_data['date'].max()
+        if pd.to_datetime(start_date) >= cached_start and pd.to_datetime(end_date) <= cached_end:
+            return cached_data.loc[start_date:end_date]
 
-    from datetime import datetime
+    # Philadelphia coordinates: lat, lon, elevation (meters)
+    philly = Point(
+        PHILADELPHIA_CENTER["lat"],
+        PHILADELPHIA_CENTER["lon"],
+        6  # Approximate elevation in meters
+    )
 
-    from meteostat import Hourly, Point
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
 
-    # Philadelphia coordinates
-    philly = Point(39.9526, -75.1652, 12)
-
-    # Fetch data
-    start = datetime.fromisoformat(start_date)
-    end = datetime.fromisoformat(end_date)
-    data = Hourly(philly, start, end)
+    # Fetch daily weather data
+    data = daily(station_id, start, end)
     df = data.fetch()
+
+    if df is None or df.empty:
+        raise ValueError("No weather data returned from Meteostat API")
 
     # Ensure cache directory exists
     cache_path.parent.mkdir(parents=True, exist_ok=True)
@@ -77,11 +98,11 @@ def fetch_weather_data(
     # Save to cache
     df.to_parquet(cache_path)
 
-    return df
+    return df.loc[start_date:end_date]
 
 
 def load_cached_weather(
-    station_id: str = "724060-93740",
+    cache_path: Path = None,
     start_date: str = None,
     end_date: str = None,
 ) -> pd.DataFrame:
@@ -89,23 +110,24 @@ def load_cached_weather(
     Load cached weather data from local parquet file.
 
     Args:
-        station_id: Meteostat station ID.
-        start_date: Optional start date filter.
-        end_date: Optional end date filter.
+        cache_path: Path to cache file. If None, uses default.
+        start_date: Optional start date filter (YYYY-MM-DD).
+        end_date: Optional end date filter (YYYY-MM-DD).
 
     Returns:
         DataFrame with weather data. Returns None if cache doesn't exist.
+
+    Example:
+        >>> df = load_cached_weather()
+        >>> if df is not None:
+        ...     print(df.describe())
     """
-    cache_path = EXTERNAL_DATA_DIR / f"weather_{station_id}_*.parquet"
+    if cache_path is None:
+        cache_path = EXTERNAL_DATA_DIR / "weather_philly_2006_2026.parquet"
 
-    # Find matching cache file (wildcard for date range)
-    matching_files = list(cache_path.parent.glob(f"weather_{station_id}_*.parquet"))
-
-    if not matching_files:
+    if not cache_path.exists():
         return None
 
-    # Use the most recent matching file
-    cache_path = sorted(matching_files)[-1]
     df = pd.read_parquet(cache_path)
 
     if start_date:
