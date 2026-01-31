@@ -14,17 +14,17 @@ This is a Python-based exploratory data analysis (EDA) project for Philadelphia 
 # Activate virtual environment
 source .venv/bin/activate
 
+# External data API keys (optional - see .env.example for signup)
+# FRED API: https://fred.stlouisfed.org/docs/api/api_key.html (free, instant)
+# Census API: https://api.census.gov/data/key_signup.html (free, email approval)
+
 # Install dependencies (requirements.txt not managed - install manually)
 pip install pandas numpy matplotlib seaborn folium scikit-learn scipy pyarrow
+# External data libraries (Phase 2)
+pip install meteostat fredapi census python-dotenv requests-cache statsmodels
 
 # Statistical rigor (Phase 1)
 pip install pymannkendall  # Mann-Kendall trend test for temporal data
-
-# External data sources for correlation analysis
-pip install meteostat requests census  # Weather, US Census data
-
-# Statistical analysis libraries (for rigor layer)
-pip install statsmodels  # Econometric analysis, statistical tests
 
 # Dashboard libraries (Streamlit chosen over Dash)
 pip install streamlit plotly kaleido  # Dashboard framework, interactive plots, high-DPI export
@@ -75,6 +75,8 @@ Core analysis scripts that perform computations and return results dictionaries:
 | `covid_lockdown.py` | Pre/lockdown/post-COVID period comparison |
 | `robbery_timing.py` | Robbery patterns by time of day |
 | `weighted_severity_analysis.py` | District-level severity scoring distinguishing high-volume/low-risk vs low-volume/high-risk areas |
+| `external_data.py` | External data fetching (Meteostat weather, FRED/Census APIs) with caching and temporal alignment |
+| `correlation_analysis.py` | Crime-weather and crime-economic correlation analysis with detrending and statistical testing |
 
 ### Report Generators (`analysis/*_report.py`)
 
@@ -174,6 +176,8 @@ This project uses GSD (Get Shit Done) workflow for project management:
 
 1. **Statistical Rigor Layer** - Add significance testing (p-values), confidence intervals (99% CI), effect sizes (Cohen's d), FDR correction
 2. **External Data Integration** - Weather (Meteostat), Economic (Census/FRED APIs), Policing data correlation
+   - API keys required: FRED (free signup), Census (free signup)
+   - Use `.env` file with `python-dotenv` for key management
 3. **Advanced Temporal Analysis** - Holiday effects, individual crime types (homicide, burglary, theft, assault), shift patterns
 4. **Dashboard Foundation** - Streamlit app with time/geographic/crime-type filters
 5. **Dashboard Cross-Filtering** - Linked views with cross-filtering interactions
@@ -216,10 +220,13 @@ Reports are saved to `reports/` as markdown files with:
 ## Common Gotchas
 
 1. **Missing coordinates**: ~25% of records lack valid coordinates. Always filter with `valid_coord` flag.
-2. **2026 data**: Incomplete year (only through January 20, 2026) - exclude from trend analysis.
-3. **Python version**: Uses Python 3.14.2 in `.venv/` - ensure compatibility when adding new dependencies
-4. **Large dataset**: Use sampling (`df.sample()`) for visualizations to avoid memory issues.
-5. **Matplotlib backend**: Set `os.environ["MPLBACKEND"] = "Agg"` for non-interactive plotting.
-6. **District values**: May be strings or floats; convert with `int(float(value))` before use.
-7. **UCR codes**: Stored as floats in source; convert to int for lookups.
-8. **No requirements.txt**: Dependencies are in `.venv/` but not pinned to a requirements file.
+2. **Meteostat v2 API**: Uses `daily(station_id, start, end)` function, not `Hourly` class. Returns `temp` not `tavg`. Station ID for Philadelphia: 72408 (PHL International Airport).
+3. **Date dtype handling**: Date columns in crime data may be categorical dtype - convert to datetime before temporal operations: `df[date_col] = pd.to_datetime(df[date_col])`
+4. **External API keys**: Functions in `external_data.py` raise ValueError with helpful signup instructions when keys missing. Not required for module import.
+5. **2026 data**: Incomplete year (only through January 20, 2026) - exclude from trend analysis.
+6. **Python version**: Uses Python 3.14.2 in `.venv/` - ensure compatibility when adding new dependencies.
+7. **Large dataset**: Use sampling (`df.sample()`) for visualizations to avoid memory issues.
+8. **Matplotlib backend**: Set `os.environ["MPLBACKEND"] = "Agg"` for non-interactive plotting.
+9. **District values**: May be strings or floats; convert with `int(float(value))` before use.
+10. **UCR codes**: Stored as floats in source; convert to int for lookups.
+11. **No requirements.txt**: Dependencies are in `.venv/` but not pinned to a requirements file.
