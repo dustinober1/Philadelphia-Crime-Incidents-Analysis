@@ -3,6 +3,9 @@ Summer Crime Spike Analysis
 
 Answers the question: "Is the summer crime spike a myth or a fact?"
 through seasonal decomposition and quantification of month-over-month patterns.
+
+Enhanced with statistical significance testing, effect sizes, and
+year-over-year consistency analysis with FDR correction.
 """
 
 import pandas as pd
@@ -11,8 +14,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
 
-from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT
+from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT, STAT_CONFIG
 from analysis.utils import load_data, extract_temporal_features, image_to_base64, create_image_tag, format_number
+from analysis.stats_utils import compare_two_samples, cohens_d, bootstrap_ci, apply_fdr_correction
+from analysis.reproducibility import set_global_seed, get_analysis_metadata, format_metadata_markdown, DataVersion
 
 
 # =============================================================================
@@ -281,11 +286,20 @@ def analyze_by_crime_type(df: pd.DataFrame) -> dict:
 
 def analyze_summer_spike() -> dict:
     """
-    Run comprehensive summer crime spike analysis.
+    Run comprehensive summer crime spike analysis with statistical testing.
 
     Returns:
         Dictionary containing analysis results and base64-encoded plots.
+
+    Statistical tests performed:
+        - Two-sample comparison (summer vs other months)
+        - Cohen's d effect size for seasonal difference
+        - Bootstrap 99% CI for monthly difference
+        - Year-over-year consistency with FDR correction
     """
+    # Set seed for reproducibility
+    set_global_seed(STAT_CONFIG["random_seed"])
+
     print("Loading data for summer spike analysis...")
     df = load_data(clean=False)
 
@@ -296,6 +310,27 @@ def analyze_summer_spike() -> dict:
     df = classify_crime_type(df)
 
     results = {}
+
+    # Store analysis metadata
+    try:
+        data_version = DataVersion(PROJECT_ROOT / "data" / "crime_incidents_combined.parquet")
+        metadata = get_analysis_metadata(
+            data_version=data_version,
+            analysis_type="summer_spike",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
+    except Exception as e:
+        print(f"Warning: Could not create data version: {e}")
+        metadata = get_analysis_metadata(
+            analysis_type="summer_spike",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
 
     # ========================================================================
     # PRIMARY ANALYSIS: All Crimes
@@ -309,6 +344,110 @@ def analyze_summer_spike() -> dict:
     results["monthly_stats"] = stats_all
     results["seasonal_comparison"] = seasonal_all
     results["monthly_data"] = monthly_all
+
+    # ========================================================================
+    # STATISTICAL TESTS: Summer vs Other Months
+    # ========================================================================
+    print("Running summer vs other months comparison test...")
+
+    # Prepare data for statistical test
+    summer_months_data = monthly_all[monthly_all["month_name"].isin(SUMMER_MONTHS)]["crime_count"].values
+    other_months_data = monthly_all[~monthly_all["month_name"].isin(SUMMER_MONTHS)]["crime_count"].values
+
+    # Two-sample comparison
+    summer_comparison = compare_two_samples(summer_months_data, other_months_data, alpha=STAT_CONFIG["alpha"])
+    results["summer_comparison_test"] = summer_comparison
+
+    # Cohen's d effect size
+    effect_size = cohens_d(summer_months_data, other_months_data)
+    results["cohens_d"] = effect_size
+
+    # Bootstrap 99% CI for the difference
+    summer_mean = summer_months_data.mean()
+    other_mean = other_months_data.mean()
+    observed_diff = summer_mean - other_mean
+
+    # Bootstrap CI for the mean difference using resampling approach
+    # We'll create bootstrap samples for each group and compute differences
+    n_bootstrap = STAT_CONFIG["bootstrap_n_resamples"]
+    boot_diffs = []
+    np.random.seed(STAT_CONFIG["random_seed"])
+
+    for _ in range(n_bootstrap):
+        boot_summer = np.random.choice(summer_months_data, size=len(summer_months_data), replace=True)
+        boot_other = np.random.choice(other_months_data, size=len(other_months_data), replace=True)
+        boot_diffs.append(boot_summer.mean() - boot_other.mean())
+
+    boot_diffs = np.array(boot_diffs)
+    ci_lower = np.percentile(boot_diffs, (1 - STAT_CONFIG["confidence_level"]) / 2 * 100)
+    ci_upper = np.percentile(boot_diffs, (1 + STAT_CONFIG["confidence_level"]) / 2 * 100)
+
+    results["summer_difference_ci"] = {
+        "observed_difference": observed_diff,
+        "ci_lower": ci_lower,
+        "ci_upper": ci_upper,
+        "confidence_level": STAT_CONFIG["confidence_level"]
+    }
+
+    print(f"  Summer vs Other: {summer_comparison['test_name']}, p={summer_comparison['p_value']:.4f}")
+    print(f"  Cohen's d: {effect_size:.3f}")
+    print(f"  99% CI for difference: [{ci_lower:.0f}, {ci_upper:.0f}]")
+
+    # ========================================================================
+    # STATISTICAL TESTS: Year-over-Year Consistency with FDR
+    # ========================================================================
+    print("Running year-over-year consistency analysis...")
+
+    # Test summer vs non-summer for each complete year (2006-2025)
+    yearly_p_values = []
+    yearly_effect_sizes = []
+    years_tested = []
+
+    for year in range(2006, 2026):  # Complete years only
+        year_data = df[df["year"] == year]
+        if len(year_data) == 0:
+            continue
+
+        summer_data = year_data[year_data["season"] == "Summer"]
+        non_summer_data = year_data[year_data["season"] != "Summer"]
+
+        if len(summer_data) < 10 or len(non_summer_data) < 10:
+            continue
+
+        # Monthly aggregation for this year
+        summer_monthly = summer_data.groupby("month").size().values
+        non_summer_monthly = non_summer_data.groupby("month").size().values
+
+        if len(summer_monthly) < 2 or len(non_summer_monthly) < 2:
+            continue
+
+        # Run test
+        test_result = compare_two_samples(summer_monthly, non_summer_monthly, alpha=0.05)
+        yearly_p_values.append(test_result["p_value"])
+        years_tested.append(year)
+
+        # Effect size
+        try:
+            es = cohens_d(summer_monthly, non_summer_monthly)
+            yearly_effect_sizes.append(es)
+        except:
+            yearly_effect_sizes.append(0.0)
+
+    # Apply FDR correction
+    if yearly_p_values:
+        p_values_array = np.array(yearly_p_values)
+        adjusted_p = apply_fdr_correction(p_values_array, method='bh')
+
+        results["year_over_year_fdr"] = {
+            "years": years_tested,
+            "raw_p_values": yearly_p_values,
+            "adjusted_p_values": adjusted_p.tolist(),
+            "effect_sizes": yearly_effect_sizes,
+            "significant_count": int((adjusted_p < STAT_CONFIG["alpha"]).sum()),
+            "total_years": len(years_tested)
+        }
+
+        print(f"  Summer spike significant in {results['year_over_year_fdr']['significant_count']}/{len(years_tested)} years (after FDR correction)")
 
     # Create primary visualizations
     print("Creating visualizations...")
@@ -381,9 +520,14 @@ def generate_markdown_report(results: dict) -> str:
         results: Dictionary from analyze_summer_spike()
 
     Returns:
-        Markdown string with analysis results.
+        Markdown string with analysis results including statistical tests.
     """
     md = []
+
+    # Analysis Configuration section
+    if "metadata" in results:
+        md.append(format_metadata_markdown(results["metadata"]))
+        md.append("\n")
 
     # ========================================================================
     # TITLE
@@ -402,12 +546,20 @@ def generate_markdown_report(results: dict) -> str:
     peak = results["peak_analysis"]
     consistency = results.get("consistency", {})
 
-    # Direct answer
+    # Direct answer based on statistical test
     summer_pct = seasonal["summer_winter_pct_change"]
-    if summer_pct > 15:
+
+    # Use statistical test results for verdict
+    is_significant = False
+    if "summer_comparison_test" in results:
+        is_significant = results["summer_comparison_test"]["is_significant"]
+
+    if is_significant and summer_pct > 15:
         verdict = "**FACT** - The summer crime spike is statistically significant."
-    elif summer_pct > 5:
+    elif is_significant and summer_pct > 5:
         verdict = "**PARTIALLY FACT** - There is a measurable summer increase, though modest."
+    elif is_significant:
+        verdict = "**FACT** - The summer crime spike is statistically significant (though effect size may vary)."
     else:
         verdict = "**MYTH** - The summer crime spike is not statistically significant."
 
@@ -421,7 +573,25 @@ def generate_markdown_report(results: dict) -> str:
     md.append(f"- **Peak Month**: {peak['peak_month']} is the highest month with {format_number(int(peak['peak_value']))} average incidents.\n")
     md.append(f"- **Lowest Month**: {peak['low_month']} is the lowest with {format_number(int(peak['low_value']))} average incidents.\n")
 
-    if consistency:
+    # Add statistical test results
+    if "summer_comparison_test" in results:
+        sc = results["summer_comparison_test"]
+        sig = "**significant**" if sc["is_significant"] else "not significant"
+        md.append(f"- **Statistical Test**: {sc['test_name']}, p = {sc['p_value']:.4f} ({sig} at alpha = {STAT_CONFIG['alpha']})\n")
+
+    if "cohens_d" in results:
+        from analysis.stats_utils import interpret_cohens_d
+        effect_interpret = interpret_cohens_d(results["cohens_d"])
+        md.append(f"- **Effect Size**: Cohen's d = {results['cohens_d']:.3f} ({effect_interpret})\n")
+
+    if "summer_difference_ci" in results:
+        ci = results["summer_difference_ci"]
+        md.append(f"- **99% CI for Difference**: [{format_number(int(ci['ci_lower']))}, {format_number(int(ci['ci_upper']))}]\n")
+
+    if "year_over_year_fdr" in results:
+        fdr = results["year_over_year_fdr"]
+        md.append(f"- **Year-over-Year Consistency**: Summer spike significant in **{fdr['significant_count']}/{fdr['total_years']} years** (after FDR correction)\n")
+    elif consistency:
         md.append(f"- **Consistency**: In **{consistency['summer_higher_years']} out of {consistency['total_years']} years** ({consistency['consistency_pct']:.1f}%), summer had more crime than winter.\n")
 
     md.append("\n---\n\n")
