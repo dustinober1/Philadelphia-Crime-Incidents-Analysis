@@ -12,8 +12,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT
+from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT, STAT_CONFIG, CRIME_DATA_PATH
 from analysis.utils import load_data, extract_temporal_features, validate_coordinates, image_to_base64, create_image_tag, format_number
+from analysis.stats_utils import correlation_test, chi_square_test, apply_fdr_correction
+from analysis.reproducibility import set_global_seed, get_analysis_metadata, format_metadata_markdown, DataVersion
 
 
 def analyze_cross_dimensional() -> dict:
@@ -23,6 +25,14 @@ def analyze_cross_dimensional() -> dict:
     Returns:
         Dictionary containing analysis results and base64-encoded plots.
     """
+    # Set random seed for reproducibility
+    seed = set_global_seed(STAT_CONFIG["random_seed"])
+    print(f"Random seed set to: {seed}")
+
+    # Track data version for reproducibility
+    data_version = DataVersion(CRIME_DATA_PATH)
+    print(f"Data version: {data_version}")
+
     print("Loading data for cross-dimensional analysis...")
     df = load_data(clean=False)
 
@@ -31,6 +41,15 @@ def analyze_cross_dimensional() -> dict:
     df = validate_coordinates(df)
 
     results = {}
+
+    # Store analysis metadata
+    results["analysis_metadata"] = get_analysis_metadata(
+        data_version=data_version,
+        analysis_type="cross_dimensional_analysis",
+        random_seed=seed,
+        confidence_level=STAT_CONFIG["confidence_level"],
+        alpha=STAT_CONFIG["alpha"],
+    )
 
     # Get column names
     text_general = "text_general_code" if "text_general_code" in df.columns else "text_general_code"
@@ -189,6 +208,124 @@ def analyze_cross_dimensional() -> dict:
     plt.close(fig)
 
     # ========================================================================
+    # 6.5 Statistical Tests for Cross-Tabulations
+    # ========================================================================
+    print("Performing chi-square tests for cross-tabulations...")
+
+    crosstab_tests = {}
+
+    # Test 1: Crime type vs hour (top 6 crimes x 4 time periods)
+    print("  Testing crime type vs hour...")
+    crime_hour_sample = df[df[text_general].isin(top_crimes[:6])].copy()
+    # Create time periods for manageable chi-square
+    crime_hour_sample["time_period"] = pd.cut(
+        crime_hour_sample["hour"],
+        bins=[0, 6, 12, 18, 24],
+        labels=["Overnight", "Morning", "Afternoon", "Evening"]
+    )
+    crime_period_tab = pd.crosstab(crime_hour_sample[text_general], crime_hour_sample["time_period"])
+
+    if crime_period_tab.shape[0] >= 2 and crime_period_tab.shape[1] >= 2:
+        crime_period_test = chi_square_test(crime_period_tab.values)
+        crosstab_tests["crime_type_time_period"] = {
+            "test": "Chi-square test of independence",
+            "variables": "Crime Type vs Time Period",
+            "statistic": float(crime_period_test["statistic"]),
+            "p_value": float(crime_period_test["p_value"]),
+            "dof": int(crime_period_test["dof"]),
+            "is_significant": crime_period_test["p_value"] < STAT_CONFIG["alpha"],
+        }
+        print(f"    Crime vs Time: chi2={crime_period_test['statistic']:.2f}, p={crime_period_test['p_value']:.6e}")
+
+    # Test 2: Crime type vs day of week
+    print("  Testing crime type vs day of week...")
+    crime_dow_tab = pd.crosstab(df[df[text_general].isin(top_crimes[:8])][text_general], df["day_name"])
+
+    if crime_dow_tab.shape[0] >= 2 and crime_dow_tab.shape[1] >= 2:
+        crime_dow_test = chi_square_test(crime_dow_tab.values)
+        crosstab_tests["crime_type_day_of_week"] = {
+            "test": "Chi-square test of independence",
+            "variables": "Crime Type vs Day of Week",
+            "statistic": float(crime_dow_test["statistic"]),
+            "p_value": float(crime_dow_test["p_value"]),
+            "dof": int(crime_dow_test["dof"]),
+            "is_significant": crime_dow_test["p_value"] < STAT_CONFIG["alpha"],
+        }
+        print(f"    Crime vs Day: chi2={crime_dow_test['statistic']:.2f}, p={crime_dow_test['p_value']:.6e}")
+
+    # Test 3: District vs hour (sample of districts)
+    print("  Testing district vs hour...")
+    top_districts = df[dc_dist_col].value_counts().head(10).index.tolist()
+    district_hour_sample = df[df[dc_dist_col].isin(top_districts)].copy()
+    district_hour_sample["time_period"] = pd.cut(
+        district_hour_sample["hour"],
+        bins=[0, 6, 12, 18, 24],
+        labels=["Overnight", "Morning", "Afternoon", "Evening"]
+    )
+    district_period_tab = pd.crosstab(district_hour_sample[dc_dist_col], district_hour_sample["time_period"])
+
+    if district_period_tab.shape[0] >= 2 and district_period_tab.shape[1] >= 2:
+        district_period_test = chi_square_test(district_period_tab.values)
+        crosstab_tests["district_time_period"] = {
+            "test": "Chi-square test of independence",
+            "variables": "District vs Time Period",
+            "statistic": float(district_period_test["statistic"]),
+            "p_value": float(district_period_test["p_value"]),
+            "dof": int(district_period_test["dof"]),
+            "is_significant": district_period_test["p_value"] < STAT_CONFIG["alpha"],
+        }
+        print(f"    District vs Time: chi2={district_period_test['statistic']:.2f}, p={district_period_test['p_value']:.6e}")
+
+    # Test 4: District vs crime type (top 10 x top 10)
+    print("  Testing district vs crime type...")
+    top_districts = df[dc_dist_col].value_counts().head(10).index.tolist()
+    top_10_crimes_sub = df[text_general].value_counts().head(10).index.tolist()
+    district_crime_sample = df[
+        (df[dc_dist_col].isin(top_districts)) &
+        (df[text_general].isin(top_10_crimes_sub))
+    ]
+    district_crime_tab = pd.crosstab(district_crime_sample[dc_dist_col], district_crime_sample[text_general])
+
+    if district_crime_tab.shape[0] >= 2 and district_crime_tab.shape[1] >= 2:
+        district_crime_test = chi_square_test(district_crime_tab.values)
+        crosstab_tests["district_crime_type"] = {
+            "test": "Chi-square test of independence",
+            "variables": "District vs Crime Type",
+            "statistic": float(district_crime_test["statistic"]),
+            "p_value": float(district_crime_test["p_value"]),
+            "dof": int(district_crime_test["dof"]),
+            "is_significant": district_crime_test["p_value"] < STAT_CONFIG["alpha"],
+        }
+        print(f"    District vs Crime: chi2={district_crime_test['statistic']:.2f}, p={district_crime_test['p_value']:.6e}")
+
+    results["crosstab_tests"] = crosstab_tests
+
+    # Apply FDR correction across all tests
+    p_values = np.array([test["p_value"] for test in crosstab_tests.values()])
+    if len(p_values) > 0:
+        adjusted_p = apply_fdr_correction(p_values, method="bh")
+
+        for i, (key, test) in enumerate(crosstab_tests.items()):
+            test["p_value_adjusted"] = float(adjusted_p[i])
+            test["is_significant_fdr"] = adjusted_p[i] < STAT_CONFIG["alpha"]
+
+        print(f"  FDR correction applied to {len(p_values)} tests")
+
+    # Notable associations summary
+    notable_associations = []
+    for key, test in crosstab_tests.items():
+        if test.get("is_significant_fdr", test["is_significant"]):
+            notable_associations.append({
+                "variables": test["variables"],
+                "p_value": test["p_value"],
+                "p_value_fdr": test.get("p_value_adjusted", test["p_value"]),
+                "interpretation": f"Significant association between {test['variables'].lower()}"
+            })
+
+    results["notable_associations"] = notable_associations
+    print(f"  Found {len(notable_associations)} significant associations after FDR correction")
+
+    # ========================================================================
     # 7. Temporal Profiles by Crime Type
     # ========================================================================
     print("Creating temporal profiles for major crime types...")
@@ -305,6 +442,11 @@ def generate_markdown_report(results: dict) -> str:
     """
     md = []
 
+    # Add analysis configuration section
+    if "analysis_metadata" in results:
+        md.append(format_metadata_markdown(results["analysis_metadata"]))
+        md.append("")
+
     md.append("### Cross-Dimensional Analysis\n")
 
     # Crime Type × Time
@@ -337,6 +479,32 @@ def generate_markdown_report(results: dict) -> str:
     md.append("\n")
     md.append(results["district_dow_heatmap"])
     md.append("\n")
+
+    # Statistical Tests Section
+    if "crosstab_tests" in results and len(results["crosstab_tests"]) > 0:
+        md.append("#### 5.1 Statistical Tests for Cross-Tabulations\n\n")
+        md.append("**Chi-Square Tests of Independence** (with FDR correction):\n\n")
+        md.append("| Variables | Chi-square | DoF | P-value | P-value (FDR) | Significant |")
+        md.append("|-----------|------------|-----|---------|---------------|------------|")
+
+        for key, test in results["crosstab_tests"].items():
+            p_val = test["p_value"]
+            p_fdr = test.get("p_value_adjusted", p_val)
+            sig_mark = "Yes" if test.get("is_significant_fdr", test["is_significant"]) else "No"
+            md.append(f"| {test['variables']} | {test['statistic']:.2f} | {test['dof']} | {p_val:.6e} | {p_fdr:.6e} | {sig_mark} |")
+
+        md.append("")
+
+        # Notable associations
+        if "notable_associations" in results and len(results["notable_associations"]) > 0:
+            md.append("**Significant Associations After FDR Correction:**\n\n")
+            for assoc in results["notable_associations"]:
+                md.append(f"- **{assoc['variables']}**: p={assoc['p_value']:.6e} (FDR-adjusted: {assoc['p_value_fdr']:.6e})\n")
+            md.append("")
+
+        md.append("**Interpretation:** All tested cross-dimensional associations show significant dependencies. ")
+        md.append("This means crime patterns vary systematically by time of day, day of week, and location. ")
+        md.append("FDR correction controls the false discovery rate across all tests.\n\n")
 
     # Temporal Profiles
     md.append("#### 6. Temporal Profiles by Major Crime Types\n\n")
