@@ -7,6 +7,9 @@ Analyzes crime patterns across three periods:
 - Pre-lockdown: 2018-2019 (baseline)
 - Lockdown: 2020-2022 (COVID period)
 - Post-lockdown: 2023-2025 (new normal)
+
+Enhanced with statistical significance testing including multi-group comparison
+with omnibus test, Tukey HSD post-hoc, and FDR-adjusted p-values.
 """
 
 import pandas as pd
@@ -15,7 +18,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
 
-from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT
+from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT, STAT_CONFIG
 from analysis.utils import (
     load_data,
     extract_temporal_features,
@@ -23,6 +26,8 @@ from analysis.utils import (
     create_image_tag,
     format_number,
 )
+from analysis.stats_utils import compare_multiple_samples, apply_fdr_correction, bootstrap_ci
+from analysis.reproducibility import set_global_seed, get_analysis_metadata, format_metadata_markdown, DataVersion
 
 
 # =============================================================================
@@ -407,11 +412,20 @@ def calculate_yoy_changes(df: pd.DataFrame) -> dict:
 
 def analyze_covid_lockdown() -> dict:
     """
-    Run comprehensive COVID-19 lockdown impact analysis.
+    Run comprehensive COVID-19 lockdown impact analysis with statistical testing.
 
     Returns:
         Dictionary containing analysis results and base64-encoded plots.
+
+    Statistical tests performed:
+        - Multi-group comparison across 4 periods (omnibus test)
+        - Tukey HSD post-hoc for pairwise comparisons
+        - Bootstrap 99% CI for monthly deviations
+        - FDR adjustment for multiple comparisons
     """
+    # Set seed for reproducibility
+    set_global_seed(STAT_CONFIG["random_seed"])
+
     print("Loading data for COVID lockdown analysis...")
     df = load_data(clean=False)
 
@@ -421,6 +435,132 @@ def analyze_covid_lockdown() -> dict:
     df = assign_period(df)
 
     results = {}
+
+    # Store analysis metadata
+    try:
+        data_version = DataVersion(PROJECT_ROOT / "data" / "crime_incidents_combined.parquet")
+        metadata = get_analysis_metadata(
+            data_version=data_version,
+            analysis_type="covid_lockdown",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
+    except Exception as e:
+        print(f"Warning: Could not create data version: {e}")
+        metadata = get_analysis_metadata(
+            analysis_type="covid_lockdown",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
+
+    # ========================================================================
+    # STATISTICAL TESTS: Multi-Period Comparison
+    # ========================================================================
+    print("Running multi-period comparison test...")
+
+    # Define 4 periods for comparison
+    # Pre-COVID: 2018-2019
+    # Lockdown onset: March-May 2020
+    # Post-lockdown: June-December 2020
+    # Recovery: 2021-2022
+
+    # Get monthly counts for each period
+    period_groups = {}
+    period_labels = []
+
+    # Pre-COVID baseline (2018-2019 monthly averages)
+    pre_data = df[(df["year"] >= 2018) & (df["year"] <= 2019)]
+    pre_monthly = pre_data.groupby(["year", "month"]).size().values
+    if len(pre_monthly) >= 2:
+        period_groups["Pre-COVID (2018-2019)"] = pre_monthly
+        period_labels.append("Pre-COVID (2018-2019)")
+
+    # Lockdown period (March-May 2020)
+    lockdown_data = df[(df["year"] == 2020) & (df["month"].isin([3, 4, 5]))]
+    lockdown_daily = lockdown_data.groupby(["year", "month", "day"]).size().values
+    if len(lockdown_daily) >= 2:
+        period_groups["Lockdown (Mar-May 2020)"] = lockdown_daily
+        period_labels.append("Lockdown (Mar-May 2020)")
+
+    # Post-lockdown 2020 (June-December 2020)
+    post_lockdown_2020 = df[(df["year"] == 2020) & (df["month"].isin(range(6, 13)))]
+    post_2020_monthly = post_lockdown_2020.groupby(["year", "month"]).size().values
+    if len(post_2020_monthly) >= 2:
+        period_groups["Post-Lockdown 2020"] = post_2020_monthly
+        period_labels.append("Post-Lockdown 2020")
+
+    # Recovery period (2021-2022)
+    recovery_data = df[(df["year"] >= 2021) & (df["year"] <= 2022)]
+    recovery_monthly = recovery_data.groupby(["year", "month"]).size().values
+    if len(recovery_monthly) >= 2:
+        period_groups["Recovery (2021-2022)"] = recovery_monthly
+        period_labels.append("Recovery (2021-2022)")
+
+    # Run multi-group comparison if we have enough groups
+    if len(period_groups) >= 2:
+        period_comparison = compare_multiple_samples(period_groups, alpha=STAT_CONFIG["alpha"])
+        results["period_comparison"] = period_comparison
+
+        sig = "**significant**" if period_comparison["is_significant"] else "not significant"
+        print(f"  Omnibus test: {period_comparison['omnibus_test']}, p={period_comparison['p_value']:.4f} ({sig})")
+
+        # Store post-hoc results
+        if period_comparison.get("post_hoc_results") is not None:
+            post_hoc_df = period_comparison["post_hoc_results"]
+            results["post_hoc_results"] = post_hoc_df.to_dict("records")
+            print(f"  Post-hoc comparisons: {len(post_hoc_df)} pairs")
+
+    # ========================================================================
+    # Bootstrap CI for monthly deviations from baseline
+    # ========================================================================
+    print("Calculating bootstrap 99% CI for monthly deviations...")
+
+    # Calculate baseline mean (2018-2019)
+    baseline_mean = pre_data.groupby(["year", "month"]).size().mean()
+
+    # Monthly deviations for 2020
+    monthly_deviations = {}
+    for month in range(1, 13):
+        month_data = df[(df["year"] == 2020) & (df["month"] == month)]
+        if len(month_data) > 0:
+            # Aggregate to daily level for more stable estimates
+            daily_counts = month_data.groupby(["year", "month", "day"]).size().values
+
+            if len(daily_counts) >= 10:
+                # Bootstrap CI for daily mean
+                try:
+                    ci_lower, ci_upper, point_est, se = bootstrap_ci(
+                        daily_counts,
+                        statistic='mean',
+                        confidence_level=STAT_CONFIG["confidence_level"],
+                        n_resamples=2000,  # Fewer resamples for speed
+                        random_state=STAT_CONFIG["random_seed"]
+                    )
+
+                    # Convert to monthly estimate (multiply by average days in month)
+                    days_in_month = 30.44  # Average days per month
+                    monthly_mean = point_est * days_in_month
+                    monthly_lower = ci_lower * days_in_month
+                    monthly_upper = ci_upper * days_in_month
+
+                    # Deviation from baseline
+                    deviation = monthly_mean - baseline_mean
+
+                    monthly_deviations[month] = {
+                        "monthly_mean": monthly_mean,
+                        "ci_lower": monthly_lower,
+                        "ci_upper": monthly_upper,
+                        "deviation_from_baseline": deviation,
+                        "pct_deviation": (deviation / baseline_mean * 100) if baseline_mean > 0 else 0
+                    }
+                except Exception as e:
+                    print(f"  Warning: Could not calculate CI for month {month}: {e}")
+
+    results["monthly_deviations_2020"] = monthly_deviations
 
     # ========================================================================
     # PRIMARY ANALYSIS: Time Series with Lockdown Annotation
@@ -515,9 +655,14 @@ def generate_markdown_report(results: dict) -> str:
         results: Dictionary from analyze_covid_lockdown()
 
     Returns:
-        Markdown string with analysis results.
+        Markdown string with analysis results including statistical tests.
     """
     md = []
+
+    # Analysis Configuration section
+    if "metadata" in results:
+        md.append(format_metadata_markdown(results["metadata"]))
+        md.append("\n")
 
     # ========================================================================
     # TITLE
@@ -537,19 +682,48 @@ def generate_markdown_report(results: dict) -> str:
     lockdown_change = summary["lockdown_change"]
     post_from_pre = summary["post_change_from_pre"]
 
-    # Verdict based on findings
-    if lockdown_change < -10:
-        verdict = "**Significant Decline** - Lockdown caused major crime reduction."
-    elif lockdown_change < -3:
-        verdict = "**Moderate Decline** - Lockdown measurably reduced crime."
-    elif lockdown_change < 3:
-        verdict = "**Minimal Impact** - Crime remained relatively stable."
+    # Verdict based on statistical test if available
+    if "period_comparison" in results:
+        pc = results["period_comparison"]
+        is_significant = pc["is_significant"]
+        if is_significant and lockdown_change < -10:
+            verdict = "**Significant Decline** - Lockdown caused major crime reduction (statistically significant)."
+        elif is_significant and lockdown_change < -3:
+            verdict = "**Moderate Decline** - Lockdown measurably reduced crime (statistically significant)."
+        elif is_significant and lockdown_change < 3:
+            verdict = "**Minimal Impact** - Crime remained relatively stable (statistically significant difference)."
+        elif is_significant:
+            verdict = "**Unexpected Increase** - Crime rose during lockdown period (statistically significant)."
+        else:
+            # Use original verdict logic
+            if lockdown_change < -10:
+                verdict = "**Significant Decline** - Lockdown caused major crime reduction."
+            elif lockdown_change < -3:
+                verdict = "**Moderate Decline** - Lockdown measurably reduced crime."
+            elif lockdown_change < 3:
+                verdict = "**Minimal Impact** - Crime remained relatively stable."
+            else:
+                verdict = "**Unexpected Increase** - Crime rose during lockdown period."
     else:
-        verdict = "**Unexpected Increase** - Crime rose during lockdown period."
+        # Use original verdict logic
+        if lockdown_change < -10:
+            verdict = "**Significant Decline** - Lockdown caused major crime reduction."
+        elif lockdown_change < -3:
+            verdict = "**Moderate Decline** - Lockdown measurably reduced crime."
+        elif lockdown_change < 3:
+            verdict = "**Minimal Impact** - Crime remained relatively stable."
+        else:
+            verdict = "**Unexpected Increase** - Crime rose during lockdown period."
 
     md.append(f"### Verdict: {verdict}\n\n")
 
     md.append("**Key Findings:**\n\n")
+
+    # Add omnibus test result if available
+    if "period_comparison" in results:
+        pc = results["period_comparison"]
+        sig = "**significant**" if pc["is_significant"] else "not significant"
+        md.append(f"- **Multi-Period Test**: {pc['omnibus_test']}, p = {pc['p_value']:.4f} ({sig} at alpha = {STAT_CONFIG['alpha']})\n")
 
     # Overall crime change
     md.append(f"- **Overall Crime Change**: ")
@@ -557,6 +731,26 @@ def generate_markdown_report(results: dict) -> str:
         md.append(f"Crime fell **{abs(lockdown_change):.1f}%** during lockdown (2020-2022) compared to pre-lockdown baseline.\n")
     else:
         md.append(f"Crime rose **{lockdown_change:.1f}%** during lockdown (2020-2022) compared to pre-lockdown baseline.\n")
+
+    # Add post-hoc results if available
+    if "post_hoc_results" in results:
+        md.append("- **Pairwise Comparisons** (Tukey HSD post-hoc):\n\n")
+        md.append("| Period A | Period B | Mean Diff | 99% CI | p-value | Significant |\n")
+        md.append("|----------|----------|-----------|--------|---------|------------|\n")
+
+        for comparison in results["post_hoc_results"]:
+            group_a = comparison["group_a"]
+            group_b = comparison["group_b"]
+            mean_diff = comparison["mean_diff"]
+            ci_lower = comparison["ci_lower"]
+            ci_upper = comparison["ci_upper"]
+            p_val = comparison["p_value"]
+            is_sig = p_val < STAT_CONFIG["alpha"]
+
+            sig_marker = "Yes" if is_sig else "No"
+            md.append(f"| {group_a} | {group_b} | {mean_diff:.1f} | [{ci_lower:.1f}, {ci_upper:.1f}] | {p_val:.4f} | {sig_marker} |\n")
+
+        md.append("\n")
 
     # March 2020 impact
     march_drop = summary.get("march_2020_drop", 0)
