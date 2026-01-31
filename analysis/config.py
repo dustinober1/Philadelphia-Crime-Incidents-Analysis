@@ -4,6 +4,7 @@ Configuration constants for Philadelphia Crime Incidents EDA.
 Defines paths, plot settings, analysis parameters, and statistical configuration.
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # =============================================================================
@@ -31,6 +32,99 @@ TEMP_DIR = PROJECT_ROOT / ".temp"
 # External data paths
 EXTERNAL_DATA_DIR = DATA_DIR / "external"
 EXTERNAL_CACHE_DIR = EXTERNAL_DATA_DIR / ".cache"
+
+# =============================================================================
+# EXTERNAL DATA CACHING CONFIGURATION
+# =============================================================================
+
+# Cache staleness settings for different data sources
+# Longer staleness = fewer API calls but potentially stale data
+CACHE_CONFIG = {
+    # Weather data: 7 days (historical data doesn't change often)
+    "weather_staleness": 7,  # days
+
+    # FRED economic data: 30 days (monthly updates, safe cache window)
+    "fred_staleness": 30,  # days
+
+    # Census ACS data: 365 days (retroactive data never changes)
+    "census_staleness": 365,  # days
+
+    # Cache backend type ('sqlite', 'memory', 'redis')
+    "cache_backend": "sqlite",
+
+    # Whether to use cache (set to False to force fresh API calls)
+    "cache_enabled": True,
+}
+
+
+def get_cache_staleness(source: str) -> timedelta:
+    """
+    Get cache staleness duration for a data source.
+
+    Args:
+        source: Data source name ('weather', 'fred', 'census').
+
+    Returns:
+        timedelta object for the staleness period.
+
+    Raises:
+        ValueError: If source name is not recognized.
+
+    Example:
+        >>> from analysis.config import get_cache_staleness
+        >>> delta = get_cache_staleness('weather')
+        >>> print(delta.days)
+        7
+    """
+    key = f"{source.lower()}_staleness"
+    if key not in CACHE_CONFIG:
+        raise ValueError(f"Unknown cache source: {source}. Use 'weather', 'fred', or 'census'.")
+    return timedelta(days=CACHE_CONFIG[key])
+
+
+# =============================================================================
+# TEMPORAL ALIGNMENT CONFIGURATION
+# =============================================================================#
+
+# Temporal resolution for different analysis types
+# Higher resolution = more data points but requires more aligned data sources
+TEMPORAL_CONFIG = {
+    # Daily analysis: crime + weather (no economic data due to monthly frequency)
+    "daily_start": "2006-01-01",
+    "daily_end": "2025-12-31",  # Exclude 2026 (incomplete)
+
+    # Monthly analysis: crime + weather + FRED unemployment
+    "monthly_start": "2006-01-01",
+    "monthly_end": "2025-12-31",
+
+    # Annual analysis: crime + weather + FRED + Census ACS
+    "annual_start": "2010",  # ACS 5-year estimates available from 2010
+    "annual_end": "2023",  # Most recent complete ACS data
+}
+
+
+def get_analysis_range(resolution: str = "monthly") -> tuple:
+    """
+    Get date range for analysis at specified temporal resolution.
+
+    Args:
+        resolution: Temporal resolution ('daily', 'monthly', 'annual').
+
+    Returns:
+        Tuple of (start_date, end_date) as strings.
+
+    Raises:
+        ValueError: If resolution not recognized.
+
+    Example:
+        >>> start, end = get_analysis_range('monthly')
+        >>> print(f'{start} to {end}')
+        '2006-01-01 to 2025-12-31'
+    """
+    if resolution not in TEMPORAL_CONFIG:
+        raise ValueError(f"Unknown resolution: {resolution}. Use 'daily', 'monthly', or 'annual'.")
+    return TEMPORAL_CONFIG[f"{resolution}_start"], TEMPORAL_CONFIG[f"{resolution}_end"]
+
 
 # =============================================================================
 # DATASET INFO
