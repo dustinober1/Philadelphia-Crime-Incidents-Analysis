@@ -109,7 +109,12 @@ class DataVersion:
         if "dispatch_date" in df.columns:
             # Try to convert to datetime
             try:
-                dates = pd.to_datetime(df["dispatch_date"], errors="coerce")
+                # Handle category dtype by converting to string first
+                dates_series = df["dispatch_date"]
+                if pd.api.types.is_categorical_dtype(dates_series):
+                    dates_series = dates_series.astype(str)
+
+                dates = pd.to_datetime(dates_series, errors="coerce")
                 valid_dates = dates.dropna()
                 if len(valid_dates) > 0:
                     min_date = valid_dates.min().strftime("%Y-%m-%d")
