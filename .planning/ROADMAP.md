@@ -12,7 +12,7 @@ This roadmap transforms an existing exploratory data analysis project (11 analys
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Statistical Rigor Layer** - Add significance testing, confidence intervals, effect sizes, and reproducibility infrastructure to all existing analyses
+- [x] **Phase 1: Statistical Rigor Layer** - Add significance testing, confidence intervals, effect sizes, and reproducibility infrastructure to all existing analyses (Completed: 2025-01-31)
 - [ ] **Phase 2: External Data Integration** - Ingest weather, economic, and policing data for correlation analysis
 - [ ] **Phase 3: Advanced Temporal Analysis** - Deep-dive into holiday effects, individual crime types, and shift-by-shift patterns
 - [ ] **Phase 4: Dashboard Foundation** - Build Streamlit dashboard with time, geographic, and crime type filters
@@ -40,12 +40,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 - Wave 3 (sequential): 01-04 effect sizes & FDR, 01-06 data quality audit
 
 Plans:
-- [ ] 01-01-PLAN.md — Create statistical testing utilities module (stats_utils.py with 10+ functions, STAT_CONFIG)
-- [ ] 01-05-PLAN.md — Implement reproducibility infrastructure (DataVersion, seed management, parameter docs)
-- [ ] 01-02-PLAN.md — Add significance testing and CIs to temporal analyses (temporal, summer_spike, covid_lockdown, safety_trend, robbery_timing)
-- [ ] 01-03-PLAN.md — Add significance testing and CIs to spatial analyses (spatial, red_zones, categorical, cross_analysis, weighted_severity)
-- [ ] 01-04-PLAN.md — Add effect sizes and FDR correction (Cliff's delta, odds ratios, verify all modules)
-- [ ] 01-06-PLAN.md — Generate comprehensive data quality audit report
+- [x] 01-01-PLAN.md — Create statistical testing utilities module (stats_utils.py with 10+ functions, STAT_CONFIG)
+- [x] 01-05-PLAN.md — Implement reproducibility infrastructure (DataVersion, seed management, parameter docs)
+- [x] 01-02-PLAN.md — Add significance testing and CIs to temporal analyses (temporal, summer_spike, covid_lockdown, safety_trend, robbery_timing)
+- [x] 01-03-PLAN.md — Add significance testing and CIs to spatial analyses (spatial, red_zones, categorical, cross_analysis, weighted_severity)
+- [x] 01-04-PLAN.md — Add effect sizes and FDR correction (Cliff's delta, odds ratios, verify all modules)
+- [x] 01-06-PLAN.md — Generate comprehensive data quality audit report
 
 ### Phase 2: External Data Integration
 **Goal**: Weather, economic, and policing data sources are ingested, cached, and aligned with crime data for correlation analysis
@@ -153,11 +153,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Statistical Rigor Layer | 0/6 | Not started | - |
+| 1. Statistical Rigor Layer | 6/6 | ✓ Complete | 2025-01-31 |
 | 2. External Data Integration | 0/8 | Not started | - |
 | 3. Advanced Temporal Analysis | 0/4 | Not started | - |
 | 4. Dashboard Foundation | 0/8 | Not started | - |
 | 5. Dashboard Cross-Filtering | 0/5 | Not started | - |
 | 6. Publication Outputs | 0/6 | Not started | - |
 
-**Overall Progress:** [░░░░░░░░░░] 0/37 plans (0%)
+**Overall Progress:** [██░░░░░░░░░] 6/37 plans (16%)

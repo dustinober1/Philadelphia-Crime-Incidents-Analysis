@@ -11,10 +11,10 @@ Requirements for initial release. Research-grade EDA with statistical rigor, ext
 
 Requirements for methodologically sound, reproducible analysis suitable for academic publication.
 
-- [ ] **STAT-01**: User can view p-values for all trend analyses, temporal comparisons, and spatial correlations
-- [ ] **STAT-02**: User can view confidence intervals (95% CI) on all visualizations showing point estimates
-- [ ] **STAT-03**: User can view effect sizes (Cohen's d, odds ratios, or standardized coefficients) to assess practical significance
-- [ ] **STAT-04**: User can view results with multiple testing correction (FDR, Benjamini-Hochberg) applied to omnibus comparisons
+- [x] **STAT-01**: User can view p-values for all trend analyses, temporal comparisons, and spatial correlations
+- [x] **STAT-02**: User can view confidence intervals (99% CI) on all visualizations showing point estimates
+- [x] **STAT-03**: User can view effect sizes (Cohen's d, odds ratios, or standardized coefficients) to assess practical significance
+- [x] **STAT-04**: User can view results with multiple testing correction (FDR, Benjamini-Hochberg) applied to omnibus comparisons
 
 ### Publication Infrastructure
 
@@ -22,8 +22,8 @@ Requirements for generating academic-quality outputs.
 
 - [ ] **PUB-01**: User can export figures in high-DPI formats (PNG, SVG, PDF at 300+ DPI)
 - [ ] **PUB-02**: User can export tables in LaTeX-ready format with publication styling
-- [ ] **PUB-03**: User can view comprehensive data quality audit documenting missing data, coordinate coverage, and limitations
-- [ ] **PUB-04**: User can reproduce all analyses through documented random seeds, version tracking, and parameter documentation
+- [x] **PUB-03**: User can view comprehensive data quality audit documenting missing data, coordinate coverage, and limitations
+- [x] **PUB-04**: User can reproduce all analyses through documented random seeds, version tracking, and parameter documentation
 
 ### External Correlation
 
@@ -76,14 +76,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STAT-01 | Phase 1 | Pending |
-| STAT-02 | Phase 1 | Pending |
-| STAT-03 | Phase 1 | Pending |
-| STAT-04 | Phase 1 | Pending |
+| STAT-01 | Phase 1 | Complete |
+| STAT-02 | Phase 1 | Complete |
+| STAT-03 | Phase 1 | Complete |
+| STAT-04 | Phase 1 | Complete |
 | PUB-01 | Phase 6 | Pending |
 | PUB-02 | Phase 6 | Pending |
-| PUB-03 | Phase 1 | Pending |
-| PUB-04 | Phase 1 | Pending |
+| PUB-03 | Phase 1 | Complete |
+| PUB-04 | Phase 1 | Complete |
 | CORR-01 | Phase 2 | Pending |
 | CORR-02 | Phase 2 | Pending |
 | CORR-03 | Phase 2 | Pending |
