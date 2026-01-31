@@ -13,6 +13,9 @@ Temporal alignment functions handle misalignment between data sources:
 - Weather: Daily (2006-2026)
 - FRED: Monthly (1990-present)
 - Census ACS: Annual 5-year estimates (2010-present)
+
+Detrending utilities prevent spurious correlations from long-term trend drift
+when analyzing relationships between crime and external variables.
 """
 
 from datetime import timedelta
@@ -21,6 +24,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import requests_cache
+
+# Import statsmodels for detrending
+try:
+    from statsmodels.tsa.tsatools import detrend as sm_detrend
+    STATSMODELS_AVAILABLE = True
+except ImportError:
+    STATSMODELS_AVAILABLE = None
 
 from analysis.config import (
     CACHE_CONFIG,
@@ -144,6 +154,142 @@ def get_cache_info() -> dict:
     }
 
     return info
+
+# =============================================================================
+# DETRENDING UTILITIES
+# =============================================================================
+
+
+def detrend_series(series: pd.Series, method: str = "linear") -> pd.Series:
+    """
+    Remove trend from a time series to avoid spurious correlations.
+
+    Spurious correlation occurs when two series with long-term trends
+    show high correlation even if no real relationship exists. Detrending
+    removes the trend component before correlation analysis.
+
+    Args:
+        series: Time series (pandas Series with datetime or numeric index).
+        method: Detrending method ('linear' or 'mean').
+                - 'linear': Remove best-fit line trend (statsmodels.detrend)
+                - 'mean': Subtract mean (simple centering)
+
+    Returns:
+        Detrended series with same index as input.
+
+    Note:
+        Crime and weather both show trends over 20 years. Correlating raw
+        data will produce significant results even if unrelated. Always
+        detrend before correlation analysis.
+
+    Example:
+        >>> crime_detrended = detrend_series(crime_series, 'linear')
+        >>> temp_detrended = detrend_series(temp_series, 'linear')
+        >>> correlation = crime_detrended.corr(temp_detrended)
+    """
+    if method == "linear":
+        if STATSMODELS_AVAILABLE is None:
+            raise ImportError(
+                "statsmodels is required for linear detrending. "
+                "Install with: pip install statsmodels"
+            )
+        # Use statsmodels to remove linear trend
+        detrended = sm_detrend(series.values, order=1)
+        return pd.Series(detrended, index=series.index, name=series.name)
+
+    elif method == "mean":
+        # Simple mean centering
+        return series - series.mean()
+
+    else:
+        raise ValueError(f"Unknown detrending method: {method}. Use 'linear' or 'mean'.")
+
+
+def first_difference(series: pd.Series) -> pd.Series:
+    """
+    Apply first-differencing to remove trend (alternative to detrending).
+
+    First-differencing computes the change between consecutive periods:
+        diff[t] = series[t] - series[t-1]
+
+    This removes any linear trend and makes the series stationary.
+
+    Args:
+        series: Time series (pandas Series).
+
+    Returns:
+        Differenced series (length = len(series) - 1).
+
+    Example:
+        >>> crime_diff = first_difference(crime_series)
+        >>> temp_diff = first_difference(temp_series)
+        >>> correlation = crime_diff.corr(temp_diff)
+    """
+    return series.diff().dropna()
+
+
+def cross_correlation(
+    series1: pd.Series,
+    series2: pd.Series,
+    max_lag: int = 7,
+) -> pd.DataFrame:
+    """
+    Compute cross-correlation between two series at multiple lags.
+
+    Tests whether series2 leads series1 (positive lags) or vice versa.
+
+    Args:
+        series1: First time series (e.g., crime count).
+        series2: Second time series (e.g., temperature).
+        max_lag: Maximum lag to test (in periods, same as series frequency).
+
+    Returns:
+        DataFrame with columns:
+            - lag: Lag period (negative = series2 leads, positive = series1 leads)
+            - correlation: Spearman correlation at each lag
+            - p_value: Statistical significance of correlation
+            - n: Sample size for each lag
+
+    Example:
+        >>> # Test if temperature today predicts crime tomorrow
+        >>> cc = cross_correlation(crime_series, temp_series, max_lag=7)
+        >>> print(cc[cc['lag'] == 1])  # Temp today -> Crime tomorrow
+    """
+    from scipy.stats import spearmanr
+
+    lags = range(-max_lag, max_lag + 1)
+    results = []
+
+    for lag in lags:
+        if lag < 0:
+            # series2 leads (shift series2 left)
+            s1 = series1.iloc[abs(lag):]
+            s2 = series2.iloc[:lag]
+        elif lag > 0:
+            # series1 leads (shift series1 left)
+            s1 = series1.iloc[:-lag]
+            s2 = series2.iloc[lag:]
+        else:
+            # No lag (contemporaneous)
+            s1 = series1
+            s2 = series2
+
+        # Align and compute correlation
+        min_len = min(len(s1), len(s2))
+        s1 = s1.iloc[:min_len]
+        s2 = s2.iloc[:min_len]
+
+        if min_len > 10:  # Need sufficient data
+            corr, p_value = spearmanr(s1, s2)
+            results.append({
+                'lag': lag,
+                'correlation': corr,
+                'p_value': p_value,
+                'n': min_len,
+            })
+
+    return pd.DataFrame(results)
+
 
 # =============================================================================
 # WEATHER DATA (Meteostat v2)
