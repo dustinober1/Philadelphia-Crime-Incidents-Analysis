@@ -3,6 +3,9 @@ Phase 2: Temporal Analysis
 
 Analyzes long-term trends, seasonal patterns, and cyclical patterns
 in the crime data over time (2006-2026).
+
+Enhanced with statistical significance testing, confidence intervals,
+and effect sizes for rigorous temporal analysis.
 """
 
 import pandas as pd
@@ -11,17 +14,28 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
 
-from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT
+from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT, STAT_CONFIG
 from analysis.utils import load_data, extract_temporal_features, image_to_base64, create_image_tag, format_number
+from analysis.stats_utils import mann_kendall_test, bootstrap_ci, compare_two_samples, apply_fdr_correction, chi_square_test
+from analysis.reproducibility import set_global_seed, get_analysis_metadata, format_metadata_markdown, DataVersion
 
 
 def analyze_temporal_patterns() -> dict:
     """
-    Run comprehensive temporal analysis.
+    Run comprehensive temporal analysis with statistical testing.
 
     Returns:
         Dictionary containing analysis results and base64-encoded plots.
+
+    Statistical tests performed:
+        - Mann-Kendall trend test for yearly crime counts
+        - Bootstrap 99% CI for annual mean
+        - Chi-square test for day-of-week uniformity
+        - Two-sample comparison for seasonal differences
     """
+    # Set seed for reproducibility
+    set_global_seed(STAT_CONFIG["random_seed"])
+
     print("Loading data for temporal analysis...")
     df = load_data(clean=False)
 
@@ -29,6 +43,27 @@ def analyze_temporal_patterns() -> dict:
     df = extract_temporal_features(df)
 
     results = {}
+
+    # Store analysis metadata
+    try:
+        data_version = DataVersion(PROJECT_ROOT / "data" / "crime_incidents_combined.parquet")
+        metadata = get_analysis_metadata(
+            data_version=data_version,
+            analysis_type="temporal_patterns",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
+    except Exception as e:
+        print(f"Warning: Could not create data version: {e}")
+        metadata = get_analysis_metadata(
+            analysis_type="temporal_patterns",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
 
     # ========================================================================
     # 1. Long-term Trend Analysis (Yearly)
@@ -38,7 +73,40 @@ def analyze_temporal_patterns() -> dict:
     yearly_counts = df.groupby("year").size().reset_index(name="count")
     results["yearly_counts"] = yearly_counts
 
-    # Yearly trend plot
+    # ========================================================================
+    # STATISTICAL TESTS: Yearly Trend Analysis
+    # ========================================================================
+    print("Running Mann-Kendall trend test...")
+
+    # Mann-Kendall trend test on complete years (exclude 2026)
+    complete_years_data = yearly_counts[yearly_counts["year"] < 2026]["count"].values
+    mk_result = mann_kendall_test(complete_years_data, alpha=STAT_CONFIG["alpha"])
+    results["trend_test"] = mk_result
+
+    print(f"  Trend: {mk_result['trend']}, tau={mk_result['tau']:.4f}, p={mk_result['p_value']:.4f}")
+
+    # Bootstrap 99% CI for annual mean
+    print("Calculating bootstrap 99% CI for annual mean...")
+    ci_lower, ci_upper, point_estimate, se = bootstrap_ci(
+        complete_years_data,
+        statistic='mean',
+        confidence_level=STAT_CONFIG["confidence_level"],
+        n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+        random_state=STAT_CONFIG["random_seed"]
+    )
+    results["yearly_mean_ci"] = {
+        "ci_lower": ci_lower,
+        "ci_upper": ci_upper,
+        "point_estimate": point_estimate,
+        "standard_error": se,
+        "confidence_level": STAT_CONFIG["confidence_level"]
+    }
+
+    print(f"  99% CI for annual mean: [{ci_lower:.0f}, {ci_upper:.0f}]")
+
+    # ========================================================================
+    # Yearly trend plot with 99% CI band
+    # ========================================================================
     fig, ax = plt.subplots(figsize=FIGURE_SIZES["wide"])
     years = yearly_counts["year"]
     counts = yearly_counts["count"]
@@ -53,6 +121,11 @@ def analyze_temporal_patterns() -> dict:
         p = np.poly1d(z)
         trend_x = np.linspace(years[complete_mask].min(), years[complete_mask].max(), 100)
         ax.plot(trend_x, p(trend_x), "r--", linewidth=2, label="Trend (2nd order)")
+
+        # Add 99% CI band for annual mean
+        ci_band = results["yearly_mean_ci"]
+        ax.axhspan(ci_band["ci_lower"], ci_band["ci_upper"], alpha=0.15, color="green",
+                   label=f'{int(ci_band["confidence_level"]*100)}% CI for Annual Mean')
 
     # Mark 2020 as COVID year
     ax.axvline(x=2020, color=COLORS["danger"], linestyle=":", linewidth=2, label="COVID-19 Pandemic")
@@ -138,6 +211,26 @@ def analyze_temporal_patterns() -> dict:
     plt.close(fig)
 
     # ========================================================================
+    # STATISTICAL TESTS: Seasonal Comparison
+    # ========================================================================
+    print("Running seasonal comparison test...")
+
+    # Summer vs Winter comparison
+    summer_data = df[df["season"] == "Summer"].groupby("year").size().values
+    winter_data = df[df["season"] == "Winter"].groupby("year").size().values
+
+    seasonal_comparison = compare_two_samples(summer_data, winter_data, alpha=STAT_CONFIG["alpha"])
+    # Add interpretation
+    from analysis.stats_utils import cohens_d, interpret_cohens_d
+    effect_size = cohens_d(summer_data, winter_data)
+    seasonal_comparison["cohens_d"] = effect_size
+    seasonal_comparison["effect_interpretation"] = interpret_cohens_d(effect_size)
+    results["seasonal_comparison"] = seasonal_comparison
+
+    print(f"  Summer vs Winter: {seasonal_comparison['test_name']}, p={seasonal_comparison['p_value']:.4f}")
+    print(f"  Cohen's d: {effect_size:.3f} ({seasonal_comparison['effect_interpretation']})")
+
+    # ========================================================================
     # 3. Day of Week Analysis
     # ========================================================================
     print("Analyzing day of week patterns...")
@@ -178,6 +271,26 @@ def analyze_temporal_patterns() -> dict:
     plt.tight_layout()
     results["weekend_comparison_plot"] = create_image_tag(image_to_base64(fig))
     plt.close(fig)
+
+    # ========================================================================
+    # STATISTICAL TESTS: Day of Week Uniformity
+    # ========================================================================
+    print("Running day-of-week uniformity test...")
+
+    # Chi-square test for uniform distribution across days
+    observed = dow_counts.values
+    expected = np.full(len(observed), observed.mean())  # Equal expected if uniform
+
+    # Create contingency table for chi-square test
+    contingency_table = np.array([observed, expected])
+    dow_test = chi_square_test(contingency_table)
+
+    # Override p-value significance threshold to match STAT_CONFIG
+    dow_test["is_significant"] = dow_test["p_value"] < STAT_CONFIG["alpha"]
+
+    results["dow_uniformity_test"] = dow_test
+
+    print(f"  Day-of-week uniformity: chi2={dow_test['statistic']:.2f}, p={dow_test['p_value']:.4f}")
 
     # ========================================================================
     # 4. Hour of Day Analysis
@@ -291,9 +404,14 @@ def generate_markdown_report(results: dict) -> str:
         results: Dictionary from analyze_temporal_patterns()
 
     Returns:
-        Markdown string with analysis results.
+        Markdown string with analysis results including statistical tests.
     """
     md = []
+
+    # Analysis Configuration section
+    if "metadata" in results:
+        md.append(format_metadata_markdown(results["metadata"]))
+        md.append("\n")
 
     md.append("### Temporal Analysis\n")
 
@@ -310,6 +428,18 @@ def generate_markdown_report(results: dict) -> str:
     md.append(f"**Lowest Year**: {low_year['year']} with {format_number(low_year['count'])} incidents\n")
     md.append(f"**2026 Note**: Data is incomplete (only through January 20)\n\n")
 
+    # Add statistical test results for yearly trend
+    if "trend_test" in results:
+        mk = results["trend_test"]
+        sig = "**significant**" if mk["is_significant"] else "not significant"
+        md.append(f"**Mann-Kendall Trend Test**: {mk['trend']} trend (tau = {mk['tau']:.3f}, p = {mk['p_value']:.4f}, {sig} at alpha = {STAT_CONFIG['alpha']})\n")
+
+    if "yearly_mean_ci" in results:
+        ci = results["yearly_mean_ci"]
+        md.append(f"**99% CI for Annual Mean**: [{format_number(int(ci['ci_lower']))}, {format_number(int(ci['ci_upper']))}]\n")
+
+    md.append("\n")
+
     md.append(results["yearly_trend_plot"])
     md.append("\n")
     md.append(results["yoy_change_plot"])
@@ -325,6 +455,13 @@ def generate_markdown_report(results: dict) -> str:
     md.append(f"**Peak Month**: {peak_month['month_name']} with {format_number(peak_month['count'])} incidents\n")
     md.append(f"**Lowest Month**: {low_month['month_name']} with {format_number(low_month['count'])} incidents\n\n")
 
+    # Add seasonal comparison test results
+    if "seasonal_comparison" in results:
+        sc = results["seasonal_comparison"]
+        sig = "**significant**" if sc["is_significant"] else "not significant"
+        md.append(f"**Summer vs Winter**: {sc['test_name']}, p = {sc['p_value']:.4f} ({sig} at alpha = {STAT_CONFIG['alpha']})\n")
+        md.append(f"**Effect Size**: Cohen's d = {sc['cohens_d']:.3f} ({sc['effect_interpretation']})\n\n")
+
     md.append(results["monthly_bar_plot"])
     md.append("\n")
     md.append(results["seasonal_plot"])
@@ -339,6 +476,16 @@ def generate_markdown_report(results: dict) -> str:
 
     md.append(f"**Peak Day**: {peak_dow} with {format_number(dow_counts[peak_dow])} incidents\n")
     md.append(f"**Lowest Day**: {low_dow} with {format_number(dow_counts[low_dow])} incidents\n\n")
+
+    # Add day-of-week uniformity test
+    if "dow_uniformity_test" in results:
+        dow_test = results["dow_uniformity_test"]
+        sig = "**significant**" if dow_test["is_significant"] else "not significant"
+        md.append(f"**Uniformity Test**: Chi-square = {dow_test['statistic']:.2f}, p = {dow_test['p_value']:.4f} ({sig} at alpha = {STAT_CONFIG['alpha']})\n")
+        if dow_test["is_significant"]:
+            md.append("**Interpretation**: Crimes are NOT uniformly distributed across days of the week\n\n")
+        else:
+            md.append("**Interpretation**: No evidence against uniform distribution across days\n\n")
 
     md.append(results["dow_plot"])
     md.append("\n")
