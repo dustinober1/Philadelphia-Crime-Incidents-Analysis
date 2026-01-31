@@ -24,6 +24,8 @@ from analysis.config import (
     DBSCAN_CONFIG,
     CLUSTERING_SAMPLE_SIZE,
     CRIME_TYPE_FOCUS,
+    STAT_CONFIG,
+    CRIME_DATA_PATH,
 )
 from analysis.utils import (
     load_data,
@@ -36,6 +38,8 @@ from analysis.utils import (
     create_image_tag,
     format_number,
 )
+from analysis.stats_utils import bootstrap_ci
+from analysis.reproducibility import set_global_seed, get_analysis_metadata, format_metadata_markdown, DataVersion
 
 
 # =============================================================================
@@ -348,6 +352,14 @@ def analyze_red_zones() -> dict:
     Returns:
         Dictionary containing analysis results, visualizations, and insights.
     """
+    # Set random seed for reproducibility
+    seed = set_global_seed(STAT_CONFIG["random_seed"])
+    print(f"Random seed set to: {seed}")
+
+    # Track data version for reproducibility
+    data_version = DataVersion(CRIME_DATA_PATH)
+    print(f"Data version: {data_version}")
+
     print("Loading data for red zones analysis...")
     df = load_data(clean=False)
 
@@ -363,6 +375,18 @@ def analyze_red_zones() -> dict:
     print(f"  Analyzing {format_number(len(df))} incidents from 2020-2025")
 
     results = {}
+
+    # Store analysis metadata
+    results["analysis_metadata"] = get_analysis_metadata(
+        data_version=data_version,
+        analysis_type="red_zones_analysis",
+        random_seed=seed,
+        confidence_level=STAT_CONFIG["confidence_level"],
+        alpha=STAT_CONFIG["alpha"],
+        dbscan_eps_meters=DBSCAN_CONFIG["eps_meters"],
+        dbscan_min_samples=DBSCAN_CONFIG["min_samples"],
+        sample_size=CLUSTERING_SAMPLE_SIZE,
+    )
 
     # ========================================================================
     # PRIMARY ANALYSIS: Overall Crime Hotspots
@@ -407,6 +431,121 @@ def analyze_red_zones() -> dict:
     centroids = calculate_cluster_centroids(clustered)
     cluster_stats = calculate_cluster_stats(clustered, centroids)
     results["cluster_stats"] = cluster_stats
+
+    # ========================================================================
+    # Cluster Statistical Analysis
+    # ========================================================================
+    print("Calculating cluster confidence intervals...")
+
+    # Bootstrap CI for cluster centroids (top clusters only)
+    cluster_cis = {}
+    top_clusters = cluster_stats.head(min(10, len(cluster_stats)))
+
+    for _, row in top_clusters.iterrows():
+        cluster_id = row["cluster_id"]
+        cluster_data = clustered[clustered["cluster"] == cluster_id]
+
+        if len(cluster_data) < 30:
+            continue
+
+        # Bootstrap CI for centroid longitude
+        lon_lower, lon_upper, lon_est, lon_se = bootstrap_ci(
+            cluster_data["point_x"].values,
+            statistic="mean",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_state=seed + int(cluster_id),
+        )
+
+        # Bootstrap CI for centroid latitude
+        lat_lower, lat_upper, lat_est, lat_se = bootstrap_ci(
+            cluster_data["point_y"].values,
+            statistic="mean",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_state=seed + int(cluster_id) + 1000,
+        )
+
+        # Bootstrap CI for crime count
+        count_data = np.ones(len(cluster_data))  # Each incident counts as 1
+        count_lower, count_upper, count_est, count_se = bootstrap_ci(
+            count_data,
+            statistic="sum",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_state=seed + int(cluster_id) + 2000,
+        )
+
+        cluster_cis[int(cluster_id)] = {
+            "centroid_lon_ci": (float(lon_lower), float(lon_upper)),
+            "centroid_lat_ci": (float(lat_lower), float(lat_upper)),
+            "count_ci": (int(count_lower * len(cluster_data)), int(count_upper * len(cluster_data))),
+            "count_se": float(count_se),
+            "n_points": len(cluster_data),
+        }
+
+    results["cluster_cis"] = cluster_cis
+
+    # Cluster significance test: compare cluster density to random spatial distribution
+    print("Testing cluster significance vs random distribution...")
+
+    # Calculate observed density (incidents per square km in hotspots)
+    total_clustered_incidents = clustered_count
+    # Approximate area: n_clusters * pi * r^2 (r = 150m)
+    cluster_area_km2 = n_clusters * np.pi * (DBSCAN_CONFIG["eps_meters"] / 1000) ** 2
+    observed_density = total_clustered_incidents / cluster_area_km2 if cluster_area_km2 > 0 else 0
+
+    # Generate random distribution for comparison
+    n_simulations = 999
+    random_densities = []
+
+    lon_min, lon_max = clustered["point_x"].min(), clustered["point_x"].max()
+    lat_min, lat_max = clustered["point_y"].min(), clustered["point_y"].max()
+
+    for i in range(n_simulations):
+        # Generate random points with same spatial extent
+        np.random.seed(seed + i)
+        random_lons = np.random.uniform(lon_min, lon_max, len(clustered))
+        random_lats = np.random.uniform(lat_min, lat_max, len(clustered))
+
+        # Apply DBSCAN-like counting (simple density estimate)
+        # Count points within eps radius of each point
+        from sklearn.neighbors import NearestNeighbors
+        coords = np.column_stack([random_lons, random_lats])
+        nbrs = NearestNeighbors(radius=DBSCAN_CONFIG["eps_meters"] / 6371000, metric="haversine").fit(np.radians(coords))
+        distances, indices = nbrs.radius_neighbors(np.radians(coords))
+
+        # Count "clustered" points (those with >= min_samples neighbors)
+        cluster_counts = np.array([len(idx) for idx in indices])
+        n_clustered_random = np.sum(cluster_counts >= DBSCAN_CONFIG["min_samples"])
+
+        # Density estimate
+        random_density = n_clustered_random / cluster_area_km2 if cluster_area_km2 > 0 else 0
+        random_densities.append(random_density)
+
+    random_densities = np.array(random_densities)
+
+    # Calculate p-value: proportion of random simulations >= observed
+    p_value = np.mean(random_densities >= observed_density)
+    is_significant = p_value < STAT_CONFIG["alpha"]
+
+    results["cluster_significance"] = {
+        "observed_density": float(observed_density),
+        "null_mean": float(np.mean(random_densities)),
+        "null_std": float(np.std(random_densities)),
+        "p_value": float(p_value),
+        "is_significant": is_significant,
+        "n_simulations": n_simulations,
+        "interpretation": (
+            f"Hotspots are significantly denser than random (p={p_value:.4f})"
+            if is_significant
+            else f"Hotspots are not significantly denser than random (p={p_value:.4f})"
+        ),
+    }
+
+    print(f"  Cluster density: {observed_density:.2f} incidents/km²")
+    print(f"  Random mean: {np.mean(random_densities):.2f} incidents/km²")
+    print(f"  P-value: {p_value:.6f}, Significant: {is_significant}")
 
     # District volume analysis
     district_stats = calculate_district_volume(df)
@@ -501,6 +640,11 @@ def generate_markdown_report(results: dict) -> str:
     """
     md = []
 
+    # Add analysis configuration section
+    if "analysis_metadata" in results:
+        md.append(format_metadata_markdown(results["analysis_metadata"]))
+        md.append("")
+
     # ========================================================================
     # TITLE
     # ========================================================================
@@ -585,6 +729,49 @@ def generate_markdown_report(results: dict) -> str:
 
     md.append(results["cluster_size_plot"])
     md.append("\n\n*Figure 1: Top 15 red zones by incident count within 500ft radius.*\n\n")
+
+    # Cluster Statistical Significance
+    if "cluster_significance" in results:
+        sig = results["cluster_significance"]
+        md.append("### Cluster Statistical Significance\n\n")
+        md.append("**Are hotspots significantly denser than random?**\n\n")
+        md.append(f"| Metric | Value |")
+        md.append(f"|--------|-------|")
+        md.append(f"| Observed Density | {sig['observed_density']:.2f} incidents/km² |")
+        md.append(f"| Random Mean (simulated) | {sig['null_mean']:.2f} incidents/km² |")
+        md.append(f"| Random Std Dev | {sig['null_std']:.2f} incidents/km² |")
+        md.append(f"| P-value | {sig['p_value']:.6f} |")
+        md.append(f"| Significant (alpha={STAT_CONFIG['alpha']}) | {'Yes' if sig['is_significant'] else 'No'} |")
+        md.append(f"| Simulations | {sig['n_simulations']:,} |")
+        md.append("")
+
+        md.append(f"**Interpretation:** {sig['interpretation']}\n\n")
+        if sig['is_significant']:
+            md.append("The detected hotspots are statistically significant - they represent ")
+            md.append("true crime concentrations rather than random spatial patterns.\n\n")
+        else:
+            md.append("The detected hotspots may be due to random spatial distribution.\n\n")
+
+    # Cluster Confidence Intervals
+    if "cluster_cis" in results and len(results["cluster_cis"]) > 0:
+        md.append("### Cluster Confidence Intervals (99% CI)\n\n")
+        md.append("**Top Hotspots with Confidence Intervals:**\n\n")
+        md.append("| Zone ID | Centroid Lon 99% CI | Centroid Lat 99% CI | Count 99% CI | Points |")
+        md.append("|---------|-------------------|-------------------|-------------|--------|")
+
+        cluster_stats = results["cluster_stats"]
+        for _, row in cluster_stats.head(10).iterrows():
+            cluster_id = int(row["cluster_id"])
+            if cluster_id in results["cluster_cis"]:
+                ci_data = results["cluster_cis"][cluster_id]
+                lon_ci = f"({ci_data['centroid_lon_ci'][0]:.6f}, {ci_data['centroid_lon_ci'][1]:.6f})"
+                lat_ci = f"({ci_data['centroid_lat_ci'][0]:.6f}, {ci_data['centroid_lat_ci'][1]:.6f})"
+                count_ci = f"({ci_data['count_ci'][0]:,}, {ci_data['count_ci'][1]:,})"
+                md.append(f"| Zone {cluster_id} | {lon_ci} | {lat_ci} | {count_ci} | {ci_data['n_points']:,} |")
+
+        md.append("")
+        md.append("*Confidence intervals indicate uncertainty in cluster centroid locations and counts. ")
+        md.append("Wider intervals indicate more dispersed hotspots.*\n\n")
 
     # ========================================================================
     # DISTRICT VS DENSITY ANALYSIS
