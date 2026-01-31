@@ -14,8 +14,17 @@ This is a Python-based exploratory data analysis (EDA) project for Philadelphia 
 # Activate virtual environment
 source .venv/bin/activate
 
-# Install dependencies
-pip install -r requirements.txt  # or: pip install pandas numpy matplotlib seaborn folium scikit-learn
+# Install dependencies (requirements.txt not managed - install manually)
+pip install pandas numpy matplotlib seaborn folium scikit-learn scipy pyarrow
+
+# External data sources for correlation analysis
+pip install meteostat requests census  # Weather, US Census data
+
+# Statistical analysis libraries (for rigor layer)
+pip install statsmodels  # Econometric analysis, statistical tests
+
+# Dashboard libraries (Streamlit chosen over Dash)
+pip install streamlit plotly kaleido  # Dashboard framework, interactive plots, high-DPI export
 
 # Run individual analysis modules
 python analysis/data_quality.py
@@ -132,6 +141,52 @@ Edit `analysis/config.py` for:
 - DBSCAN parameters (`DBSCAN_CONFIG`)
 - Crime severity weights (`CRIME_SEVERITY_WEIGHTS` in `weighted_severity_analysis.py`)
 
+## GSD Workflow
+
+This project uses GSD (Get Shit Done) workflow for project management:
+- `.planning/PROJECT.md` - Project context, requirements, constraints, decisions
+- `.planning/REQUIREMENTS.md` - v1/v2 requirements with traceability to phases
+- `.planning/ROADMAP.md` - Phase structure with goals, requirements, success criteria
+- `.planning/STATE.md` - Project state and current phase
+- `.planning/config.json` - Workflow settings (mode: yolo, depth: comprehensive, model_profile: quality)
+- `.planning/research/` - Domain research (STACK, FEATURES, ARCHITECTURE, PITFALLS, SUMMARY)
+- `.planning/codebase/` - Codebase documentation (7 files: STACK, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, INTEGRATIONS, CONCERNS)
+- Use `/gsd:new-project` to initialize a new project phase
+- Use `/gsd:map-codebase` to refresh codebase documentation
+- Use `/gsd:plan-phase N` to create execution plans for a phase
+
+## Research Roadmap (6 Phases)
+
+1. **Statistical Rigor Layer** - Add significance testing (p-values), confidence intervals (95% CI), effect sizes (Cohen's d), FDR correction
+2. **External Data Integration** - Weather (Meteostat), Economic (Census/FRED APIs), Policing data correlation
+3. **Advanced Temporal Analysis** - Holiday effects, individual crime types (homicide, burglary, theft, assault), shift patterns
+4. **Dashboard Foundation** - Streamlit app with time/geographic/crime-type filters
+5. **Dashboard Cross-Filtering** - Linked views with cross-filtering interactions
+6. **Publication Outputs** - High-DPI export (PNG/SVG/PDF 300+ DPI), LaTeX table export
+
+## Dashboard Framework
+
+**Chosen: Streamlit** (over Dash) - pure Python, faster prototyping, excellent for single-use research dashboards
+- Performance: Must use aggressive caching for 3.5M records (target: <5s load, <3s updates)
+- State persistence: URL encoding for shareable filtered views
+
+## Statistical Rigor Requirements
+
+This is an **academic/research** project - methodological rigor is paramount:
+- **Significance testing**: All trends, comparisons, correlations must report p-values
+- **Confidence intervals**: 95% CI on all point estimates in visualizations
+- **Effect sizes**: Cohen's d, odds ratios, or standardized coefficients
+- **Multiple testing correction**: FDR (Benjamini-Hochberg) for omnibus comparisons
+- **Reproducibility**: Random seeds, version tracking, parameter documentation
+
+## Critical Pitfalls
+
+1. **Spurious correlations**: 20-year trends will correlate due to shared drift - **detrend first**
+2. **MAUP** (Modifiable Areal Unit Problem): Results change with boundary choices - use **multi-scale analysis**
+3. **Missing coordinate bias**: ~25% missing data is **non-random** - profile missingness before spatial analysis
+4. **Dashboard performance**: 3.5M records will kill Streamlit without **aggressive caching from the start**
+5. **Causal claims**: EDA shows correlation - state "associated with" not "causes"
+
 ## Report Output
 
 Reports are saved to `reports/` as markdown files with:
@@ -143,7 +198,9 @@ Reports are saved to `reports/` as markdown files with:
 
 1. **Missing coordinates**: ~25% of records lack valid coordinates. Always filter with `valid_coord` flag.
 2. **2026 data**: Incomplete year (only through January 20, 2026) - exclude from trend analysis.
-3. **Large dataset**: Use sampling (`df.sample()`) for visualizations to avoid memory issues.
-4. **Matplotlib backend**: Set `os.environ["MPLBACKEND"] = "Agg"` for non-interactive plotting.
-5. **District values**: May be strings or floats; convert with `int(float(value))` before use.
-6. **UCR codes**: Stored as floats in source; convert to int for lookups.
+3. **Python version**: Uses Python 3.14.2 in `.venv/` - ensure compatibility when adding new dependencies
+4. **Large dataset**: Use sampling (`df.sample()`) for visualizations to avoid memory issues.
+5. **Matplotlib backend**: Set `os.environ["MPLBACKEND"] = "Agg"` for non-interactive plotting.
+6. **District values**: May be strings or floats; convert with `int(float(value))` before use.
+7. **UCR codes**: Stored as floats in source; convert to int for lookups.
+8. **No requirements.txt**: Dependencies are in `.venv/` but not pinned to a requirements file.
