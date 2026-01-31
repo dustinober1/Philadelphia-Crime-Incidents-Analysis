@@ -29,9 +29,9 @@ Requirements for generating academic-quality outputs.
 
 Requirements for integrating external data sources to enable explanatory analysis beyond descriptive patterns.
 
-- [ ] **CORR-01**: User can view correlation analysis between crime incidence and weather variables (temperature, precipitation) with appropriate detrending
-- [ ] **CORR-02**: User can view correlation analysis between crime patterns and economic indicators (unemployment, poverty rates, income) by district/area
-- [ ] **CORR-03**: User can view correlation analysis between crime outcomes and policing data (resource allocation, arrest rates) if data is available
+- [x] **CORR-01**: User can view correlation analysis between crime incidence and weather variables (temperature, precipitation) with appropriate detrending
+- [x] **CORR-02**: User can view correlation analysis between crime patterns and economic indicators (unemployment, poverty rates, income) by district/area
+- [x] **CORR-03**: User can view correlation analysis between crime outcomes and policing data (resource allocation, arrest rates) if data is available
 
 ### Temporal & Crime Types
 

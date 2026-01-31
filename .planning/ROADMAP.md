@@ -13,7 +13,7 @@ This roadmap transforms an existing exploratory data analysis project (11 analys
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Statistical Rigor Layer** - Add significance testing, confidence intervals, effect sizes, and reproducibility infrastructure to all existing analyses (Completed: 2025-01-31)
-- [ ] **Phase 2: External Data Integration** - Ingest weather, economic, and policing data for correlation analysis
+- [x] **Phase 2: External Data Integration** - Ingest weather, economic, and policing data for correlation analysis (Completed: 2025-01-31)
 - [ ] **Phase 3: Advanced Temporal Analysis** - Deep-dive into holiday effects, individual crime types, and shift-by-shift patterns
 - [ ] **Phase 4: Dashboard Foundation** - Build Streamlit dashboard with time, geographic, and crime type filters
 - [ ] **Phase 5: Dashboard Cross-Filtering** - Implement linked views with cross-filtering interactions
@@ -40,12 +40,14 @@ Decimal phases appear between their surrounding integers in numeric order.
 - Wave 3 (sequential): 01-04 effect sizes & FDR, 01-06 data quality audit
 
 Plans:
-- [x] 01-01-PLAN.md — Create statistical testing utilities module (stats_utils.py with 10+ functions, STAT_CONFIG)
-- [x] 01-05-PLAN.md — Implement reproducibility infrastructure (DataVersion, seed management, parameter docs)
-- [x] 01-02-PLAN.md — Add significance testing and CIs to temporal analyses (temporal, summer_spike, covid_lockdown, safety_trend, robbery_timing)
-- [x] 01-03-PLAN.md — Add significance testing and CIs to spatial analyses (spatial, red_zones, categorical, cross_analysis, weighted_severity)
-- [x] 01-04-PLAN.md — Add effect sizes and FDR correction (Cliff's delta, odds ratios, verify all modules)
-- [x] 01-06-PLAN.md — Generate comprehensive data quality audit report
+- [x] 02-01-PLAN.md — Ingest and cache weather data (Meteostat API)
+- [x] 02-02-PLAN.md — Ingest and cache economic data (FRED, Census APIs)
+- [x] 02-03-PLAN.md — Implement caching infrastructure (requests-cache)
+- [x] 02-04-PLAN.md — Implement temporal alignment and detrending utilities
+- [x] 02-05-PLAN.md — Compute crime-weather correlations with statistical safeguards
+- [x] 02-06-PLAN.md — Compute crime-economic correlations with statistical safeguards
+- [x] 02-07-PLAN.md — Assess policing data availability
+- [x] 02-08-PLAN.md — Generate correlation analysis report
 
 ### Phase 2: External Data Integration
 **Goal**: Weather, economic, and policing data sources are ingested, cached, and aligned with crime data for correlation analysis
@@ -57,17 +59,23 @@ Plans:
   3. User can view crime-policing correlation analysis (resource allocation, arrest rates) if data is available, with clear documentation of data limitations
   4. All external data sources are cached locally with staleness checks to avoid API rate limits
   5. Temporal misalignment issues are documented and handled (daily weather vs monthly economic vs daily crime)
-**Plans**: TBD
+**Plans**: 8 plans in 4 waves
+
+**Wave Structure:**
+- Wave 1 (parallel): 02-01 weather ingestion (Meteostat), 02-02 economic ingestion (FRED, Census)
+- Wave 2 (parallel): 02-03 caching infrastructure, 02-04 temporal alignment
+- Wave 3 (parallel): 02-05 crime-weather correlations, 02-06 crime-economic correlations
+- Wave 4 (parallel): 02-07 policing data assessment, 02-08 correlation report generator
 
 Plans:
-- [ ] 02-01: Ingest and cache weather data (Meteostat API)
-- [ ] 02-02: Ingest and cache economic data (U.S. Census API, FRED API)
-- [ ] 02-03: Ingest and cache policing data if available
-- [ ] 02-04: Implement temporal alignment and detrending utilities
-- [ ] 02-05: Compute crime-weather correlations with statistical safeguards
-- [ ] 02-06: Compute crime-economic correlations with statistical safeguards
-- [ ] 02-07: Compute crime-policing correlations if data available
-- [ ] 02-08: Generate correlation analysis report
+- [ ] 02-01-PLAN.md — Ingest and cache weather data (Meteostat API, fetch_weather_data, load_cached_weather)
+- [ ] 02-02-PLAN.md — Ingest and cache economic data (FRED API, Census API, fetch_fred_data, fetch_census_data)
+- [ ] 02-03-PLAN.md — Implement caching infrastructure (requests-cache, CACHE_CONFIG, get_cached_session)
+- [ ] 02-04-PLAN.md — Implement temporal alignment and detrending utilities (align_temporal_data, detrend_series)
+- [ ] 02-05-PLAN.md — Compute crime-weather correlations with statistical safeguards (analyze_weather_crime_correlation, lagged correlations)
+- [ ] 02-06-PLAN.md — Compute crime-economic correlations with statistical safeguards (analyze_economic_crime_correlation, bootstrap CI)
+- [ ] 02-07-PLAN.md — Assess policing data availability (assess_policing_data_availability, POLICING_DATA_CONFIG)
+- [ ] 02-08-PLAN.md — Generate correlation analysis report (12_report_correlations.py)
 
 ### Phase 3: Advanced Temporal Analysis
 **Goal**: Granular temporal patterns (holiday effects, individual crime types, shift-by-shift) are analyzed with statistical rigor
@@ -154,10 +162,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Statistical Rigor Layer | 6/6 | ✓ Complete | 2025-01-31 |
-| 2. External Data Integration | 0/8 | Not started | - |
+| 2. External Data Integration | 8/8 | ✓ Complete | 2025-01-31 |
 | 3. Advanced Temporal Analysis | 0/4 | Not started | - |
 | 4. Dashboard Foundation | 0/8 | Not started | - |
 | 5. Dashboard Cross-Filtering | 0/5 | Not started | - |
 | 6. Publication Outputs | 0/6 | Not started | - |
 
-**Overall Progress:** [██░░░░░░░░░] 6/37 plans (16%)
+**Overall Progress:** [████░░░░░░░] 14/37 plans (38%)
