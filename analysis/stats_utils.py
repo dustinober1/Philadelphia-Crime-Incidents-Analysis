@@ -10,6 +10,9 @@ Functions:
     compare_two_samples: Two-sample comparison with automatic test selection
     compare_multiple_samples: Multi-group comparison (ANOVA/Kruskal-Wallis)
     cohens_d: Cohen's d effect size for two samples
+    cliffs_delta: Cliff's Delta non-parametric effect size
+    odds_ratio: Odds ratio for proportion comparisons
+    standardized_coefficient: Standardized regression coefficient
     bootstrap_ci: Bootstrap confidence intervals
     apply_fdr_correction: False Discovery Rate correction
     tukey_hsd: Tukey HSD post-hoc test
@@ -407,6 +410,91 @@ def interpret_cohens_d(d: float) -> str:
         return "medium effect"
     else:
         return "large effect"
+
+
+def cliffs_delta(x: np.ndarray, y: np.ndarray) -> Tuple[float, str]:
+    """
+    Calculate Cliff's Delta non-parametric effect size.
+
+    Cliff's Delta measures the ordinal dominance between two samples.
+    More robust than Cohen's d for non-normal data or ordinal data.
+
+    The statistic ranges from -1 to +1:
+    - delta = +1: All values in x are greater than all values in y
+    - delta = 0: No dominance (equal distributions)
+    - delta = -1: All values in y are greater than all values in x
+
+    Interpretation (Romano et al., 2006):
+    - negligible: |d| < 0.147
+    - small: 0.147 <= |d| < 0.33
+    - medium: 0.33 <= |d| < 0.474
+    - large: |d| >= 0.474
+
+    Args:
+        x: First sample data.
+        y: Second sample data.
+
+    Returns:
+        Tuple of (effect_size, interpretation) where:
+        - effect_size: Cliff's Delta value (-1 to +1)
+        - interpretation: String description of effect size magnitude
+
+    Raises:
+        ValueError: If either sample has fewer than 2 observations.
+
+    Example:
+        >>> import numpy as np
+        >>> x = np.array([1, 2, 3, 4, 5])
+        >>> y = np.array([2, 3, 4, 5, 6])
+        >>> delta, interp = cliffs_delta(x, y)
+        >>> print(f"Cliff's Delta: {delta:.3f} ({interp})")
+
+    References:
+        - Cliff, N. (1993). Dominance statistics: Ordinal analyses to
+          answer ordinal questions.
+        - Romano, J., Kromrey, J. D., Coraggio, J., & Skowronek, J. (2006).
+          Appropriate statistics for ordinal level data.
+    """
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    x = x[~np.isnan(x)]
+    y = y[~np.isnan(y)]
+
+    nx = len(x)
+    ny = len(y)
+
+    if nx < 2:
+        raise ValueError(f"Sample x requires at least 2 observations. Got {nx}.")
+    if ny < 2:
+        raise ValueError(f"Sample y requires at least 2 observations. Got {ny}.")
+
+    # Calculate Cliff's Delta
+    # Delta = (P(x > y) - P(x < y)) where P is proportion
+    # Using vectorized operations for efficiency
+    # Create matrices of comparisons
+    x_matrix = x.reshape(-1, 1)  # Column vector
+    y_matrix = y.reshape(1, -1)  # Row vector
+
+    # Count dominance: where x > y and where x < y
+    greater = np.sum(x_matrix > y_matrix)
+    less = np.sum(x_matrix < y_matrix)
+
+    # Cliff's Delta
+    delta = (greater - less) / (nx * ny)
+
+    # Interpretation based on Romano et al. (2006)
+    abs_delta = abs(delta)
+    if abs_delta < 0.147:
+        interpretation = "negligible"
+    elif abs_delta < 0.33:
+        interpretation = "small"
+    elif abs_delta < 0.474:
+        interpretation = "medium"
+    else:
+        interpretation = "large"
+
+    return float(delta), interpretation
 
 
 # =============================================================================
