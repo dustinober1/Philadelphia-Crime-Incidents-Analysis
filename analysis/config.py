@@ -28,6 +28,10 @@ ANALYSIS_DIR = PROJECT_ROOT / "analysis"
 REPORTS_DIR = PROJECT_ROOT / "reports"
 TEMP_DIR = PROJECT_ROOT / ".temp"
 
+# External data paths
+EXTERNAL_DATA_DIR = DATA_DIR / "external"
+EXTERNAL_CACHE_DIR = EXTERNAL_DATA_DIR / ".cache"
+
 # =============================================================================
 # DATASET INFO
 # =============================================================================
