@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 1 of 6 (Statistical Rigor Layer)
-Plan: 3 of 6 in current phase
+Plan: 4 of 6 in current phase
 Status: Plan completed
-Last activity: 2026-01-31 — Completed plan 01-03 (Spatial and Categorical Statistical Tests)
+Last activity: 2026-01-31 — Completed plan 01-04 (Effect Size Calculations)
 
-Progress: [████░░░░] 50%
+Progress: [██████░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: ~10 min
+- Total plans completed: 4
+- Average duration: ~8 min
 - Total execution time: 0.5 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1     | 3/6   | -     | ~10 min  |
+| 1     | 4/6   | -     | ~8 min   |
 
 **Recent Trend:**
-- Last 3 plans: 01-01, 01-05, 01-02, 01-03
-- Trend: Wave 2 in progress - 01-03 (spatial/categorical) complete
+- Last 4 plans: 01-01, 01-05, 01-02, 01-03, 01-04
+- Trend: Wave 3 in progress - 01-04 (effect sizes) complete
 
 *Updated after each plan completion*
 
@@ -70,6 +70,12 @@ Recent decisions affecting current work:
 - High-severity districts identified: D24, D25, D22, D35, D12, D14, D39
 - FDR correction applied to all cross-tabulation tests
 
+**From 01-04 (Effect Size Calculations):**
+- Cliff's delta thresholds from Romano et al. (2006): negligible < 0.147, small < 0.33, medium < 0.474, large >= 0.474
+- Cramer's V interpretation varies by table size (stricter for 2x2, more lenient for larger tables)
+- Odds ratio uses Woolf method for CI with continuity correction for zero cells
+- All effect sizes include interpretation strings for readability in reports
+
 **From 01-CONTEXT (Implementation Decisions):**
 - Significance testing: SciPy for simple tests, statsmodels for econometric analysis
 - Non-parametric tests preferred (Mann-Kendall for trends, Mann-Whitney U for comparisons)
@@ -90,6 +96,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-31 Wave 2 plan 01-03 execution
-Stopped at: Completed 01-03-PLAN.md (Spatial and Categorical Statistical Tests)
+Last session: 2026-01-31 Wave 3 plan 01-04 execution
+Stopped at: Completed 01-04-PLAN.md (Effect Size Calculations)
 Resume file: None
