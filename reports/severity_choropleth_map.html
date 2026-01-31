@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_5b7dc512ac60411a4d4cb32b2f9c2f54 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+    <div style="position: fixed;
+                bottom: 50px; left: 50px; width: 250px; height: auto;
+                border:2px solid grey; z-index:9999; font-size:14px;
+                background-color:white; padding: 10px">
+    <p><b>Severity Legend (Normalized Score)</b></p>
+    <p><i class="fa fa-circle" style="color:darkred"></i> Very High Risk (≥ 5.0)</p>
+    <p><i class="fa fa-circle" style="color:red"></i> High Risk (3.0-4.9)</p>
+    <p><i class="fa fa-circle" style="color:orange"></i> Moderate Risk (2.0-2.9)</p>
+    <p><i class="fa fa-circle" style="color:yellow"></i> Low Risk (1.0-1.9)</p>
+    <p><i class="fa fa-circle" style="color:lightgreen"></i> Minimal Risk (< 1.0)</p>
+    </div>
+    
+    
+            <div class="folium-map" id="map_5b7dc512ac60411a4d4cb32b2f9c2f54" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_5b7dc512ac60411a4d4cb32b2f9c2f54 = L.map(
+                "map_5b7dc512ac60411a4d4cb32b2f9c2f54",
+                {
+                    center: [39.9526, -75.1652],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 12,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_ae799fd5a4ce2c9a20d9078e8457014b = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_ae799fd5a4ce2c9a20d9078e8457014b.addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+            var circle_marker_7f0bf649f700cbf56f43ae2349fd8c25 = L.circleMarker(
+                [39.98, -75.24],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_22990ca25b23cb7d73109d4d845e8a29 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_cc77d78c2d7bf467dfe2dc1e59a25927 = $(`<div id="html_cc77d78c2d7bf467dfe2dc1e59a25927" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 24</strong><br>                 Severity Score: 939181<br>                 Avg. Severity: 3.77<br>                 Normalized Severity: 3.77<br>                 Total Incidents: 249408<br>                 High Severity (%): 23.2%<br>                 Low Severity (%): 56.7%             </div>             </div>`)[0];
+                popup_22990ca25b23cb7d73109d4d845e8a29.setContent(html_cc77d78c2d7bf467dfe2dc1e59a25927);
+            
+        
+
+        circle_marker_7f0bf649f700cbf56f43ae2349fd8c25.bindPopup(popup_22990ca25b23cb7d73109d4d845e8a29)
+        ;
+
+        
+    
+    
+            var circle_marker_5015ce19990a988bd35edf044a988f2a = L.circleMarker(
+                [39.985, -75.1652],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_88b5345cddb35013daa77935edd28ad3 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_c3cc5cae4f7199da11071678d24b431d = $(`<div id="html_c3cc5cae4f7199da11071678d24b431d" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 15</strong><br>                 Severity Score: 939181<br>                 Avg. Severity: 3.39<br>                 Normalized Severity: 3.39<br>                 Total Incidents: 277255<br>                 High Severity (%): 14.4%<br>                 Low Severity (%): 58.7%             </div>             </div>`)[0];
+                popup_88b5345cddb35013daa77935edd28ad3.setContent(html_c3cc5cae4f7199da11071678d24b431d);
+            
+        
+
+        circle_marker_5015ce19990a988bd35edf044a988f2a.bindPopup(popup_88b5345cddb35013daa77935edd28ad3)
+        ;
+
+        
+    
+    
+            var circle_marker_12ebbb85c34df4424272f64853690fd3 = L.circleMarker(
+                [40.03, -75.13],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_9a79b6a35cd901a6db620ffa5db24b5d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5742a0a94b354fd7983f1284a1709aea = $(`<div id="html_5742a0a94b354fd7983f1284a1709aea" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 25</strong><br>                 Severity Score: 889065<br>                 Avg. Severity: 3.99<br>                 Normalized Severity: 3.99<br>                 Total Incidents: 222837<br>                 High Severity (%): 23.8%<br>                 Low Severity (%): 49.9%             </div>             </div>`)[0];
+                popup_9a79b6a35cd901a6db620ffa5db24b5d.setContent(html_5742a0a94b354fd7983f1284a1709aea);
+            
+        
+
+        circle_marker_12ebbb85c34df4424272f64853690fd3.bindPopup(popup_9a79b6a35cd901a6db620ffa5db24b5d)
+        ;
+
+        
+    
+    
+            var circle_marker_7bf3a0e32192d3199e61b8aa685a762e = L.circleMarker(
+                [39.96, -75.22],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_aaccca7b58580f5cc64c83813f466531 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e2058264ce5587a6ffd3316c175c102d = $(`<div id="html_e2058264ce5587a6ffd3316c175c102d" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 22</strong><br>                 Severity Score: 816920<br>                 Avg. Severity: 3.73<br>                 Normalized Severity: 3.73<br>                 Total Incidents: 218812<br>                 High Severity (%): 18.7%<br>                 Low Severity (%): 53.3%             </div>             </div>`)[0];
+                popup_aaccca7b58580f5cc64c83813f466531.setContent(html_e2058264ce5587a6ffd3316c175c102d);
+            
+        
+
+        circle_marker_7bf3a0e32192d3199e61b8aa685a762e.bindPopup(popup_aaccca7b58580f5cc64c83813f466531)
+        ;
+
+        
+    
+    
+            var circle_marker_a0aaff395b23fc75be200ed102915922 = L.circleMarker(
+                [39.9526, -75.1652],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_e88b180f813c11e5570a9b5c126b7b65 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_315456d766858de103c404de46dc7d57 = $(`<div id="html_315456d766858de103c404de46dc7d57" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 35</strong><br>                 Severity Score: 749586<br>                 Avg. Severity: 3.66<br>                 Normalized Severity: 3.66<br>                 Total Incidents: 204706<br>                 High Severity (%): 18.1%<br>                 Low Severity (%): 53.7%             </div>             </div>`)[0];
+                popup_e88b180f813c11e5570a9b5c126b7b65.setContent(html_315456d766858de103c404de46dc7d57);
+            
+        
+
+        circle_marker_a0aaff395b23fc75be200ed102915922.bindPopup(popup_e88b180f813c11e5570a9b5c126b7b65)
+        ;
+
+        
+    
+    
+            var circle_marker_d9f05b02f80943e74008037d0c03575d = L.circleMarker(
+                [39.9526, -75.1652],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_3b2cac861ca5305d199a8123018225ea = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_53d0feb73d78fb6e8fe9d952cd5f7827 = $(`<div id="html_53d0feb73d78fb6e8fe9d952cd5f7827" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 19</strong><br>                 Severity Score: 744510<br>                 Avg. Severity: 3.34<br>                 Normalized Severity: 3.34<br>                 Total Incidents: 222868<br>                 High Severity (%): 15.8%<br>                 Low Severity (%): 59.2%             </div>             </div>`)[0];
+                popup_3b2cac861ca5305d199a8123018225ea.setContent(html_53d0feb73d78fb6e8fe9d952cd5f7827);
+            
+        
+
+        circle_marker_d9f05b02f80943e74008037d0c03575d.bindPopup(popup_3b2cac861ca5305d199a8123018225ea)
+        ;
+
+        
+    
+    
+            var circle_marker_66e523e7d2f58e8656c2c94234ad95c8 = L.circleMarker(
+                [39.91, -75.13],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_da619a3407fa7dc255c5d7c0178e1083 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_ee2e409e984694fbae8edf71159bff8e = $(`<div id="html_ee2e409e984694fbae8edf71159bff8e" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 12</strong><br>                 Severity Score: 686346<br>                 Avg. Severity: 3.44<br>                 Normalized Severity: 3.44<br>                 Total Incidents: 199793<br>                 High Severity (%): 16.2%<br>                 Low Severity (%): 57.5%             </div>             </div>`)[0];
+                popup_da619a3407fa7dc255c5d7c0178e1083.setContent(html_ee2e409e984694fbae8edf71159bff8e);
+            
+        
+
+        circle_marker_66e523e7d2f58e8656c2c94234ad95c8.bindPopup(popup_da619a3407fa7dc255c5d7c0178e1083)
+        ;
+
+        
+    
+    
+            var circle_marker_88c725474dcbd36bff6293d389ae5487 = L.circleMarker(
+                [39.9526, -75.1652],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_f38c23e8568bed4c7bfc4d7eb47e24a5 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0a6268c772770c0c45f8f16ca524abf3 = $(`<div id="html_0a6268c772770c0c45f8f16ca524abf3" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 14</strong><br>                 Severity Score: 679990<br>                 Avg. Severity: 3.52<br>                 Normalized Severity: 3.52<br>                 Total Incidents: 193247<br>                 High Severity (%): 14.8%<br>                 Low Severity (%): 55.5%             </div>             </div>`)[0];
+                popup_f38c23e8568bed4c7bfc4d7eb47e24a5.setContent(html_0a6268c772770c0c45f8f16ca524abf3);
+            
+        
+
+        circle_marker_88c725474dcbd36bff6293d389ae5487.bindPopup(popup_f38c23e8568bed4c7bfc4d7eb47e24a5)
+        ;
+
+        
+    
+    
+            var circle_marker_5f71373b85bbaf667916823b14fbe105 = L.circleMarker(
+                [39.9526, -75.1652],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_19774a8ae463fbf500e8ed1a7ca8b134 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e1fa822e62629cc07137cf18e7008477 = $(`<div id="html_e1fa822e62629cc07137cf18e7008477" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 39</strong><br>                 Severity Score: 606854<br>                 Avg. Severity: 3.64<br>                 Normalized Severity: 3.64<br>                 Total Incidents: 166880<br>                 High Severity (%): 17.3%<br>                 Low Severity (%): 54.3%             </div>             </div>`)[0];
+                popup_19774a8ae463fbf500e8ed1a7ca8b134.setContent(html_e1fa822e62629cc07137cf18e7008477);
+            
+        
+
+        circle_marker_5f71373b85bbaf667916823b14fbe105.bindPopup(popup_19774a8ae463fbf500e8ed1a7ca8b134)
+        ;
+
+        
+    
+    
+            var circle_marker_41a3bf29ed270954ff403931acb03a60 = L.circleMarker(
+                [40.02, -75.18],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_dfad251eeafb76ef24e79b279642210b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_c8bc103f400d13f65633d65dc69d45ca = $(`<div id="html_c8bc103f400d13f65633d65dc69d45ca" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 18</strong><br>                 Severity Score: 580595<br>                 Avg. Severity: 3.35<br>                 Normalized Severity: 3.35<br>                 Total Incidents: 173208<br>                 High Severity (%): 15.5%<br>                 Low Severity (%): 61.5%             </div>             </div>`)[0];
+                popup_dfad251eeafb76ef24e79b279642210b.setContent(html_c8bc103f400d13f65633d65dc69d45ca);
+            
+        
+
+        circle_marker_41a3bf29ed270954ff403931acb03a60.bindPopup(popup_dfad251eeafb76ef24e79b279642210b)
+        ;
+
+        
+    
+    
+            var circle_marker_fc52f6f40971a7ef36b6c21726aaeb66 = L.circleMarker(
+                [39.9492, -75.18],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_a0c230700c39615a3538f62df487b65b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_3c84de7d24bbe0afb2631cc877cb4427 = $(`<div id="html_3c84de7d24bbe0afb2631cc877cb4427" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 2</strong><br>                 Severity Score: 566536<br>                 Avg. Severity: 3.16<br>                 Normalized Severity: 3.16<br>                 Total Incidents: 179128<br>                 High Severity (%): 11.4%<br>                 Low Severity (%): 63.0%             </div>             </div>`)[0];
+                popup_a0c230700c39615a3538f62df487b65b.setContent(html_3c84de7d24bbe0afb2631cc877cb4427);
+            
+        
+
+        circle_marker_fc52f6f40971a7ef36b6c21726aaeb66.bindPopup(popup_a0c230700c39615a3538f62df487b65b)
+        ;
+
+        
+    
+    
+            var circle_marker_8aaea7b4524d1481e6ec4d111bc04b59 = L.circleMarker(
+                [39.92, -75.2],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_c5a6fb0d66651232fe81257053da5424 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e4cca4bedd3ffbfe280b04d4d1060c18 = $(`<div id="html_e4cca4bedd3ffbfe280b04d4d1060c18" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 26</strong><br>                 Severity Score: 457863<br>                 Avg. Severity: 3.31<br>                 Normalized Severity: 3.31<br>                 Total Incidents: 138266<br>                 High Severity (%): 13.4%<br>                 Low Severity (%): 61.4%             </div>             </div>`)[0];
+                popup_c5a6fb0d66651232fe81257053da5424.setContent(html_e4cca4bedd3ffbfe280b04d4d1060c18);
+            
+        
+
+        circle_marker_8aaea7b4524d1481e6ec4d111bc04b59.bindPopup(popup_c5a6fb0d66651232fe81257053da5424)
+        ;
+
+        
+    
+    
+            var circle_marker_1f13038039ce4b8bb99fd8a53c652fb7 = L.circleMarker(
+                [39.94, -75.2],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_8ada725c4772b212c56af2dbc26b903e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_52e8df215240992343d79049527204b2 = $(`<div id="html_52e8df215240992343d79049527204b2" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 9</strong><br>                 Severity Score: 433642<br>                 Avg. Severity: 2.81<br>                 Normalized Severity: 2.81<br>                 Total Incidents: 154574<br>                 High Severity (%): 8.4%<br>                 Low Severity (%): 73.6%             </div>             </div>`)[0];
+                popup_8ada725c4772b212c56af2dbc26b903e.setContent(html_52e8df215240992343d79049527204b2);
+            
+        
+
+        circle_marker_1f13038039ce4b8bb99fd8a53c652fb7.bindPopup(popup_8ada725c4772b212c56af2dbc26b903e)
+        ;
+
+        
+    
+    
+            var circle_marker_5b2ee4921e513a36f44e09b5277a462b = L.circleMarker(
+                [39.97, -75.18],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_60c47f922540a169aeeefa27699467b1 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_c87c70cc91eb0d432a9c54a64ef40a56 = $(`<div id="html_c87c70cc91eb0d432a9c54a64ef40a56" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 3</strong><br>                 Severity Score: 420901<br>                 Avg. Severity: 2.96<br>                 Normalized Severity: 2.96<br>                 Total Incidents: 141970<br>                 High Severity (%): 10.3%<br>                 Low Severity (%): 68.6%             </div>             </div>`)[0];
+                popup_60c47f922540a169aeeefa27699467b1.setContent(html_c87c70cc91eb0d432a9c54a64ef40a56);
+            
+        
+
+        circle_marker_5b2ee4921e513a36f44e09b5277a462b.bindPopup(popup_60c47f922540a169aeeefa27699467b1)
+        ;
+
+        
+    
+    
+            var circle_marker_f8ce658d04da5ff1b7956bfd4d986fae = L.circleMarker(
+                [40.0, -75.15],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_e0e448b0f8ed389e923a9a859cde61bd = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_4ccbc38ceb472164d977338e31a5c67f = $(`<div id="html_4ccbc38ceb472164d977338e31a5c67f" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 6</strong><br>                 Severity Score: 398623<br>                 Avg. Severity: 2.75<br>                 Normalized Severity: 2.75<br>                 Total Incidents: 144961<br>                 High Severity (%): 8.7%<br>                 Low Severity (%): 74.9%             </div>             </div>`)[0];
+                popup_e0e448b0f8ed389e923a9a859cde61bd.setContent(html_4ccbc38ceb472164d977338e31a5c67f);
+            
+        
+
+        circle_marker_f8ce658d04da5ff1b7956bfd4d986fae.bindPopup(popup_e0e448b0f8ed389e923a9a859cde61bd)
+        ;
+
+        
+    
+    
+            var circle_marker_85fa416821b5dec4e2c04a1dfcb615b0 = L.circleMarker(
+                [39.9526, -75.13],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_a12fbf6952ddae9f714012cf2e5aa30f = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_4e820ddb62198c312114bd91ff09c90b = $(`<div id="html_4e820ddb62198c312114bd91ff09c90b" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 16</strong><br>                 Severity Score: 378191<br>                 Avg. Severity: 3.20<br>                 Normalized Severity: 3.20<br>                 Total Incidents: 118345<br>                 High Severity (%): 15.3%<br>                 Low Severity (%): 63.5%             </div>             </div>`)[0];
+                popup_a12fbf6952ddae9f714012cf2e5aa30f.setContent(html_4e820ddb62198c312114bd91ff09c90b);
+            
+        
+
+        circle_marker_85fa416821b5dec4e2c04a1dfcb615b0.bindPopup(popup_a12fbf6952ddae9f714012cf2e5aa30f)
+        ;
+
+        
+    
+    
+            var circle_marker_3df0acf264077a9a74ab8c05ede190b3 = L.circleMarker(
+                [39.97, -75.2],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_60689f3eb1b89ff4fe4ab19481e1d3c9 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2f82667bfefefea593c1fc92d977b43c = $(`<div id="html_2f82667bfefefea593c1fc92d977b43c" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 8</strong><br>                 Severity Score: 359037<br>                 Avg. Severity: 3.07<br>                 Normalized Severity: 3.07<br>                 Total Incidents: 117026<br>                 High Severity (%): 8.7%<br>                 Low Severity (%): 63.8%             </div>             </div>`)[0];
+                popup_60689f3eb1b89ff4fe4ab19481e1d3c9.setContent(html_2f82667bfefefea593c1fc92d977b43c);
+            
+        
+
+        circle_marker_3df0acf264077a9a74ab8c05ede190b3.bindPopup(popup_60689f3eb1b89ff4fe4ab19481e1d3c9)
+        ;
+
+        
+    
+    
+            var circle_marker_3915839d4f7d52fcc26ac66c86407b79 = L.circleMarker(
+                [39.93, -75.18],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_a5c912ac8c26429d4d205c8d8694e620 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_6b563c5848eedf54c7805771ad28a19e = $(`<div id="html_6b563c5848eedf54c7805771ad28a19e" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 17</strong><br>                 Severity Score: 357125<br>                 Avg. Severity: 3.28<br>                 Normalized Severity: 3.28<br>                 Total Incidents: 108917<br>                 High Severity (%): 14.9%<br>                 Low Severity (%): 62.9%             </div>             </div>`)[0];
+                popup_a5c912ac8c26429d4d205c8d8694e620.setContent(html_6b563c5848eedf54c7805771ad28a19e);
+            
+        
+
+        circle_marker_3915839d4f7d52fcc26ac66c86407b79.bindPopup(popup_a5c912ac8c26429d4d205c8d8694e620)
+        ;
+
+        
+    
+    
+            var circle_marker_38bf1c50a0e154cdde6470ca4003afdc = L.circleMarker(
+                [39.9526, -75.1652],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_cc278f9bc826ede83c6f381b806182d0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d8186585a4d55ecfb4906c154d075794 = $(`<div id="html_d8186585a4d55ecfb4906c154d075794" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 1</strong><br>                 Severity Score: 229945<br>                 Avg. Severity: 3.21<br>                 Normalized Severity: 3.21<br>                 Total Incidents: 71708<br>                 High Severity (%): 13.3%<br>                 Low Severity (%): 64.5%             </div>             </div>`)[0];
+                popup_cc278f9bc826ede83c6f381b806182d0.setContent(html_d8186585a4d55ecfb4906c154d075794);
+            
+        
+
+        circle_marker_38bf1c50a0e154cdde6470ca4003afdc.bindPopup(popup_cc278f9bc826ede83c6f381b806182d0)
+        ;
+
+        
+    
+    
+            var circle_marker_fe8c376b09875c98bb93663fd6882728 = L.circleMarker(
+                [40.0, -75.18],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 25, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_6b34db9929b28324a7d1e70ae52bd8f0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_622677b363932530030d58c2101324e2 = $(`<div id="html_622677b363932530030d58c2101324e2" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 7</strong><br>                 Severity Score: 208552<br>                 Avg. Severity: 2.92<br>                 Normalized Severity: 2.92<br>                 Total Incidents: 71472<br>                 High Severity (%): 6.3%<br>                 Low Severity (%): 66.9%             </div>             </div>`)[0];
+                popup_6b34db9929b28324a7d1e70ae52bd8f0.setContent(html_622677b363932530030d58c2101324e2);
+            
+        
+
+        circle_marker_fe8c376b09875c98bb93663fd6882728.bindPopup(popup_6b34db9929b28324a7d1e70ae52bd8f0)
+        ;
+
+        
+    
+    
+            var circle_marker_f09e936bcde54be1c99e62234a974581 = L.circleMarker(
+                [39.94, -75.15],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 22.54839240389434, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_ca14d47e68de71c58a5e988349620a5b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d635963fdda1f7ebff1002fb0ddc5383 = $(`<div id="html_d635963fdda1f7ebff1002fb0ddc5383" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 5</strong><br>                 Severity Score: 145424<br>                 Avg. Severity: 2.86<br>                 Normalized Severity: 2.86<br>                 Total Incidents: 50843<br>                 High Severity (%): 5.9%<br>                 Low Severity (%): 67.5%             </div>             </div>`)[0];
+                popup_ca14d47e68de71c58a5e988349620a5b.setContent(html_d635963fdda1f7ebff1002fb0ddc5383);
+            
+        
+
+        circle_marker_f09e936bcde54be1c99e62234a974581.bindPopup(popup_ca14d47e68de71c58a5e988349620a5b)
+        ;
+
+        
+    
+    
+            var circle_marker_d9d2dac1e9e4683102e5fac81b8ef9d0 = L.circleMarker(
+                [39.97, -75.15],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 16.729315586717824, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_f3bfb0566647a9f97eafe160c52ce969 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_9dc69eb0776973584e7b421c3df54301 = $(`<div id="html_9dc69eb0776973584e7b421c3df54301" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 4</strong><br>                 Severity Score: 90976<br>                 Avg. Severity: 3.25<br>                 Normalized Severity: 3.25<br>                 Total Incidents: 27987<br>                 High Severity (%): 15.2%<br>                 Low Severity (%): 65.7%             </div>             </div>`)[0];
+                popup_f3bfb0566647a9f97eafe160c52ce969.setContent(html_9dc69eb0776973584e7b421c3df54301);
+            
+        
+
+        circle_marker_d9d2dac1e9e4683102e5fac81b8ef9d0.bindPopup(popup_f3bfb0566647a9f97eafe160c52ce969)
+        ;
+
+        
+    
+    
+            var circle_marker_484e7b8d0615451e673e6c1f2728d031 = L.circleMarker(
+                [39.9526, -75.1652],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 16.2191245139804, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_6c3af97763ebaac972c79d563e71f737 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_cc8d9c09239260f70c46d73ae08e8ae4 = $(`<div id="html_cc8d9c09239260f70c46d73ae08e8ae4" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 23</strong><br>                 Severity Score: 83640<br>                 Avg. Severity: 3.18<br>                 Normalized Severity: 3.18<br>                 Total Incidents: 26306<br>                 High Severity (%): 16.5%<br>                 Low Severity (%): 64.5%             </div>             </div>`)[0];
+                popup_6c3af97763ebaac972c79d563e71f737.setContent(html_cc8d9c09239260f70c46d73ae08e8ae4);
+            
+        
+
+        circle_marker_484e7b8d0615451e673e6c1f2728d031.bindPopup(popup_6c3af97763ebaac972c79d563e71f737)
+        ;
+
+        
+    
+    
+            var circle_marker_b5e17e589022560e85106b0d844ae7b2 = L.circleMarker(
+                [39.9526, -75.1652],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.977061409210524, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_55a76dea8f4d19f228540543c31b7832 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_84d2e9ebf8aecb72bdee2820703347ec = $(`<div id="html_84d2e9ebf8aecb72bdee2820703347ec" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 77</strong><br>                 Severity Score: 33364<br>                 Avg. Severity: 2.33<br>                 Normalized Severity: 2.33<br>                 Total Incidents: 14345<br>                 High Severity (%): 3.1%<br>                 Low Severity (%): 85.8%             </div>             </div>`)[0];
+                popup_55a76dea8f4d19f228540543c31b7832.setContent(html_84d2e9ebf8aecb72bdee2820703347ec);
+            
+        
+
+        circle_marker_b5e17e589022560e85106b0d844ae7b2.bindPopup(popup_55a76dea8f4d19f228540543c31b7832)
+        ;
+
+        
+    
+    
+            var circle_marker_21548a6df6f0699360ee97058bb94832 = L.circleMarker(
+                [39.9526, -75.1652],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+        
+    
+        var popup_ebcf22323e05435ce698e47df9e1f116 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2112cbeb39b4d089a7341f3ea039bddb = $(`<div id="html_2112cbeb39b4d089a7341f3ea039bddb" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <strong>District 92</strong><br>                 Severity Score: 4093<br>                 Avg. Severity: 2.75<br>                 Normalized Severity: 2.75<br>                 Total Incidents: 1491<br>                 High Severity (%): 8.0%<br>                 Low Severity (%): 80.5%             </div>             </div>`)[0];
+                popup_ebcf22323e05435ce698e47df9e1f116.setContent(html_2112cbeb39b4d089a7341f3ea039bddb);
+            
+        
+
+        circle_marker_21548a6df6f0699360ee97058bb94832.bindPopup(popup_ebcf22323e05435ce698e47df9e1f116)
+        ;
+
+        
+    
+    
+            var layer_control_d5cadbdd051f11d418b0bf7e2371a1ee_layers = {
+                base_layers : {
+                    "openstreetmap" : tile_layer_ae799fd5a4ce2c9a20d9078e8457014b,
+                },
+                overlays :  {
+                },
+            };
+            let layer_control_d5cadbdd051f11d418b0bf7e2371a1ee = L.control.layers(
+                layer_control_d5cadbdd051f11d418b0bf7e2371a1ee_layers.base_layers,
+                layer_control_d5cadbdd051f11d418b0bf7e2371a1ee_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": true,
+  "autoZIndex": true,
+}
+            ).addTo(map_5b7dc512ac60411a4d4cb32b2f9c2f54);
+
+        
+</script>
+</html>
