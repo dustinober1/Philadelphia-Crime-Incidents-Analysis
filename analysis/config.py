@@ -98,6 +98,12 @@ STAT_CONFIG = {
     "effect_size_medium": 0.5,
     "effect_size_large": 0.8,
 
+    # Cliff's Delta thresholds (non-parametric effect size)
+    # Source: Romano et al. (2006). Appropriate statistics for ordinal level data.
+    "cliffs_delta_negligible": 0.147,
+    "cliffs_delta_small": 0.33,
+    "cliffs_delta_medium": 0.474,
+
     # FDR correction method ('bh' = Benjamini-Hochberg, 'by' = Benjamini-Yekutieli)
     "fdr_method": "bh",
 
@@ -107,6 +113,47 @@ STAT_CONFIG = {
     # Legacy key for backward compatibility
     "significance_threshold": 0.01,  # Same as alpha
 }
+
+
+# =============================================================================
+# EFFECT SIZE INTERPRETATION HELPERS
+# =============================================================================
+
+def interpret_cliffs_delta(delta: float) -> str:
+    """
+    Interpret Cliff's Delta effect size using configured thresholds.
+
+    Cliff's Delta is a non-parametric effect size measure for ordinal data.
+    More robust than Cohen's d for non-normal distributions.
+
+    Args:
+        delta: Cliff's Delta value (-1 to +1)
+
+    Returns:
+        Interpretation string: negligible, small, medium, or large
+
+    Interpretation thresholds (Romano et al., 2006):
+    - negligible: |d| < 0.147
+    - small: 0.147 <= |d| < 0.33
+    - medium: 0.33 <= |d| < 0.474
+    - large: |d| >= 0.474
+
+    Example:
+        >>> interpret_cliffs_delta(0.4)
+        'medium'
+        >>> interpret_cliffs_delta(-0.6)
+        'large'
+    """
+    abs_d = abs(delta)
+    if abs_d < STAT_CONFIG["cliffs_delta_negligible"]:
+        return "negligible"
+    elif abs_d < STAT_CONFIG["cliffs_delta_small"]:
+        return "small"
+    elif abs_d < STAT_CONFIG["cliffs_delta_medium"]:
+        return "medium"
+    else:
+        return "large"
+
 
 # =============================================================================
 # ANALYSIS PARAMETERS
