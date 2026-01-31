@@ -7,13 +7,143 @@ Provides functions to fetch and cache external data sources:
 - Census data from U.S. Census Bureau (income, poverty rates)
 
 All functions implement local caching to avoid API rate limits.
+
+Temporal alignment functions handle misalignment between data sources:
+- Crime: Daily (2006-2026)
+- Weather: Daily (2006-2026)
+- FRED: Monthly (1990-present)
+- Census ACS: Annual 5-year estimates (2010-present)
 """
 
+from datetime import timedelta
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import requests_cache
 
-from analysis.config import EXTERNAL_DATA_DIR, PHILADELPHIA_CENTER
+from analysis.config import (
+    CACHE_CONFIG,
+    EXTERNAL_CACHE_DIR,
+    EXTERNAL_DATA_DIR,
+    PHILADELPHIA_CENTER,
+    get_cache_staleness,
+)
+
+
+# =============================================================================
+# CACHING INFRASTRUCTURE
+# =============================================================================
+
+
+def _ensure_cache_dir() -> Path:
+    """Ensure cache directory exists."""
+    EXTERNAL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    return EXTERNAL_CACHE_DIR
+
+
+def get_cached_session(source: str = "weather"):
+    """
+    Get a requests session with caching enabled.
+
+    Uses requests-cache to cache API responses locally with per-source
+    staleness settings. Avoids rate limits and speeds up repeated requests.
+
+    Args:
+        source: Data source name for staleness settings ('weather', 'fred', 'census').
+
+    Returns:
+        requests_cache.CachedSession configured for the data source.
+
+    Example:
+        >>> session = get_cached_session('weather')
+        >>> response = session.get('https://example.com/api')
+    """
+    if not CACHE_CONFIG.get("cache_enabled", True):
+        # Return uncached session if caching disabled
+        import requests
+
+        return requests.Session()
+
+    _ensure_cache_dir()
+
+    cache_path = EXTERNAL_CACHE_DIR / f"{source}_cache"
+    staleness = get_cache_staleness(source)
+
+    # Create cached session with SQLite backend
+    session = requests_cache.CachedSession(
+        cache_name=str(cache_path),
+        expire_after=staleness,
+        backend=CACHE_CONFIG.get("cache_backend", "sqlite"),
+    )
+
+    return session
+
+
+def clear_cache(source: str = None) -> None:
+    """
+    Clear cached API responses.
+
+    Args:
+        source: Specific source to clear ('weather', 'fred', 'census').
+                If None, clears all caches.
+
+    Example:
+        >>> clear_cache('weather')  # Clear only weather cache
+        >>> clear_cache()  # Clear all caches
+    """
+    _ensure_cache_dir()
+
+    if source:
+        # Clear specific source cache
+        cache_pattern = EXTERNAL_CACHE_DIR / f"{source}_cache.*"
+        for cache_file in EXTERNAL_CACHE_DIR.glob(f"{source}_cache.*"):
+            cache_file.unlink()
+    else:
+        # Clear all caches
+        for cache_file in EXTERNAL_CACHE_DIR.glob("*_cache.*"):
+            cache_file.unlink()
+
+
+def get_cache_info() -> dict:
+    """
+    Get information about cached data.
+
+    Returns:
+        Dict with cache file sizes and counts for each data source.
+
+    Example:
+        >>> info = get_cache_info()
+        >>> print(info['weather']['size_mb'])
+    """
+    _ensure_cache_dir()
+
+    sources = ['weather', 'fred', 'census']
+    info = {}
+
+    for source in sources:
+        cache_files = list(EXTERNAL_CACHE_DIR.glob(f"{source}_cache.*"))
+
+        if cache_files:
+            total_size = sum(f.stat().st_size for f in cache_files)
+            info[source] = {
+                'exists': True,
+                'file_count': len(cache_files),
+                'size_bytes': total_size,
+                'size_mb': round(total_size / (1024 * 1024), 2),
+                'files': [str(f.name) for f in cache_files],
+            }
+        else:
+            info[source] = {'exists': False}
+
+    # Also check parquet cache files in parent directory
+    parquet_files = list(EXTERNAL_DATA_DIR.glob("*.parquet"))
+    info['parquet'] = {
+        'count': len(parquet_files),
+        'files': [str(f.name) for f in parquet_files],
+    }
+
+    return info
 
 # =============================================================================
 # WEATHER DATA (Meteostat v2)
