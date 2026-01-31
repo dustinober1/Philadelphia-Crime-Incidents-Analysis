@@ -512,3 +512,195 @@ def load_cached_census(
         return None
 
     return pd.read_parquet(cache_path)
+
+
+# =============================================================================
+# TEMPORAL ALIGNMENT UTILITIES
+# =============================================================================
+
+def aggregate_crime_by_period(
+    crime_df: pd.DataFrame,
+    period: str = "D",  # D=daily, W=weekly, M=monthly, Y=yearly
+    date_column: str = "dispatch_date",
+) -> pd.DataFrame:
+    """
+    Aggregate crime incidents to a temporal period.
+
+    Args:
+        crime_df: DataFrame with crime incidents. Must have date_column.
+        period: Pandas resample period code ('D', 'W', 'M', 'Q', 'Y').
+        date_column: Name of date column to aggregate by.
+
+    Returns:
+        DataFrame with date index and 'crime_count' column.
+
+    Raises:
+        ValueError: If date_column not found in DataFrame.
+
+    Note:
+        - Daily (D): Full temporal resolution, matches weather data
+        - Monthly (M): Matches FRED unemployment data
+        - Yearly (Y): Matches Census ACS 5-year estimates
+
+    Example:
+        >>> from analysis.utils import load_data
+        >>> df = load_data()
+        >>> daily = aggregate_crime_by_period(df, 'D')
+        >>> monthly = aggregate_crime_by_period(df, 'M')
+    """
+    if date_column not in crime_df.columns:
+        raise ValueError(f"Date column '{date_column}' not found in DataFrame")
+
+    # Ensure date column is datetime
+    df = crime_df.copy()
+    df[date_column] = pd.to_datetime(df[date_column])
+
+    # Set date as index and count incidents per period
+    df = df.set_index(date_column)
+
+    # Resample and count
+    aggregated = df.resample(period).size().reset_index(name='crime_count')
+    aggregated = aggregated.set_index(date_column)
+
+    return aggregated
+
+
+def align_temporal_data(
+    crime_df: pd.DataFrame,
+    weather_df: pd.DataFrame = None,
+    unemployment_df: pd.DataFrame = None,
+    census_df: pd.DataFrame = None,
+    resolution: str = "monthly",
+) -> pd.DataFrame:
+    """
+    Align crime data with external data sources for correlation analysis.
+
+    Handles temporal misalignment between sources:
+        - Crime: Daily (2006-2026)
+        - Weather: Daily (2006-2026)
+        - FRED: Monthly (1990-present)
+        - Census ACS: Annual 5-year estimates (2010-present)
+
+    Args:
+        crime_df: Crime incident DataFrame. Must have 'dispatch_date' column.
+        weather_df: Weather DataFrame with date index. Optional.
+        unemployment_df: FRED unemployment DataFrame with date index. Optional.
+        census_df: Census DataFrame with year column. Optional.
+        resolution: Temporal resolution ('daily', 'monthly', 'annual').
+
+    Returns:
+        DataFrame with aligned data. Columns depend on resolution and
+        available external data:
+            - daily: date, crime_count, temp, prcp
+            - monthly: date, crime_count, temp, prcp, unemployment_rate
+            - annual: year, crime_count, unemployment_rate, poverty_rate
+
+        Resolution trade-offs:
+            - Daily: Weather only (no economic data due to monthly/annual frequency)
+            - Monthly: Weather + unemployment (no Census due to annual frequency)
+            - Annual: Weather + unemployment + Census (full alignment but fewer points)
+
+    Raises:
+        ValueError: If resolution not recognized or crime_df is empty.
+
+    Example:
+        >>> # Monthly alignment with weather and unemployment
+        >>> df = align_temporal_data(crime_df, weather_df, unemployment_df, resolution='monthly')
+        >>> print(df.columns)
+    """
+    if resolution not in ("daily", "monthly", "annual"):
+        raise ValueError(f"Unknown resolution: {resolution}. Use 'daily', 'monthly', or 'annual'.")
+
+    # Get analysis range from config
+    from analysis.config import get_analysis_range
+    start_date, end_date = get_analysis_range(resolution)
+
+    # Aggregate crime to specified period
+    if resolution == "daily":
+        period = "D"
+    elif resolution == "monthly":
+        period = "M"
+    else:  # annual
+        period = "Y"
+
+    crime_agg = aggregate_crime_by_period(crime_df, period=period)
+
+    # Filter to analysis range
+    crime_agg = crime_agg.loc[start_date:end_date]
+
+    # Initialize result DataFrame with crime counts
+    result = crime_agg.rename(columns={'crime_count': 'crime_count'})
+
+    # Align and merge weather data (if provided)
+    if weather_df is not None:
+        weather_df = weather_df.copy()
+        weather_df.index = pd.to_datetime(weather_df.index)
+
+        # Resample weather to match period
+        weather_agg = weather_df[['temp', 'prcp']].resample(period).mean()
+        weather_agg = weather_agg.loc[start_date:end_date]
+
+        # Merge
+        result = result.join(weather_agg, how='left')
+
+    # Align and merge unemployment data (if provided and not daily)
+    if unemployment_df is not None and resolution != "daily":
+        unemployment_df = unemployment_df.copy()
+        unemployment_df.index = pd.to_datetime(unemployment_df.index)
+
+        # Unemployment is already monthly, just resample if annual
+        if resolution == "annual":
+            unemployment_agg = unemployment_df.resample("Y").mean()
+        else:
+            unemployment_agg = unemployment_df
+
+        unemployment_agg = unemployment_agg.loc[start_date:end_date]
+        unemployment_agg.columns = ['unemployment_rate']
+
+        # Merge
+        result = result.join(unemployment_agg, how='left')
+
+    # Align and merge Census data (if provided and annual only)
+    if census_df is not None and resolution == "annual":
+        # Census data is at tract level, need to aggregate to city-wide
+        # For now, skip as we need district crosswalk (separate plan)
+        pass
+
+    # Remove rows with all-NaN external data
+    result = result.dropna(how='all', subset=[c for c in result.columns if c != 'crime_count'])
+
+    return result
+
+
+def create_lagged_features(
+    df: pd.DataFrame,
+    columns: list = None,
+    lags: list = [1, 7, 30],  # 1 day, 1 week, 1 month
+) -> pd.DataFrame:
+    """
+    Create lagged features for cross-correlation analysis.
+
+    Tests whether weather today predicts crime tomorrow, etc.
+
+    Args:
+        df: DataFrame with datetime index.
+        columns: Columns to create lags for. If None, uses all numeric columns.
+        lags: List of lag periods (same units as DataFrame index frequency).
+
+    Returns:
+        DataFrame with added {column}_lag{lag} columns.
+
+    Example:
+        >>> df = create_lagged_features(weather_df, columns=['temp'], lags=[1, 7])
+        >>> print(df.columns)  # temp, temp_lag1, temp_lag7
+    """
+    if columns is None:
+        columns = df.select_dtypes(include=[np.number]).columns.tolist()
+
+    result = df.copy()
+
+    for col in columns:
+        for lag in lags:
+            result[f'{col}_lag{lag}'] = result[col].shift(lag)
+
+    return result
