@@ -288,6 +288,57 @@ SECTION_HEADERS = {
 }
 
 # =============================================================================
+# POLICING DATA CONFIGURATION
+# =============================================================================
+
+# Philadelphia policing data sources and availability
+# Note: No programmatic API exists for Philadelphia policing data
+POLICING_DATA_CONFIG = {
+    # Data sources that exist but lack API access
+    "sources": {
+        "controller_reports": {
+            "name": "Philadelphia Controller's Office",
+            "url": "https://controller.phila.gov/policing-in-philadelphia/",
+            "format": "PDF reports",
+            "years_available": [2022, 2024],
+            "api": False,
+            "notes": "Static PDF reports with some data tables. No bulk CSV download.",
+        },
+        "dao_dashboard": {
+            "name": "District Attorney's Office Data Dashboard",
+            "url": "https://dao.phila.gov/data/",
+            "format": "Interactive web dashboard",
+            "years_available": "Recent years only",
+            "api": False,
+            "notes": "Limited visual dashboard, no export capability.",
+        },
+        "opendataphilly": {
+            "name": "OpenDataPhilly",
+            "url": "https://www.opendataphilly.org/",
+            "format": "Varies (CSV, API, shapefile)",
+            "years_available": "Varies by dataset",
+            "api": "Varies by dataset",
+            "notes": "May have historical policing datasets. Requires manual search.",
+        },
+    },
+
+    # Data variables of interest (if available)
+    "variables_of_interest": [
+        "police_officer_count_by_district",
+        "arrest_rates_by_district",
+        "response_times",
+        "patrol_hours_by_district",
+        "budget_allocation",
+    ],
+
+    # Assessment status
+    "available_for_correlation": False,
+    "limitation": "No programmatic API access. Data exists in static PDFs and dashboards.",
+    "recommendation": "Manual data entry from PDF reports or web scraping (fragile).",
+}
+
+
+# =============================================================================
 # CLUSTERING / RED ZONES ANALYSIS
 # =============================================================================#
 
