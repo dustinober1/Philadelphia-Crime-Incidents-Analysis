@@ -5,6 +5,9 @@ Answers the question: "Is Philadelphia actually getting safer?"
 
 Analyzes violent vs property crime trends over the last 10 years (2016-2025)
 using FBI UCR standard classification.
+
+Enhanced with statistical significance testing including Mann-Kendall
+trend tests, bootstrap confidence intervals, and effect size analysis.
 """
 
 import pandas as pd
@@ -12,7 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT
+from analysis.config import COLORS, FIGURE_SIZES, PROJECT_ROOT, STAT_CONFIG
 from analysis.utils import (
     load_data,
     extract_temporal_features,
@@ -21,15 +24,26 @@ from analysis.utils import (
     create_image_tag,
     format_number,
 )
+from analysis.stats_utils import mann_kendall_test, cohens_d, bootstrap_ci, compare_two_samples
+from analysis.reproducibility import set_global_seed, get_analysis_metadata, format_metadata_markdown, DataVersion
 
 
 def analyze_safety_trends() -> dict:
     """
-    Run safety trend analysis for 2016-2025.
+    Run safety trend analysis for 2016-2025 with statistical testing.
 
     Returns:
         Dictionary containing analysis results and base64-encoded plots.
+
+    Statistical tests performed:
+        - Mann-Kendall trend tests for violent and property crime
+        - Bootstrap 99% CI for trend slopes
+        - Comparison between violent and property crime trends
+        - Effect size analysis for category differences
     """
+    # Set seed for reproducibility
+    set_global_seed(STAT_CONFIG["random_seed"])
+
     print("Loading data for safety trend analysis...")
     df = load_data(clean=False)
 
@@ -42,6 +56,27 @@ def analyze_safety_trends() -> dict:
     print(f"Analyzing {len(df_recent):,} incidents from 2016-2025")
 
     results = {}
+
+    # Store analysis metadata
+    try:
+        data_version = DataVersion(PROJECT_ROOT / "data" / "crime_incidents_combined.parquet")
+        metadata = get_analysis_metadata(
+            data_version=data_version,
+            analysis_type="safety_trend",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
+    except Exception as e:
+        print(f"Warning: Could not create data version: {e}")
+        metadata = get_analysis_metadata(
+            analysis_type="safety_trend",
+            confidence_level=STAT_CONFIG["confidence_level"],
+            bootstrap_n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_seed=STAT_CONFIG["random_seed"]
+        )
+        results["metadata"] = metadata
 
     # ========================================================================
     # 1. Annual Aggregation by Crime Category
@@ -62,6 +97,61 @@ def analyze_safety_trends() -> dict:
         annual_by_category[f"{cat}_pct"] = (
             annual_by_category[cat] / annual_by_category["Total"] * 100
         )
+
+    # ========================================================================
+    # STATISTICAL TESTS: Mann-Kendall Trend Tests
+    # ========================================================================
+    print("Running Mann-Kendall trend tests...")
+
+    trend_tests = {}
+    for category in ["Violent", "Property"]:
+        cat_data = annual_by_category[category].values
+        mk_result = mann_kendall_test(cat_data, alpha=STAT_CONFIG["alpha"])
+        trend_tests[category] = mk_result
+
+        sig = "**significant**" if mk_result["is_significant"] else "not significant"
+        print(f"  {category} trend: {mk_result['trend']} (tau={mk_result['tau']:.3f}, p={mk_result['p_value']:.4f}, {sig})")
+
+        # Bootstrap CI for annual mean
+        ci_lower, ci_upper, point_est, se = bootstrap_ci(
+            cat_data,
+            statistic='mean',
+            confidence_level=STAT_CONFIG["confidence_level"],
+            n_resamples=STAT_CONFIG["bootstrap_n_resamples"],
+            random_state=STAT_CONFIG["random_seed"]
+        )
+        trend_tests[f"{category}_mean_ci"] = {
+            "ci_lower": ci_lower,
+            "ci_upper": ci_upper,
+            "point_estimate": point_est,
+            "standard_error": se
+        }
+        print(f"  {category} annual mean 99% CI: [{ci_lower:.0f}, {ci_upper:.0f}]")
+
+    results["trend_tests"] = trend_tests
+
+    # ========================================================================
+    # STATISTICAL TESTS: Violent vs Property Comparison
+    # ========================================================================
+    print("Comparing violent vs property crime trends...")
+
+    # Compare annual rates
+    violent_rates = annual_by_category["Violent"].values
+    property_rates = annual_by_category["Property"].values
+
+    category_comparison = compare_two_samples(violent_rates, property_rates, alpha=STAT_CONFIG["alpha"])
+    results["category_comparison"] = category_comparison
+
+    # Cohen's d for effect size
+    effect_size = cohens_d(violent_rates, property_rates)
+    category_comparison["cohens_d"] = effect_size
+
+    from analysis.stats_utils import interpret_cohens_d
+    category_comparison["effect_interpretation"] = interpret_cohens_d(effect_size)
+
+    sig = "**significant**" if category_comparison["is_significant"] else "not significant"
+    print(f"  Violent vs Property: {category_comparison['test_name']}, p={category_comparison['p_value']:.4f} ({sig})")
+    print(f"  Cohen's d: {effect_size:.3f} ({category_comparison['effect_interpretation']})")
 
     # ========================================================================
     # 2. Year-over-Year Changes
@@ -389,9 +479,14 @@ def generate_markdown_report(results: dict) -> str:
         results: Dictionary from analyze_safety_trends()
 
     Returns:
-        Markdown string with analysis results.
+        Markdown string with analysis results including statistical tests.
     """
     md = []
+
+    # Analysis Configuration section
+    if "metadata" in results:
+        md.append(format_metadata_markdown(results["metadata"]))
+        md.append("\n")
 
     # Title
     md.append("# Is Philadelphia Actually Getting Safer?\n")
@@ -403,6 +498,29 @@ def generate_markdown_report(results: dict) -> str:
     md.append("## Executive Summary\n\n")
 
     stats = results["summary_stats"]
+    trend_tests = results.get("trend_tests", {})
+    category_comparison = results.get("category_comparison", {})
+
+    # Add statistical test results to executive summary
+    if trend_tests:
+        violent_trend = trend_tests.get("Violent", {})
+        property_trend = trend_tests.get("Property", {})
+
+        if violent_trend:
+            violent_sig = "**significant**" if violent_trend.get("is_significant", False) else "not significant"
+            md.append(f"**Violent Crime Trend (2016-2025)**: {violent_trend.get('trend', 'unknown')} trend ")
+            md.append(f"(tau = {violent_trend.get('tau', 0):.3f}, p = {violent_trend.get('p_value', 1):.4f}, {violent_sig} at alpha = {STAT_CONFIG['alpha']})\n\n")
+
+        if property_trend:
+            property_sig = "**significant**" if property_trend.get("is_significant", False) else "not significant"
+            md.append(f"**Property Crime Trend (2016-2025)**: {property_trend.get('trend', 'unknown')} trend ")
+            md.append(f"(tau = {property_trend.get('tau', 0):.3f}, p = {property_trend.get('p_value', 1):.4f}, {property_sig} at alpha = {STAT_CONFIG['alpha']})\n\n")
+
+    if category_comparison:
+        cat_sig = "**significant**" if category_comparison.get("is_significant", False) else "not significant"
+        md.append(f"**Violent vs Property Comparison**: {category_comparison.get('test_name', 'N/A')}, ")
+        md.append(f"p = {category_comparison.get('p_value', 1):.4f} ({cat_sig}), ")
+        md.append(f"Cohen's d = {category_comparison.get('cohens_d', 0):.3f} ({category_comparison.get('effect_interpretation', 'N/A')})\n\n")
 
     md.append("**Yes, Philadelphia is getting safer** - at least when it comes to violent crime. \n\n")
     md.append(f"Contrary to the perception that crime spiked during or after the COVID-19 pandemic, ")
