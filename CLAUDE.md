@@ -17,6 +17,9 @@ source .venv/bin/activate
 # Install dependencies (requirements.txt not managed - install manually)
 pip install pandas numpy matplotlib seaborn folium scikit-learn scipy pyarrow
 
+# Statistical rigor (Phase 1)
+pip install pymannkendall  # Mann-Kendall trend test for temporal data
+
 # External data sources for correlation analysis
 pip install meteostat requests census  # Weather, US Census data
 
@@ -57,8 +60,10 @@ Core analysis scripts that perform computations and return results dictionaries:
 
 | Module | Purpose |
 |--------|---------|
-| `config.py` | Centralized constants (paths, plot settings, DBSCAN params, crime severity weights) |
+| `config.py` | Centralized constants (paths, plot settings, STAT_CONFIG, DBSCAN params, crime severity weights) |
 | `utils.py` | Data loading, coordinate validation, temporal feature extraction, UCR classification, clustering helpers |
+| `stats_utils.py` | Statistical testing (20+ functions): normality, comparisons, bootstrap CI, FDR, Mann-Kendall, chi-square, correlation, effect sizes |
+| `reproducibility.py` | DataVersion (SHA256 tracking), set_global_seed(), analysis metadata documentation |
 | `data_quality.py` | Missing data, coordinate validation, duplicate detection |
 | `temporal_analysis.py` | Long-term trends, seasonal patterns, day/hour heatmaps |
 | `categorical_analysis.py` | Crime types, police districts, UCR categories |
@@ -87,10 +92,18 @@ Scripts that orchestrate analysis modules and generate markdown reports:
 ```python
 def analyze_*() -> dict:
     """Run analysis and return results dict with base64-encoded plots."""
+    # Imports for statistical rigor (Phase 1)
+    from analysis.stats_utils import mann_kendall_test, bootstrap_ci, compare_two_samples
+    from analysis.reproducibility import set_global_seed, get_analysis_metadata, format_metadata_markdown
+    from analysis.config import STAT_CONFIG
+
+    # Set seed for reproducibility
+    set_global_seed(STAT_CONFIG["random_seed"])
+
     df = load_data()
     df = validate_coordinates(df)
     df = extract_temporal_features(df)
-    # ... analysis code ...
+    # ... analysis code with statistical tests ...
     results = {"stats": ..., "plot": create_image_tag(image_to_base64(fig))}
     return results
 
@@ -151,13 +164,15 @@ This project uses GSD (Get Shit Done) workflow for project management:
 - `.planning/config.json` - Workflow settings (mode: yolo, depth: comprehensive, model_profile: quality)
 - `.planning/research/` - Domain research (STACK, FEATURES, ARCHITECTURE, PITFALLS, SUMMARY)
 - `.planning/codebase/` - Codebase documentation (7 files: STACK, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, INTEGRATIONS, CONCERNS)
+- `.planning/phases/XX-name/` - Phase-specific CONTEXT.md, RESEARCH.md, PLAN.md files
 - Use `/gsd:new-project` to initialize a new project phase
 - Use `/gsd:map-codebase` to refresh codebase documentation
 - Use `/gsd:plan-phase N` to create execution plans for a phase
+- Use `/gsd:execute-phase N` to run all plans in a phase
 
 ## Research Roadmap (6 Phases)
 
-1. **Statistical Rigor Layer** - Add significance testing (p-values), confidence intervals (95% CI), effect sizes (Cohen's d), FDR correction
+1. **Statistical Rigor Layer** - Add significance testing (p-values), confidence intervals (99% CI), effect sizes (Cohen's d), FDR correction
 2. **External Data Integration** - Weather (Meteostat), Economic (Census/FRED APIs), Policing data correlation
 3. **Advanced Temporal Analysis** - Holiday effects, individual crime types (homicide, burglary, theft, assault), shift patterns
 4. **Dashboard Foundation** - Streamlit app with time/geographic/crime-type filters
@@ -174,10 +189,14 @@ This project uses GSD (Get Shit Done) workflow for project management:
 
 This is an **academic/research** project - methodological rigor is paramount:
 - **Significance testing**: All trends, comparisons, correlations must report p-values
-- **Confidence intervals**: 95% CI on all point estimates in visualizations
-- **Effect sizes**: Cohen's d, odds ratios, or standardized coefficients
+- **Confidence intervals**: 99% CI on all point estimates in visualizations
+- **Effect sizes**: Cohen's d, Cliff's delta, odds ratios, Cramer's V, or standardized coefficients
 - **Multiple testing correction**: FDR (Benjamini-Hochberg) for omnibus comparisons
 - **Reproducibility**: Random seeds, version tracking, parameter documentation
+
+**Implementation**: Use `analysis.stats_utils` for all statistical functions (20+ available). SciPy 1.17+ required (uses `false_discovery_control`, `tukey_hsd`). `pymannkendall` for temporal trends. STAT_CONFIG in `config.py` centralizes all parameters (confidence_level=0.99, alpha=0.01, effect_size benchmarks).
+
+**Phase 1 Complete**: All 11 analysis modules updated with statistical rigor. Data quality audit at `reports/01_data_quality_audit.md` (97.83/100 score).
 
 ## Critical Pitfalls
 
