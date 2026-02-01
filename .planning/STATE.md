@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 5 of 6 (Dashboard Cross-Filtering)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-01 — Completed 05-01-PLAN.md (State management infrastructure)
+Last activity: 2026-02-01 — Completed 05-02-PLAN.md (Apply button integration)
 
-Progress: [███████████░] 84% (31/37 plans)
+Progress: [███████████░] 86% (32/37 plans)
 
 ## Performance Metrics
 
@@ -94,8 +94,9 @@ Recent decisions affecting current work:
 - Random seeds: Global with override capability
 
 **Pending:**
-- Dashboard framework finalization (Streamlit recommended in research)
 - External data API validation during Phase 2 (requires user to obtain FRED/Census API keys)
+- View-to-view cross-filtering (plan 03) for exploratory interactions
+- High-DPI export and publication outputs (Phase 6)
 
 **From 02-01 (Weather Data Ingestion):**
 - Meteostat 2.0.1 installed and configured for Philadelphia weather data
@@ -263,14 +264,23 @@ Recent decisions affecting current work:
 - All visualization logic remains in analysis modules (zero code duplication)
 
 **From 05-01 (State Management Infrastructure):**
-- Created dashboard/components/state.py with PendingFilters and FilterState NamedTuples
-- State management functions: initialize_filter_state, mark_filter_pending, clear_pending_filters, has_pending_changes, get_applied_state, update_applied_state
+- Created dashboard/components/state.py module with PendingFilters and FilterState NamedTuples
 - Session state keys defined as constants (PENDING_FILTERS_KEY, APPLIED_FILTERS_KEY, FILTER_INIT_KEY)
-- PendingFilters NamedTuple tracks which filters have uncommitted changes (time_pending, geo_pending, crime_pending)
-- FilterState NamedTuple holds applied filter values (start_date, end_date, districts, crime_categories, crime_types)
-- STATE_CONFIG added to dashboard/config.py with apply_button_enabled, auto_sync_url, pending_ttl, view_state_ttl
+- State functions: initialize_filter_state(), mark_filter_pending(), clear_pending_filters(), has_pending_changes(), get_applied_state(), update_applied_state()
+- PendingFilters tracks time_pending, geo_pending, crime_pending boolean flags
+- FilterState holds applied values: start_date, end_date, districts, crime_categories, crime_types
 - Components package exports state management types for easy importing
-- NamedTuples used for immutability - filters capture values at render time, type-safe with IDE autocomplete
+
+**From 05-02 (Apply Button Integration):**
+- Created render_*_filters_with_pending() functions in all filter modules (time, geo, crime)
+- All widgets have on_change callbacks calling mark_filter_pending(filter_type)
+- Visual indicators (🔵) show pending state in filter subheaders
+- Apply button in app.py: disabled when no pending changes, enabled when changes pending
+- On apply click: update_applied_state() → clear_pending_filters() → sync to URL → st.rerun()
+- URL sync only happens on apply button click (not on filter change)
+- Applied state used for data filtering, pending state only tracks widget values
+- Cascading filters use applied state to determine available options
+- Hybrid approach: Original render_*_filters() preserved, new render_*_filters_with_pending() for apply pattern
 
 ### Pending Todos
 
@@ -289,7 +299,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-01 14:26 UTC
-Stopped at: Completed 05-01-PLAN.md (State management infrastructure) - 1/3 plans in Phase 5
-Note: Plan 05-02 was executed out of order before 05-01 - state.py was created as blocking dependency
+Last session: 2026-02-01 14:27 UTC
+Stopped at: Completed 05-02-PLAN.md (Apply button integration) - 2/3 plans in Phase 5
+Note: State.py was created during plan 02 as blocking dependency (plan 01 infrastructure)
 Resume file: None
