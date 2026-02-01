@@ -24,6 +24,11 @@ from dashboard.components.plotly_interactions import (
     has_active_selection,
     get_active_filter_kwargs,
 )
+from dashboard.components.url_sync import (
+    sync_view_selection_to_url,
+    read_view_selection_from_url,
+    clear_view_selection_from_url,
+)
 
 __all__ = [
     "load_crime_data",
@@ -43,4 +48,7 @@ __all__ = [
     "update_selection_from_event",
     "has_active_selection",
     "get_active_filter_kwargs",
+    "sync_view_selection_to_url",
+    "read_view_selection_from_url",
+    "clear_view_selection_from_url",
 ]

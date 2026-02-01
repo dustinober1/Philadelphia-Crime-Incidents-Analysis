@@ -16,6 +16,16 @@ from dashboard.components.state import (
     get_applied_state,
     initialize_filter_state,
 )
+from dashboard.components import (
+    sync_view_selection_to_url,
+    read_view_selection_from_url,
+    clear_view_selection_from_url,
+)
+from dashboard.components.plotly_interactions import (
+    ViewSelectionState,
+    initialize_view_selection_state,
+    get_selection_state,
+)
 from dashboard.filters.time_filters import render_time_filters_with_pending, get_filter_dates
 from dashboard.filters.geo_filters import render_geo_filters_with_pending, get_filter_districts
 from dashboard.filters.crime_filters import render_crime_filters_with_pending, get_filter_categories, get_filter_crime_types
@@ -90,12 +100,43 @@ def _sync_all_filters_to_url(time_state, geo_state, crime_state) -> None:
     sync_crime_filters_to_url(crime_state)
 
 
+def _update_selection_state_from_dict(selection_dict: dict) -> None:
+    """Update view selection state from URL parameters dict.
+
+    Args:
+        selection_dict: Dict with keys active_view, active_districts,
+                       active_crime_types, active_time_range
+    """
+    import streamlit as st
+
+    selection_state = ViewSelectionState(
+        active_view=selection_dict.get("active_view"),
+        active_districts=selection_dict.get("active_districts"),
+        active_crime_types=selection_dict.get("active_crime_types"),
+        active_time_range=selection_dict.get("active_time_range"),
+    )
+    st.session_state["view_selections"] = {
+        "active_view": selection_state.active_view,
+        "active_districts": selection_state.active_districts,
+        "active_crime_types": selection_state.active_crime_types,
+        "active_time_range": selection_state.active_time_range,
+    }
+
+
 def main():
     """Main dashboard entry point."""
     _load_custom_css()
 
     # Initialize filter state (required for apply button pattern)
     initialize_filter_state()
+    # Initialize view selection state (required for cross-filtering)
+    initialize_view_selection_state()
+
+    # Load view selections from URL
+    url_view_selection = read_view_selection_from_url()
+    if url_view_selection.get("active_view"):
+        # Restore view selection from URL
+        _update_selection_state_from_dict(url_view_selection)
 
     # Title
     st.title(DISPLAY_CONFIG["title"])
@@ -138,6 +179,8 @@ def main():
                 update_applied_state(time_state, geo_state, crime_state)
                 # Clear pending flags
                 clear_pending_filters()
+                # Clear view selections (sidebar filters override view selections)
+                clear_view_selection_from_url()
                 # Sync to URL
                 _sync_all_filters_to_url(time_state, geo_state, crime_state)
                 # Rerun to update views
@@ -191,23 +234,36 @@ def main():
 
     st.markdown("---")
 
-    # Create tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(list(PAGE_NAMES.values()))
+    # Track active tab in session state for detecting tab changes
+    if "active_tab" not in st.session_state:
+        st.session_state["active_tab"] = None
 
-    with tab1:
+    # Create tabs
+    tab_names = list(PAGE_NAMES.values())
+    tabs = st.tabs(tab_names)
+
+    # Note: Streamlit doesn't provide a direct way to detect which tab is active
+    # We sync view selections after rendering, but clear them when sidebar changes
+
+    with tabs[0]:
         render_overview_page(df, filtered_df)
 
-    with tab2:
+    with tabs[1]:
         render_temporal_page(df, filtered_df)
 
-    with tab3:
+    with tabs[2]:
         render_spatial_page(df, filtered_df)
 
-    with tab4:
+    with tabs[3]:
         render_correlations_page(df, filtered_df)
 
-    with tab5:
+    with tabs[4]:
         render_advanced_page(df, filtered_df)
+
+    # Sync current view selection to URL after tab rendering
+    current_selection = get_selection_state()
+    if current_selection.active_view:
+        sync_view_selection_to_url(current_selection)
 
 
 if __name__ == "__main__":
