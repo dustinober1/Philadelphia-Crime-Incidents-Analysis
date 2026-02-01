@@ -101,7 +101,9 @@ def render_overview_page(full_df: pd.DataFrame, filtered_df: pd.DataFrame) -> No
         merged_counts["count_filtered"] = merged_counts["count_filtered"].fillna(0) # Fill NaN with 0 for non-filtered categories
 
         # Determine opacity based on whether the category is present in the filtered data
-        merged_counts["opacity"] = merged_counts["count_filtered"].apply(lambda x: 0.9 if x > 0 else 0.2)
+        merged_counts["opacity"] = merged_counts["count_filtered"].apply(
+            lambda x: PLOTLY_CONFIG["selected_opacity"] if x > 0 else PLOTLY_CONFIG["unselected_opacity"]
+        )
 
         # Create RGBA colors dynamically for each bar
         # Define a base color (e.g., Plotly default blue)
@@ -163,7 +165,9 @@ def render_overview_page(full_df: pd.DataFrame, filtered_df: pd.DataFrame) -> No
                                           on="year", how="left").fillna(0)
 
             # Determine opacity for each year
-            merged_year_counts["opacity"] = merged_year_counts["count_filtered"].apply(lambda x: 1.0 if x > 0 else 0.2)
+            merged_year_counts["opacity"] = merged_year_counts["count_filtered"].apply(
+                lambda x: PLOTLY_CONFIG["selected_opacity"] if x > 0 else PLOTLY_CONFIG["unselected_opacity"]
+            )
 
             # Create Plotly Express line chart
             fig_years = px.line(merged_year_counts, x="year", y="count_full",
@@ -210,7 +214,9 @@ def render_overview_page(full_df: pd.DataFrame, filtered_df: pd.DataFrame) -> No
             merged_season_counts["count_filtered"] = merged_season_counts["count_filtered"].fillna(0)
 
             # Determine opacity for each season
-            merged_season_counts["opacity"] = merged_season_counts["count_filtered"].apply(lambda x: 0.9 if x > 0 else 0.2)
+            merged_season_counts["opacity"] = merged_season_counts["count_filtered"].apply(
+                lambda x: PLOTLY_CONFIG["selected_opacity"] if x > 0 else PLOTLY_CONFIG["unselected_opacity"]
+            )
 
             # Create RGBA colors dynamically
             base_color_season = "rgba(255, 127, 14, {})" # Using Plotly's default orange color
@@ -254,7 +260,9 @@ def render_overview_page(full_df: pd.DataFrame, filtered_df: pd.DataFrame) -> No
         merged_district_counts["count_filtered"] = merged_district_counts["count_filtered"].fillna(0)
 
         # Determine opacity for each district
-        merged_district_counts["opacity"] = merged_district_counts["count_filtered"].apply(lambda x: 0.9 if x > 0 else 0.2)
+        merged_district_counts["opacity"] = merged_district_counts["count_filtered"].apply(
+            lambda x: PLOTLY_CONFIG["selected_opacity"] if x > 0 else PLOTLY_CONFIG["unselected_opacity"]
+        )
 
         # Create RGBA colors dynamically
         base_color_district = "rgba(44, 160, 44, {})" # Using Plotly's default green color
