@@ -7,11 +7,18 @@ Run with: streamlit run dashboard/app.py
 import streamlit as st
 from pathlib import Path
 
-from dashboard.config import DISPLAY_CONFIG, PAGE_NAMES, FILTER_DEFAULTS
-from dashboard.components.cache import load_crime_data, get_data_summary, apply_filters
+from dashboard.config import DISPLAY_CONFIG, PAGE_NAMES
+from dashboard.components.cache import load_crime_data, apply_filters
 from dashboard.filters.time_filters import render_time_filters, get_filter_dates
 from dashboard.filters.geo_filters import render_geo_filters, get_filter_districts
 from dashboard.filters.crime_filters import render_crime_filters, get_filter_categories, get_filter_crime_types
+from dashboard.pages import (
+    render_overview_page,
+    render_temporal_page,
+    render_spatial_page,
+    render_correlations_page,
+    render_advanced_page,
+)
 
 # Configure page
 st.set_page_config(
@@ -42,8 +49,16 @@ def _load_custom_css():
         border-radius: 0.5rem;
         margin: 0.5rem 0;
     }
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 4px 4px 0 0;
+        padding: 10px 20px;
+    }
     </style>
     """, unsafe_allow_html=True)
+
 
 def main():
     """Main dashboard entry point."""
@@ -54,32 +69,36 @@ def main():
     st.markdown(f"<p class='sub-header'>{DISPLAY_CONFIG['subtitle']}</p>", unsafe_allow_html=True)
 
     # Load data (cached)
-    with st.spinner("Loading data..."):
+    with st.spinner("Loading data (first load takes ~10s)..."):
         df = load_crime_data()
 
-    # Render time filters in sidebar
-    time_state = render_time_filters()
-    start_date, end_date = get_filter_dates(time_state)
+    # Sidebar: Render all filters
+    with st.sidebar:
+        st.header(":wrench: Filters")
 
-    # Apply time filters first (to limit other filter options)
-    df_time_filtered = apply_filters(df, start_date=start_date, end_date=end_date)
+        # Time filters
+        time_state = render_time_filters()
+        start_date, end_date = get_filter_dates(time_state)
 
-    # Render geo filters
-    geo_state = render_geo_filters(df_time_filtered)
-    selected_districts = get_filter_districts(geo_state)
+        st.markdown("---")
 
-    # Apply time + geo filters
-    df_tg_filtered = apply_filters(
-        df,
-        start_date=start_date,
-        end_date=end_date,
-        districts=selected_districts,
-    )
+        # Geo filters (depends on time filter)
+        df_time_filtered = apply_filters(df, start_date=start_date, end_date=end_date)
+        geo_state = render_geo_filters(df_time_filtered)
+        selected_districts = get_filter_districts(geo_state)
 
-    # Render crime filters
-    crime_state = render_crime_filters(df_tg_filtered)
-    selected_categories = get_filter_categories(crime_state)
-    selected_crime_types = get_filter_crime_types(crime_state)
+        st.markdown("---")
+
+        # Crime filters (depends on time + geo)
+        df_tg_filtered = apply_filters(
+            df, start_date=start_date, end_date=end_date, districts=selected_districts
+        )
+        crime_state = render_crime_filters(df_tg_filtered)
+        selected_categories = get_filter_categories(crime_state)
+        selected_crime_types = get_filter_crime_types(crime_state)
+
+        st.markdown("---")
+        st.caption("Dashboard v1.0 | Phase 4")
 
     # Apply all filters
     filtered_df = apply_filters(
@@ -91,42 +110,57 @@ def main():
         crime_types=selected_crime_types,
     )
 
-    # Display summary stats
-    summary = get_data_summary(filtered_df)
-
-    st.subheader(f"Filtered Summary: {start_date} to {end_date}")
-
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Records", f"{summary['total_records']:,}")
-    with col2:
-        st.metric("Years", summary.get('years', 'N/A'))
-    with col3:
-        district_count = len(selected_districts)
-        total_districts = summary.get('districts', 23)
-        st.metric("Districts", f"{district_count}/{total_districts}")
-    with col4:
-        coord_pct = summary.get('coord_coverage', {}).get('percentage', 0)
-        st.metric("Valid Coordinates", f"{coord_pct:.1f}%")
+    # Filter summary banner
+    with st.container():
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Records", f"{len(filtered_df):,}")
+        with col2:
+            st.metric("Date Range", f"{start_date[:4]}-{end_date[:4]}")
+        with col3:
+            st.metric("Districts", len(selected_districts))
+        with col4:
+            st.metric("Categories", len(selected_categories))
 
     # Show active filters
     filter_info = []
 
-    if len(selected_districts) < 23:
+    if len(selected_districts) < 25:  # 25 districts in data
         filter_info.append(f"Districts: {', '.join(f'D{d}' for d in sorted(selected_districts))}")
 
     if len(selected_categories) < 3:
         filter_info.append(f"Categories: {', '.join(selected_categories)}")
+
+    if selected_crime_types and len(selected_crime_types) > 0:
+        filter_info.append(f"Crime Types: {len(selected_crime_types)} selected")
 
     if filter_info:
         st.caption(" | ".join(filter_info))
     else:
         st.caption(":map: All districts, :mag: All categories")
 
-    st.caption(f":link: Share this view: URL encodes your current filter settings")
+    st.caption(":link: Share this view: URL encodes your current filter settings")
 
     st.markdown("---")
-    st.info("Main visualizations will be added in plan 04-06.")
+
+    # Create tabs
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(list(PAGE_NAMES.values()))
+
+    with tab1:
+        render_overview_page(filtered_df)
+
+    with tab2:
+        render_temporal_page(filtered_df)
+
+    with tab3:
+        render_spatial_page(filtered_df)
+
+    with tab4:
+        render_correlations_page(filtered_df)
+
+    with tab5:
+        render_advanced_page(filtered_df)
+
 
 if __name__ == "__main__":
     main()
