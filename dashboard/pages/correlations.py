@@ -8,17 +8,58 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
+from dashboard.components import (
+    get_selection_state,
+    get_active_filter_kwargs,
+    clear_selection_state,
+    has_active_selection,
+)
+from dashboard.components.cache import apply_filters
 
-def render_correlations_page(df: pd.DataFrame) -> None:
+
+def render_correlations_page(full_df: pd.DataFrame, filtered_df: pd.DataFrame) -> None:
     """
     Render the Correlations page.
 
     Args:
-        df: Filtered DataFrame.
+        full_df: The complete, unfiltered DataFrame.
+        filtered_df: The currently filtered DataFrame.
     """
     st.header(":chart_with_upwards_trend: External Data Correlations")
 
     st.caption("Correlations with weather and economic factors")
+
+    # Get selection state for cross-filtering
+    selection_state = get_selection_state()
+
+    # Display active cross-filter hint and clear button
+    if selection_state.active_view and selection_state.active_view != "correlations":
+        source_view_name = selection_state.active_view.title()
+
+        # Format selection details for display
+        selection_details = []
+        if selection_state.active_districts:
+            selection_details.append(f"Districts: {', '.join(map(str, selection_state.active_districts[:5]))}{'...' if len(selection_state.active_districts) > 5 else ''}")
+        if selection_state.active_crime_types:
+            selection_details.append(f"Crime Types: {', '.join(selection_state.active_crime_types[:3])}{'...' if len(selection_state.active_crime_types) > 3 else ''}")
+        if selection_state.active_time_range:
+            selection_details.append(f"Time Range: {selection_state.active_time_range[0]} to {selection_state.active_time_range[1]}")
+
+        selection_info = ", ".join(selection_details) if selection_details else "Active selection"
+
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.info(f":link: **Active cross-filter from {source_view_name} view**: {selection_info}")
+        with col2:
+            if st.button(":x: Clear", key="correlations_clear"):
+                clear_selection_state()
+                st.rerun()
+
+        # Apply cross-filter if active selection from other views
+        cross_filter_kwargs = get_active_filter_kwargs()
+        if cross_filter_kwargs:
+            filtered_df = apply_filters(filtered_df, **cross_filter_kwargs)
+            st.caption(f":information_source: Analysis based on {len(filtered_df):,} records after cross-filter")
 
     # Check for correlation reports
     correlation_report = Path("reports/12_report_correlations.md")
