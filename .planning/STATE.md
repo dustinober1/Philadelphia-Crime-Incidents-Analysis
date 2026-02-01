@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 4 of 6 (Dashboard Foundation)
-Plan: 2 of 6 in current phase
+Plan: 5 of 6 in current phase
 Status: In progress
-Last activity: 2026-02-01 — Completed 04-02-PLAN.md (Cached data loading component)
+Last activity: 2026-02-01 — Completed 04-05-PLAN.md (Crime type filter controls)
 
-Progress: [██████████░░] 54% (20/37 plans)
+Progress: [██████████░░] 57% (21/37 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
+- Total plans completed: 21
 - Average duration: ~8 min
-- Total execution time: 2h 7m
+- Total execution time: 2h 12m
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [██████████░░] 54% (20/37 plans)
 | 1     | 6/6   | -     | ~10 min  |
 | 2     | 8/8   | -     | ~5 min   |
 | 3     | 4/4   | -     | ~25 min  |
-| 4     | 2/6   | -     | ~2 min   |
+| 4     | 5/6   | -     | ~3 min   |
 
 **Recent Trend:**
-- Last 5 plans: 04-02, 04-01, 03-04, 03-03, 03-02
-- Trend: Phase 4 in progress - Data loading with caching complete
+- Last 5 plans: 04-05, 04-04, 04-03, 04-02, 04-01
+- Trend: Phase 4 in progress - Filter controls complete
 
 *Updated after each plan completion*
 
@@ -219,6 +219,17 @@ Recent decisions affecting current work:
 - 2026 excluded by default (incomplete year - only through January 20)
 - Reuses existing utilities: load_data(), validate_coordinates(), extract_temporal_features(), classify_crime_category()
 
+**From 04-05 (Crime Type Filter Controls):**
+- Created dashboard/filters/ package with crime_filters.py (257 lines) for UCR category and crime type selection
+- UCR classification: Violent (UCR 100-499), Property (UCR 500-799), Other (800+) imported from analysis.utils
+- CrimeFilterState NamedTuple for immutable filter state (categories, crime_types, select_all_types)
+- render_crime_filters() creates category multi-select, select all toggle, crime type multi-select
+- URL state synchronization via read_crime_filters_from_url() and sync_crime_filters_to_url()
+- Crime type options limited to selected categories for better UX (cascading filters)
+- Clean URL encoding: omit params when all categories selected or select_all_types=true
+- Extended apply_filters() with crime_types parameter for filtering by text_general_code column
+- Filter pattern: time -> geo -> crime for cascading options limited to filtered data
+
 ### Pending Todos
 
 None yet.
@@ -236,6 +247,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-01 04:04 UTC
-Stopped at: Completed 04-02-PLAN.md (Cached data loading component) - 2/6 plans in Phase 4
+Last session: 2026-02-01 04:10 UTC
+Stopped at: Completed 04-05-PLAN.md (Crime type filter controls) - 5/6 plans in Phase 4
 Resume file: None
