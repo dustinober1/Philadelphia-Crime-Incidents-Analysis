@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Statistical Rigor Layer** - Add significance testing, confidence intervals, effect sizes, and reproducibility infrastructure to all existing analyses (Completed: 2025-01-31)
 - [x] **Phase 2: External Data Integration** - Ingest weather, economic, and policing data for correlation analysis (Completed: 2025-01-31)
 - [x] **Phase 3: Advanced Temporal Analysis** - Deep-dive into holiday effects, individual crime types, and shift-by-shift patterns (Completed: 2026-01-31)
-- [ ] **Phase 4: Dashboard Foundation** - Build Streamlit dashboard with time, geographic, and crime type filters
+- [x] **Phase 4: Dashboard Foundation** - Build Streamlit dashboard with time, geographic, and crime type filters (Completed: 2026-01-31)
 - [ ] **Phase 5: Dashboard Cross-Filtering** - Implement linked views with cross-filtering interactions
 - [ ] **Phase 6: Publication Outputs** - Generate high-DPI figures and LaTeX-ready tables for academic presentation
 
@@ -116,12 +116,12 @@ Plans:
 - Wave 3 (sequential): 04-06 main app with tabs and visualizations
 
 Plans:
-- [ ] 04-01-PLAN.md — Set up Streamlit project structure and configuration
-- [ ] 04-02-PLAN.md — Implement data loading with caching
-- [ ] 04-03-PLAN.md — Implement time range filter controls
-- [ ] 04-04-PLAN.md — Implement geographic filter controls
-- [ ] 04-05-PLAN.md — Implement crime type filter controls
-- [ ] 04-06-PLAN.md — Create main dashboard with tabs and visualizations
+- [x] 04-01-PLAN.md — Set up Streamlit project structure and configuration
+- [x] 04-02-PLAN.md — Implement data loading with caching
+- [x] 04-03-PLAN.md — Implement time range filter controls
+- [x] 04-04-PLAN.md — Implement geographic filter controls
+- [x] 04-05-PLAN.md — Implement crime type filter controls
+- [x] 04-06-PLAN.md — Create main dashboard with tabs and visualizations
 
 ### Phase 5: Dashboard Cross-Filtering
 **Goal**: Dashboard views are linked with cross-filtering so selections in one component update all related visualizations
@@ -171,8 +171,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Statistical Rigor Layer | 6/6 | ✓ Complete | 2025-01-31 |
 | 2. External Data Integration | 8/8 | ✓ Complete | 2025-01-31 |
 | 3. Advanced Temporal Analysis | 4/4 | ✓ Complete | 2026-01-31 |
-| 4. Dashboard Foundation | 0/6 | Ready to execute | - |
-| 5. Dashboard Cross-Filtering | 0/5 | Not started | - |
+| 4. Dashboard Foundation | 6/6 | ✓ Complete | 2026-01-31 |
+| 5. Dashboard Cross-Filtering | 0/5 | Ready to execute | - |
 | 6. Publication Outputs | 0/6 | Not started | - |
 
-**Overall Progress:** [████████░░░░] 24/35 plans (69%)
+**Overall Progress:** [██████████░░] 30/35 plans (86%)
