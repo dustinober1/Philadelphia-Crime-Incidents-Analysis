@@ -9,9 +9,16 @@ from pathlib import Path
 
 from dashboard.config import DISPLAY_CONFIG, PAGE_NAMES
 from dashboard.components.cache import load_crime_data, apply_filters
-from dashboard.filters.time_filters import render_time_filters, get_filter_dates
-from dashboard.filters.geo_filters import render_geo_filters, get_filter_districts
-from dashboard.filters.crime_filters import render_crime_filters, get_filter_categories, get_filter_crime_types
+from dashboard.components.state import (
+    has_pending_changes,
+    clear_pending_filters,
+    update_applied_state,
+    get_applied_state,
+    initialize_filter_state,
+)
+from dashboard.filters.time_filters import render_time_filters_with_pending, get_filter_dates
+from dashboard.filters.geo_filters import render_geo_filters_with_pending, get_filter_districts
+from dashboard.filters.crime_filters import render_crime_filters_with_pending, get_filter_categories, get_filter_crime_types
 from dashboard.pages import (
     render_overview_page,
     render_temporal_page,
@@ -60,9 +67,35 @@ def _load_custom_css():
     """, unsafe_allow_html=True)
 
 
+def _sync_all_filters_to_url(time_state, geo_state, crime_state) -> None:
+    """
+    Sync all applied filter states to URL parameters.
+
+    Called when apply button is clicked to make filtered views shareable.
+
+    Args:
+        time_state: TimeFilterState from time_filters.py
+        geo_state: GeoFilterState from geo_filters.py
+        crime_state: CrimeFilterState from crime_filters.py
+    """
+    from dashboard.filters.time_filters import sync_time_filters_to_url
+    from dashboard.filters.geo_filters import sync_geo_filters_to_url
+    from dashboard.filters.crime_filters import sync_crime_filters_to_url
+
+    # Time filters
+    sync_time_filters_to_url(time_state)
+    # Geo filters
+    sync_geo_filters_to_url(geo_state)
+    # Crime filters
+    sync_crime_filters_to_url(crime_state)
+
+
 def main():
     """Main dashboard entry point."""
     _load_custom_css()
+
+    # Initialize filter state (required for apply button pattern)
+    initialize_filter_state()
 
     # Title
     st.title(DISPLAY_CONFIG["title"])
@@ -72,42 +105,57 @@ def main():
     with st.spinner("Loading data (first load takes ~10s)..."):
         df = load_crime_data()
 
-    # Sidebar: Render all filters
+    # Get applied state for filtering
+    applied = get_applied_state()
+
+    # Sidebar: Render all filters with pending state tracking
     with st.sidebar:
         st.header(":wrench: Filters")
 
         # Time filters
-        time_state = render_time_filters()
-        start_date, end_date = get_filter_dates(time_state)
+        time_state = render_time_filters_with_pending()
 
         st.markdown("---")
 
-        # Geo filters (depends on time filter)
-        df_time_filtered = apply_filters(df, start_date=start_date, end_date=end_date)
-        geo_state = render_geo_filters(df_time_filtered)
-        selected_districts = get_filter_districts(geo_state)
+        # Geo filters (depends on time filter - use applied state for cascading)
+        df_time_filtered = apply_filters(df, start_date=applied.start_date, end_date=applied.end_date)
+        geo_state = render_geo_filters_with_pending(df_time_filtered)
 
         st.markdown("---")
 
-        # Crime filters (depends on time + geo)
+        # Crime filters (depends on time + geo - use applied state for cascading)
         df_tg_filtered = apply_filters(
-            df, start_date=start_date, end_date=end_date, districts=selected_districts
+            df, start_date=applied.start_date, end_date=applied.end_date, districts=applied.districts
         )
-        crime_state = render_crime_filters(df_tg_filtered)
-        selected_categories = get_filter_categories(crime_state)
-        selected_crime_types = get_filter_crime_types(crime_state)
+        crime_state = render_crime_filters_with_pending(df_tg_filtered)
 
         st.markdown("---")
-        st.caption("Dashboard v1.0 | Phase 4")
 
-    # Apply all filters
+        # Apply button
+        if has_pending_changes():
+            if st.button(":white_check_mark: Apply Filters", type="primary", use_container_width=True):
+                # Update applied state from current filter values
+                update_applied_state(time_state, geo_state, crime_state)
+                # Clear pending flags
+                clear_pending_filters()
+                # Sync to URL
+                _sync_all_filters_to_url(time_state, geo_state, crime_state)
+                # Rerun to update views
+                st.rerun()
+        else:
+            st.button(":white_check_mark: Apply Filters", disabled=True, use_container_width=True)
+
+        st.markdown("---")
+        st.caption("Dashboard v1.0 | Phase 5")
+
+    # Apply all filters using applied state
     filtered_df = apply_filters(
         df,
-        start_date=start_date,
-        end_date=end_date,
-        districts=selected_districts,
-        crime_categories=selected_categories,
-        crime_types=selected_crime_types,
+        start_date=applied.start_date,
+        end_date=applied.end_date,
+        districts=applied.districts,
+        crime_categories=applied.crime_categories,
+        crime_types=applied.crime_types,
     )
 
     # Filter summary banner
@@ -116,23 +164,23 @@ def main():
         with col1:
             st.metric("Records", f"{len(filtered_df):,}")
         with col2:
-            st.metric("Date Range", f"{start_date[:4]}-{end_date[:4]}")
+            st.metric("Date Range", f"{applied.start_date[:4]}-{applied.end_date[:4]}")
         with col3:
-            st.metric("Districts", len(selected_districts))
+            st.metric("Districts", len(applied.districts))
         with col4:
-            st.metric("Categories", len(selected_categories))
+            st.metric("Categories", len(applied.crime_categories))
 
     # Show active filters
     filter_info = []
 
-    if len(selected_districts) < 25:  # 25 districts in data
-        filter_info.append(f"Districts: {', '.join(f'D{d}' for d in sorted(selected_districts))}")
+    if len(applied.districts) < 25:  # 25 districts in data
+        filter_info.append(f"Districts: {', '.join(f'D{d}' for d in sorted(applied.districts))}")
 
-    if len(selected_categories) < 3:
-        filter_info.append(f"Categories: {', '.join(selected_categories)}")
+    if len(applied.crime_categories) < 3:
+        filter_info.append(f"Categories: {', '.join(applied.crime_categories)}")
 
-    if selected_crime_types and len(selected_crime_types) > 0:
-        filter_info.append(f"Crime Types: {len(selected_crime_types)} selected")
+    if applied.crime_types and len(applied.crime_types) > 0:
+        filter_info.append(f"Crime Types: {len(applied.crime_types)} selected")
 
     if filter_info:
         st.caption(" | ".join(filter_info))
@@ -147,19 +195,19 @@ def main():
     tab1, tab2, tab3, tab4, tab5 = st.tabs(list(PAGE_NAMES.values()))
 
     with tab1:
-        render_overview_page(filtered_df)
+        render_overview_page(df, filtered_df)
 
     with tab2:
-        render_temporal_page(filtered_df)
+        render_temporal_page(df, filtered_df)
 
     with tab3:
-        render_spatial_page(filtered_df)
+        render_spatial_page(df, filtered_df)
 
     with tab4:
-        render_correlations_page(filtered_df)
+        render_correlations_page(df, filtered_df)
 
     with tab5:
-        render_advanced_page(filtered_df)
+        render_advanced_page(df, filtered_df)
 
 
 if __name__ == "__main__":
