@@ -25,6 +25,7 @@ from dashboard.components.plotly_interactions import (
     ViewSelectionState,
     initialize_view_selection_state,
     get_selection_state,
+    clear_selection_state,
 )
 from dashboard.filters.time_filters import render_time_filters_with_pending, get_filter_dates
 from dashboard.filters.geo_filters import render_geo_filters_with_pending, get_filter_districts
@@ -180,7 +181,8 @@ def main():
                 # Clear pending flags
                 clear_pending_filters()
                 # Clear view selections (sidebar filters override view selections)
-                clear_view_selection_from_url()
+                clear_selection_state()  # Clear session state
+                clear_view_selection_from_url()  # Clear URL params
                 # Sync to URL
                 _sync_all_filters_to_url(time_state, geo_state, crime_state)
                 # Rerun to update views
