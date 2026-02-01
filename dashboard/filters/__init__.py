@@ -1,10 +1,17 @@
 """
-Dashboard filter controls.
+Dashboard filter components.
 
-Provides sidebar filter widgets for time, geographic, and crime category filtering.
+Reusable filter controls for time, geography, and crime type.
 """
 
-# Geographic filters (04-04)
+from dashboard.filters.time_filters import (
+    render_time_filters,
+    sync_time_filters_to_url,
+    read_time_filters_from_url,
+    TimeFilterState,
+    get_filter_dates,
+)
+
 from dashboard.filters.geo_filters import (
     render_geo_filters,
     sync_geo_filters_to_url,
@@ -14,34 +21,31 @@ from dashboard.filters.geo_filters import (
     get_district_list_from_data,
 )
 
-# Time filters (04-03)
-try:
-    from dashboard.filters.time_filters import (
-        render_time_filters,
-        sync_time_filters_to_url,
-        read_time_filters_from_url,
-        TimeFilterState,
-        get_filter_dates,
-    )
-    _has_time_filters = True
-except ImportError:
-    _has_time_filters = False
+from dashboard.filters.crime_filters import (
+    render_crime_filters,
+    sync_crime_filters_to_url,
+    read_crime_filters_from_url,
+    CrimeFilterState,
+    get_filter_categories,
+    get_filter_crime_types,
+)
 
 __all__ = [
+    "render_time_filters",
+    "sync_time_filters_to_url",
+    "read_time_filters_from_url",
+    "TimeFilterState",
+    "get_filter_dates",
     "render_geo_filters",
     "sync_geo_filters_to_url",
     "read_geo_filters_from_url",
     "GeoFilterState",
     "get_filter_districts",
     "get_district_list_from_data",
+    "render_crime_filters",
+    "sync_crime_filters_to_url",
+    "read_crime_filters_from_url",
+    "CrimeFilterState",
+    "get_filter_categories",
+    "get_filter_crime_types",
 ]
-
-# Add time filters to exports if available
-if _has_time_filters:
-    __all__.extend([
-        "render_time_filters",
-        "sync_time_filters_to_url",
-        "read_time_filters_from_url",
-        "TimeFilterState",
-        "get_filter_dates",
-    ])
