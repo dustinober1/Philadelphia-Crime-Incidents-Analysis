@@ -8,17 +8,63 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
+from dashboard.components import (
+    get_selection_state,
+    get_active_filter_kwargs,
+    clear_selection_state,
+    has_active_selection,
+)
+from dashboard.components.cache import apply_filters
 
-def render_advanced_page(df: pd.DataFrame) -> None:
+
+def render_advanced_page(full_df: pd.DataFrame, filtered_df: pd.DataFrame) -> None:
     """
     Render the Advanced Temporal page.
 
     Args:
-        df: Filtered DataFrame.
+        full_df: The complete, unfiltered DataFrame.
+        filtered_df: The currently filtered DataFrame.
     """
     st.header(":calendar: Advanced Temporal Analysis")
 
     st.caption("Holiday effects, crime type profiles, and shift patterns")
+
+    # Get selection state for cross-filtering
+    selection_state = get_selection_state()
+
+    # Display active cross-filter hint and clear button
+    if selection_state.active_view and selection_state.active_view != "advanced":
+        source_view_name = selection_state.active_view.title()
+
+        # Format selection details for display
+        selection_details = []
+        if selection_state.active_districts:
+            selection_details.append(f"Districts: {', '.join(map(str, selection_state.active_districts[:5]))}{'...' if len(selection_state.active_districts) > 5 else ''}")
+        if selection_state.active_crime_types:
+            selection_details.append(f"Crime Types: {', '.join(selection_state.active_crime_types[:3])}{'...' if len(selection_state.active_crime_types) > 3 else ''}")
+        if selection_state.active_time_range:
+            selection_details.append(f"Time Range: {selection_state.active_time_range[0]} to {selection_state.active_time_range[1]}")
+
+        selection_info = ", ".join(selection_details) if selection_details else "Active selection"
+
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.info(f":link: **Active cross-filter from {source_view_name} view**: {selection_info}")
+        with col2:
+            if st.button(":x: Clear", key="advanced_clear"):
+                clear_selection_state()
+                st.rerun()
+
+        # Apply cross-filter if active selection from other views
+        cross_filter_kwargs = get_active_filter_kwargs()
+        if cross_filter_kwargs:
+            filtered_df = apply_filters(filtered_df, **cross_filter_kwargs)
+
+            # Warn if cross-filter resulted in too little data
+            if len(filtered_df) < 100:
+                st.warning(f":warning: **Small dataset**: Cross-filter resulted in only {len(filtered_df):,} records. Analysis may be unreliable.")
+            else:
+                st.caption(f":information_source: Analysis based on {len(filtered_df):,} records after cross-filter")
 
     # Check for advanced temporal report
     advanced_report = Path("reports/16_advanced_temporal_analysis_report.md")
