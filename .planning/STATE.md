@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 4 of 6 (Dashboard Foundation)
-Plan: 1 of 6 in current phase
+Plan: 2 of 6 in current phase
 Status: In progress
-Last activity: 2026-01-31 — Completed 04-01-PLAN.md (Dashboard project structure)
+Last activity: 2026-02-01 — Completed 04-02-PLAN.md (Cached data loading component)
 
-Progress: [█████████░░░] 51% (19/37 plans)
+Progress: [██████████░░] 54% (20/37 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
+- Total plans completed: 18
 - Average duration: ~8 min
-- Total execution time: 2h 5m
+- Total execution time: 2h 7m
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [█████████░░░] 51% (19/37 plans)
 | 1     | 6/6   | -     | ~10 min  |
 | 2     | 8/8   | -     | ~5 min   |
 | 3     | 4/4   | -     | ~25 min  |
-| 4     | 1/6   | -     | ~2 min   |
+| 4     | 2/6   | -     | ~2 min   |
 
 **Recent Trend:**
-- Last 5 plans: 04-01, 03-04, 03-03, 03-02, 03-01
-- Trend: Phase 4 in progress - Dashboard structure created
+- Last 5 plans: 04-02, 04-01, 03-04, 03-03, 03-02
+- Trend: Phase 4 in progress - Data loading with caching complete
 
 *Updated after each plan completion*
 
@@ -208,6 +208,17 @@ Recent decisions affecting current work:
 - Custom CSS loaded via _load_custom_css() function at app startup
 - Sidebar + tabs layout per CONTEXT.md decision
 
+**From 04-02 (Cached Data Loading Component):**
+- Created dashboard/components/ package with __init__.py, cache.py (198 lines)
+- load_crime_data() uses @st.cache_data (ttl=3600, max_entries=10) for full dataset caching
+- apply_filters() caches filter results (ttl=1800, max_entries=50) for fast query responses
+- get_data_summary() returns total_records, date_range, years, districts, crime_categories, coord_coverage
+- load_cached_report() loads pre-generated markdown reports for embedding
+- **Categorical date handling**: dispatch_date is categorical dtype - must use pd.to_datetime() before min/max/comparison
+- Temporary _dispatch_date_dt column used for filtering to avoid modifying cached DataFrame
+- 2026 excluded by default (incomplete year - only through January 20)
+- Reuses existing utilities: load_data(), validate_coordinates(), extract_temporal_features(), classify_crime_category()
+
 ### Pending Todos
 
 None yet.
@@ -225,6 +236,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-31 23:03 UTC
-Stopped at: Completed 04-01-PLAN.md (Dashboard project structure) - 1/6 plans in Phase 4
+Last session: 2026-02-01 04:04 UTC
+Stopped at: Completed 04-02-PLAN.md (Cached data loading component) - 2/6 plans in Phase 4
 Resume file: None
