@@ -10,6 +10,7 @@ from typing import NamedTuple
 
 from analysis.utils import VIOLENT_CRIME_UCR, PROPERTY_CRIME_UCR
 from dashboard.config import FILTER_DEFAULTS
+from dashboard.components.state import mark_filter_pending, has_pending_changes, PendingFilters
 
 
 # UCR category definitions
@@ -227,6 +228,105 @@ def render_crime_filters(df, key_prefix: str = "crime") -> CrimeFilterState:
 
     # Sync to URL
     sync_crime_filters_to_url(state)
+
+    return state
+
+
+def render_crime_filters_with_pending(df, key_prefix: str = "crime") -> CrimeFilterState:
+    """
+    Render crime type filter controls with pending state tracking.
+
+    This version tracks pending changes separately from applied state.
+    URL sync is handled by app.py when apply button is clicked.
+
+    Args:
+        df: Filtered DataFrame (used to limit crime type options).
+        key_prefix: Prefix for widget keys to avoid conflicts.
+
+    Returns:
+        CrimeFilterState with current filter values.
+    """
+    with st.sidebar:
+        # Check for pending changes
+        crime_pending = st.session_state.get("pending_filters", PendingFilters()).crime_pending
+
+        # Visual indicator for pending changes
+        header_text = ":mag: Crime Type"
+        if crime_pending:
+            header_text = f":mag: Crime Type 🔵"
+        st.subheader(header_text)
+
+        # Get current applied state for defaults
+        from dashboard.components.state import get_applied_state
+        applied = get_applied_state()
+
+        # Get available categories from data
+        available_categories = get_crime_categories_from_data(df)
+
+        # Determine default from applied state
+        default_categories = [c for c in applied.crime_categories if c in available_categories]
+        if not default_categories:
+            default_categories = available_categories
+
+        # Callback for marking pending
+        def _on_crime_change():
+            mark_filter_pending("crime")
+
+        # Category multi-select
+        selected_categories = st.multiselect(
+            "UCR Categories",
+            options=["Violent", "Property", "Other"],
+            default=default_categories,
+            key=f"{key_prefix}_pending_categories",
+            on_change=_on_crime_change,
+        )
+
+        if not selected_categories:
+            st.warning("No categories selected. Showing all categories.")
+            selected_categories = available_categories
+
+        # Get crime types for selected categories
+        available_crime_types = get_crime_types_from_data(df, selected_categories)
+
+        # Determine default from applied state
+        default_select_all = applied.crime_types is None
+        default_types = applied.crime_types if not default_select_all else None
+
+        # Select all toggle
+        select_all_types = st.checkbox(
+            "Select All Crime Types",
+            value=default_select_all,
+            key=f"{key_prefix}_pending_select_all",
+            on_change=_on_crime_change,
+        )
+
+        if select_all_types:
+            selected_crime_types = None
+        else:
+            # Determine default types
+            if default_types:
+                default_types = [t for t in default_types if t in available_crime_types]
+            if not default_types:
+                default_types = available_crime_types[:10] if len(available_crime_types) > 10 else available_crime_types
+
+            selected_crime_types = st.multiselect(
+                "Specific Crime Types",
+                options=available_crime_types,
+                default=default_types,
+                key=f"{key_prefix}_pending_types",
+                on_change=_on_crime_change,
+            )
+
+            if not selected_crime_types:
+                st.info("All crime types in selected categories will be shown.")
+                selected_crime_types = None
+
+    # Create state object (without URL sync)
+    state = CrimeFilterState(
+        categories=selected_categories,
+        crime_types=selected_crime_types,
+        select_all_types=select_all_types,
+    )
 
     return state
 
