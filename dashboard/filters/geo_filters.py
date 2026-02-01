@@ -8,6 +8,7 @@ import streamlit as st
 from typing import NamedTuple
 
 from dashboard.config import FILTER_DEFAULTS
+from dashboard.components.state import mark_filter_pending, has_pending_changes, PendingFilters
 
 
 class GeoFilterState(NamedTuple):
@@ -186,3 +187,82 @@ def get_filter_districts(state: GeoFilterState) -> list[int]:
         List of district integers.
     """
     return state.districts
+
+
+def render_geo_filters_with_pending(df, key_prefix: str = "geo") -> GeoFilterState:
+    """
+    Render geographic filter controls with pending state tracking.
+
+    This version tracks pending changes separately from applied state.
+    URL sync is handled by app.py when apply button is clicked.
+
+    Args:
+        df: Filtered DataFrame (used to limit district options).
+        key_prefix: Prefix for widget keys to avoid conflicts.
+
+    Returns:
+        GeoFilterState with current filter values.
+    """
+    with st.sidebar:
+        # Check for pending changes
+        geo_pending = st.session_state.get("pending_filters", PendingFilters()).geo_pending
+
+        # Visual indicator for pending changes
+        header_text = ":map: Geographic Area"
+        if geo_pending:
+            header_text = f":map: Geographic Area 🔵"
+        st.subheader(header_text)
+
+        # Get current applied state for defaults
+        from dashboard.components.state import get_applied_state
+        applied = get_applied_state()
+
+        # Get available districts from data
+        available_districts = get_district_list_from_data(df)
+
+        # Determine default from applied state
+        default_select_all = len(applied.districts) >= len(available_districts)
+        default_districts = applied.districts if not default_select_all else available_districts
+
+        # Callback for marking pending
+        def _on_geo_change():
+            mark_filter_pending("geo")
+
+        # Select all toggle
+        select_all = st.checkbox(
+            "Select All Districts",
+            value=default_select_all,
+            key=f"{key_prefix}_pending_select_all",
+            on_change=_on_geo_change,
+        )
+
+        if select_all:
+            # All districts selected
+            selected_districts = available_districts
+        else:
+            # Filter default districts to available
+            default_districts = [d for d in default_districts if d in available_districts]
+            if not default_districts:
+                default_districts = available_districts
+
+            selected_districts = st.multiselect(
+                "Police Districts",
+                options=available_districts,
+                default=default_districts,
+                format_func=lambda x: f"District {int(x)}",
+                key=f"{key_prefix}_pending_districts",
+                on_change=_on_geo_change,
+            )
+
+            # Show "No districts selected" message
+            if not selected_districts:
+                st.warning("No districts selected. Showing all districts.")
+                selected_districts = available_districts
+
+    # Create state object (without URL sync)
+    state = GeoFilterState(
+        districts=selected_districts,
+        select_all=select_all,
+    )
+
+    return state
