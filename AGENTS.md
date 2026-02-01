@@ -1,0 +1,5 @@
+- All docs files are to be put into the docs/ folder with the exception o f the README.md and AGENTS.md file.
+- All notebooks are not considered finsihed until they are ran and executed and all errors are cleared out and fixed. 
+- this repo used conda environment crime
+- default to conda install for packages, only use pip if conda install fails
+- commit at the file level using standard commit messages and push all to remote repot at the end of each run. 
