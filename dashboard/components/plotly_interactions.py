@@ -47,12 +47,13 @@ def initialize_view_selection_state() -> None:
         }
 
 
-def register_plotly_selection(fig: go.Figure, key: str) -> go.Figure:
+def register_plotly_selection(fig: go.Figure, key: str | None = None) -> go.Figure:
     """Configure Plotly figure for selection events.
 
     Args:
         fig: Plotly figure object to configure
-        key: Unique identifier for the chart (used to identify selection source)
+        key: Unique identifier for the chart (unused - kept for API compatibility,
+             the key is passed to st.plotly_chart() separately)
 
     Returns:
         Configured figure with selection enabled
@@ -65,8 +66,9 @@ def register_plotly_selection(fig: go.Figure, key: str) -> go.Figure:
     # Enable box/lasso select mode
     fig.update_layout(dragmode='select')
 
-    # Store the key in figure metadata for identification
-    fig.layout.update({'_selection_key': key})
+    # Note: key parameter is kept for API compatibility but not used
+    # The actual chart identification comes from source_view parameter
+    # when calling update_selection_from_event()
 
     return fig
 
