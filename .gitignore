@@ -13,4 +13,4 @@ analysis_output.log
 *.pyc
 __pycache__/
 .pytest_cache/
-*.parquet
+*.parquet.DS_Store

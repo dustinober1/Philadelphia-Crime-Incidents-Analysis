@@ -279,3 +279,84 @@ Reports are saved to `reports/` as markdown files with:
 12. **Moving holidays**: Thanksgiving (4th Thursday), Memorial Day, Labor Day change dates each year - use `workalendar.UnitedStates()` to calculate correctly.
     **workalendar v17+ API**: Use `workalendar.usa.UnitedStates` (not `america`); returns list of tuples not dict.
     **Numeric module filenames**: Phase 3 modules (03-01-*, 03-02-*, etc.) require `importlib.import_module()` due to leading digits.
+
+## Dashboard Package Structure (Phase 4)
+
+**Created:** `dashboard/` package with 5 page renderers, 3 filter modules, cache component, and main app
+
+**Run dashboard:** `streamlit run dashboard/app.py` (launches at http://localhost:8501)
+
+**Package structure:**
+- `dashboard/__init__.py` - Package initialization
+- `dashboard/app.py` - Main entry point with st.set_page_config, st.tabs for 5 views
+- `dashboard/config.py` - Dashboard constants (PAGE_NAMES, FILTER_DEFAULTS, CACHE_CONFIG, DISPLAY_CONFIG)
+- `dashboard/components/cache.py` - Data loading with @st.cache_data decorators
+- `dashboard/filters/` - Filter modules (time_filters.py, geo_filters.py, crime_filters.py)
+- `dashboard/pages/` - Page renderers (overview.py, temporal.py, spatial.py, correlations.py, advanced.py)
+
+### Streamlit Caching Pattern (Large Datasets)
+
+**Pattern:** Multi-layer @st.cache_data decorators for sub-5s load times
+
+```python
+@st.cache_data(ttl=3600, max_entries=10, show_spinner="Loading...")
+def load_data() -> pd.DataFrame:
+    # First load ~10s, subsequent loads instant
+    # Cache key derived from function arguments automatically
+    return df
+```
+
+**Layers:** Data loading (ttl=3600), filter results (ttl=1800), reports (ttl=300)
+**Key:** Each unique filter combination creates its own cache entry - no manual cache key management
+
+### Streamlit URL State Sync Pattern
+
+**Pattern:** Bidirectional st.query_params for shareable filtered views
+
+```python
+# Read from URL
+params = st.query_params
+start = params.get("start_date", "2006-01-01")
+
+# Write to URL
+st.query_params["start_date"] = start_date.isoformat()
+```
+
+**Clean URL trick:** When "select all" is active, omit the parameter entirely (cleaner: `?start=2020` vs `?districts=1,2,3,...,23`)
+
+### Streamlit Filter State with NamedTuple
+
+**Pattern:** Use NamedTuple for immutable filter state containers
+
+```python
+class TimeFilterState(NamedTuple):
+    start_date: date
+    end_date: date
+    preset: str | None
+
+    @property
+    def years(self) -> list[int]:
+        return list(range(self.start_date.year, self.end_date.year + 1))
+```
+
+**Benefits:** Type safety, IDE autocomplete, hashable for cache keys, derived properties encapsulated
+
+### Cascading Filter Architecture
+
+**Pattern:** Downstream filters receive progressively filtered data
+
+```python
+# Time filter (no dependencies)
+time_state = render_time_filters()
+df_filtered = apply_filters(df, start=start, end=end)
+
+# Geo filter (limited to time range)
+geo_state = render_geo_filters(df_filtered)  # Pass filtered data
+selected_districts = get_filter_districts(geo_state)
+
+# Crime filter (limited to time + geo)
+df_tg_filtered = apply_filters(df, start=start, end=end, districts=districts)
+crime_state = render_crime_filters(df_tg_filtered)  # Pass filtered data
+```
+
+**Why:** Prevents showing options that would return zero results (e.g., districts with no data in selected time period)
