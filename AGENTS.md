@@ -4,7 +4,7 @@ All docs files are to be put into the `docs/` folder with the exception of `READ
 
 This repository uses the `crime` conda environment. Prefer `conda install` when adding packages; use `pip` only if a package is unavailable via conda.
 
-Notebooks are considered unfinished until they are executed end-to-end with no errors. Commit notebooks with outputs cleared (see rules below) and push changes to the remote repository at logical file-level commits.
+Notebooks are considered unfinished until they are executed end-to-end with no errors. Commit completed notebooks with outputs preserved (do not clear outputs) and push changes to the remote repository at logical file-level commits.
 
 ---
 
@@ -22,7 +22,13 @@ The following rules apply to creating, running, and committing Jupyter notebooks
 
 5. **Run Before Commit:** Every notebook must be executed start-to-finish locally (or in CI) with no errors before committing. If long-running steps exist, provide a fast/sampled dev path and clearly mark the long step.
 
-6. **Outputs & Committed Files:** Commit notebooks with outputs cleared to avoid merge conflicts. Separately commit publication-ready exports (PNG/HTML/PDF) to `reports/` for review and reproducibility. Large binary artifacts should be reviewed and justified in PRs.
+6. **Outputs & Committed Files:** Commit completed notebooks with outputs preserved (do not clear outputs) to retain executed outputs for reproducibility. Separately commit publication-ready exports (PNG/HTML/PDF) to `reports/` for review and reproducibility. Large binary artifacts should be reviewed and justified in PRs.
+
+**Additional Practical Recommendations:**
+- **CI compatibility:** For CI, run notebooks in a fast test-mode (sampled data) or execute a cleared copy for automated checks. Example command for a cleared CI run: `jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=600 --ClearOutputPreprocessor.enabled=True notebooks/<notebook>.ipynb`. Keep the committed notebook (with outputs) for reproducibility and use the CI-run copy for automated validation.
+- **Notebook diffs & reviews:** Use `nbdime` to produce readable notebook diffs in PRs (`pip install nbdime` and `nbdime config-git --enable`). This reduces noisy diffs and simplifies reviews/merges.
+- **Large outputs & storage policy:** Avoid committing very large binary outputs into the main repo. Save large images/HTML to `reports/`. For files larger than ~5 MB, consider Git LFS or separate storage; such files should be reviewed in PRs.
+- **Pre-commit / automation (recommended):** Consider optional pre-commit hooks to validate notebooks before committing (examples: `nbstripout`, execution checks, or file-size checks). These help prevent accidental large-binary commits and ensure notebooks execute in a reproducible minimal test-mode.
 
 7. **Data Access:** Use project utilities (e.g., `analysis.utils.load_data`) and relative paths under `data/`. Document the data source, file path, and last update date in a metadata cell.
 
@@ -44,7 +50,7 @@ The following rules apply to creating, running, and committing Jupyter notebooks
 
 16. **CI & Headless Execution:** Notebooks should be runnable headless (e.g., `jupyter nbconvert --execute`) for CI. Add a small test-run mode that executes quickly with a sample of the data.
 
-17. **Completion Checklist:** Each notebook must include (or reference) a completion checklist before merging: ran successfully, no errors, figures saved to `reports/`, reproducibility metadata present, outputs cleared, and PR summary written.
+17. **Completion Checklist:** Each notebook must include (or reference) a completion checklist before merging: ran successfully, no errors, figures saved to `reports/`, reproducibility metadata present, outputs preserved (include execution outputs), and PR summary written.
 
 18. **Commit Messages & PRs:** Use descriptive commit messages and include an executive summary of the notebook findings in the PR description. Link to generated `reports/` assets in the PR.
 
