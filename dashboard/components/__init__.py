@@ -15,6 +15,15 @@ from dashboard.components.state import (
     clear_pending_filters,
     update_applied_state,
 )
+from dashboard.components.plotly_interactions import (
+    ViewSelectionState,
+    register_plotly_selection,
+    get_selection_state,
+    clear_selection_state,
+    update_selection_from_event,
+    has_active_selection,
+    get_active_filter_kwargs,
+)
 
 __all__ = [
     "load_crime_data",
@@ -27,4 +36,11 @@ __all__ = [
     "mark_filter_pending",
     "clear_pending_filters",
     "update_applied_state",
+    "ViewSelectionState",
+    "register_plotly_selection",
+    "get_selection_state",
+    "clear_selection_state",
+    "update_selection_from_event",
+    "has_active_selection",
+    "get_active_filter_kwargs",
 ]
