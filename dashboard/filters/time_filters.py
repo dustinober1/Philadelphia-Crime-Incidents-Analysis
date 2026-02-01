@@ -10,6 +10,7 @@ from datetime import datetime, date
 from typing import NamedTuple
 
 from dashboard.config import FILTER_DEFAULTS
+from dashboard.components.state import mark_filter_pending, has_pending_changes, PendingFilters
 
 
 class TimeFilterState(NamedTuple):
@@ -223,3 +224,144 @@ def get_filter_dates(state: TimeFilterState) -> tuple[str, str]:
         state.start_date.strftime("%Y-%m-%d"),
         state.end_date.strftime("%Y-%m-%d"),
     )
+
+
+def render_time_filters_with_pending(key_prefix: str = "time") -> TimeFilterState:
+    """
+    Render time range filter controls with pending state tracking.
+
+    This version tracks pending changes separately from applied state.
+    URL sync is handled by app.py when apply button is clicked.
+
+    Args:
+        key_prefix: Prefix for widget keys to avoid conflicts.
+
+    Returns:
+        TimeFilterState with current filter values.
+    """
+    with st.sidebar:
+        # Check for pending changes
+        pending = has_pending_changes()
+        time_pending = st.session_state.get("pending_filters", PendingFilters()).time_pending
+
+        # Visual indicator for pending changes
+        header_text = ":calendar: Time Range"
+        if time_pending:
+            header_text = f":calendar: Time Range 🔵"
+        st.subheader(header_text)
+
+        # Get current applied state for defaults
+        from dashboard.components.state import get_applied_state
+        applied = get_applied_state()
+
+        # Initialize from applied state
+        default_start = datetime.strptime(applied.start_date, "%Y-%m-%d").date()
+        default_end = datetime.strptime(applied.end_date, "%Y-%m-%d").date()
+
+        # Determine preset from applied state
+        preset = "custom"
+        for key, config in PRESETS.items():
+            if config["years"] and config["years"] == (default_start.year, default_end.year):
+                preset = key
+                break
+
+        # Callback for marking pending
+        def _on_time_change():
+            mark_filter_pending("time")
+
+        # Preset period selection
+        current_preset_idx = list(PRESETS.keys()).index(preset) if preset in PRESETS else 0
+        preset = st.selectbox(
+            "Preset Period",
+            options=list(PRESETS.keys()),
+            format_func=lambda x: PRESETS[x]["label"],
+            index=current_preset_idx,
+            key=f"{key_prefix}_pending_preset",
+            on_change=_on_time_change,
+        )
+
+        # Determine date range based on preset
+        if preset != "custom":
+            preset_years = PRESETS[preset]["years"]
+            default_start = date(preset_years[0], 1, 1)
+            default_end = date(preset_years[1], 12, 31)
+
+        # Date range slider
+        date_range = st.slider(
+            "Date Range",
+            min_value=date(2006, 1, 1),
+            max_value=date(2025, 12, 31),
+            value=(default_start, default_end),
+            format="YYYY-MM-DD",
+            key=f"{key_prefix}_pending_range",
+            on_change=_on_time_change,
+        )
+
+        start_date, end_date = date_range
+
+        # Year multi-select (for cascading filters)
+        available_years = list(range(start_date.year, end_date.year + 1))
+
+        # Initialize session state for years
+        years_key = f"{key_prefix}_pending_years"
+        if years_key not in st.session_state:
+            st.session_state[years_key] = available_years
+
+        # Update available years when date range changes
+        selected_years = st.multiselect(
+            "Select Years",
+            options=available_years,
+            default=available_years,
+            key=f"{key_prefix}_pending_years_select",
+            on_change=_on_time_change,
+        )
+
+        # Season filter (optional)
+        season = st.selectbox(
+            "Season (Optional)",
+            options=["All", "Winter", "Spring", "Summer", "Fall"],
+            index=0,
+            key=f"{key_prefix}_pending_season",
+            on_change=_on_time_change,
+        )
+
+        # Month filter (optional, cascades from years/season)
+        all_months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ]
+
+        if season != "All":
+            season_months = {
+                "Winter": ["December", "January", "February"],
+                "Spring": ["March", "April", "May"],
+                "Summer": ["June", "July", "August"],
+                "Fall": ["September", "October", "November"],
+            }
+            month_options = season_months[season]
+        else:
+            month_options = all_months
+
+        selected_months = st.multiselect(
+            "Select Months",
+            options=month_options,
+            default=month_options,
+            key=f"{key_prefix}_pending_months",
+            on_change=_on_time_change,
+        )
+
+    # Create state object (without URL sync)
+    state = TimeFilterState(
+        start_date=start_date,
+        end_date=end_date,
+        preset=preset if preset != "custom" else None,
+    )
+
+    # Store derived filter values in session state for other components
+    st.session_state[f"{key_prefix}_pending_derived"] = {
+        "years": selected_years,
+        "months": selected_months,
+        "season": season,
+    }
+
+    return state
