@@ -11,7 +11,7 @@ from dashboard.config import DISPLAY_CONFIG, PAGE_NAMES, FILTER_DEFAULTS
 from dashboard.components.cache import load_crime_data, get_data_summary, apply_filters
 from dashboard.filters.time_filters import render_time_filters, get_filter_dates
 from dashboard.filters.geo_filters import render_geo_filters, get_filter_districts
-from dashboard.filters.crime_filters import render_crime_filters, get_filter_categories
+from dashboard.filters.crime_filters import render_crime_filters, get_filter_categories, get_filter_crime_types
 
 # Configure page
 st.set_page_config(
@@ -79,6 +79,7 @@ def main():
     # Render crime filters
     crime_state = render_crime_filters(df_tg_filtered)
     selected_categories = get_filter_categories(crime_state)
+    selected_crime_types = get_filter_crime_types(crime_state)
 
     # Apply all filters
     filtered_df = apply_filters(
@@ -87,6 +88,7 @@ def main():
         end_date=end_date,
         districts=selected_districts,
         crime_categories=selected_categories,
+        crime_types=selected_crime_types,
     )
 
     # Display summary stats

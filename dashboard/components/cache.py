@@ -69,6 +69,7 @@ def apply_filters(
     end_date: str | None = None,
     districts: list[int] | None = None,
     crime_categories: list[str] | None = None,
+    crime_types: list[str] | None = None,
 ) -> pd.DataFrame:
     """
     Apply filters to the crime dataset with caching.
@@ -82,6 +83,7 @@ def apply_filters(
         end_date: End date filter (YYYY-MM-DD format or None for no filter).
         districts: List of police districts to include (None for all).
         crime_categories: List of crime categories to include (None for all).
+        crime_types: List of specific crime types to include (None for all).
 
     Returns:
         Filtered DataFrame.
@@ -118,6 +120,10 @@ def apply_filters(
     # Crime category filter
     if crime_categories is not None and "crime_category" in result.columns:
         result = result[result["crime_category"].isin(crime_categories)].copy()
+
+    # Crime type filter (specific crime types)
+    if crime_types is not None and "text_general_code" in result.columns:
+        result = result[result["text_general_code"].isin(crime_types)].copy()
 
     return result
 
