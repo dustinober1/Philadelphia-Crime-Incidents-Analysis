@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 5 of 6 (Dashboard Cross-Filtering)
-Plan: 4 of 3 in current phase (checkpoint in 05-05)
+Plan: 5 of 3 in current phase (checkpoint in 05-05)
 Status: In progress
-Last activity: 2026-02-01 — Completed 05-04-PLAN.md (View-to-view cross-filtering with opacity dimming)
+Last activity: 2026-02-01 — Completed 05-05-PLAN.md (Unified URL state encoding for cross-filtering)
 
-Progress: [██████████░] 91% (34/37 plans)
+Progress: [██████████░] 94% (35/37 plans)
 
 ## Performance Metrics
 
@@ -306,6 +306,17 @@ Recent decisions affecting current work:
 - Read-only page pattern: Correlations/advanced accept cross-filters but don't trigger new selections
 - Selection state persists across tab changes until new selection made or sidebar filters changed
 
+**From 05-05 (Unified URL State Encoding for Cross-Filtering):**
+- Created dashboard/components/url_sync.py with URL encoding/decoding for view selections
+- Short URL parameter keys: av (active_view), ad (active_districts), act (active_crime_types), atr (active_time_range)
+- Clean URL heuristic: Omit params when None or "all selected" for cleaner shareable URLs
+- Unified namespace: Sidebar params (start_date, districts, crime_types) + view params (av, ad, act, atr) coexist
+- View selections read from URL on page load via read_view_selection_from_url()
+- View selections sync to URL after tab rendering via sync_view_selection_to_url()
+- Apply button clears both session state (clear_selection_state()) and URL params (clear_view_selection_from_url())
+- Ephemeral view selections: Cleared when sidebar filters change (sidebar has priority over view-to-view)
+- URL sync functions exported from dashboard.components package for easy importing
+
 ### Pending Todos
 
 None yet.
@@ -323,6 +334,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-01 14:38 UTC
-Stopped at: Completed 05-04-PLAN.md (View-to-view cross-filtering implementation) - 4/3 plans in Phase 5 (checkpoint pending)
+Last session: 2026-02-01 09:52 UTC
+Stopped at: Completed 05-05-PLAN.md (Unified URL state encoding for cross-filtering) - 5/3 plans in Phase 5 (checkpoint pending)
 Resume file: None
