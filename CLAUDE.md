@@ -26,6 +26,9 @@ pip install meteostat fredapi census python-dotenv requests-cache statsmodels
 # Statistical rigor (Phase 1)
 pip install pymannkendall  # Mann-Kendall trend test for temporal data
 
+# Advanced temporal analysis (Phase 3)
+pip install workalendar  # US federal holiday detection (15+ holidays)
+
 # Dashboard libraries (Streamlit chosen over Dash)
 pip install streamlit plotly kaleido  # Dashboard framework, interactive plots, high-DPI export
 
@@ -48,6 +51,12 @@ python analysis/06_generate_report.py
 
 # Run weighted severity analysis
 python analysis/weighted_severity_analysis.py
+
+# Run advanced temporal analysis modules (Phase 3)
+python analysis/03-01-holiday_effects.py      # Holiday effects on crime patterns
+python analysis/03-02-crime_type_profiles.py  # Individual crime type analysis
+python analysis/03-03-shift_analysis.py       # Shift-by-shift temporal analysis
+python analysis/03-04-advanced_temporal_report.py  # Unified report generator
 ```
 
 ## Architecture
@@ -77,6 +86,10 @@ Core analysis scripts that perform computations and return results dictionaries:
 | `weighted_severity_analysis.py` | District-level severity scoring distinguishing high-volume/low-risk vs low-volume/high-risk areas |
 | `external_data.py` | External data fetching (Meteostat weather, FRED/Census APIs) with caching and temporal alignment |
 | `correlation_analysis.py` | Crime-weather and crime-economic correlation analysis with detrending and statistical testing |
+| `03-01-holiday_effects.py` | Holiday effects analysis (15+ US federal holidays, 3-day pre/post windows) with FDR correction |
+| `03-02-crime_type_profiles.py` | Individual crime type analysis (homicide, burglary, theft, vehicle theft, aggravated assault) |
+| `03-03-shift_analysis.py` | Shift-by-shift temporal analysis (4 shifts: Morning/Afternoon/Evening/Late Night) |
+| `03-04-advanced_temporal_report.py` | Unified report generator orchestrating all Phase 3 analyses |
 
 ### Report Generators (`analysis/*_report.py`)
 
@@ -87,6 +100,7 @@ Scripts that orchestrate analysis modules and generate markdown reports:
 - `09_report_red_zones.py` - Red zones focused report
 - `10_report_covid_lockdown.py` - COVID impact focused report
 - `11_report_robbery_timing.py` - Robbery timing focused report
+- `03-04-advanced_temporal_report.py` - Unified Phase 3 report (holiday effects, crime types, shift patterns)
 
 ## Key Patterns
 
@@ -146,6 +160,37 @@ Uses Haversine distance for geographic clustering:
 - `CLUSTERING_SAMPLE_SIZE=500_000` (samples full dataset for performance)
 
 Functions: `dbscan_clustering()`, `calculate_cluster_centroids()`, `calculate_cluster_stats()`
+
+### Shift Definitions (Phase 3)
+
+**4 shifts used for temporal analysis:**
+- Morning: 6AM-12PM (hours 6-11)
+- Afternoon: 12PM-6PM (hours 12-17)
+- Evening: 6PM-12AM (hours 18-23)
+- Late Night: 12AM-6AM (hours 0-5)
+
+**Weekend handling**: Same as weekdays (patterns emerge from data, not forced separation)
+
+**Hour preservation**: `extract_temporal_features()` overwrites hour with 0; preserve original hour column BEFORE calling if needed for shift classification.
+
+### Holiday Effects Analysis (Phase 3)
+
+**Window**: 3 days before + holiday + 3 days after (7-day holiday week)
+
+**Holidays**: 15+ US federal observances via `workalendar.UnitedStates()`
+
+**Moving holidays**: Thanksgiving (4th Thursday), Memorial Day (last Monday May), etc. - use `workalendar`, never hard-code
+
+**Statistical approach**: FDR correction required for 15+ holiday comparisons
+
+### Small Sample Handling (Phase 3 Crime Type Analysis)
+
+**Adaptive methods:**
+- n < 30: Use exact tests (`fisher_exact()` from stats_utils)
+- n >= 30: Use asymptotic tests (chi-square, t-tests)
+- Document limitations in report for rare crimes (e.g., homicide)
+
+**Chi-square validity**: Filter categories to minimum 5 * num_groups observations for valid expected frequencies.
 
 ## Configuration
 
@@ -226,7 +271,11 @@ Reports are saved to `reports/` as markdown files with:
 5. **2026 data**: Incomplete year (only through January 20, 2026) - exclude from trend analysis.
 6. **Python version**: Uses Python 3.14.2 in `.venv/` - ensure compatibility when adding new dependencies.
 7. **Large dataset**: Use sampling (`df.sample()`) for visualizations to avoid memory issues.
+   **Memory overflow**: Full-dataset analysis (3.5M records) causes exit 137; use 20% sampling for memory-intensive operations like holiday effects.
 8. **Matplotlib backend**: Set `os.environ["MPLBACKEND"] = "Agg"` for non-interactive plotting.
 9. **District values**: May be strings or floats; convert with `int(float(value))` before use.
 10. **UCR codes**: Stored as floats in source; convert to int for lookups.
 11. **No requirements.txt**: Dependencies are in `.venv/` but not pinned to a requirements file.
+12. **Moving holidays**: Thanksgiving (4th Thursday), Memorial Day, Labor Day change dates each year - use `workalendar.UnitedStates()` to calculate correctly.
+    **workalendar v17+ API**: Use `workalendar.usa.UnitedStates` (not `america`); returns list of tuples not dict.
+    **Numeric module filenames**: Phase 3 modules (03-01-*, 03-02-*, etc.) require `importlib.import_module()` due to leading digits.
