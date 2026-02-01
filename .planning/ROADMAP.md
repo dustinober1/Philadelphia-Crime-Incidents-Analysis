@@ -133,14 +133,19 @@ Plans:
   3. User can select a crime type in any view and see all other views filter to that crime type
   4. Cross-filtering maintains responsive performance (<3 second updates) through optimized state management
   5. Dashboard includes correlation pages displaying weather and economic correlations with filters
-**Plans**: TBD
+**Plans**: 5 plans in 3 waves
+
+**Wave Structure:**
+- Wave 1 (parallel): 05-01 state management infrastructure, 05-02 apply button pattern
+- Wave 2 (parallel): 05-03 plotly selection events, 05-04 view-to-view cross-filtering
+- Wave 3 (sequential): 05-05 unified URL state encoding
 
 Plans:
-- [ ] 05-01: Implement shared session state for cross-filtering
-- [ ] 05-02: Create correlation analysis pages with external data filters
-- [ ] 05-03: Implement time range cross-filtering across all views
-- [ ] 05-04: Implement geographic area cross-filtering across all views
-- [ ] 05-05: Implement crime type cross-filtering across all views
+- [ ] 05-01-PLAN.md — Create state management infrastructure (pending/applied separation, apply button tracking)
+- [ ] 05-02-PLAN.md — Integrate apply button pattern into sidebar filters (pending state, visual indicators)
+- [ ] 05-03-PLAN.md — Create Plotly selection event handling infrastructure (on_select="rerun", selection state)
+- [ ] 05-04-PLAN.md — Implement view-to-view cross-filtering with opacity dimming (all pages)
+- [ ] 05-05-PLAN.md — Implement unified URL state encoding for sidebar + view selections
 
 ### Phase 6: Publication Outputs
 **Goal**: High-DPI figures and LaTeX-ready tables are generated for academic presentation
