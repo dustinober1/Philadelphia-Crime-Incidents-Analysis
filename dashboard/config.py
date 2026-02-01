@@ -36,6 +36,14 @@ CACHE_CONFIG = {
     "filter_max_entries": 50,
 }
 
+# State management configuration for cross-filtering
+STATE_CONFIG = {
+    "apply_button_enabled": True,  # Master switch for apply button feature
+    "auto_sync_url": False,  # Sidebar filters only sync to URL on apply
+    "pending_ttl": 300,  # 5 minutes - pending state persistence
+    "view_state_ttl": 1800,  # 30 minutes - view-to-view cross-filter state
+}
+
 # Dashboard display settings
 DISPLAY_CONFIG = {
     "title": "Philadelphia Crime Incidents Dashboard",
