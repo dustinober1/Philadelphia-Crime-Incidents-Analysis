@@ -44,6 +44,23 @@ STATE_CONFIG = {
     "view_state_ttl": 1800,  # 30 minutes - view-to-view cross-filter state
 }
 
+# Plotly interaction configuration for view-to-view cross-filtering
+PLOTLY_CONFIG = {
+    # Selection mode for charts
+    "selection_mode": "select",  # "select" for box/lasso, False to disable
+    # Selection event handling
+    "on_select_rerun": True,  # Use on_select="rerun" for instant cross-filtering
+    # Visual feedback for selections
+    "selected_opacity": 1.0,  # Full opacity for selected elements
+    "unselected_opacity": 0.3,  # 30% opacity for unselected (dimmed)
+    # Hover behavior
+    "hover_mode": "closest",  # Show hover info for nearest data point
+    # Selection persistence
+    "selection_ttl": 1800,  # 30 minutes - view selections persist longer than pending filters
+    # Selection limits
+    "max_selections": 100,  # Max points allowed in selection (prevents performance issues)
+}
+
 # Dashboard display settings
 DISPLAY_CONFIG = {
     "title": "Philadelphia Crime Incidents Dashboard",
