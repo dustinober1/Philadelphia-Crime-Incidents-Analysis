@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 5 of 6 (Dashboard Cross-Filtering)
-Plan: 3 of 3 in current phase
+Plan: 4 of 3 in current phase (checkpoint in 05-05)
 Status: In progress
-Last activity: 2026-02-01 — Completed 05-03-PLAN.md (Plotly selection event infrastructure)
+Last activity: 2026-02-01 — Completed 05-04-PLAN.md (View-to-view cross-filtering with opacity dimming)
 
-Progress: [███████████░] 89% (33/37 plans)
+Progress: [██████████░] 91% (34/37 plans)
 
 ## Performance Metrics
 
@@ -295,6 +295,17 @@ Recent decisions affecting current work:
 - 30% opacity for dimmed unselected data (unselected_opacity=0.3)
 - State isolation pattern: New selection clears other selection types
 
+**From 05-04 (View-to-View Cross-Filtering Implementation):**
+- Overview page: 4 selectable charts (category, years, seasons, districts) with on_select="rerun" events
+- Temporal page: 5 Plotly charts (years, months, day of week, seasons, hours) converted from Streamlit native charts
+- Spatial page: District bar chart converted to Plotly with selection support
+- Correlations/advanced pages: Accept cross-filters with detailed selection display and clear buttons
+- Opacity dimming uses PLOTLY_CONFIG values (1.0 selected, 0.3 unselected) consistently across all views
+- Active selection hints displayed on all pages (overview shows hint, others show hint + clear button)
+- Overview page uses full_df vs filtered_df pattern for dimming (shows all data with non-selected items dimmed)
+- Read-only page pattern: Correlations/advanced accept cross-filters but don't trigger new selections
+- Selection state persists across tab changes until new selection made or sidebar filters changed
+
 ### Pending Todos
 
 None yet.
@@ -312,6 +323,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-01 14:32 UTC
-Stopped at: Completed 05-03-PLAN.md (Plotly selection event infrastructure) - 3/3 plans in Phase 5
+Last session: 2026-02-01 14:38 UTC
+Stopped at: Completed 05-04-PLAN.md (View-to-view cross-filtering implementation) - 4/3 plans in Phase 5 (checkpoint pending)
 Resume file: None
