@@ -40,6 +40,8 @@ The following rules apply to creating, running, and committing Jupyter notebooks
 
 11. **Notebook Structure:** Include, in order: title, short overview, table of contents, reproducibility cell, imports, data loading, data validation, transformation, analysis, visualizations (with saving), results/insights, and conclusion.
 
+**Presentation / Narrative:** Use Markdown cells to present findings, interpretations, and conclusions. Avoid relying on Python `print()` statements for final narratives — keep code cells focused on computation and use Markdown to write human-readable explanations that appear clearly in rendered notebooks.
+
 12. **Visualization Standards:** All plots must have clear titles, axis labels, legends, and consistent color palettes (use `analysis.config.COLORS` where available). Save figures at publication quality (300 DPI) to `reports/`.
 
 13. **Data Quality & Validation:** Include checks for missingness, date ranges, coordinate validity, and other domain validations. Document filtering decisions and assumptions.
