@@ -108,17 +108,20 @@ Plans:
   3. User can filter dashboard by crime type using multi-select controls for UCR categories and specific crimes
   4. Dashboard loads and renders within 5 seconds using aggressive caching and data sampling
   5. All dashboard visualizations reuse analysis modules (no duplicated logic)
-**Plans**: TBD
+**Plans**: 6 plans in 3 waves
+
+**Wave Structure:**
+- Wave 1 (parallel): 04-01 project structure + config, 04-02 data loading with caching
+- Wave 2 (parallel): 04-03 time filters, 04-04 geo filters, 04-05 crime filters
+- Wave 3 (sequential): 04-06 main app with tabs and visualizations
 
 Plans:
-- [ ] 04-01: Set up Streamlit project structure and configuration
-- [ ] 04-02: Implement data loading with caching
-- [ ] 04-03: Implement time range filter controls
-- [ ] 04-04: Implement geographic filter controls
-- [ ] 04-05: Implement crime type filter controls
-- [ ] 04-06: Create main overview page with filtered statistics
-- [ ] 04-07: Create temporal analysis page with filtered visualizations
-- [ ] 04-08: Create spatial analysis page with filtered maps
+- [ ] 04-01-PLAN.md — Set up Streamlit project structure and configuration
+- [ ] 04-02-PLAN.md — Implement data loading with caching
+- [ ] 04-03-PLAN.md — Implement time range filter controls
+- [ ] 04-04-PLAN.md — Implement geographic filter controls
+- [ ] 04-05-PLAN.md — Implement crime type filter controls
+- [ ] 04-06-PLAN.md — Create main dashboard with tabs and visualizations
 
 ### Phase 5: Dashboard Cross-Filtering
 **Goal**: Dashboard views are linked with cross-filtering so selections in one component update all related visualizations
@@ -168,8 +171,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Statistical Rigor Layer | 6/6 | ✓ Complete | 2025-01-31 |
 | 2. External Data Integration | 8/8 | ✓ Complete | 2025-01-31 |
 | 3. Advanced Temporal Analysis | 4/4 | ✓ Complete | 2026-01-31 |
-| 4. Dashboard Foundation | 0/8 | Not started | - |
+| 4. Dashboard Foundation | 0/6 | Ready to execute | - |
 | 5. Dashboard Cross-Filtering | 0/5 | Not started | - |
 | 6. Publication Outputs | 0/6 | Not started | - |
 
-**Overall Progress:** [████████░░░░] 18/37 plans (49%)
+**Overall Progress:** [████████░░░░] 18/35 plans (51%)
