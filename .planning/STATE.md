@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 4 of 6 (Dashboard Foundation)
-Plan: 5 of 6 in current phase
+Plan: 3 of 6 in current phase
 Status: In progress
-Last activity: 2026-02-01 — Completed 04-05-PLAN.md (Crime type filter controls)
+Last activity: 2026-02-01 — Completed 04-03-PLAN.md (Time range filter controls)
 
 Progress: [██████████░░] 57% (21/37 plans)
 
@@ -219,6 +219,26 @@ Recent decisions affecting current work:
 - 2026 excluded by default (incomplete year - only through January 20)
 - Reuses existing utilities: load_data(), validate_coordinates(), extract_temporal_features(), classify_crime_category()
 
+**From 04-04 (Geographic Filter Controls):**
+- Created dashboard/filters/geo_filters.py (188 lines) for police district selection
+- 25 districts in data (not 23) - Philadelphia has additional districts beyond standard 1-23 (35, 39, 77, 92)
+- GeoFilterState NamedTuple for immutable filter state (districts, select_all)
+- render_geo_filters() creates select all toggle and district multi-select
+- URL state synchronization via read_geo_filters_from_url() and sync_geo_filters_to_url()
+- District values may be strings or floats - get_district_list_from_data() handles conversion to int
+- Comma-separated URL encoding (e.g., "1,2,3,5,7") - omit when all districts selected
+- District options limited to those with data in filtered time range (cascading filters)
+
+**From 04-03 (Time Range Filter Controls):**
+- Created dashboard/filters/time_filters.py (225 lines) with TimeFilterState NamedTuple and preset periods
+- Preset periods: All Data (2006-2025), Last 5 Years, Last 3 Years, Last Year (2025), COVID Period (2020-2022), Custom
+- render_time_filters() creates preset selectbox, date range slider, year/season/month selectors with cascading logic
+- URL state synchronization via read_time_filters_from_url() and sync_time_filters_to_url() using st.query_params
+- Season selection cascades to available months (e.g., Winter only shows Dec/Jan/Feb)
+- Session state stores derived values (selected_years, selected_months) for other components
+- Filters sync to URL query parameters for shareable filtered views
+- Follows CONTEXT.md Pattern 3 for URL state encoding
+
 **From 04-05 (Crime Type Filter Controls):**
 - Created dashboard/filters/ package with crime_filters.py (257 lines) for UCR category and crime type selection
 - UCR classification: Violent (UCR 100-499), Property (UCR 500-799), Other (800+) imported from analysis.utils
@@ -247,6 +267,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-01 04:10 UTC
-Stopped at: Completed 04-05-PLAN.md (Crime type filter controls) - 5/6 plans in Phase 4
+Last session: 2026-02-01 04:12 UTC
+Stopped at: Completed 04-03-PLAN.md (Time range filter controls) - 3/6 plans in Phase 4
 Resume file: None
