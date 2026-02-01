@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2025-01-30)
 ## Current Position
 
 Phase: 5 of 6 (Dashboard Cross-Filtering)
-Plan: 2 of 3 in current phase
+Plan: 3 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-01 — Completed 05-02-PLAN.md (Apply button integration)
+Last activity: 2026-02-01 — Completed 05-03-PLAN.md (Plotly selection event infrastructure)
 
-Progress: [███████████░] 86% (32/37 plans)
+Progress: [███████████░] 89% (33/37 plans)
 
 ## Performance Metrics
 
@@ -282,6 +282,19 @@ Recent decisions affecting current work:
 - Cascading filters use applied state to determine available options
 - Hybrid approach: Original render_*_filters() preserved, new render_*_filters_with_pending() for apply pattern
 
+**From 05-03 (Plotly Selection Event Infrastructure):**
+- Created dashboard/components/plotly_interactions.py module with selection event handling (320 lines)
+- ViewSelectionState NamedTuple for selection state container (active_view, districts, crime_types, time_range)
+- Session state keys: VIEW_SELECTION_KEY, ACTIVE_VIEW_KEY, ACTIVE_DISTRICTS_KEY, ACTIVE_CRIME_TYPES_KEY, ACTIVE_TIME_RANGE_KEY
+- Core utilities: initialize_view_selection_state(), register_plotly_selection(), update_selection_from_event(), get_selection_state(), clear_selection_state(), has_active_selection(), get_active_filter_kwargs()
+- Private helpers: _extract_districts_from_selection(), _extract_crime_types_from_selection(), _extract_time_range_from_selection()
+- PLOTLY_CONFIG added to dashboard/config.py with 7 keys (selection_mode, on_select_rerun, opacities, hover_mode, selection_ttl, max_selections)
+- Components package exports plotly interaction utilities for easy importing
+- **plotly 6.5.2 installed** as required dependency for selection event handling
+- 30-minute TTL for view selections (longer than 5-minute pending filter state)
+- 30% opacity for dimmed unselected data (unselected_opacity=0.3)
+- State isolation pattern: New selection clears other selection types
+
 ### Pending Todos
 
 None yet.
@@ -299,7 +312,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-01 14:27 UTC
-Stopped at: Completed 05-02-PLAN.md (Apply button integration) - 2/3 plans in Phase 5
-Note: State.py was created during plan 02 as blocking dependency (plan 01 infrastructure)
+Last session: 2026-02-01 14:32 UTC
+Stopped at: Completed 05-03-PLAN.md (Plotly selection event infrastructure) - 3/3 plans in Phase 5
 Resume file: None
