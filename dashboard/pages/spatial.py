@@ -6,20 +6,52 @@ Displays geographic distribution and district comparisons using analysis module 
 
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 from dashboard.components.cache import load_cached_report
+from dashboard.components import (
+    register_plotly_selection,
+    update_selection_from_event,
+    get_selection_state,
+    get_active_filter_kwargs,
+    clear_selection_state,
+    has_active_selection,
+)
+from dashboard.config import PLOTLY_CONFIG
 
 
-def render_spatial_page(df: pd.DataFrame) -> None:
+def render_spatial_page(full_df: pd.DataFrame, filtered_df: pd.DataFrame) -> None:
     """
     Render the Spatial Maps page.
 
     Args:
-        df: Filtered DataFrame.
+        full_df: The complete, unfiltered DataFrame.
+        filtered_df: The currently filtered DataFrame.
     """
     st.header(":map: Spatial Distribution")
 
     st.caption("Geographic patterns and district comparisons")
+
+    # Get selection state for cross-filtering
+    selection_state = get_selection_state()
+
+    # Display active cross-filter hint and clear button
+    if selection_state.active_view and selection_state.active_view != "spatial":
+        source_view_name = selection_state.active_view.title()
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.info(f":link: **Active cross-filter from {source_view_name} view**")
+        with col2:
+            if st.button(":x: Clear", key="spatial_clear"):
+                clear_selection_state()
+                st.rerun()
+
+    # Apply cross-filter if active selection from other views
+    if selection_state.active_view and selection_state.active_view != "spatial":
+        from dashboard.components.cache import apply_filters
+        cross_filter_kwargs = get_active_filter_kwargs()
+        if cross_filter_kwargs:
+            filtered_df = apply_filters(filtered_df, **cross_filter_kwargs)
 
     # Option: Show pre-generated report OR run filtered analysis
     col1, col2 = st.columns([3, 1])
@@ -93,17 +125,17 @@ def render_spatial_page(df: pd.DataFrame) -> None:
             # Coordinate statistics
             st.subheader("Coordinate Statistics")
 
-            if "valid_coord" in df.columns:
-                coord_valid = df["valid_coord"].sum()
-                coord_pct = (coord_valid / len(df) * 100) if len(df) > 0 else 0
+            if "valid_coord" in filtered_df.columns:
+                coord_valid = filtered_df["valid_coord"].sum()
+                coord_pct = (coord_valid / len(filtered_df) * 100) if len(filtered_df) > 0 else 0
 
                 col1, col2, col3, col4 = st.columns(4)
                 col1.metric("Valid Coordinates", f"{coord_valid:,}")
                 col2.metric("Coverage %", f"{coord_pct:.1f}%")
-                col3.metric("Total Records", f"{len(df):,}")
+                col3.metric("Total Records", f"{len(filtered_df):,}")
 
-                if coord_valid > 0 and "point_x" in df.columns and "point_y" in df.columns:
-                    valid_df = df[df["valid_coord"]]
+                if coord_valid > 0 and "point_x" in filtered_df.columns and "point_y" in filtered_df.columns:
+                    valid_df = filtered_df[filtered_df["valid_coord"]]
                     lon_min, lon_max = valid_df["point_x"].min(), valid_df["point_x"].max()
                     lat_min, lat_max = valid_df["point_y"].min(), valid_df["point_y"].max()
                     col4.metric("Bounds", f"{lon_min:.2f}/{lat_min:.2f}")
@@ -111,30 +143,42 @@ def render_spatial_page(df: pd.DataFrame) -> None:
             # District distribution
             st.subheader("District Distribution")
 
-            if "dc_dist" in df.columns:
-                district_counts = df["dc_dist"].value_counts().sort_index()
-                st.bar_chart(district_counts)
+            if "dc_dist" in filtered_df.columns:
+                district_counts = filtered_df["dc_dist"].value_counts().sort_index().reset_index()
+                district_counts.columns = ["dc_dist", "count"]
+
+                # Create Plotly bar chart with selection support
+                fig_districts = px.bar(district_counts, x="dc_dist", y="count",
+                                       labels={"dc_dist": "Police District", "count": "Number of Incidents"},
+                                       title="Incidents by District")
+
+                fig_districts = register_plotly_selection(fig_districts, key="spatial_districts")
+                selection_event = st.plotly_chart(fig_districts, on_select="rerun", key="spatial_districts_chart", use_container_width=True)
+
+                # Handle selection event
+                if selection_event.selection["points"]:
+                    update_selection_from_event(selection_event, source_view="spatial")
 
                 # Top 5 districts by crime count
                 st.subheader("Top 5 Districts by Incident Count")
-                top_districts = district_counts.head(5)
-                for district, count in top_districts.items():
-                    st.metric(f"District {district}", f"{count:,}")
+                top_districts = district_counts.nlargest(5, "count")
+                for _, row in top_districts.iterrows():
+                    st.metric(f"District {int(row['dc_dist'])}", f"{int(row['count']):,}")
 
                 # Bottom 5 districts
                 st.subheader("Bottom 5 Districts by Incident Count")
-                bottom_districts = district_counts.tail(5)
-                for district, count in bottom_districts.items():
-                    st.metric(f"District {district}", f"{count:,}")
+                bottom_districts = district_counts.nsmallest(5, "count")
+                for _, row in bottom_districts.iterrows():
+                    st.metric(f"District {int(row['dc_dist'])}", f"{int(row['count']):,}")
 
             # Crime category by district
             st.subheader("Crime Category by District")
 
-            if "dc_dist" in df.columns and "crime_category" in df.columns:
+            if "dc_dist" in filtered_df.columns and "crime_category" in filtered_df.columns:
                 # Create a crosstab for district x category
                 district_category = pd.crosstab(
-                    df["dc_dist"],
-                    df["crime_category"],
+                    filtered_df["dc_dist"],
+                    filtered_df["crime_category"],
                     normalize="index"
                 ) * 100
 
