@@ -7,7 +7,11 @@ Run with: streamlit run dashboard/app.py
 import streamlit as st
 from pathlib import Path
 
-from dashboard.config import DISPLAY_CONFIG, PAGE_NAMES
+from dashboard.config import DISPLAY_CONFIG, PAGE_NAMES, FILTER_DEFAULTS
+from dashboard.components.cache import load_crime_data, get_data_summary, apply_filters
+from dashboard.filters.time_filters import render_time_filters, get_filter_dates
+from dashboard.filters.geo_filters import render_geo_filters, get_filter_districts
+from dashboard.filters.crime_filters import render_crime_filters, get_filter_categories
 
 # Configure page
 st.set_page_config(
@@ -49,34 +53,78 @@ def main():
     st.title(DISPLAY_CONFIG["title"])
     st.markdown(f"<p class='sub-header'>{DISPLAY_CONFIG['subtitle']}</p>", unsafe_allow_html=True)
 
-    # Sidebar info (placeholder for filters in later plans)
-    with st.sidebar:
-        st.header(":wrench: Filters")
-        st.info("Filter controls will be added in subsequent plans (04-03, 04-04, 04-05)")
-        st.markdown("---")
-        st.caption("Dashboard v1.0 | Philadelphia Crime EDA")
+    # Load data (cached)
+    with st.spinner("Loading data..."):
+        df = load_crime_data()
 
-    # Placeholder for tabs (will be implemented in 04-06)
-    st.header("Dashboard Under Construction")
-    st.info("This dashboard is being built incrementally. See Phase 4 plans:")
-    st.markdown("""
-    - Plan 04-01: Project structure and configuration (this plan)
-    - Plan 04-02: Data loading with caching
-    - Plan 04-03: Time range filter controls
-    - Plan 04-04: Geographic filter controls
-    - Plan 04-05: Crime type filter controls
-    - Plan 04-06: Main overview page with tabs and visualizations
-    """)
+    # Render time filters in sidebar
+    time_state = render_time_filters()
+    start_date, end_date = get_filter_dates(time_state)
 
-    # Quick stats placeholder
-    st.subheader("Quick Stats (Placeholder)")
-    col1, col2, col3 = st.columns(3)
+    # Apply time filters first (to limit other filter options)
+    df_time_filtered = apply_filters(df, start_date=start_date, end_date=end_date)
+
+    # Render geo filters
+    geo_state = render_geo_filters(df_time_filtered)
+    selected_districts = get_filter_districts(geo_state)
+
+    # Apply time + geo filters
+    df_tg_filtered = apply_filters(
+        df,
+        start_date=start_date,
+        end_date=end_date,
+        districts=selected_districts,
+    )
+
+    # Render crime filters
+    crime_state = render_crime_filters(df_tg_filtered)
+    selected_categories = get_filter_categories(crime_state)
+
+    # Apply all filters
+    filtered_df = apply_filters(
+        df,
+        start_date=start_date,
+        end_date=end_date,
+        districts=selected_districts,
+        crime_categories=selected_categories,
+    )
+
+    # Display summary stats
+    summary = get_data_summary(filtered_df)
+
+    st.subheader(f"Filtered Summary: {start_date} to {end_date}")
+
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Total Records", "3.5M", "2006-2025")
+        st.metric("Records", f"{summary['total_records']:,}")
     with col2:
-        st.metric("Police Districts", "23", "Philadelphia")
+        st.metric("Years", summary.get('years', 'N/A'))
     with col3:
-        st.metric("Crime Types", "32", "UCR categories")
+        district_count = len(selected_districts)
+        total_districts = summary.get('districts', 23)
+        st.metric("Districts", f"{district_count}/{total_districts}")
+    with col4:
+        coord_pct = summary.get('coord_coverage', {}).get('percentage', 0)
+        st.metric("Valid Coordinates", f"{coord_pct:.1f}%")
+
+    # Show active filters
+    filter_info = []
+
+    if len(selected_districts) < 23:
+        filter_info.append(f"Districts: {', '.join(f'D{d}' for d in sorted(selected_districts))}")
+
+    if len(selected_categories) < 3:
+        filter_info.append(f"Categories: {', '.join(selected_categories)}")
+
+    if filter_info:
+        st.caption(" | ".join(filter_info))
+    else:
+        st.caption(":map: All districts, :mag: All categories")
+
+    st.caption(f":link: Share this view: URL encodes your current filter settings")
+
+    st.markdown("---")
+    st.info("Main visualizations will be added in plan 04-06.")
 
 if __name__ == "__main__":
     main()
