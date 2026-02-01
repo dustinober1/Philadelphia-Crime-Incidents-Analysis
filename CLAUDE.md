@@ -217,6 +217,12 @@ This project uses GSD (Get Shit Done) workflow for project management:
 - Use `/gsd:plan-phase N` to create execution plans for a phase
 - Use `/gsd:execute-phase N` to run all plans in a phase
 
+**GSD agent model profiles** (from config.json model_profile):
+- quality/balanced/budget settings determine which model each agent uses
+- quality → gsd-phase-researcher: opus, gsd-planner: opus, gsd-plan-checker: sonnet
+- balanced → gsd-phase-researcher: sonnet, gsd-planner: opus, gsd-plan-checker: sonnet
+- budget → gsd-phase-researcher: haiku, gsd-planner: sonnet, gsd-plan-checker: haiku
+
 ## Research Roadmap (6 Phases)
 
 1. **Statistical Rigor Layer** - Add significance testing (p-values), confidence intervals (99% CI), effect sizes (Cohen's d), FDR correction
@@ -279,6 +285,7 @@ Reports are saved to `reports/` as markdown files with:
 12. **Moving holidays**: Thanksgiving (4th Thursday), Memorial Day, Labor Day change dates each year - use `workalendar.UnitedStates()` to calculate correctly.
     **workalendar v17+ API**: Use `workalendar.usa.UnitedStates` (not `america`); returns list of tuples not dict.
     **Numeric module filenames**: Phase 3 modules (03-01-*, 03-02-*, etc.) require `importlib.import_module()` due to leading digits.
+13. **Zsh glob patterns**: Wildcard patterns like `/*-PLAN.md` fail in zsh; use `ls ... | grep PATTERN` or Glob tool instead.
 
 ## Dashboard Package Structure (Phase 4)
 
@@ -360,3 +367,31 @@ crime_state = render_crime_filters(df_tg_filtered)  # Pass filtered data
 ```
 
 **Why:** Prevents showing options that would return zero results (e.g., districts with no data in selected time period)
+
+## Phase 5 Cross-Filtering Architecture
+
+**Hybrid state management:** Sidebar filters require explicit apply button (deliberate filtering), view-to-view cross-filters are instant (exploratory interaction)
+**URL encoding:** Unified namespace for sidebar + view params (e.g., `?districts=22&active_view=spatial&active_district=22`)
+**Visual feedback:** Per-filter indicators (dots/icons) for pending changes, 30% opacity dimming for filtered-out data
+**State persistence:** Sidebar in session state + URL, views in URL (shareable), apply button enables/disables based on pending changes
+
+## GSD Context Gathering Workflow
+
+**/gsd:discuss-phase N** - Extract implementation decisions before planning
+- Generates phase-specific gray areas (not generic UI/UX categories)
+- Asks 4 questions per area, then checks: "More questions or next area?"
+- Scope guardrail: new capabilities → "That's its own phase. I'll note it for later."
+- CONTEXT.md feeds researcher (WHAT to investigate) and planner (WHAT choices are locked)
+
+**Phase directory creation pattern:**
+```bash
+PADDED_PHASE=$(printf "%02d" 5)
+PHASE_NAME=$(grep "Phase 5:" .planning/ROADMAP.md | sed 's/.*Phase [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+mkdir -p ".planning/phases/${PADDED_PHASE}-${PHASE_NAME}"
+```
+
+**Planning docs commit pattern:**
+```bash
+COMMIT_PLANNING_DOCS=$(cat .planning/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
+git check-ignore -q .planning 2>/dev/null && COMMIT_PLANNING_DOCS=false
+```
