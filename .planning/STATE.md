@@ -14,11 +14,11 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 ## Current Position
 
 Phase: 1 of 4 (High-Level Trends & Seasonality)
-Plan: 2 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-02 - Completed 01-04-PLAN.md
+Last activity: 2026-02-02 - Completed 01-02-PLAN.md
 
-Progress: ███░░░░░░░ 13%
+Progress: ████░░░░░░ 40%
 
 ## Decisions
 
@@ -26,6 +26,7 @@ Progress: ███░░░░░░░ 13%
 | --- | --- | --- |
 | 01-01 | Use UCR general code hundred-bands for crime category mapping | Aligns with notebook expectations and supports Violent/Property/Other rollups |
 | 01-01 | Store Phase 1 parameters in external YAML config | Enables versioned, repeatable notebook runs |
+| 01-02 | Define REPORTS_DIR from repo_root in notebooks, not re-import from analysis.config | Ensures artifacts save to correct location when notebooks run from notebooks/ directory |
 
 ## Blockers/Concerns Carried Forward
 
@@ -33,9 +34,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-02 15:04 UTC
-Stopped at: Completed 01-04-PLAN.md
+Last session: 2026-02-02 23:33 UTC
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
 
 ---
-*State initialized: 2026-02-02*
+*State updated: 2026-02-02*
