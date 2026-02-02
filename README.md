@@ -83,6 +83,19 @@ See `AGENTS.md` for the full checklist and additional guidance (data validation,
 python analysis/06_generate_report.py
 ```
 
+## Running Phase 1 Analyses
+
+### Quick Start
+python analysis/orchestrate_phase1.py --version v1.0
+
+### Options
+- `--fast`: Run with 10% sample for quick testing
+- `--notebook annual_trend`: Run single notebook
+- `--config-path custom.yaml`: Use custom configuration
+
+### Outputs
+All artifacts are saved to `reports/` with versioned filenames.
+
 - Run a single analysis (example: summer spike):
 
 ```bash
