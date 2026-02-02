@@ -31,6 +31,11 @@ class Phase1Config:
         self._validate(data)
         object.__setattr__(self, "data", data)
 
+    @property
+    def version(self) -> str:
+        """Return the configuration version string."""
+        return self.data["version"]  # type: ignore[index]
+
     def get_notebook_params(self, notebook_name: str) -> Dict[str, Any]:
         """Return parameters for a configured notebook.
 
