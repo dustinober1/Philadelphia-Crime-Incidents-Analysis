@@ -31,9 +31,19 @@ Success criteria:
 3. A time-series notebook comparing pre/during/post COVID windows including an annotated time series chart (lockdown marked) and displacement analysis for burglary types.
 4. All analyses run headless via nbconvert and generate artifacts in `reports/`.
 
-### Phase 2 — Spatial & Socioeconomic Analysis
+### Phase 2 — Spatial & Socioeconomic Analysis ← CURRENT
 Goal: Identify hotspots, temporal hotspots for robbery, and per-tract crime rates normalized by population.
 Requirements covered: PATROL-01, PATROL-02, PATROL-03, HYP-SOCIO
+**Plans:** 6 plans in 3 waves (see `.planning/phases/02-spatial-socioeconomic/00-INDEX.md`)
+
+Plans:
+- [ ] 02-01-PLAN.md — Infrastructure & Boundary Data (Wave 1)
+- [ ] 02-02-PLAN.md — Hotspot Clustering PATROL-01 (Wave 2)
+- [ ] 02-03-PLAN.md — Robbery Heatmap PATROL-02 (Wave 2)
+- [ ] 02-04-PLAN.md — District Severity PATROL-03 (Wave 2)
+- [ ] 02-05-PLAN.md — Census Tract Rates HYP-SOCIO (Wave 2)
+- [ ] 02-06-PLAN.md — Integration & Validation (Wave 3)
+
 Success criteria:
 1. Hotspot notebook producing cluster outputs (centroids, cluster labels) and a heatmap PNG and GeoJSON for review.
 2. Hour × Weekday heatmap for Robbery with a short recommendation note for patrol timing.
@@ -72,4 +82,5 @@ Success criteria:
 1. ~~Approve this roadmap~~ ✅ Complete
 2. ~~`/gsd-discuss-phase 1`~~ ✅ Complete
 3. ~~`/gsd-plan-phase 1`~~ ✅ Complete — 5 plans created
-4. `/gsd-execute-phase 1` — Execute Phase 1 plans (start with Wave 1: Infrastructure)
+4. ~~`/gsd-execute-phase 1`~~ ✅ Complete — All Phase 1 plans executed, tag `phase-1-complete`
+5. `/gsd-plan-phase 2` — Create Phase 2 plans (infrastructure, 4 notebooks, integration)
