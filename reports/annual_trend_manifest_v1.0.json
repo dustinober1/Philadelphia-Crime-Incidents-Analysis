@@ -1,0 +1,29 @@
+{
+  "artifacts": [
+    {
+      "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/annual_trend_v1.0.png",
+      "sha256": "176bb7f20e153b6fc4a17831b1ed39b5c60e1b8099ff612118fb2c2a07911306"
+    },
+    {
+      "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/violent_vs_property_v1.0.png",
+      "sha256": "9c72ffaa1fc939949eb04342e7cf510535888595816e774066bd6565771f518d"
+    },
+    {
+      "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/annual_trend_comprehensive_v1.0.png",
+      "sha256": "40e4849c4501208e6f2189276b43dad2c72354e8b8fe615df8fc25bb59d41f78"
+    },
+    {
+      "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/annual_trend_report_v1.0.md",
+      "sha256": "e672b6409d4d7cc071da5990ad70bdf3e3c0111b494198de1b14e48ed462e74b"
+    }
+  ],
+  "git_commit": "f0d76057a4ea197be8559f3d55908bda007c07dd",
+  "parameters": {
+    "end_year": 2024,
+    "min_complete_months": 12,
+    "start_year": 2015
+  },
+  "runtime_seconds": 4.89539098739624,
+  "timestamp": "2026-02-02T23:22:54Z",
+  "version": "v1.0"
+}
