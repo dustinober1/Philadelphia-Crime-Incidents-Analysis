@@ -16,6 +16,15 @@
 ### Phase 1 — High-Level Trends & Seasonality
 Goal: Produce audited, reproducible answers to: Is Philadelphia getting safer? Is there a summer spike? How did COVID change the landscape?
 Requirements covered: CHIEF-01, CHIEF-02, CHIEF-03
+**Plans:** 5 plans in 3 waves
+
+Plans:
+- [ ] 01-01-PLAN.md — Infrastructure Setup (Wave 1)
+- [ ] 01-02-PLAN.md — Annual Trends Notebook CHIEF-01 (Wave 2)
+- [ ] 01-03-PLAN.md — Seasonality Notebook CHIEF-02 (Wave 2)
+- [ ] 01-04-PLAN.md — COVID Analysis Notebook CHIEF-03 (Wave 2)
+- [ ] 01-05-PLAN.md — Integration & Testing (Wave 3)
+
 Success criteria:
 1. A reproducible notebook that aggregates incidents annually (last 10 years) and outputs a clean trend PNG and Markdown summary.
 2. Monthly seasonality decomposition notebook with month-level boxplots and a numeric summary statement (e.g., percent increase July vs January) exported.
@@ -60,6 +69,7 @@ Success criteria:
 
 ## Next Steps
 
-1. Approve this roadmap to commit `ROADMAP.md` and update `REQUIREMENTS.md` traceability and `.planning/STATE.md` current focus.
-2. `/gsd-discuss-phase 1` — gather implementation-level context for Phase 1 (data QA, notebook owners, deliverable formats).
-3. `/gsd-plan-phase 1` — generate execution plans and tasks for Phase 1.
+1. ~~Approve this roadmap~~ ✅ Complete
+2. ~~`/gsd-discuss-phase 1`~~ ✅ Complete
+3. ~~`/gsd-plan-phase 1`~~ ✅ Complete — 5 plans created
+4. `/gsd-execute-phase 1` — Execute Phase 1 plans (start with Wave 1: Infrastructure)
