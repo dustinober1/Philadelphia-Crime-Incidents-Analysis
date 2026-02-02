@@ -22,7 +22,7 @@ Plans:
 - [x] 01-01-PLAN.md — Infrastructure Setup (Wave 1)
 - [ ] 01-02-PLAN.md — Annual Trends Notebook CHIEF-01 (Wave 2)
 - [ ] 01-03-PLAN.md — Seasonality Notebook CHIEF-02 (Wave 2)
-- [ ] 01-04-PLAN.md — COVID Analysis Notebook CHIEF-03 (Wave 2)
+- [x] 01-04-PLAN.md — COVID Analysis Notebook CHIEF-03 (Wave 2)
 - [ ] 01-05-PLAN.md — Integration & Testing (Wave 3)
 
 Success criteria:
