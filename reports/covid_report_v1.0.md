@@ -1,5 +1,5 @@
 # COVID-19 Lockdown Crime Landscape
-*Generated: 2026-02-02T15:01:44Z | Version: v1.0*
+*Generated: 2026-02-02T15:03:54Z | Version: v1.0*
 
 ## Summary
 Crime volumes declined during lockdown, while burglary patterns shifted toward commercial targets.
@@ -51,4 +51,4 @@ Confounding factors (economic recession, civil unrest) and reporting delays are 
 ## Technical Details
 - Records analyzed: 106889
 - Date range: {'min': Timestamp('2018-01-01 00:00:00'), 'max': Timestamp('2025-12-31 00:00:00')}
-- Git commit: 2f303571d00ccac076aa60487c5bbd678db1ed57
+- Git commit: 293eaf0e07edbc0ed22d5fb94f6c29b641ca8fe6
