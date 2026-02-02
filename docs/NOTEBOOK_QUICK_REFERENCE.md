@@ -140,3 +140,63 @@ Refer to:
 *Created: February 1, 2026*  
 *Analysis Period: 2015-2025 (11 years)*  
 *Answer: Philadelphia IS getting safer (objectively, from peak years)*
+
+---
+
+# Quick Reference: COVID-19 Lockdown Impact Notebook
+
+## TL;DR - What You Get
+A self-contained notebook that answers: **"How did the COVID-19 lockdowns impact our crime landscape?"**
+
+**Answer Focus**: Periodized comparison (before/during/after) plus burglary displacement analysis.
+
+---
+
+## File Location
+📍 `notebooks/covid_lockdown_crime_landscape.ipynb`
+
+---
+
+## Running It
+```bash
+cd "/Users/dustinober/Projects/Crime Incidents Philadelphia"
+```
+
+```bash
+# Activate conda environment
+conda activate crime
+```
+
+```bash
+jupyter notebook notebooks/covid_lockdown_crime_landscape.ipynb
+```
+
+---
+
+## Main Outputs
+1. **Chart**: `reports/covid_lockdown_burglary_trends.png`
+2. **Tables**: Period summaries and displacement metrics (in-notebook)
+
+---
+
+## Key Sections
+| # | Section | Output |
+|---|---------|--------|
+| 1 | Reproducibility | Environment + versions |
+| 2 | Data Validation | Missingness + last complete year |
+| 3 | Transformations | Period labels + burglary types |
+| 4 | Period Comparison | Monthly averages by period |
+| 5 | Visualization | Multi-line time series with March 2020 annotation |
+| 6 | Insights | Displacement effect metrics |
+
+---
+
+## Data Source
+- **File**: `data/crime_incidents_combined.parquet`
+- **Date Field**: `dispatch_date`
+- **Crime Type Field**: `text_general_code`
+
+---
+
+*Created: February 1, 2026*  
+*Analysis Period: 2018–Present (with 2022 excluded as transition)*

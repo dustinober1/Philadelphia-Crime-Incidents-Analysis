@@ -190,3 +190,27 @@ For questions or modifications to the analysis, refer to:
 **Status**: ✅ COMPLETE AND READY FOR EXECUTION
 
 The notebook is fully self-contained, requires only the data file, and can be executed from start to finish without errors. All sections follow the project's guidelines for Jupyter notebook development.
+
+---
+
+## Completed Deliverable: COVID-19 Lockdown Impact Notebook
+
+### Date Completed: February 1, 2026
+
+**File**: `notebooks/covid_lockdown_crime_landscape.ipynb`
+
+**Research Question**: "How did the COVID-19 lockdowns impact our crime landscape?"
+
+**Analysis Type**: Period comparison (2018–2019 vs. 2020–2021 vs. 2023–Present) with burglary displacement focus
+
+**What This Notebook Delivers**
+- ✅ Periodized crime distribution summaries using monthly averages
+- ✅ Residential vs. commercial burglary classification
+- ✅ Displacement metrics (during vs. before; after vs. during)
+- ✅ Multi-line time series with March 2020 lockdown annotation
+- ✅ Publication-quality output saved to `reports/covid_lockdown_burglary_trends.png`
+
+**Notes**
+- 2022 is excluded as a transition year in the before/during/after comparisons.
+- The notebook uses the `crime` conda environment and reads from `data/crime_incidents_combined.parquet`.
+- Execution status: not yet run in this session (run end-to-end before commit).
