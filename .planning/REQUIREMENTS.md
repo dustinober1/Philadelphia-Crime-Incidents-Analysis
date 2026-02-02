@@ -7,9 +7,9 @@
 
 ### Chief (High-Level Trends)
 
-- [ ] **CHIEF-01**: Annual aggregation of crime counts for the last 10 years and trend line comparing Violent vs Property crimes
-- [ ] **CHIEF-02**: Monthly seasonality decomposition and month-level boxplots; quantify month-to-month percentage differences (e.g., July vs January)
-- [ ] **CHIEF-03**: Comparative pre/during/post COVID time series with lockdown annotation and analysis of displacement effects
+- [x] **CHIEF-01**: Annual aggregation of crime counts for the last 10 years and trend line comparing Violent vs Property crimes
+- [x] **CHIEF-02**: Monthly seasonality decomposition and month-level boxplots; quantify month-to-month percentage differences (e.g., July vs January)
+- [x] **CHIEF-03**: Comparative pre/during/post COVID time series with lockdown annotation and analysis of displacement effects
 
 ### Patrol (Resource Allocation)
 
@@ -49,9 +49,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHIEF-01 | Phase 1 | Pending |
-| CHIEF-02 | Phase 1 | Pending |
-| CHIEF-03 | Phase 1 | Pending |
+| CHIEF-01 | Phase 1 | Complete |
+| CHIEF-02 | Phase 1 | Complete |
+| CHIEF-03 | Phase 1 | Complete |
 | PATROL-01 | Phase 2 | Pending |
 | PATROL-02 | Phase 2 | Pending |
 | PATROL-03 | Phase 2 | Pending |
