@@ -19,7 +19,7 @@ Requirements covered: CHIEF-01, CHIEF-02, CHIEF-03
 **Plans:** 5 plans in 3 waves
 
 Plans:
-- [ ] 01-01-PLAN.md — Infrastructure Setup (Wave 1)
+- [x] 01-01-PLAN.md — Infrastructure Setup (Wave 1)
 - [ ] 01-02-PLAN.md — Annual Trends Notebook CHIEF-01 (Wave 2)
 - [ ] 01-03-PLAN.md — Seasonality Notebook CHIEF-02 (Wave 2)
 - [ ] 01-04-PLAN.md — COVID Analysis Notebook CHIEF-03 (Wave 2)
