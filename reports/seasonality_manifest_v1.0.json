@@ -1,0 +1,33 @@
+{
+  "artifacts": [
+    {
+      "path": "reports/seasonality_boxplot_v1.0.png",
+      "sha256": "244dc5048d3368348ee39ffaf6161be7870c4ecaa3c3e90dbcaa40cde0da0f00"
+    },
+    {
+      "path": "reports/monthly_trend_v1.0.png",
+      "sha256": "5ba025df558694842b21be4caef295d3d346f17c32ef11fc442f940b8162c392"
+    },
+    {
+      "path": "reports/seasonality_report_v1.0.md",
+      "sha256": "c854c56a7445d29ff4856663400b306966fe1fb9b8fd2bdcf94b056672efe12e"
+    }
+  ],
+  "git_commit": "4acd883354d874045104f8248940d6cefdc1006f",
+  "parameters": {
+    "significance_level": 0.05,
+    "summer_months": [
+      6,
+      7,
+      8
+    ],
+    "winter_months": [
+      1,
+      2,
+      3
+    ]
+  },
+  "runtime_seconds": 4.466102123260498,
+  "timestamp": "2026-02-02T23:24:51Z",
+  "version": "v1.0"
+}
