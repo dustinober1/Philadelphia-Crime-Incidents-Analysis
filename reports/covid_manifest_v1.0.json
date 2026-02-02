@@ -1,0 +1,37 @@
+{
+  "artifacts": [
+    {
+      "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/covid_timeline_v1.0.png",
+      "sha256": "6ed619c6624ac9144f640a63127707b22e961441a56c388ffe20c0a4ef2aad39"
+    },
+    {
+      "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/burglary_displacement_v1.0.png",
+      "sha256": "7869314bb02a0d3a7492fbb3373ee5b0762b3633055243284e8accb699fea3f3"
+    },
+    {
+      "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/period_comparison_v1.0.png",
+      "sha256": "9428bb7b54914508653a33149715a8a595f4e88340b586800d822e9d30a0a4ff"
+    },
+    {
+      "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/covid_report_v1.0.md",
+      "sha256": "f280bd40b12f257eb30e0c5c770e88cf982cad738be695d1a450144719de4adb"
+    }
+  ],
+  "git_commit": "2f303571d00ccac076aa60487c5bbd678db1ed57",
+  "parameters": {
+    "AFTER_START_YEAR": 2023,
+    "BEFORE_YEARS": [
+      2018,
+      2019
+    ],
+    "DURING_YEARS": [
+      2020,
+      2021
+    ],
+    "FAST_MODE": "true",
+    "LOCKDOWN_DATE": "2020-03-01"
+  },
+  "runtime_seconds": 0.0,
+  "timestamp": "2026-02-02T15:01:48Z",
+  "version": "v1.0"
+}
