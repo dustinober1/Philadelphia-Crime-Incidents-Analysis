@@ -15,3 +15,6 @@ __pycache__/
 .pytest_cache/
 *.parquet.DS_Store
 *.parquet 
+# Firebase CLI debug log (created when commands run with --debug)
+@firebase-debug.log
+firebase-debug.log
