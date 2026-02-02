@@ -85,16 +85,90 @@ python analysis/06_generate_report.py
 
 ## Running Phase 1 Analyses
 
+Phase 1 answers three key questions about Philadelphia crime:
+1. **Is Philadelphia getting safer?** (Annual trends analysis - CHIEF-01)
+2. **Is there a summer crime spike?** (Seasonality analysis - CHIEF-02)
+3. **How did COVID change the crime landscape?** (Pre/during/post comparison - CHIEF-03)
+
 ### Quick Start
+
+```bash
+# Full run (takes ~3-5 minutes)
+./run_phase1.sh
+
+# Fast mode for testing (takes ~30 seconds, 10% sample)
+./run_phase1.sh v1.0 --fast
+
+# Run with validation
+./run_phase1.sh v1.0 --fast --validate
+```
+
+### Manual Execution
+
+```bash
+# Run all notebooks
 python analysis/orchestrate_phase1.py --version v1.0
 
-### Options
-- `--fast`: Run with 10% sample for quick testing
-- `--notebook annual_trend`: Run single notebook
-- `--config-path custom.yaml`: Use custom configuration
+# Run with fast sampling
+python analysis/orchestrate_phase1.py --version v1.0 --fast
 
-### Outputs
-All artifacts are saved to `reports/` with versioned filenames.
+# Run single notebook
+python analysis/orchestrate_phase1.py --notebook annual_trend
+
+# Continue on errors
+python analysis/orchestrate_phase1.py --continue-on-error
+
+# Use custom config
+python analysis/orchestrate_phase1.py --config-path config/custom.yaml
+```
+
+### Output Artifacts
+
+All outputs are saved to `reports/` with versioned filenames:
+
+| Artifact | Description |
+|----------|-------------|
+| `annual_trend_v*.png` | 10-year crime trend visualization |
+| `annual_trend_comprehensive_v*.png` | Detailed trend with statistics |
+| `violent_vs_property_v*.png` | Crime category comparison |
+| `seasonality_boxplot_v*.png` | Monthly crime distribution boxplot |
+| `monthly_trend_v*.png` | Monthly averages with confidence intervals |
+| `covid_timeline_v*.png` | COVID period comparison timeline |
+| `burglary_displacement_v*.png` | Residential vs commercial burglary shift |
+| `*_report_v*.md` | Academic-style analysis reports |
+| `*_manifest_v*.json` | Artifact metadata with hashes |
+| `execution.log` | Orchestration run log |
+
+### Validate Artifacts
+
+```bash
+python analysis/validate_artifacts.py
+```
+
+### Configuration
+
+Phase 1 parameters are stored in `config/phase1_config.yaml`:
+
+```yaml
+version: "v1.0"
+notebooks:
+  annual_trend:
+    start_year: 2015
+    end_year: 2024
+  seasonality:
+    summer_months: [6, 7, 8]
+    winter_months: [1, 2, 3]
+  covid:
+    lockdown_date: "2020-03-01"
+    before_years: [2018, 2019]
+    during_years: [2020, 2021]
+```
+
+### Troubleshooting
+
+**Config not found:** Run `ls config/phase1_config.yaml` to verify
+**Papermill errors:** Check `reports/execution.log` for details
+**Missing data:** Ensure `data/crime_incidents_combined.parquet` exists
 
 - Run a single analysis (example: summer spike):
 

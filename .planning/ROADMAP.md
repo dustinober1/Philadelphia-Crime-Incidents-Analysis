@@ -13,7 +13,7 @@
 
 ## Phase Details
 
-### Phase 1 — High-Level Trends & Seasonality
+### Phase 1 — High-Level Trends & Seasonality COMPLETE
 Goal: Produce audited, reproducible answers to: Is Philadelphia getting safer? Is there a summer spike? How did COVID change the landscape?
 Requirements covered: CHIEF-01, CHIEF-02, CHIEF-03
 **Plans:** 5 plans in 3 waves
@@ -23,7 +23,7 @@ Plans:
 - [x] 01-02-PLAN.md — Annual Trends Notebook CHIEF-01 (Wave 2)
 - [x] 01-03-PLAN.md — Seasonality Notebook CHIEF-02 (Wave 2)
 - [x] 01-04-PLAN.md — COVID Analysis Notebook CHIEF-03 (Wave 2)
-- [ ] 01-05-PLAN.md — Integration & Testing (Wave 3)
+- [x] 01-05-PLAN.md — Integration & Testing (Wave 3)
 
 Success criteria:
 1. A reproducible notebook that aggregates incidents annually (last 10 years) and outputs a clean trend PNG and Markdown summary.

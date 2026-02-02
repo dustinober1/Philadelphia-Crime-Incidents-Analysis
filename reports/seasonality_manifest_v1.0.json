@@ -2,18 +2,18 @@
   "artifacts": [
     {
       "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/seasonality_boxplot_v1.0.png",
-      "sha256": "4948e3c2b04f3eab4560ae8df4ed8b0bd0490ef6ce930da10dab8c2b5fcda28c"
+      "sha256": "a702547f30dc926bd5afb284e263037d4364adaf71d157252a907f159aeaea1c"
     },
     {
       "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/monthly_trend_v1.0.png",
-      "sha256": "a1aa0a58f738f5201f84076e64ad074ce18dd6c00211e027cd6bad97a9a9703e"
+      "sha256": "07fa2c2a03dc5c0b466e0a0b362c3df77b246f6c5ac9786ddf4868947bf56942"
     },
     {
       "path": "/Users/dustinober/Projects/Crime Incidents Philadelphia/reports/seasonality_report_v1.0.md",
-      "sha256": "82b4c471a6b9ce9ebe071b8e9ae23381b75ba7e81d0e6a29fa8ca735479f7de9"
+      "sha256": "2a68697748f94b201e12d85aae5da093ba7f1f3c0f476e9593eba5fc7bd4a437"
     }
   ],
-  "git_commit": "a457dfd49630f8e53b31de922cfeded8f56e70fe",
+  "git_commit": "f4fb95bd3b570cd96f104a894c843c9490e012fb",
   "parameters": {
     "significance_level": 0.05,
     "summer_months": [
@@ -27,7 +27,7 @@
       3
     ]
   },
-  "runtime_seconds": 4.475218772888184,
-  "timestamp": "2026-02-02T23:26:48Z",
+  "runtime_seconds": 5.171162128448486,
+  "timestamp": "2026-02-02T23:30:46Z",
   "version": "v1.0"
 }

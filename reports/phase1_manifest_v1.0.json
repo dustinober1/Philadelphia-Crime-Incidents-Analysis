@@ -1,0 +1,55 @@
+{
+  "artifacts": [
+    {
+      "path": "reports/annual_trend_executed_v1.0.ipynb",
+      "sha256": "d95fac9deabf79c15b9ec4cc5155378e890cf744fa4b0d2af96e16ebbe26b106"
+    },
+    {
+      "path": "reports/seasonality_executed_v1.0.ipynb",
+      "sha256": "5ed79ef00966374385308cf2f50a46d9a7f816626c648e6da589acc47979459a"
+    },
+    {
+      "path": "reports/covid_executed_v1.0.ipynb",
+      "sha256": "9cb68893c0e0c366fff06c9138e223fa086cfbdd7fa0105872d4eb473c0f10d7"
+    }
+  ],
+  "git_commit": "f4fb95bd3b570cd96f104a894c843c9490e012fb",
+  "parameters": {
+    "annual_trend": {
+      "end_year": 2024,
+      "fast_sample_frac": 0.1,
+      "min_complete_months": 12,
+      "start_year": 2015
+    },
+    "covid": {
+      "after_start_year": 2023,
+      "before_years": [
+        2018,
+        2019
+      ],
+      "during_years": [
+        2020,
+        2021
+      ],
+      "fast_sample_frac": 0.1,
+      "lockdown_date": "2020-03-01"
+    },
+    "seasonality": {
+      "fast_sample_frac": 0.1,
+      "significance_level": 0.05,
+      "summer_months": [
+        6,
+        7,
+        8
+      ],
+      "winter_months": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "runtime_seconds": 20.39538311958313,
+  "timestamp": "2026-02-02T23:30:52Z",
+  "version": "v1.0"
+}
