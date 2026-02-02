@@ -4,91 +4,100 @@
 
 ## Pattern Overview
 
-Overall: Data-analysis / reproducible-notebook project
+Overall: Repository is an analysis-first project organized around reproducible notebooks and data artifacts. There is no running web service or packaged library in the current tree; analysis is performed in Jupyter notebooks which act as the primary executable units.
 
 Key Characteristics:
-- Primary deliverables are Jupyter notebooks which contain orchestration, analysis and visualizations.
-- Data is stored as committed artifacts under `data/` (Parquet and local cache files).
-- Reproducibility and environment isolation are enforced via `environment.yml` and `requirements.txt`.
+- Notebook-driven analysis (single-purpose notebooks are the functional units).
+- Data-artifact centric: large datasets and preprocessed Parquet files under `data/` are primary inputs/outputs.
+- Report generation is file-based: outputs are written to `reports/` as images and Markdown/HTML assets.
 
 ## Layers
 
-Notebooks (Presentation & Orchestration):
-- Purpose: interactively run data loading, transformation, analysis and produce figures/reports.
-- Location: `notebooks/`
-- Contains: Jupyter notebooks (examples: `notebooks/philadelphia_safety_trend_analysis.ipynb`, `notebooks/covid_lockdown_crime_landscape.ipynb`)
-- Depends on: local data files in `data/`, Python environment in `environment.yml`/`requirements.txt`
-- Used by: reviewers and CI workflow (CI executes notebooks headless via `.github/workflows/run-notebooks.yml` referenced in `AGENTS.md`)
+Data Layer:
+- Purpose: store source and processed datasets used by analyses.
+- Location: `data/` and `data/external/`.
+- Contains: `data/crime_incidents_combined.parquet`, `data/external/weather_philly_2006_2026.parquet`, `data/external/.cache/weather_cache.sqlite`.
+- Depends on: none (static files on disk).
+- Used by: notebooks in `notebooks/` that read Parquet/CSV with pandas/geopandas.
 
-Data (Raw & Processed Artifacts):
-- Purpose: store data used by analysis and cached intermediate artifacts
-- Location: `data/` and subfolders (examples: `data/crime_incidents_combined.parquet`, `data/external/weather_philly_2006_2026.parquet`, `data/external/.cache/weather_cache.sqlite`)
-- Contains: Parquet datasets, sqlite cache, other raw files
-- Depends on: ETL or data retrieval code invoked from notebooks
+Analysis Layer (Working/Computation):
+- Purpose: perform data cleaning, transformations, visualization and reporting.
+- Location: `notebooks/`.
+- Contains: `notebooks/philadelphia_safety_trend_analysis.ipynb`, `notebooks/summer_crime_spike_analysis.ipynb`, `notebooks/covid_lockdown_crime_landscape.ipynb`, `notebooks/data_quality_audit_notebook.ipynb`.
+- Depends on: `data/` artifacts and environment defined in `environment.yml` / `requirements.txt`.
+- Used by: human operators, CI notebook-runner (if configured).
 
-Reports / Outputs:
-- Purpose: final figures and exported assets for consumption
-- Location: `reports/` (example: `reports/covid_lockdown_burglary_trends.png`)
+Reporting Layer:
+- Purpose: hold human-consumable outputs produced by analyses.
+- Location: `reports/`.
+- Contains: images and exported figures, e.g. `reports/covid_lockdown_burglary_trends.png`.
+- Depends on: outputs produced by notebooks.
 
-Docs & Governance:
-- Purpose: contribution rules, notebook standards, delivery notes
-- Location: `docs/` (examples: `docs/NOTEBOOK_COMPLETION_REPORT.md`, `docs/NOTEBOOK_QUICK_REFERENCE.md`, `docs/DELIVERY_SUMMARY.md`)
+Documentation & Governance:
+- Purpose: standards, rules and repository guidance.
+- Location: `docs/`, `AGENTS.md`, `README.md`.
+- Contains: notebook standards (`AGENTS.md`), quick references (`docs/NOTEBOOK_QUICK_REFERENCE.md`), completion checklist guidance.
 
-Environment & Config:
-- Purpose: pin environment and declare dependencies
-- Location: repo root files: `environment.yml`, `requirements.txt`, `.env.example`
+Configuration & Environment:
+- Purpose: define reproducible execution environment and secrets placeholders.
+- Files: `environment.yml`, `requirements.txt`, `.env.example`.
 
-Project Metadata & Entry README:
-- Location: `README.md`, `AGENTS.md`
+Version control / Metadata:
+- Purpose: project history and repository metadata.
+- Location: `.git/` (present in repository root).
 
 ## Data Flow
 
-Typical data flow for an analysis notebook:
-1. Notebook loads environment and imports (first cells).
-2. Notebook reads committed data artifacts from `data/` (e.g. `data/crime_incidents_combined.parquet`).
-3. Notebook applies transformations in-cell or calls helper modules (helper modules are not present as top-level Python packages in the repository today; functionality lives inside notebooks).
-4. Notebook writes outputs to `reports/` and may write intermediate artifacts back to `data/`.
-5. Final notebooks and reports are committed; CI executes notebooks headless for verification.
+1. Source datasets are present under `data/` (example: `data/crime_incidents_combined.parquet`).
+2. Notebooks in `notebooks/` load these files (pandas/geopandas) and perform cleaning/transformations in-memory.
+3. Notebooks generate visualizations and export artifacts into `reports/` (images/Markdown/HTML).
+4. Documentation and guidance in `docs/` and `AGENTS.md` describe standards for notebooks and CI execution.
 
 State Management:
-- There is no application-level state store or service. State is files on disk under `data/`.
+- Transient and memory-first: notebooks manage state in-memory during execution. There is no centralized state store or database in the current repository.
 
 ## Key Abstractions
 
-Notebooks as first-class components:
-- Purpose: each notebook is a self-contained entry point for a particular analysis or question.
-- Examples: `notebooks/summer_crime_spike_analysis.ipynb`, `notebooks/data_quality_audit_notebook.ipynb`
+Dataset (parquet artifact):
+- Purpose: compact, columnar snapshot of cleaned/merged crime data.
+- Examples: `data/crime_incidents_combined.parquet`.
+- Pattern: consumed directly by notebooks via `pandas.read_parquet` / `geopandas.read_file`.
 
-Data artifacts:
-- Purpose: immutable or versioned data snapshots used for reproducibility.
-- Examples: `data/crime_incidents_combined.parquet`, `data/external/weather_philly_2006_2026.parquet`
+Notebook (analysis unit):
+- Purpose: hold an end-to-end analysis or validation workflow (data load → transform → visualize → export).
+- Examples: `notebooks/data_quality_audit_notebook.ipynb`.
+- Pattern: self-contained scripts with a reproducibility cell as required by `AGENTS.md`.
 
-Environment abstraction (conda/pinned requirements):
-- Purpose: reproducible execution environment; files: `environment.yml`, `requirements.txt`
+Report (artifact):
+- Purpose: final outputs for publication or presentation.
+- Examples: `reports/covid_lockdown_burglary_trends.png`.
 
 ## Entry Points
 
-Primary entry points (for users):
-- Interactive: open any notebook under `notebooks/` (e.g. `notebooks/philadelphia_safety_trend_analysis.ipynb`).
-- Documentation/Guidance: `AGENTS.md` and `README.md` describe workflows and rules.
+There are no Python script entrypoints (no `analysis/` or `dashboard/` packages present). The practical entry points are the notebooks themselves:
+- `notebooks/philadelphia_safety_trend_analysis.ipynb`
+- `notebooks/summer_crime_spike_analysis.ipynb`
+- `notebooks/covid_lockdown_crime_landscape.ipynb`
+- `notebooks/data_quality_audit_notebook.ipynb`
 
-CI entry points (automation):
-- The CI workflow referenced in `AGENTS.md` (`.github/workflows/run-notebooks.yml`) is the automation entrypoint for headless execution. (File referenced in `AGENTS.md` but not present in repository root; CI guidance exists in docs.)
+CI Entry Point (if configured):
+- The repository documents an automated notebook-runner in `AGENTS.md` and expects a workflow such as `.github/workflows/run-notebooks.yml` to execute notebooks via `jupyter nbconvert --execute`. The workflow file is not present in the current tree; if CI is present, it would invoke the notebooks listed above.
 
 ## Error Handling
 
-Strategy: notebooks handle errors ad-hoc inside cells. There is no centralized error-handling library or structured try/catch across notebooks.
+Strategy: ad-hoc, per-notebook error checks and validation. Notebooks include data-validation steps (per `AGENTS.md`) but there is no shared exception-handling framework or central logging service configured in the codebase.
 
 Patterns:
-- Notebook-level assertions and validations (data quality checks) are present in analysis notebooks — see `notebooks/data_quality_audit_notebook.ipynb` for an example of validation-focused code cells.
+- Validate inputs early in each notebook (missingness, schema checks).
+- Fail-fast: notebooks should abort on critical data errors and report via raised exceptions or captured traceback in CI.
 
 ## Cross-Cutting Concerns
 
-Logging: ephemeral and ad-hoc via notebook outputs and saved plots; no centralized logging or telemetry.
+Logging: there is no centralized logging library in the repository. Notebooks typically rely on standard Python stdout/stderr and notebook outputs.
 
-Validation: validation is implemented inside notebooks (data quality audit notebook).
+Validation: per-notebook validation responsibilities are documented in `AGENTS.md` and implemented inside notebooks.
 
-Authentication: not applicable — this repository does not contain external service integrations that require runtime secrets in code. `.env.example` exists to document expected env variables.
+Authentication: Not applicable — there are no external services requiring runtime auth in the current repository. A placeholder `.env.example` exists for secret configuration.
 
 ---
 

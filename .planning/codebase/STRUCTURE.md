@@ -6,88 +6,97 @@
 
 ```
 [project-root]/
-├── notebooks/             # Primary analysis notebooks (entry points)
-├── data/                  # Committed data artifacts (Parquet, caches)
-│   ├── external/          # External data snapshots and cache
-│   └── crime_incidents_combined.parquet
-├── reports/               # Generated figures and exported assets
-├── docs/                  # Governance and notebook standards
-├── .planning/             # Generated codebase maps (this directory)
-├── environment.yml        # Conda environment for reproducibility
-├── requirements.txt       # Optional pip requirements
-├── .env.example           # Example environment variables
-└── README.md              # Project overview
+├── .git/                 # Git metadata
+├── .env.example          # Environment variable template
+├── README.md             # Project overview and quickstart
+├── environment.yml       # Conda environment spec
+├── requirements.txt      # Python pip requirements (present)
+├── data/                 # Data artifacts (raw, processed, external)
+│   ├── crime_incidents_combined.parquet
+│   └── external/
+│       ├── weather_philly_2006_2026.parquet
+│       └── .cache/weather_cache.sqlite
+├── notebooks/            # Jupyter notebooks (analysis units)
+│   ├── philadelphia_safety_trend_analysis.ipynb
+│   ├── summer_crime_spike_analysis.ipynb
+│   ├── covid_lockdown_crime_landscape.ipynb
+│   └── data_quality_audit_notebook.ipynb
+├── reports/              # Generated report artifacts (images, html)
+│   └── covid_lockdown_burglary_trends.png
+├── docs/                 # Documentation and notebook standards
+│   ├── NOTEBOOK_QUICK_REFERENCE.md
+│   └── NOTEBOOK_COMPLETION_REPORT.md
+├── AGENTS.md             # Agent and contributor guidance (notebook rules)
+└── .planning/            # Generated planning artifacts
+    └── codebase/         # (this output)
 ```
 
 ## Directory Purposes
 
-**notebooks/**:
-- Purpose: contain narrative analysis and executable notebooks. Each notebook is a self-contained pipeline for a question/figure.
-- Contains: `.ipynb` files. Key files: `notebooks/philadelphia_safety_trend_analysis.ipynb`, `notebooks/covid_lockdown_crime_landscape.ipynb`, `notebooks/summer_crime_spike_analysis.ipynb`, `notebooks/data_quality_audit_notebook.ipynb`.
-
 **data/**:
-- Purpose: store source data and intermediate artifacts used by notebooks.
-- Contains: Parquet files and caches. Key files: `data/crime_incidents_combined.parquet`, `data/external/weather_philly_2006_2026.parquet`, `data/external/.cache/weather_cache.sqlite`.
+- Purpose: store datasets consumed by notebooks and analyses.
+- Contains: Parquet datasets and caching DBs.
+- Key files: `data/crime_incidents_combined.parquet`, `data/external/weather_philly_2006_2026.parquet`.
+
+**notebooks/**:
+- Purpose: primary place for analyses. Each notebook is an executable analysis pipeline (load → transform → visualize → export).
+- Contains: domain-focused notebooks named by analysis purpose.
+- Key files: all `.ipynb` files in `notebooks/`.
 
 **reports/**:
-- Purpose: store generated figures (PNG/HTML) and other exported assets. Example: `reports/covid_lockdown_burglary_trends.png`.
+- Purpose: generated artifacts for presentation and review.
+- Contains: PNGs, HTML exports, and other report assets.
 
-**docs/**:
-- Purpose: standards, delivery summaries, notebook guidance. Key files: `docs/NOTEBOOK_COMPLETION_REPORT.md`, `docs/NOTEBOOK_QUICK_REFERENCE.md`, `docs/DELIVERY_SUMMARY.md`.
+**docs/** and `AGENTS.md`:
+- Purpose: governance, reproducibility rules, and contributor guidance. Notebooks must follow these rules.
 
-**.planning/**:
-- Purpose: machine-generated mapping files and planning artifacts. Location created by this mapping: `.planning/codebase/ARCHITECTURE.md` and `.planning/codebase/STRUCTURE.md`.
+**Root config files** (`environment.yml`, `requirements.txt`, `.env.example`):
+- Purpose: define runtime environment, Python dependencies, and required environment variables.
 
 ## Key File Locations
 
 Entry Points:
-- `notebooks/philadelphia_safety_trend_analysis.ipynb`: primary analytical entry for safety trends.
+- `notebooks/*.ipynb` — primary executable content. Run via Jupyter or headless `jupyter nbconvert --execute`.
 
 Configuration:
-- `environment.yml`: conda environment specification for reproducible runs.
-- `requirements.txt`: pip fallback requirements.
-- `.env.example`: template for environment variables.
+- `environment.yml` — conda environment specification
+- `requirements.txt` — pip fallback
+- `.env.example` — environment variable placeholders
 
 Core Data:
-- `data/crime_incidents_combined.parquet`: main combined incidents dataset.
-- `data/external/weather_philly_2006_2026.parquet`: weather dataset supporting analyses.
+- `data/crime_incidents_combined.parquet` — canonical combined dataset
+- `data/external/weather_philly_2006_2026.parquet` — external reference dataset
 
-Reports & Outputs:
-- `reports/`: visualizations and exported assets.
+Documentation:
+- `README.md`, `AGENTS.md`, `docs/NOTEBOOK_QUICK_REFERENCE.md`
 
 ## Naming Conventions
 
 Files:
-- Notebooks use descriptive snake_case filenames: `philadelphia_safety_trend_analysis.ipynb`.
-- Data artifacts use snake_case with file-type suffix: `crime_incidents_combined.parquet`.
+- Notebooks: use descriptive, snake_case names ending with `_analysis` or context (e.g., `summer_crime_spike_analysis.ipynb`).
+- Data artifacts: descriptive, lower_snake_case, include timeframe when appropriate (e.g., `weather_philly_2006_2026.parquet`).
 
 Directories:
-- Short, lowercase names (e.g., `notebooks`, `data`, `reports`, `docs`).
+- Top-level functional directories: `data/`, `notebooks/`, `reports/`, `docs/`.
 
 ## Where to Add New Code
 
-New Notebook / Analysis:
-- Primary code: `notebooks/<descriptive_name>.ipynb`.
-- Outputs: `reports/<descriptive_name>.*`.
+New Analysis Feature (notebook-first):
+- Primary code: create a new notebook under `notebooks/` named `YYYY_mm_dd_<short_description>.ipynb` or `<feature>_analysis.ipynb`.
+- Tests: add data validation cells inside the notebook; create a matching `docs/notebook_summaries/` entry if producing published output.
 
-New Data Assets:
-- Add under `data/` or `data/external/`. Commit Parquet or CSV snapshots used for reproducibility.
+New Utility Module (reusable code):
+- Implementation: add a new `analysis/` package at project root (create `analysis/__init__.py`) and place helpers under `analysis/utils.py` or `analysis/io.py`.
+- Tests: add `tests/` directory and `pytest` test modules (not present yet).
 
-Utilities / Shared Python modules:
-- Not present in repository. If adding reusable modules, create a top-level package directory `analysis/` with an `__init__.py` and place helper modules there (e.g., `analysis/io.py`, `analysis/validation.py`). Add the package to `environment.yml`/`requirements.txt` and update README with usage.
-
-Tests:
-- Not present. If adding tests, create `tests/` and use pytest; keep tests co-located with helpers (e.g., `tests/test_io.py`).
+Utilities & Shared Helpers:
+- Shared code should live under `analysis/` (notebooks should import from `analysis` rather than duplicating logic inside notebooks).
 
 ## Special Directories
 
-data/external/.cache:
-- Purpose: local cache for downloaded external datasets (sqlite cache file present: `data/external/.cache/weather_cache.sqlite`).
-- Generated: Yes
-- Committed: Yes (cache sqlite is currently committed)
+`.planning/`: contains generated planning artifacts and maps (this folder). Generated files committed here are for orchestrator use.
 
-notebooks/:
-- Purpose: narrative-first deliverables; committed with outputs preserved (project rule in `AGENTS.md`).
+`data/external/.cache/`: contains caching artifacts (SQLite cache) — committed in this repo but should be considered for `.gitignore` if environment-specific.
 
 ---
 

@@ -2,91 +2,173 @@
 
 **Analysis Date:** 2026-02-02
 
-## Overview
+This document records the coding and notebook conventions that are present in the repository and the prescriptive, actionable conventions to follow when adding code or tests. All referenced files are present in the repository and are shown with exact paths.
 
-This repository is primarily an analysis / notebook project. Conventions are focused on reproducible Python data-analysis, notebook hygiene, and a small dashboard. Key policy and convention sources in the repo:
+## Sources of conventions (observed)
+- `AGENTS.md` (root) — explicit, project-wide notebook and style rules. See `AGENTS.md` for the full ruleset. Key references in this document: `AGENTS.md` (root).
+- `README.md` (root) — high-level project layout and development guidance (mentions `black`, `flake8`/`ruff`). See `README.md` for quickstart and layout references.
+- `requirements.txt` (root) and `environment.yml` (root) — contain formatting and lint dependencies such as `black`, `isort`, `ruff`, and `flake8`.
 
-- Project guidance: `AGENTS.md`
-- High-level README: `README.md`
-- Environment / deps: `environment.yml`, `requirements.txt`
-- Notebooks: `notebooks/` (examples: `notebooks/data_quality_audit_notebook.ipynb`, `notebooks/summer_crime_spike_analysis.ipynb`)
+## High-level style
 
-Where code is referenced but not present, the README documents the expected conventions (for contributors and CI).
+- Language: Python 3 (recommended 3.9+ in `README.md`; `environment.yml` pins Python to `3.14` in this environment). Files: any Python modules should be `.py` files.
+- Style guide: PEP 8 is the canonical style referenced in `AGENTS.md` and `README.md`.
+- Formatting tools detected: `black` is included in `requirements.txt` and `environment.yml` (`black` package). Linting tools detected: `flake8` and `ruff` are present in `requirements.txt` and `environment.yml`.
+- Import sorting: `isort` is present in `requirements.txt` and `environment.yml`.
 
-## Naming Patterns
+Prescriptive rule (follow these when adding code):
+- Run `black` on changed Python files before committing.
+- Use `isort` to keep import groups stable.
+- Run `ruff` or `flake8` as a pre-commit check (project does not include pre-commit hooks in repo; add if desired).
 
-Files
-- Notebook files: live in `notebooks/` and use descriptive, snake_case names, e.g. `notebooks/data_quality_audit_notebook.ipynb`.
-- Analysis scripts (expected): `analysis/` scripts are referenced in `README.md` (examples: `analysis/06_generate_report.py`, `analysis/temporal_analysis.py`). If added, use snake_case and a numeric prefix for ordered steps (e.g. `01_fetch_data.py`, `06_generate_report.py`).
+Relevant files/paths:
+- `README.md` (root) — `README.md` lines referencing `black` and linting tools.
+- `requirements.txt` (root) — contains `black`, `ruff`, `flake8`, and `isort` entries.
+- `environment.yml` (root) — contains formatting/linting tools and Python version.
 
-Functions and Variables
-- Use snake_case for functions and variables (PEP 8). This is the stated style in `README.md` and `AGENTS.md`.
-- Avoid `from module import *`. Prefer explicit imports: `from analysis.utils import load_data` or `import analysis.utils as utils`.
+## File & naming conventions
 
-Classes and Types
-- Use PascalCase for classes (PEP 8). No class-heavy code detected in repo, but follow Pydantic/typing conventions for models (the environment contains `pydantic`).
+- Python modules: snake_case for file names (example expected paths referenced in `README.md`): `analysis/utils.py`, `analysis/config.py`, `analysis/06_generate_report.py`, `dashboard/app.py`.
+- Notebooks: use descriptive, kebab-like or underscore-separated names in `notebooks/`, e.g. `notebooks/data_quality_audit_notebook.ipynb` (observed).
+- Packages / directories: use lowercase, short names (observed layout in `README.md` — `analysis/`, `dashboard/`, `notebooks/`, `reports/`, `data/`).
+- Tests: when added, tests should be placed in a top-level `tests/` directory using `test_*.py` filenames (see Testing section). `tests/` is not present in the repository currently.
 
-Modules / Packages
-- Module file names are snake_case. When creating packages, include an explicit `__init__.py`.
+Prescriptive patterns (strict):
+- Module filenames: `^[a-z0-9_]+\.py$` (snake_case). Example: `analysis/utils.py`.
+- Class names: CapWords (PascalCase). Example: `class DataLoader`.
+- Function and variable names: snake_case. Example: `def load_data(path: str) -> pd.DataFrame`.
+- Constant names: UPPER_SNAKE_CASE. Example: `DATA_DIR = "data/"`.
 
-## Code Style
+Files/paths referenced in guidance:
+- `analysis/` (expected directory per `README.md`)
+- `dashboard/app.py` (entrypoint referenced in `README.md`)
+- `notebooks/` (observed; notebooks present)
+- `reports/` (observed)
+- `data/raw/`, `data/external/`, `data/processed/` (observed and listed in `.gitignore` and `README.md`)
 
-Formatting
-- The project recommends `black` for formatting (`requirements.txt` lists `black`) and `isort` is present in `requirements.txt`.
-- Enforce formatting before commit locally or via CI (no CI is present; add if needed).
+## Code organization patterns (observed + prescriptive)
 
-Linting
-- The README recommends `flake8` or `ruff` for linting; both appear in `requirements.txt`.
-- Add a top-level config when enabling linting (examples: `.flake8`, `pyproject.toml` for `ruff/black`). No lint config files were detected.
+Observed organization (from `README.md` and `AGENTS.md`):
+- `analysis/` should contain reusable Python modules for heavy processing and helpers. Files mentioned: `analysis/utils.py`, `analysis/config.py`, `analysis/06_generate_report.py`.
+- Notebooks should orchestrate analysis and call `analysis/` helpers (explicit instruction in `AGENTS.md`). Notebooks are kept in `notebooks/` and exported artifacts are in `reports/`.
 
-Type Checking
-- `mypy` and `pydantic` packages are present in `requirements.txt`. No `mypy.ini` or explicit type-checking workflow detected. When adding typed modules, include `mypy` config and add to CI.
+Prescriptive module layout (use when adding code):
+- Put reusable functions in `analysis/` modules. Examples: `analysis/utils.py`, `analysis/io.py`, `analysis/transform.py`.
+- Keep the notebook logic orchestrating analysis, not implementing large helper functions. When a function is used by multiple notebooks, put it into `analysis/<module>.py` and import it from notebooks (e.g., in `notebooks/philadelphia_safety_trend_analysis.ipynb` import `analysis.utils`).
 
-Notebook Conventions (prescribed and enforced in `AGENTS.md`)
-- Notebooks must include a reproducibility metadata cell as the first code cell that records: Python version, conda env (`crime`), and key package versions (pandas, numpy, matplotlib, plotly, etc.). See `AGENTS.md` for the exact checklist.
-- Notebooks live in `notebooks/` and publication-ready exports go to `reports/` (illustrated by `reports/` and the README).
-- Notebooks should keep heavy processing in helper modules under `analysis/` and keep notebooks as orchestration/visualization layers. The README explicitly says "Keep heavy processing in `analysis/` helper modules".
-- Notebooks must be runnable headless with `jupyter nbconvert --execute` for CI. The repo includes example notebooks in `notebooks/`.
+Key file paths to use when adding code:
+- Primary analyses/helpers: `analysis/` (create `analysis/__init__.py` when needed)
+- Notebook orchestration: `notebooks/` (co-locate notebooks)
+- Exports and figures: `reports/`
+- Dashboard code: `dashboard/` (example: `dashboard/app.py`)
 
-Import Organization
-- Prefer absolute imports for project modules (e.g. `import analysis.utils as utils`). No path aliasing / advanced import setup detected.
+## Docstrings and comments
 
-Error Handling
+- The repository guidance (`AGENTS.md`) requires short docstrings for helper functions and descriptive variable names. There are no code files in `analysis/` to inspect, so this is a repository policy rather than an enforced pattern in code.
 
-- Strategy: No centralized application-level error handling exists (this is an analysis repo). For scripts and small modules follow these rules:
-  - Validate input files early and raise informative exceptions with context (use ValueError/RuntimeError with clear messages).
-  - Use try/except sparingly in analysis scripts — prefer failing fast so notebooks/CI surface errors.
-  - For dashboard entrypoint `dashboard/app.py` (referenced in `README.md`), handle configuration errors (missing env vars declared in `.env.example`) and exit with non-zero status.
+Prescriptive rule (enforceable):
+- Use Google-style or NumPy-style docstrings for non-trivial functions and classes. Example:
 
-Logging
-- Use the Python `logging` module for scripts and the dashboard (no logging config detected in repo). Example pattern for script-level logging:
+```python
+def load_data(path: str) -> pd.DataFrame:
+    """Load raw data from path and apply minimal validation.
 
-  import logging
-  logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    Parameters
+    ----------
+    path : str
+        Path to the parquet/csv file
 
-Documentation & Docstrings
-- Short docstrings for public functions and modules are recommended (AGENTS.md requests docstrings in notebooks and helper functions). Follow Google or NumPy style docstrings consistently.
+    Returns
+    -------
+    pandas.DataFrame
+    """
+    ...
+```
 
-Security & Secrets
-- `.env.example` is present. Keep real secrets out of source control. Scripts should read configuration from environment variables (use `python-dotenv` if needed). The README calls out `dashboard/config.py` for env var references (file not present in repository).
+Place docstrings at the function/class level and keep inline comments only for non-obvious decisions.
 
-Where to Put New Code
-- Analysis helpers: `analysis/` (create if missing). Key helper files referenced in README: `analysis/utils.py`, `analysis/config.py`, `analysis/06_generate_report.py`.
-- Dashboard code: `dashboard/` — entry point referenced as `dashboard/app.py` in `README.md`.
+## Import organization
 
-Prescriptive Rules (for contributors and automated agents)
-- Use `black` + `isort` on all Python code before committing.
-- Run `flake8` or `ruff` and fix reported issues before opening a PR.
-- Keep notebooks small: move reusable code into `analysis/` helpers and import them from notebooks.
-- Add tests for any non-trivial function in `analysis/` (see `TESTING.md`).
+- Observed guidance: `isort` and `black` are available and should be used to keep imports consistent. `README.md` recommends `black`.
 
-Files referenced in this section (examples):
-- `README.md`
-- `AGENTS.md`
-- `requirements.txt`
-- `environment.yml`
-- `notebooks/data_quality_audit_notebook.ipynb`
-- `notebooks/summer_crime_spike_analysis.ipynb`
+Prescriptive import groups:
+1. Standard library (sorted)
+2. Third-party packages (sorted)
+3. Local application imports (sorted)
+
+Always use absolute imports within the project (example):
+`from analysis.utils import load_data` rather than relative imports from notebooks.
+
+## Error handling
+
+Observed state: There are no production Python modules to inspect for error-handling patterns. The notebooks contain analysis code but are not a reliable source of code-level error strategy.
+
+Prescriptive rules (consistent with project style and data-processing requirements):
+- Validate inputs early. For example, functions that accept a file path should check existence and expected format and raise `ValueError` with an explanatory message on invalid input.
+- Use specific exceptions rather than bare `except:` blocks. Example:
+
+```python
+try:
+    df = pd.read_parquet(path)
+except (FileNotFoundError, OSError) as e:
+    raise FileNotFoundError(f"Missing data file: {path}") from e
+```
+
+- For long-running processing steps, raise informative exceptions and include `logging` calls (see Logging below).
+
+## Logging
+
+Observed: The repo does not include a centralized logging configuration file. `AGENTS.md` and `README.md` do not prescribe a logging framework explicitly.
+
+Prescriptive guidance:
+- Use the standard `logging` module for analysis and dashboard code. Provide a small helper at `analysis/logging.py` or `analysis/config.py` that configures a logger used across modules. Example usage:
+
+```python
+import logging
+
+logger = logging.getLogger("crime")
+logger.setLevel(logging.INFO)
+
+logger.info("Loaded dataset with %d rows", len(df))
+```
+
+Place logging configuration in `analysis/config.py` and avoid printing to stdout for non-interactive scripts. Notebooks may use `print` for exploratory output but prefer `logger` in scripts.
+
+## Notebooks (strong, repository-level conventions)
+
+The repository defines detailed notebook rules in `AGENTS.md` and summary items in `README.md`. These are enforced as project policy.
+
+Observed, enforceable rules and file paths:
+- Notebooks live in `notebooks/`. Observed files: `notebooks/data_quality_audit_notebook.ipynb`, `notebooks/summer_crime_spike_analysis.ipynb`, etc.
+- Reproducibility cell must be the first code cell and record Python version, environment name, and key packages (`AGENTS.md`).
+- Notebooks must include a fast/sampled dev path for long-running steps and be runnable headless in CI via `jupyter nbconvert --execute` (see `AGENTS.md`).
+- Notebook outputs guidance conflict: `AGENTS.md` requests that completed notebooks be committed with outputs preserved, while `README.md` (line 69) instructs to "Commit notebooks with outputs cleared". Both files exist in the repository — this is the current state and should be resolved by maintainers. Paths: `AGENTS.md`, `README.md`.
+
+Prescriptive, reconciled guidance (recommended to adopt consistently):
+- Keep a repository policy and follow only one rule. Prefer committing executed notebooks with outputs preserved for reproducibility and also maintain a CI step that runs a cleared execution for validation. Document the chosen policy in `README.md` and `AGENTS.md`.
+
+## Type hints and static typing
+
+Observed: `mypy` is present in `requirements.txt` and `environment.yml` (the environment includes `mypy`) but the repo does not contain `.py` modules to inspect for type usage.
+
+Prescriptive guidance:
+- Use type hints on public functions and return types for analysis modules (e.g., `def load_data(path: str) -> pd.DataFrame`).
+- Consider adding `mypy.ini`/`pyproject.toml` and a CI step running `mypy` for non-notebook code.
+
+## Security & secrets
+
+Observed security conventions:
+- `.env` is ignored via `.gitignore` (path: `.gitignore`). An example `.env.example` is present at project root.
+
+Prescriptive rule:
+- Do not commit secrets. Use `python-dotenv` (present in `requirements.txt`) for local development and ensure `.env` is in `.gitignore` (observed).
+
+## Summary / Next actions for contributors
+
+- Follow PEP 8; use `black` + `isort` + `ruff` as part of local development workflow. Files: `requirements.txt`, `environment.yml`.
+- Place reusable code in `analysis/` and keep notebooks in `notebooks/` as orchestrators. Reference: `README.md` and `AGENTS.md`.
+- Add tests under `tests/` (see `TESTING.md`) and include `pytest`/`pytest-cov` entries (already present in `requirements.txt`).
+- Resolve the notebook outputs instruction conflict between `AGENTS.md` and `README.md`.
 
 ---
 
