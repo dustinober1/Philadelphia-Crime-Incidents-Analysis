@@ -1,0 +1,33 @@
+version: "v1.0"
+environment:
+  output_dir: "reports"
+  dpi: 300
+  fast_sample_frac: 0.1
+
+annual_trend:
+  params:
+    start_year: 2015
+    end_year: 2024
+    min_complete_months: 12
+  outputs:
+    png: "annual_trend_{version}.png"
+    report: "annual_trend_report_{version}.md"
+
+seasonality:
+  params:
+    summer_months: [6, 7, 8]
+    winter_months: [1, 2, 3]
+    significance_level: 0.05
+  outputs:
+    png: "seasonality_boxplot_{version}.png"
+    report: "seasonality_report_{version}.md"
+
+covid:
+  params:
+    lockdown_date: "2020-03-01"
+    before_years: [2018, 2019]
+    during_years: [2020, 2021]
+    after_start_year: 2023
+  outputs:
+    png: "covid_timeline_{version}.png"
+    report: "covid_report_{version}.md"
