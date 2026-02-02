@@ -2,8 +2,11 @@
 
 from pathlib import Path
 
-CRIME_DATA_PATH = Path("data") / "crime_incidents_combined.parquet"
-REPORTS_DIR = Path("reports")
+# Resolve repo root from this module's location (analysis/config.py -> repo root)
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+
+CRIME_DATA_PATH = _REPO_ROOT / "data" / "crime_incidents_combined.parquet"
+REPORTS_DIR = _REPO_ROOT / "reports"
 
 COLORS = {
     "Violent": "#E63946",
