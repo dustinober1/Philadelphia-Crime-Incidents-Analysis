@@ -13,9 +13,9 @@
 
 ### Patrol (Resource Allocation)
 
-- [ ] **PATROL-01**: Spatial clustering (DBSCAN/KMeans) to identify hotspots; export centroids and heatmap tiles
-- [ ] **PATROL-02**: Hour × Weekday heatmap for Robbery incidents and peak-hour identification
-- [ ] **PATROL-03**: District-level severity scoring (weighted by crime severity) and choropleth map
+- [x] **PATROL-01**: Spatial clustering (DBSCAN/KMeans) to identify hotspots; export centroids and heatmap tiles
+- [x] **PATROL-02**: Hour × Weekday heatmap for Robbery incidents and peak-hour identification
+- [x] **PATROL-03**: District-level severity scoring (weighted by crime severity) and choropleth map
 
 ### Policy (Deep Dives)
 
@@ -31,7 +31,7 @@
 ### Hypotheses & External Data
 
 - [ ] **HYP-HEAT**: Merge hourly weather and test heat–crime relationships; find temperature thresholds where violent crime changes
-- [ ] **HYP-SOCIO**: Spatially join crimes to Census tracts and compute crime rates per 1,000 residents
+- [x] **HYP-SOCIO**: Spatially join crimes to Census tracts and compute crime rates per 1,000 residents
 - [ ] **HYP-EVENTS**: Engineer event-day features (sports games, holidays) and measure event impacts on crime categories
 
 ## v2 Requirements
@@ -52,16 +52,16 @@
 | CHIEF-01 | Phase 1 | Complete |
 | CHIEF-02 | Phase 1 | Complete |
 | CHIEF-03 | Phase 1 | Complete |
-| PATROL-01 | Phase 2 | Pending |
-| PATROL-02 | Phase 2 | Pending |
-| PATROL-03 | Phase 2 | Pending |
+| PATROL-01 | Phase 2 | Complete |
+| PATROL-02 | Phase 2 | Complete |
+| PATROL-03 | Phase 2 | Complete |
 | POLICY-01 | Phase 3 | Pending |
 | POLICY-02 | Phase 3 | Pending |
 | POLICY-03 | Phase 3 | Pending |
 | FORECAST-01 | Phase 4 | Pending |
 | FORECAST-02 | Phase 4 | Pending |
 | HYP-HEAT | Phase 4 | Pending |
-| HYP-SOCIO | Phase 2 | Pending |
+| HYP-SOCIO | Phase 2 | Complete |
 | HYP-EVENTS | Phase 3 | Pending |
 
 **Coverage:**
