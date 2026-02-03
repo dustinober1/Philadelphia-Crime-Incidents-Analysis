@@ -1,0 +1,40 @@
+# Phase 2: Spatial & Socioeconomic Analysis
+version: "1.0"
+
+clustering:
+  eps_degrees: 0.002  # ~220m at Philadelphia latitude (40°N)
+  min_samples: 50
+  algorithm: "DBSCAN"
+
+severity_weights:
+  # UCR general code (hundred-band) -> severity weight (FBI-based)
+  100: 10.0  # Homicide
+  200: 8.0   # Rape
+  300: 6.0   # Robbery
+  400: 5.0   # Aggravated Assault
+  500: 3.0   # Burglary
+  600: 1.0   # Theft
+  700: 2.0   # Vehicle Theft
+  800: 4.0   # Arson
+  900: 0.5   # Other
+
+heatmap:
+  robbery_ucr_range: [300, 400]  # UCR codes for robbery
+  hours: [0, 23]
+  days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+census:
+  population_column: "total_pop"
+  rate_per: 100000  # FBI UCR convention (per 100,000 residents)
+  min_population: 100  # Tracts below this flagged as unreliable
+
+boundaries:
+  police_districts_file: "data/boundaries/police_districts.geojson"
+  census_tracts_file: "data/boundaries/census_tracts_pop.geojson"
+
+# Philadelphia coordinate bounds (WGS84)
+coordinate_bounds:
+  min_lon: -75.30
+  max_lon: -74.95
+  min_lat: 39.85
+  max_lat: 40.15
