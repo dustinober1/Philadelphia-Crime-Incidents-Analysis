@@ -57,12 +57,37 @@ Identify where and why crimes concentrate and normalize by population.
 
 | Plan | Wave | Description | Status |
 |------|------|-------------|--------|
-| 02-01-PLAN.md | 1 | Infrastructure & boundary data | Pending |
-| 02-02-PLAN.md | 2 | Hotspot clustering (PATROL-01) | Pending |
-| 02-03-PLAN.md | 2 | Robbery heatmap (PATROL-02) | Pending |
-| 02-04-PLAN.md | 2 | District severity (PATROL-03) | Pending |
-| 02-05-PLAN.md | 2 | Census tract rates (HYP-SOCIO) | Pending |
-| 02-06-PLAN.md | 3 | Integration & validation | Pending |
+| 02-01-PLAN.md | 1 | Infrastructure & boundary data | Ready |
+| 02-02-PLAN.md | 2 | Hotspot clustering (PATROL-01) | Ready |
+| 02-03-PLAN.md | 2 | Robbery heatmap (PATROL-02) | Ready |
+| 02-04-PLAN.md | 2 | District severity (PATROL-03) | Ready |
+| 02-05-PLAN.md | 2 | Census tract rates (HYP-SOCIO) | Ready |
+| 02-06-PLAN.md | 3 | Integration & validation | Ready |
+
+## Dependencies
+
+```
+Wave 1: 02-01 (Infrastructure)
+    ↓
+Wave 2: 02-02, 02-03, 02-04, 02-05 (Parallel)
+    ↓
+Wave 3: 02-06 (Integration)
+```
+
+## Estimated Total Time
+
+| Plan | Estimated |
+|------|-----------|
+| 02-01 | ~70 min |
+| 02-02 | ~75 min |
+| 02-03 | ~75 min |
+| 02-04 | ~85 min |
+| 02-05 | ~95 min |
+| 02-06 | ~95 min |
+| **Total** | **~495 min** |
+
+*Note: Wave 2 plans can run in parallel, reducing wall-clock time.*
 
 ---
 *Created: 2026-02-03*
+*Updated: 2026-02-03 - All plans created*
