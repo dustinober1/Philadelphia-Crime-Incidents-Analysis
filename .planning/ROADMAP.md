@@ -37,7 +37,7 @@ Requirements covered: PATROL-01, PATROL-02, PATROL-03, HYP-SOCIO
 **Plans:** 6 plans in 3 waves (see `.planning/phases/02-spatial-socioeconomic/00-INDEX.md`)
 
 Plans:
-- [ ] 02-01-PLAN.md — Infrastructure & Boundary Data (Wave 1)
+- [x] 02-01-PLAN.md — Infrastructure & Boundary Data (Wave 1)
 - [ ] 02-02-PLAN.md — Hotspot Clustering PATROL-01 (Wave 2)
 - [ ] 02-03-PLAN.md — Robbery Heatmap PATROL-02 (Wave 2)
 - [ ] 02-04-PLAN.md — District Severity PATROL-03 (Wave 2)

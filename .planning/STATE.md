@@ -11,23 +11,24 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 - Key notebooks present: `philadelphia_safety_trend_analysis.ipynb`, `summer_crime_spike_analysis.ipynb`, `covid_lockdown_crime_landscape.ipynb`.
 - Environment: Python, pandas, geopandas, Prophet/ARIMA, scikit-learn/XGBoost.
 - Phase 1 complete with tag `phase-1-complete`
+- Phase 2 infrastructure complete: boundary data cached, spatial utils tested
 
 ## Current Position
 
 Phase: 2 of 4 (Spatial & Socioeconomic Analysis) - IN PROGRESS
-Plan: 0 of 6 in current phase - PLANNING
-Status: Phase 2 research complete, ready for planning
-Last activity: 2026-02-03 - Created Phase 2 index, data exploration complete
+Plan: 1 of 6 in current phase
+Status: Infrastructure complete, ready for analysis notebooks
+Last activity: 2026-02-03 - Completed 02-01-PLAN.md (Infrastructure & Boundary Data)
 
-Progress: ░░░░░░░░░░ 0% (Phase 2)
+Progress: █░░░░░░░░░ 17% (Phase 2: 1/6 plans)
 
 ## Phase 2 Data Findings
 
 - **Coordinates**: 98.4% of records have valid WGS84 coordinates (point_x, point_y)
-- **Districts**: 25 unique police districts (dc_dist), 100% coverage
+- **Districts**: 25 unique dc_dist in crime data; 21 official geographic police district boundaries
+- **Census tracts**: 408 tracts with total population 1.58M
 - **PSAs**: 32 unique Police Service Areas
 - **Robbery data**: 136,917 incidents with 98% hour coverage
-- **External data needed**: Police district boundaries, Census tract boundaries with population
 
 ## Completed Plans
 
@@ -38,12 +39,12 @@ Progress: ░░░░░░░░░░ 0% (Phase 2)
 | 01-03-PLAN.md | Wave 2: Seasonality notebook | Complete |
 | 01-04-PLAN.md | Wave 2: COVID impact notebook | Complete |
 | 01-05-PLAN.md | Wave 3: Integration & Testing | Complete |
+| 02-01-PLAN.md | Wave 1: Infrastructure & boundary data | Complete |
 
-## Phase 2 Plans (Pending)
+## Phase 2 Plans (Remaining)
 
 | Plan | Description | Status |
 | --- | --- | --- |
-| 02-01-PLAN.md | Wave 1: Infrastructure & boundary data | Pending |
 | 02-02-PLAN.md | Wave 2: Hotspot clustering (PATROL-01) | Pending |
 | 02-03-PLAN.md | Wave 2: Robbery heatmap (PATROL-02) | Pending |
 | 02-04-PLAN.md | Wave 2: District severity (PATROL-03) | Pending |
@@ -59,6 +60,8 @@ Progress: ░░░░░░░░░░ 0% (Phase 2)
 | 01-02 | Define REPORTS_DIR from repo_root in notebooks, not re-import from analysis.config | Ensures artifacts save to correct location when notebooks run from notebooks/ directory |
 | 01-04 | Fix analysis/config.py to use absolute paths via __file__ | Ensures all modules work regardless of working directory |
 | 01-05 | Use config file existence for repo_root detection in notebooks | More robust than checking directory name, works in any execution context |
+| 02-01 | Accept 21 geographic police districts (not 25) | Official boundary data has 21 districts; crime data has additional administrative codes (4, 6, 23, 92) |
+| 02-01 | Use TIGER + ACS API for census tract population | Census Reporter API unavailable; TIGER shapefiles + ACS population data more reliable |
 
 ## Blockers/Concerns Carried Forward
 
@@ -66,9 +69,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-03 03:40 UTC
-Stopped at: Phase 1 verified and complete, Phase 2 ready for execution
-Resume file: .planning/phases/02-spatial-socioeconomic/00-INDEX.md
+Last session: 2026-02-03 00:42 UTC
+Stopped at: Completed 02-01-PLAN.md - Infrastructure & Boundary Data
+Resume file: .planning/phases/02-spatial-socioeconomic/02-02-PLAN.md
 
 ---
 *State updated: 2026-02-03*
