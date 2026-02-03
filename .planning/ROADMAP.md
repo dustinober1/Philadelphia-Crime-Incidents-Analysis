@@ -69,9 +69,18 @@ Success criteria:
 3. Composition analysis showing violent / total ratio by year and stacked-area visualization with interpretation.
 4. Event impact notebook showing difference-in-means for game/holiday days vs controls and a summary report.
 
-### Phase 4 — Forecasting & Predictive Modeling ← CURRENT
+### Phase 4 — Forecasting & Predictive Modeling COMPLETE
 Goal: Deliver short-term forecasts and a violence-classification model with interpretable importances to support operational alerts and deeper research.
 Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
+**Plans:** 5 plans in 3 waves
+
+Plans:
+- [x] 04-01-PLAN.md — Infrastructure & Environment Setup (Wave 1)
+- [x] 04-02-PLAN.md — Time Series Forecasting Notebook FORECAST-01 (Wave 2)
+- [x] 04-03-PLAN.md — Classification Model Notebook FORECAST-02 (Wave 2)
+- [x] 04-04-PLAN.md — Heat-Crime Analysis Notebook HYP-HEAT (Wave 2)
+- [x] 04-05-PLAN.md — Integration & Validation (Wave 3)
+
 Success criteria:
 1. Forecast notebook (Prophet/ARIMA) with 30–60 day horizon, CI bands, and a clear threshold definition for anomalies; artifacts exported.
 2. Classification model notebook with data splits, time-aware CV, feature importance plot, and a short model card describing limitations.
@@ -97,4 +106,4 @@ Success criteria:
 6. ~~`/gsd-execute-phase 2`~~ ✅ Complete — All Phase 2 plans executed
 7. ~~`/gsd-plan-phase 3`~~ ✅ Complete — 6 plans created (1 infra, 4 notebooks, 1 integration)
 8. ~~`/gsd-execute-phase 3`~~ ✅ Complete — All Phase 3 plans executed, 24 artifacts validated
-9. `/gsd-plan-phase 4` — Plan Phase 4 (Forecasting & Predictive Modeling)
+9. ~~`/gsd-plan-phase 4`~~ ✅ Complete — All Phase 4 plans executed, forecasting models validated

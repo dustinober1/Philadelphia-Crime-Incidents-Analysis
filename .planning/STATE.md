@@ -3,7 +3,7 @@
 See: .planning/PROJECT.md (updated 2026-02-02)
 
 **Core value:** Provide clear, reproducible, evidence-based answers to policy and operations questions about crime in Philadelphia
-**Current focus:** Phase 4 — Forecasting & Predictive Modeling (next)
+**Current focus:** All phases complete — v1.0 milestone achieved
 
 ## Memory
 
@@ -22,6 +22,22 @@ Status: Phase Complete
 Last activity: 2026-02-03 - Completed 04-05-PLAN.md (Integration & Validation)
 
 Progress: ██████████████ 100% (22/22 plans complete across all phases)
+
+## Phase 4 Summary
+
+**Artifacts Validated:** 15+ models, visualizations, and reports
+**Cross-reference checks:** All passed
+**Total artifacts:** 3 notebooks, 3 model utilities, 4+ CSV metrics files, 10+ visualizations
+
+### Key Deliverables
+- **FORECAST-01**: Prophet time series model with 60-day forecast horizon, 95% confidence intervals, and 3-level anomaly detection system
+- **FORECAST-02**: Violence classification model (Random Forest + XGBoost) with time-aware validation, SHAP feature importance, and comprehensive model cards
+- **HYP-HEAT**: Heat-crime hypothesis **SUPPORTED** — statistically significant positive relationship between temperature and violent crime (p < 0.001)
+
+### Workarounds Applied
+- Classification notebook data corruption: Resolved via index reset and Series reconstruction techniques
+- Heat-crime datetime categorical issues: Fixed with explicit pd.to_datetime() conversions
+- Prophet/NumPy 2.0 compatibility: Downgraded NumPy to 1.26.4
 
 ## Phase 3 Summary
 
