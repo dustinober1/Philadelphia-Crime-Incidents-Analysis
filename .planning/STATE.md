@@ -17,9 +17,9 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 ## Current Position
 
 Phase: 4 of 4 (Forecasting & Predictive Modeling)
-Plan: 4 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-03 - Completed 04-04-PLAN.md (Heat-Crime Hypothesis Analysis)
+Last activity: 2026-02-03 - Completed 04-03-PLAN.md (Violence Classification Model)
 
 Progress: ████████████░ 87% (20/23 plans complete across all phases)
 
@@ -57,6 +57,7 @@ Progress: ████████████░ 87% (20/23 plans complete acro
 | 03-05-PLAN.md | Wave 2: Event Impacts (HYP-EVENTS) | Complete |
 | 03-06-PLAN.md | Wave 3: Integration & Validation | Complete |
 | 04-01-PLAN.md | Wave 1: Infrastructure & Environment Setup | Complete |
+| 04-03-PLAN.md | Wave 2: Violence Classification (FORECAST-02) | Complete |
 | 04-04-PLAN.md | Wave 2: Heat-Crime Hypothesis (HYP-HEAT) | Complete |
 
 ## Decisions
@@ -86,6 +87,10 @@ Progress: ████████████░ 87% (20/23 plans complete acro
 | 04-01 | Include both Random Forest and XGBoost for classification | RF for interpretability, XGBoost for performance; both support SHAP values |
 | 04-01 | Add SHAP library for feature importance | Model-agnostic interpretability essential for explaining predictions |
 | 04-01 | Create separate model utility modules | time_series.py, classification.py, validation.py keep concerns separated |
+| 04-03 | Use both Random Forest and XGBoost for classification | RF for interpretability, XGBoost for performance; comparison enables ensemble approach |
+| 04-03 | Implement time-aware validation without shuffling | Prevents data leakage by maintaining temporal ordering in train/test split |
+| 04-03 | Sample SHAP values for computational efficiency | Compute SHAP on 500 instances to balance interpretability insight with execution time |
+| 04-03 | Create comprehensive model cards | Document architecture, performance, limitations, bias, and operational warnings following ML best practices |
 | 04-04 | Use daily aggregation for temporal alignment | Weather data is daily, so aggregate crime to match; documents limitation of losing intra-day variation |
 | 04-04 | Apply city-wide weather station to all crimes | Single station assumes uniform temperature across Philadelphia; documents limitation of not capturing heat island effects |
 | 04-04 | Use multiple correlation methods for robustness | Pearson, Spearman, Kendall tau ensure results not dependent on single statistical method |
@@ -98,8 +103,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 04-04-PLAN.md (Heat-Crime Hypothesis Analysis)
-Resume file: None (Ready for 04-05-PLAN.md)
+Stopped at: Completed 04-03-PLAN.md (Violence Classification Model)
+Resume file: None (Ready for 04-02 or 04-05)
 
 ---
 *State updated: 2026-02-03*
