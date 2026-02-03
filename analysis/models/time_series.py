@@ -107,11 +107,11 @@ def evaluate_forecast(
     upper: Optional[pd.Series] = None,
 ) -> Dict[str, float]:
     """
-    Evaluate forecast performance with multiple metrics.
+    Evaluate forecast performance using common metrics.
 
     Args:
-        actual: Actual values
-        predicted: Predicted values
+        actual: Actual values (pandas Series or numpy array)
+        predicted: Predicted values (pandas Series or numpy array)
         lower: Lower bound of prediction interval (optional)
         upper: Upper bound of prediction interval (optional)
 
@@ -120,10 +120,14 @@ def evaluate_forecast(
     """
     from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-    # Align indices
-    mask = actual.notna() & predicted.notna()
-    actual_clean = actual[mask]
-    predicted_clean = predicted[mask]
+    # Convert to numpy arrays if needed
+    actual_arr = np.asarray(actual)
+    predicted_arr = np.asarray(predicted)
+
+    # Filter out NaN values
+    mask = ~(np.isnan(actual_arr) | np.isnan(predicted_arr))
+    actual_clean = actual_arr[mask]
+    predicted_clean = predicted_arr[mask]
 
     metrics = {
         "mae": mean_absolute_error(actual_clean, predicted_clean),
@@ -134,8 +138,10 @@ def evaluate_forecast(
 
     # Coverage of prediction intervals if provided
     if lower is not None and upper is not None:
-        lower_clean = lower[mask]
-        upper_clean = upper[mask]
+        lower_arr = np.asarray(lower)
+        upper_arr = np.asarray(upper)
+        lower_clean = lower_arr[mask]
+        upper_clean = upper_arr[mask]
         in_interval = (actual_clean >= lower_clean) & (actual_clean <= upper_clean)
         metrics["coverage"] = in_interval.mean()
 
