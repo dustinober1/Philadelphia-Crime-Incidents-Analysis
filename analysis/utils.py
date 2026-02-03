@@ -10,8 +10,9 @@ import pandas as pd
 from analysis.config import CRIME_DATA_PATH
 
 CRIME_CATEGORY_MAP: Dict[str, set[int]] = {
-    "Violent": {100, 200},
-    "Property": {300, 400, 500},
+    # UCR hundred-bands: 1=Homicide, 2=Rape, 3=Robbery, 4=Agg Assault, 5=Burglary, 6=Theft, 7=Vehicle Theft
+    "Violent": {1, 2, 3, 4},  # Homicide, Rape, Robbery, Aggravated Assault
+    "Property": {5, 6, 7},  # Burglary, Theft, Vehicle Theft
 }
 
 
