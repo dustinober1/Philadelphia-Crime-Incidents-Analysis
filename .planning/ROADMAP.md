@@ -50,16 +50,26 @@ Success criteria:
 3. District choropleth showing severity score and a table ranking districts by severity and by per-capita crime rate.
 4. Census tract join notebook that outputs per-1000-residents crime rates and flags inconsistencies in tract population data.
 
-### Phase 3 — Policy Deep Dives & Event Impacts ← CURRENT
+### Phase 3 — Policy Deep Dives & Event Impacts COMPLETE
 Goal: Provide focused evidence on retail theft, vehicle crimes, and event-day effects to inform policy decisions.
 Requirements covered: POLICY-01, POLICY-02, POLICY-03, HYP-EVENTS
+**Plans:** 6 plans in 3 waves (see `.planning/phases/03-policy-events/00-INDEX.md`)
+
+Plans:
+- [x] 03-01-PLAN.md — Infrastructure & External Data (Wave 1)
+- [x] 03-02-PLAN.md — Retail Theft Trend POLICY-01 (Wave 2)
+- [x] 03-03-PLAN.md — Vehicle Crimes Corridors POLICY-02 (Wave 2)
+- [x] 03-04-PLAN.md — Crime Composition POLICY-03 (Wave 2)
+- [x] 03-05-PLAN.md — Event Impacts HYP-EVENTS (Wave 2)
+- [x] 03-06-PLAN.md — Integration & Validation (Wave 3)
+
 Success criteria:
 1. Retail Theft 5-year trend notebook with offense-code filters and a short verdict (supported / not supported) plus visualization.
 2. Vehicle crimes map overlayed with major transit/highway corridors and a quantification (e.g., % within N blocks) exported.
 3. Composition analysis showing violent / total ratio by year and stacked-area visualization with interpretation.
 4. Event impact notebook showing difference-in-means for game/holiday days vs controls and a summary report.
 
-### Phase 4 — Forecasting & Predictive Modeling
+### Phase 4 — Forecasting & Predictive Modeling ← CURRENT
 Goal: Deliver short-term forecasts and a violence-classification model with interpretable importances to support operational alerts and deeper research.
 Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 Success criteria:
@@ -85,4 +95,6 @@ Success criteria:
 4. ~~`/gsd-execute-phase 1`~~ ✅ Complete — All Phase 1 plans executed, tag `phase-1-complete`
 5. ~~`/gsd-plan-phase 2`~~ ✅ Complete — 6 plans created (1 infra, 4 notebooks, 1 integration)
 6. ~~`/gsd-execute-phase 2`~~ ✅ Complete — All Phase 2 plans executed
-7. `/gsd-plan-phase 3` — Plan Phase 3 (Policy Deep Dives)
+7. ~~`/gsd-plan-phase 3`~~ ✅ Complete — 6 plans created (1 infra, 4 notebooks, 1 integration)
+8. ~~`/gsd-execute-phase 3`~~ ✅ Complete — All Phase 3 plans executed, 24 artifacts validated
+9. `/gsd-plan-phase 4` — Plan Phase 4 (Forecasting & Predictive Modeling)

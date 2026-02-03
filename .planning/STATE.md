@@ -3,36 +3,37 @@
 See: .planning/PROJECT.md (updated 2026-02-02)
 
 **Core value:** Provide clear, reproducible, evidence-based answers to policy and operations questions about crime in Philadelphia
-**Current focus:** Phase 3 — Predictive Modeling (next)
+**Current focus:** Phase 4 — Forecasting & Predictive Modeling (next)
 
 ## Memory
 
 - Repo type: Brownfield, notebook-driven analysis project; data artifacts present under `data/`.
-- Key notebooks present: `philadelphia_safety_trend_analysis.ipynb`, `summer_crime_spike_analysis.ipynb`, `covid_lockdown_crime_landscape.ipynb`, `robbery_temporal_heatmap.ipynb`, `census_tract_rates.ipynb`, `phase2_summary.ipynb`.
+- Key notebooks present: `philadelphia_safety_trend_analysis.ipynb`, `summer_crime_spike_analysis.ipynb`, `covid_lockdown_crime_landscape.ipynb`, `robbery_temporal_heatmap.ipynb`, `census_tract_rates.ipynb`, `phase2_summary.ipynb`, `retail_theft_trend.ipynb`, `vehicle_crimes_corridors.ipynb`, `crime_composition.ipynb`, `event_impact_analysis.ipynb`.
 - Environment: Python, pandas, geopandas, Prophet/ARIMA, scikit-learn/XGBoost.
 - Phase 1 complete with tag `phase-1-complete`
 - Phase 2 complete: all spatial/socioeconomic analysis delivered, 20 artifacts validated
+- Phase 3 complete: all policy deep dives delivered, 24 artifacts validated
 
 ## Current Position
 
-Phase: 2 of 4 (Spatial & Socioeconomic Analysis) - COMPLETE
+Phase: 3 of 4 (Policy Deep Dives & Event Impacts) - COMPLETE
 Plan: 6 of 6 in current phase
-Status: Phase 2 complete, ready for Phase 3
-Last activity: 2026-02-03 - Completed 02-06-PLAN.md (Integration & Validation)
+Status: Phase 3 complete, ready for Phase 4
+Last activity: 2026-02-03 - Completed 03-06-PLAN.md (Integration & Validation)
 
-Progress: ██████████ 100% (Phase 2: 6/6 plans)
+Progress: ██████████ 100% (Phase 3: 6/6 plans)
 
-## Phase 2 Summary
+## Phase 3 Summary
 
-**Artifacts Validated:** 14 passed, 0 failed
+**Artifacts Validated:** 24 passed, 0 failed
 **Cross-reference checks:** All passed
-**Total artifacts:** 20 files across infrastructure, hotspots, robbery, severity, census
+**Total artifacts:** 20+ files across retail theft, vehicle crimes, composition, events
 
 ### Key Deliverables
-- **PATROL-01**: 33 hotspot clusters identified, interactive heatmap available
-- **PATROL-02**: Robbery peaks 00:00-04:00, patrol recommendations generated
-- **PATROL-03**: 21 districts scored; top 5: Districts 24, 22, 25, 15, 12
-- **HYP-SOCIO**: 408 tracts analyzed, 389 with reliable rates, 19 flagged
+- **POLICY-01**: Retail theft verdict: **SUPPORTED**, +66.8% change from baseline (2018-2019 avg)
+- **POLICY-02**: 39.8% of vehicle crimes within 500m of corridors (highways + transit)
+- **POLICY-03**: Violent ratio range 8.4%-11.4%, COVID impact: ratio peaked 2020-2021 due to reduced property crime reporting
+- **HYP-EVENTS**: 14/21 significant event impacts detected; Phillies games +5.3% crime, Eagles games -14.4% crime
 
 ## Completed Plans
 
@@ -49,6 +50,12 @@ Progress: ██████████ 100% (Phase 2: 6/6 plans)
 | 02-04-PLAN.md | Wave 2: District severity (PATROL-03) | Complete |
 | 02-05-PLAN.md | Wave 2: Census tract rates (HYP-SOCIO) | Complete |
 | 02-06-PLAN.md | Wave 3: Integration & validation | Complete |
+| 03-01-PLAN.md | Wave 1: Infrastructure & External Data | Complete |
+| 03-02-PLAN.md | Wave 2: Retail Theft Trend (POLICY-01) | Complete |
+| 03-03-PLAN.md | Wave 2: Vehicle Crimes Corridors (POLICY-02) | Complete |
+| 03-04-PLAN.md | Wave 2: Crime Composition (POLICY-03) | Complete |
+| 03-05-PLAN.md | Wave 2: Event Impacts (HYP-EVENTS) | Complete |
+| 03-06-PLAN.md | Wave 3: Integration & Validation | Complete |
 
 ## Decisions
 
@@ -68,6 +75,11 @@ Progress: ██████████ 100% (Phase 2: 6/6 plans)
 | 02-05 | Fixed CRIME_CATEGORY_MAP to use hundred-bands (1-7) not codes (100-700) | Bug caused all crimes to classify as "Other" - now correctly identifies Violent/Property/Other |
 | 02-05 | Flag tracts with population < 100 as unreliable | 19 tracts flagged (17 zero-pop, 2 low-pop) to prevent inflated/undefined rates |
 | 02-06 | Use union_all() instead of deprecated unary_union | geopandas deprecation warning fixed |
+| 03-01 | Use "Thefts" text_general_code as retail theft proxy | No separate retail theft code in data; UCR 600 includes all thefts |
+| 03-01 | 500m buffer for corridor analysis | ~5 city blocks, reasonable for transit accessibility |
+| 03-01 | Use OSM + fallback manual corridors | OSM API may be unavailable; manual coordinates as backup |
+| 03-02 | Verdict threshold 25% for SUPPORTED | Clear, defensible threshold for policy claim validation |
+| 03-05 | Use difference-in-means with t-tests | Standard statistical approach for event impact analysis |
 
 ## Blockers/Concerns Carried Forward
 
@@ -75,9 +87,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-03 01:10 UTC
-Stopped at: Completed 02-06-PLAN.md - Phase 2 Integration & Validation
-Resume file: None (Phase 2 complete, ready for Phase 3)
+Last session: 2026-02-03
+Stopped at: Completed Phase 3 - ready for `/gsd-plan-phase 4`
+Resume file: None (Phase 3 complete, ready for Phase 4)
 
 ---
 *State updated: 2026-02-03*

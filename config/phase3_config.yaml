@@ -1,0 +1,82 @@
+# Phase 3: Policy Deep Dives & Event Impacts
+version: "1.0"
+
+retail_theft:
+  # "Thefts" general category - no separate retail code in data
+  text_codes: ["Thefts"]
+  ucr_codes: [600]
+  analysis_years: [2019, 2020, 2021, 2022, 2023, 2024]
+  baseline_years: [2018, 2019]
+  verdict_threshold: 0.25  # 25% increase = "supported"
+
+vehicle_crimes:
+  text_codes: ["Theft from Vehicle", "Motor Vehicle Theft"]
+  ucr_codes: [600, 700]  # UCR 600 includes theft from vehicle
+  buffer_meters: 500  # ~5 city blocks
+  analysis_years: [2019, 2020, 2021, 2022, 2023, 2024]
+
+crime_composition:
+  # UCR hundred-bands for violent crimes
+  violent_ucr_bands: [1, 2, 3, 4]  # Homicide, Rape, Robbery, Agg Assault
+  property_ucr_bands: [5, 6, 7]    # Burglary, Theft, Motor Vehicle Theft
+  analysis_years: [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+
+events:
+  # Sports venues in Philadelphia
+  venues:
+    lincoln_financial_field:
+      lat: 39.9008
+      lon: -75.1675
+      teams: ["Eagles"]
+    citizens_bank_park:
+      lat: 39.9056
+      lon: -75.1665
+      teams: ["Phillies"]
+    wells_fargo_center:
+      lat: 39.9012
+      lon: -75.1720
+      teams: ["76ers", "Flyers"]
+  
+  # Major holidays to analyze
+  holidays:
+    - name: "New Year's Day"
+      month: 1
+      day: 1
+    - name: "Memorial Day"
+      month: 5
+      last_monday: true
+    - name: "Independence Day"
+      month: 7
+      day: 4
+    - name: "Labor Day"
+      month: 9
+      first_monday: true
+    - name: "Thanksgiving"
+      month: 11
+      fourth_thursday: true
+  
+  buffer_days: 1  # Include day before/after for spillover
+  control_weeks: 4  # Compare to same day-of-week in adjacent weeks
+
+corridors:
+  highways:
+    - name: "I-95"
+      osm_ref: "I 95"
+    - name: "I-76"
+      osm_ref: "I 76"
+    - name: "I-676"
+      osm_ref: "I 676"
+    - name: "US-1"
+      osm_ref: "US 1"
+  septa_lines:
+    - name: "Market-Frankford Line"
+      type: "subway"
+    - name: "Broad Street Line"
+      type: "subway"
+
+# Philadelphia coordinate bounds (reused from Phase 2)
+coordinate_bounds:
+  min_lon: -75.30
+  max_lon: -74.95
+  min_lat: 39.85
+  max_lat: 40.15

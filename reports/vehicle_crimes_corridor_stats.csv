@@ -1,0 +1,4 @@
+corridor_type,pct_of_crimes,crime_count,buffer_meters,total_vehicle_crimes
+highway,25.077672107665393,100492,500,400723
+transit,20.003843053680473,80160,500,400723
+any,39.801558682681055,159494,500,400723
