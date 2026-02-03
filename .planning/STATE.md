@@ -69,6 +69,8 @@ Progress: █████████░ 83% (Phase 2: 5/6 plans)
 | 02-03 | Per-district breakdown created (CV=0.68) | Coefficient of variation exceeded 0.5 threshold, indicating meaningful district-level variation |
 | 02-05 | Fixed CRIME_CATEGORY_MAP to use hundred-bands (1-7) not codes (100-700) | Bug caused all crimes to classify as "Other" - now correctly identifies Violent/Property/Other |
 | 02-05 | Flag tracts with population < 100 as unreliable | 19 tracts flagged (17 zero-pop, 2 low-pop) to prevent inflated/undefined rates |
+| 02-04 | Convert float->int->str for district codes | Fixes merge mismatch between GeoDataFrame (float) and crime data (str int) |
+| 02-04 | Use 0.30 weight for violent crime ratio | Violence severity should have highest priority for resource allocation |
 
 ## Blockers/Concerns Carried Forward
 
