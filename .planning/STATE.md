@@ -17,11 +17,11 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 ## Current Position
 
 Phase: 4 of 4 (Forecasting & Predictive Modeling)
-Plan: 1 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-03 - Completed 04-01-PLAN.md (Infrastructure & Environment Setup)
+Last activity: 2026-02-03 - Completed 04-04-PLAN.md (Heat-Crime Hypothesis Analysis)
 
-Progress: ███████████░░ 71% (19/23 plans complete across all phases)
+Progress: ████████████░ 87% (20/23 plans complete across all phases)
 
 ## Phase 3 Summary
 
@@ -57,6 +57,7 @@ Progress: ███████████░░ 71% (19/23 plans complete acro
 | 03-05-PLAN.md | Wave 2: Event Impacts (HYP-EVENTS) | Complete |
 | 03-06-PLAN.md | Wave 3: Integration & Validation | Complete |
 | 04-01-PLAN.md | Wave 1: Infrastructure & Environment Setup | Complete |
+| 04-04-PLAN.md | Wave 2: Heat-Crime Hypothesis (HYP-HEAT) | Complete |
 
 ## Decisions
 
@@ -85,6 +86,10 @@ Progress: ███████████░░ 71% (19/23 plans complete acro
 | 04-01 | Include both Random Forest and XGBoost for classification | RF for interpretability, XGBoost for performance; both support SHAP values |
 | 04-01 | Add SHAP library for feature importance | Model-agnostic interpretability essential for explaining predictions |
 | 04-01 | Create separate model utility modules | time_series.py, classification.py, validation.py keep concerns separated |
+| 04-04 | Use daily aggregation for temporal alignment | Weather data is daily, so aggregate crime to match; documents limitation of losing intra-day variation |
+| 04-04 | Apply city-wide weather station to all crimes | Single station assumes uniform temperature across Philadelphia; documents limitation of not capturing heat island effects |
+| 04-04 | Use multiple correlation methods for robustness | Pearson, Spearman, Kendall tau ensure results not dependent on single statistical method |
+| 04-04 | Define hot/cold periods using percentiles | 75th/25th percentile thresholds ensure sufficient sample sizes rather than absolute temperature cutoffs |
 
 ## Blockers/Concerns Carried Forward
 
@@ -93,8 +98,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 04-01-PLAN.md (Infrastructure & Environment Setup)
-Resume file: None (Ready for 04-02-PLAN.md)
+Stopped at: Completed 04-04-PLAN.md (Heat-Crime Hypothesis Analysis)
+Resume file: None (Ready for 04-05-PLAN.md)
 
 ---
 *State updated: 2026-02-03*
