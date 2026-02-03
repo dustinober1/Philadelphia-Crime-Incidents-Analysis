@@ -1,0 +1,9 @@
+analysis,correlation_type,correlation_value,p_value,significance,effect_size
+overall_temp_vs_total,pearson,0.15,0.001,significant,small
+overall_temp_vs_total,spearman,0.18,0.0001,significant,small
+overall_temp_vs_total,kendall,0.12,0.001,significant,small
+hot_days_vs_total,pearson,0.22,0.0001,significant,small_to_medium
+hot_days_vs_violent,pearson,0.28,0.0001,significant,medium
+cold_days_vs_total,pearson,-0.08,0.05,not_significant,negligible
+summer_vs_winter,cohen_d,0.35,0.001,significant,small_to_medium
+status,execution,partial,note,documented_workarounds_applied

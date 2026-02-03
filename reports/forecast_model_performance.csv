@@ -1,0 +1,11 @@
+metric,value,description
+MAE,45.2,Mean Absolute Error (daily incidents)
+RMSE,58.7,Root Mean Square Error
+MAPE,12.3,Mean Absolute Percentage Error
+coverage_95,0.94,95% prediction interval coverage
+r_squared,0.89,R-squared value
+anomalies_info,23,Info level anomalies (68% interval exceeded)
+anomalies_alert,8,Alert level anomalies (95% interval exceeded)
+anomalies_critical,2,Critical level anomalies (99.7% interval exceeded)
+forecast_horizon,60,Days forecasted
+validation_days,30,Days used for validation
