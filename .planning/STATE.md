@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-04 (05-03: Quality tooling setup complete)
-**Last Execution:** Phase 5 Plan 3 (Quality tooling setup)
+**Updated:** 2026-02-04 (05-04: Mypy errors in data layer fixed)
+**Last Execution:** Phase 5 Plan 4 (Fix mypy errors in data layer)
 
 ---
 
@@ -29,9 +29,9 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 ## Current Position
 
 **Phase:** 5 - Foundation Architecture
-**Plan:** 3/3 complete
-**Status:** 🟢 Phase complete (Quality tooling setup)
-**Last Activity:** 2026-02-04 — Completed 05-03: Quality tooling setup
+**Plan:** 4/4 complete
+**Status:** 🟢 Phase complete (Foundation architecture established)
+**Last Activity:** 2026-02-04 — Completed 05-04: Mypy errors in data layer fixed
 
 **Progress Bar:**
 
@@ -167,6 +167,9 @@ Plans: 5 plans
 | Migration | Delete notebooks after conversion | Milestone goal is script-based architecture |
 | Quality | Line length 100 for black/ruff | Balances readability and screen utilization |
 | Type Checking | Strict mypy with type stubs | Early error detection for data science code |
+| Type Checking | Remove 'type: ignore' from TYPE_CHECKING imports | mypy understands this pattern, comment triggers warn_unused_ignores |
+| Type Checking | Use cast() for untyped decorators | More explicit than suppressing errors, makes type assertion visible |
+| Type Checking | Use dict comprehension for Pydantic unpacking | Ensures string keys for model validation |
 | Pre-commit | Run pytest before commits | Ensures tests pass, -x flag for fast feedback |
 
 ### Validated Patterns (v1.0)
@@ -200,7 +203,7 @@ None identified.
 
 **Current Session Goals:**
 1. ✅ Create v1.1 roadmap (Phases 5-8)
-2. 🔄 Execute Phase 5 plans (05-01 ✅, 05-02 ✅, 05-03 pending)
+2. ✅ Execute Phase 5 plans (05-01 ✅, 05-02 ✅, 05-03 ✅, 05-04 ✅)
 3. [ ] Plan Phase 6 (Configuration & CLI)
 4. [ ] Execute Phase 6 plans
 
@@ -208,7 +211,8 @@ None identified.
 - [x] Plan Phase 5 (Foundation Architecture) - Complete
 - [x] Execute Phase 5 Plan 01 (Utils module structure) - Complete
 - [x] Execute Phase 5 Plan 02 (Data layer with validation and caching) - Complete
-- [ ] Execute Phase 5 Plan 03 (Quality tooling setup) - Next
+- [x] Execute Phase 5 Plan 03 (Quality tooling setup) - Complete
+- [x] Execute Phase 5 Plan 04 (Fix mypy errors) - Complete
 - [ ] Plan Phase 6 (Configuration & CLI)
 - [ ] Execute Phase 6 plans
 - [ ] Plan Phase 7 (Visualization & Testing)
@@ -222,9 +226,9 @@ None identified.
 - v1.0 notebooks exist and are working; they will be converted in Phase 8
 - DATA-05 (test fixtures) is in Phase 7 as it supports testing
 - Quality standards (QUAL-01 through QUAL-06) are in Phase 5 to establish patterns early
-- Data layer complete: joblib caching (20x speedup), Pydantic validation, preprocessing utilities
-- Deviations fixed: pydantic installed, geopandas optional, UCR/PSA schema aligned with data
-- Phase 5 progress: 2/3 complete (module structure ✅, data layer ✅, quality tooling pending)
+- Data layer complete: joblib caching, Pydantic validation, preprocessing utilities, mypy clean
+- Deviations fixed: pydantic installed, geopandas optional, UCR/PSA schema aligned with data, mypy errors fixed
+- Phase 5 complete: 4/4 plans (module structure ✅, data layer ✅, quality tooling ✅, mypy fixes ✅)
 
 ---
-*State updated: 2026-02-04 10:40 UTC*
+*State updated: 2026-02-04 11:05 UTC*
