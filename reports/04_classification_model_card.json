@@ -33,22 +33,22 @@
   },
   "performance_metrics": {
     "random_forest": {
-      "accuracy": 0.905,
-      "precision_violent": 0.87,
-      "recall_violent": 0.78,
-      "f1_violent": 0.82,
-      "auc_roc": 0.93,
-      "precision_nonviolent": 0.91,
-      "recall_nonviolent": 0.96
+      "accuracy": 0.9104381563084984,
+      "precision_violent": 0.0,
+      "recall_violent": 0.0,
+      "f1_violent": 0.0,
+      "auc_roc": 0.5872057234734973,
+      "precision_nonviolent": 0.9104381563084984,
+      "recall_nonviolent": 1.0
     },
     "xgboost": {
-      "accuracy": 0.912,
-      "precision_violent": 0.88,
-      "recall_violent": 0.8,
-      "f1_violent": 0.84,
-      "auc_roc": 0.94,
-      "precision_nonviolent": 0.92,
-      "recall_nonviolent": 0.96
+      "accuracy": 0.9104381563084984,
+      "precision_violent": 0.0,
+      "recall_violent": 0.0,
+      "f1_violent": 0.0,
+      "auc_roc": 0.6014351206859486,
+      "precision_nonviolent": 0.9104381563084984,
+      "recall_nonviolent": 1.0
     },
     "source_artifact": "reports/classification_model_performance.csv"
   },
@@ -63,6 +63,7 @@
   },
   "limitations": [
     "Severe class imbalance (~9.5% violent) can cause models to under-predict the minority class unless explicitly calibrated/weighted.",
+    "Current default thresholding produced near-zero minority-class recall in this run; threshold tuning, class weights, or resampling is recommended before operational use.",
     "Geographic coverage limited to Philadelphia; performance may not generalize to other cities.",
     "Temporal drift is likely; retraining and monitoring should be performed on a regular cadence.",
     "Features are limited to those available at dispatch time (no investigation outcomes).",
