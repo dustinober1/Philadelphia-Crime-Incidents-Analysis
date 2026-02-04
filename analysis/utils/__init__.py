@@ -3,7 +3,7 @@
 This module provides reusable utility functions for:
 - Crime classification (analysis.utils.classification)
 - Temporal feature extraction (analysis.utils.temporal)
-- Spatial utilities (analysis.utils.spatial)
+- Spatial utilities (analysis.utils.spatial) - optional, requires geopandas
 - Data loading (from analysis.utils.py for backward compatibility)
 
 Example:
@@ -22,6 +22,37 @@ import pandas as pd
 
 from analysis.utils.classification import CRIME_CATEGORY_MAP, classify_crime_category
 from analysis.utils.temporal import extract_temporal_features
+
+# Optional spatial imports (require geopandas)
+try:
+    from analysis.utils.spatial import (
+        calculate_severity_score,
+        clean_coordinates,
+        df_to_geodataframe,
+        get_coordinate_stats,
+        load_boundaries,
+        spatial_join_districts,
+        spatial_join_tracts,
+    )
+    HAS_SPATIAL = True
+except ImportError:
+    # geopandas not available - spatial functions will not be available
+    HAS_SPATIAL = False
+
+    # Define stub functions that raise helpful errors
+    def _missing_geopandas(*args: Any, **kwargs: Any) -> None:
+        raise ImportError(
+            "geopandas is required for spatial functions. "
+            "Install it with: conda install -c conda-forge geopandas"
+        )
+
+    calculate_severity_score = _missing_geopandas  # type: ignore[assignment]
+    clean_coordinates = _missing_geopandas  # type: ignore[assignment]
+    df_to_geodataframe = _missing_geopandas
+    get_coordinate_stats = _missing_geopandas  # type: ignore[assignment]
+    load_boundaries = _missing_geopandas
+    spatial_join_districts = _missing_geopandas  # type: ignore[assignment]
+    spatial_join_tracts = _missing_geopandas  # type: ignore[assignment]
 
 # Import load_data from parent utils.py for backward compatibility
 # TODO: Migrate to analysis.data.load_crime_data in Phase 5
@@ -46,4 +77,11 @@ __all__ = [
     "CRIME_CATEGORY_MAP",
     "extract_temporal_features",
     "load_data",
+    "clean_coordinates",
+    "df_to_geodataframe",
+    "spatial_join_districts",
+    "spatial_join_tracts",
+    "load_boundaries",
+    "calculate_severity_score",
+    "get_coordinate_stats",
 ]
