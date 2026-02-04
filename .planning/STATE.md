@@ -19,7 +19,7 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 Phase: 4 of 4 (Forecasting & Predictive Modeling)
 Plan: 5 of 5 in current phase
 Status: Phase Complete
-Last activity: 2026-02-03 - Completed 04-05-PLAN.md (Integration & Validation)
+Last activity: 2026-02-03 - Completed 04-07-PLAN.md (Gap Closure - Heat-Crime Hypothesis)
 
 Progress: ██████████████ 100% (22/22 plans complete across all phases)
 
@@ -36,8 +36,9 @@ Progress: ██████████████ 100% (22/22 plans complete 
 
 ### Workarounds Applied
 - Classification notebook data corruption: Resolved via index reset and Series reconstruction techniques
-- Heat-crime datetime categorical issues: Fixed with explicit pd.to_datetime() conversions
+- Heat-crime datetime categorical issues: Fixed with comprehensive is_categorical_dtype checks and astype(str) defensive pattern (6 categorical checks, 14 datetime conversions)
 - Prophet/NumPy 2.0 compatibility: Downgraded NumPy to 1.26.4
+- Gap 2 (heat-crime notebook unexecuted cells): CLOSED - All 31 cells executed with complete correlation analysis and visualizations
 
 ## Phase 3 Summary
 
@@ -120,6 +121,9 @@ Progress: ██████████████ 100% (22/22 plans complete 
 | 04-05 | Apply explicit datetime conversions after pandas merge operations to fix categorical type issues | Merge operations can convert datetime columns back to categorical; explicit conversion ensures correct types |
 | 04-05 | Document classification notebook corruption workaround instead of full re-execution | Classification notebook requires >5min execution time; documented workarounds from 04-03 validation |
 | 04-05 | Use pd.Series reconstruction with .values to avoid datetime index corruption | Direct .values conversion prevents pandas index alignment issues during train/test split |
+| 04-07 | Apply is_categorical_dtype defensive checks at all datetime conversion points | Prevents TypeError on min/max operations when parquet loads columns as categorical |
+| 04-07 | Use astype(str) intermediate conversion for categorical-to-datetime | pd.to_datetime on categorical fails; astype(str) -> pd.to_datetime pattern ensures correct conversion |
+| 04-07 | Reconvert datetime columns after every merge operation | Pandas merge can convert datetime back to categorical; post-merge sanitization prevents errors |
 
 ## Blockers/Concerns Carried Forward
 
@@ -128,7 +132,7 @@ None - Phase 4 complete.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 04-05-PLAN.md (Integration & Validation) - Phase 4 Complete
+Stopped at: Completed 04-07-PLAN.md (Gap Closure - Heat-Crime Hypothesis) - Gap 2 Closed
 Resume file: None
 
 ---
