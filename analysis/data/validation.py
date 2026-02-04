@@ -143,7 +143,7 @@ def validate_crime_data(
     for idx, row in sample.iterrows():
         try:
             # Convert row to dict and validate
-            row_dict = row.to_dict()
+            row_dict = {str(k): v for k, v in row.to_dict().items()}
             # Handle NaN values for optional fields
             for key, value in row_dict.items():
                 if pd.isna(value):
