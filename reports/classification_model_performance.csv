@@ -1,17 +1,17 @@
 model,metric,value,description
-Random Forest,accuracy,0.8972830276101826,Overall accuracy
+Random Forest,accuracy,0.9104381563084984,Overall accuracy
 Random Forest,precision_violent,0.0,Precision for violent class
 Random Forest,recall_violent,0.0,Recall for violent class
 Random Forest,f1_violent,0.0,F1-score for violent class
-Random Forest,auc_roc,0.504787572010999,Area under ROC curve
-Random Forest,precision_nonviolent,0.8972830276101826,Precision for non-violent class
+Random Forest,auc_roc,0.5872057234734973,Area under ROC curve
+Random Forest,precision_nonviolent,0.9104381563084984,Precision for non-violent class
 Random Forest,recall_nonviolent,1.0,Recall for non-violent class
-XGBoost,accuracy,0.8972830276101826,Overall accuracy
+XGBoost,accuracy,0.9104381563084984,Overall accuracy
 XGBoost,precision_violent,0.0,Precision for violent class
 XGBoost,recall_violent,0.0,Recall for violent class
 XGBoost,f1_violent,0.0,F1-score for violent class
-XGBoost,auc_roc,0.5012382043007392,Area under ROC curve
-XGBoost,precision_nonviolent,0.8972830276101826,Precision for non-violent class
+XGBoost,auc_roc,0.6014351206859486,Area under ROC curve
+XGBoost,precision_nonviolent,0.9104381563084984,Precision for non-violent class
 XGBoost,recall_nonviolent,1.0,Recall for non-violent class
 Meta,class_imbalance,0.0953273310789843,Violent crime percentage
 Meta,random_seed,42.0,Reproducibility seed
