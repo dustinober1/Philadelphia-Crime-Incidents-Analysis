@@ -39,9 +39,22 @@ def create_time_aware_split(
     Returns:
         Tuple of (X_train, X_test, y_train, y_test)
     """
+    # IMPORTANT: X typically uses a datetime index that is NOT unique (many incidents
+    # share the same day/hour). Using label-based alignment (y.loc[X.index]) can
+    # explode the target length when duplicates are present.
+    #
+    # We sort by X.index for time-aware validation, then apply the SAME positional
+    # ordering to y to keep X/y aligned 1:1.
     if ensure_sorted:
-        X = X.sort_index()
-        y = y.loc[X.index]
+        # Use stable sort so identical timestamps preserve original ordering
+        order = np.argsort(np.asarray(X.index.values), kind="mergesort")
+        X = X.iloc[order]
+        y = y.iloc[order]
+
+    if len(X) != len(y):
+        raise ValueError(
+            f"X and y must be same length after sorting (X={len(X)}, y={len(y)})"
+        )
 
     split_idx = int(len(X) * (1 - test_size))
 
