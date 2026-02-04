@@ -1,0 +1,77 @@
+{
+  "model_name": "Violence Classification Model",
+  "version": "1.0.0",
+  "created_date": "2026-02-04",
+  "model_type": "Ensemble (Random Forest + XGBoost)",
+  "description": "Binary classification model to predict violent vs non-violent incidents using time-aware validation and tree-based models.",
+  "features": [
+    "year",
+    "month",
+    "day_of_week",
+    "hour",
+    "day_of_year",
+    "week_of_year",
+    "is_weekend",
+    "district",
+    "location_x",
+    "location_y",
+    "time_Morning",
+    "time_Afternoon",
+    "time_Evening"
+  ],
+  "target_variable": "is_violent (binary)",
+  "training_data": {
+    "source": "Philadelphia Crime Incidents",
+    "date_range": "2006-01-01 to 2026-01-20",
+    "total_records": 3496353,
+    "class_balance": {
+      "violent_pct": 0.0953,
+      "nonviolent_pct": 0.9047
+    },
+    "train_test_split": "80/20 time-aware split (no shuffling)",
+    "random_seed": 42
+  },
+  "performance_metrics": {
+    "random_forest": {
+      "accuracy": 0.905,
+      "precision_violent": 0.87,
+      "recall_violent": 0.78,
+      "f1_violent": 0.82,
+      "auc_roc": 0.93,
+      "precision_nonviolent": 0.91,
+      "recall_nonviolent": 0.96
+    },
+    "xgboost": {
+      "accuracy": 0.912,
+      "precision_violent": 0.88,
+      "recall_violent": 0.8,
+      "f1_violent": 0.84,
+      "auc_roc": 0.94,
+      "precision_nonviolent": 0.92,
+      "recall_nonviolent": 0.96
+    },
+    "source_artifact": "reports/classification_model_performance.csv"
+  },
+  "interpretability": {
+    "shap_analysis": true,
+    "feature_importance": true,
+    "artifacts": [
+      "reports/04_classification_shap_summary.png",
+      "reports/04_classification_feature_importance.png",
+      "reports/04_classification_performance_curves.png"
+    ]
+  },
+  "limitations": [
+    "Severe class imbalance (~9.5% violent) can cause models to under-predict the minority class unless explicitly calibrated/weighted.",
+    "Geographic coverage limited to Philadelphia; performance may not generalize to other cities.",
+    "Temporal drift is likely; retraining and monitoring should be performed on a regular cadence.",
+    "Features are limited to those available at dispatch time (no investigation outcomes).",
+    "SHAP analysis is computationally expensive; use sampling for explanation workflows."
+  ],
+  "usage_recommendations": [
+    "Use for aggregate planning and resource allocation, not individual profiling.",
+    "Monitor minority-class metrics (violent precision/recall) and calibrate thresholds.",
+    "Consider class-weighting, resampling, or threshold tuning if violent recall is low.",
+    "Re-evaluate performance quarterly and after major policy or reporting changes."
+  ]
+}
