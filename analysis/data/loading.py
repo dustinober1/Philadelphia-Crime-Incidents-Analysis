@@ -24,6 +24,7 @@ from .cache import memory
 # Optional geopandas import for spatial data
 try:
     import geopandas as gpd
+
     HAS_GEOPANDAS = True
 except ImportError:
     HAS_GEOPANDAS = False
@@ -55,9 +56,7 @@ def _load_crime_data_parquet(clean: bool = True) -> pd.DataFrame:
     # Parse dispatch_date (handle category dtype from parquet)
     if "dispatch_date" in df.columns:
         if df["dispatch_date"].dtype.name == "category":
-            df["dispatch_date"] = pd.to_datetime(
-                df["dispatch_date"].astype(str), errors="coerce"
-            )
+            df["dispatch_date"] = pd.to_datetime(df["dispatch_date"].astype(str), errors="coerce")
         elif not pd.api.types.is_datetime64_any_dtype(df["dispatch_date"]):
             df["dispatch_date"] = pd.to_datetime(df["dispatch_date"], errors="coerce")
 
@@ -116,8 +115,7 @@ def _load_boundaries_geojson(name: Literal["police_districts", "census_tracts"])
 
     if name not in boundary_files:
         raise ValueError(
-            f"Unknown boundary: {name}. "
-            f"Valid options: {list(boundary_files.keys())}"
+            f"Unknown boundary: {name}. " f"Valid options: {list(boundary_files.keys())}"
         )
 
     file_path = boundaries_dir / boundary_files[name]

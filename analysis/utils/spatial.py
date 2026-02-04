@@ -107,14 +107,12 @@ def load_boundaries(name: str) -> gpd.GeoDataFrame:
         file_path = repo_root / "data" / "boundaries" / "census_tracts_pop.geojson"
     else:
         raise ValueError(
-            f"Unknown boundary name: {name}. "
-            "Expected 'police_districts' or 'census_tracts'."
+            f"Unknown boundary name: {name}. " "Expected 'police_districts' or 'census_tracts'."
         )
 
     if not file_path.exists():
         raise FileNotFoundError(
-            f"Boundary file not found: {file_path}. "
-            "Run scripts/download_boundaries.py first."
+            f"Boundary file not found: {file_path}. " "Run scripts/download_boundaries.py first."
         )
 
     return gpd.read_file(file_path)

@@ -34,6 +34,7 @@ try:
         spatial_join_districts,
         spatial_join_tracts,
     )
+
     HAS_SPATIAL = True
 except ImportError:
     # geopandas not available - spatial functions will not be available
@@ -66,11 +67,15 @@ if utils_path.exists():
             spec.loader.exec_module(utils_module)
         load_data: Callable[..., pd.DataFrame] = utils_module.load_data
     else:
+
         def load_data(*args: Any, **kwargs: Any) -> pd.DataFrame:
             raise ImportError("load_data has been migrated to analysis.data.load_crime_data")
+
 else:
+
     def load_data(*args: Any, **kwargs: Any) -> pd.DataFrame:
         raise ImportError("load_data has been migrated to analysis.data.load_crime_data")
+
 
 __all__ = [
     "classify_crime_category",

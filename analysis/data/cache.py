@@ -38,7 +38,7 @@ def clear_cache() -> None:
     if _CACHE_DIR.exists():
         # Remove all cache contents
         for item in _CACHE_DIR.iterdir():
-            if item.is_dir() and not item.name.startswith('.'):
+            if item.is_dir() and not item.name.startswith("."):
                 shutil.rmtree(item)
             elif item.is_file():
                 item.unlink()

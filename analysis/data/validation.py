@@ -21,7 +21,6 @@ from typing import Any
 import pandas as pd
 from pydantic import BaseModel, Field, field_validator, ValidationError
 
-
 # Coordinate bounds for Philadelphia
 PHILLY_LON_MIN = -75.3
 PHILLY_LON_MAX = -74.95
@@ -59,8 +58,12 @@ class CrimeIncidentValidator(BaseModel):
     dispatch_date: datetime = Field(..., description="Dispatch timestamp")
     ucr_general: int | None = Field(None, ge=100, le=9999, description="UCR code (100-9999)")
     text_general_code: str | None = Field(None, description="Crime type description")
-    point_x: float | None = Field(None, ge=PHILLY_LON_MIN, le=PHILLY_LON_MAX, description="Longitude")
-    point_y: float | None = Field(None, ge=PHILLY_LAT_MIN, le=PHILLY_LAT_MAX, description="Latitude")
+    point_x: float | None = Field(
+        None, ge=PHILLY_LON_MIN, le=PHILLY_LON_MAX, description="Longitude"
+    )
+    point_y: float | None = Field(
+        None, ge=PHILLY_LAT_MIN, le=PHILLY_LAT_MAX, description="Latitude"
+    )
     dc_key: int | None = Field(None, description="District code")
     psa: str | None = Field(None, description="Police service area (can be letter or numeric)")
 
@@ -137,7 +140,9 @@ def validate_crime_data(
         sample = df
     else:
         sample_size_actual = min(len(df), sample_size)
-        sample = df.sample(n=sample_size_actual, random_state=42) if len(df) > sample_size_actual else df
+        sample = (
+            df.sample(n=sample_size_actual, random_state=42) if len(df) > sample_size_actual else df
+        )
 
     errors = []
     for idx, row in sample.iterrows():
@@ -155,8 +160,10 @@ def validate_crime_data(
             errors.append((idx, f"Unexpected error: {e}"))
 
     if errors:
-        error_msg = "\n".join(f"Row {idx}: {err[:100]}..." if len(err) > 100 else f"Row {idx}: {err}"
-                              for idx, err in errors[:5])
+        error_msg = "\n".join(
+            f"Row {idx}: {err[:100]}..." if len(err) > 100 else f"Row {idx}: {err}"
+            for idx, err in errors[:5]
+        )
         if len(errors) > 5:
             error_msg += f"\n... and {len(errors) - 5} more errors"
         raise ValueError(f"Data validation failed ({len(errors)} errors):\n{error_msg}")
@@ -208,12 +215,12 @@ def validate_coordinates(
     lat_min, lat_max = lat_bounds
 
     valid_mask = (
-        (result[x_col].notna()) &
-        (result[y_col].notna()) &
-        (result[x_col] >= lon_min) &
-        (result[x_col] <= lon_max) &
-        (result[y_col] >= lat_min) &
-        (result[y_col] <= lat_max)
+        (result[x_col].notna())
+        & (result[y_col].notna())
+        & (result[x_col] >= lon_min)
+        & (result[x_col] <= lon_max)
+        & (result[y_col] >= lat_min)
+        & (result[y_col] <= lat_max)
     )
 
     return result[valid_mask].copy()

@@ -46,9 +46,7 @@ def extract_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
 
     if "dispatch_datetime" not in df.columns:
         if "dispatch_date" in df.columns:
-            df["dispatch_datetime"] = pd.to_datetime(
-                df["dispatch_date"], errors="coerce"
-            )
+            df["dispatch_datetime"] = pd.to_datetime(df["dispatch_date"], errors="coerce")
         else:
             return df
 
