@@ -1,90 +1,112 @@
-"""Utilities for rendering report templates and data quality summaries."""
-
-from __future__ import annotations
-
-from pathlib import Path
-from typing import Dict
-
-import pandas as pd
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+import json
+from typing import Any, Dict, List
 
 
-def generate_data_quality_summary(df: pd.DataFrame) -> Dict[str, object]:
-    """Generate summary statistics for data quality.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Dataset to summarize.
-
-    Returns
-    -------
-    dict
-        Summary including missing percentages, date range, and year distribution.
-    """
-    missing_pct = (df.isna().mean() * 100).round(2).sort_values(ascending=False)
-    n_records = len(df)
-
-    date_range = None
-    year_distribution = None
-    if "dispatch_date" in df.columns:
-        date_range = {
-            "min": df["dispatch_date"].min(),
-            "max": df["dispatch_date"].max(),
-        }
-    if "year" in df.columns:
-        year_distribution = df["year"].value_counts().sort_index().to_dict()
-    elif "dispatch_date" in df.columns:
-        year_distribution = (
-            df["dispatch_date"].dt.year.value_counts().sort_index().to_dict()
-        )
-
-    return {
-        "n_records": n_records,
-        "missing_pct": missing_pct.to_dict(),
-        "date_range": date_range,
-        "year_distribution": year_distribution,
-    }
-
-
-def render_report_template(template_path: Path, context: Dict[str, object]) -> str:
-    """Render a Jinja2 markdown template.
-
-    Parameters
-    ----------
-    template_path : pathlib.Path
-        Path to the Jinja2 template.
-    context : dict
-        Template context values.
-
-    Returns
-    -------
-    str
-        Rendered markdown content.
-    """
-    env = Environment(
-        loader=FileSystemLoader(template_path.parent),
-        autoescape=select_autoescape(),
+def _map_test_item(item: Dict[str, Any]) -> Dict[str, Any]:
+    # Try common key variants and normalize to canonical keys
+    out = {}
+    # name
+    out["test_name"] = (
+        item.get("test_name")
+        or item.get("name")
+        or item.get("test")
+        or item.get("testName")
     )
-    template = env.get_template(template_path.name)
-    return template.render(**context)
+    # statistic value
+    out["statistic"] = (
+        item.get("statistic")
+        or item.get("stat")
+        or item.get("stat_value")
+        or item.get("statistic_value")
+    )
+    # p-value
+    out["p_value"] = (
+        item.get("p_value") or item.get("pvalue") or item.get("p") or item.get("pValue")
+    )
+    # effect size
+    out["effect_size"] = (
+        item.get("effect_size")
+        or item.get("effect")
+        or item.get("d")
+        or item.get("cohen_d")
+    )
+    # conclusion / interpretation
+    out["conclusion"] = (
+        item.get("conclusion") or item.get("interpretation") or item.get("result")
+    )
+    # confidence interval
+    ci = item.get("ci") or item.get("ci_lower") or None
+    if isinstance(ci, (list, tuple)) and len(ci) >= 2:
+        out["ci_lower"], out["ci_upper"] = ci[0], ci[1]
+    else:
+        out["ci_lower"] = item.get("ci_lower") or item.get("ciLower") or None
+        out["ci_upper"] = item.get("ci_upper") or item.get("ciUpper") or None
+
+    # Ensure minimal keys
+    return out
 
 
-def format_data_quality_table(summary: Dict[str, object]) -> str:
-    """Format a data quality summary into a markdown table.
+def normalize_heat_crime_json(in_path: str, out_path: str) -> None:
+    """Read an existing heat-crime statistical tests JSON and write a normalized schema.
 
-    Parameters
-    ----------
-    summary : dict
-        Summary from ``generate_data_quality_summary``.
-
-    Returns
-    -------
-    str
-        Markdown table string.
+    The canonical schema is:
+    {"tests": [ {"test_name":..., "statistic":..., "p_value":..., "effect_size":..., "conclusion":..., "ci_lower":..., "ci_upper":...}, ... ] }
     """
-    missing_pct = summary.get("missing_pct", {}) or {}
-    lines = ["| Column | Missing % |", "|---|---:|"]
-    for column, pct in missing_pct.items():
-        lines.append(f"| {column} | {pct:.2f} |")
-    return "\n".join(lines)
+    with open(in_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    tests: List[Dict[str, Any]] = []
+
+    # If data is a dict with top-level "tests" or similar
+    if isinstance(data, dict):
+        # If it already matches schema
+        if "tests" in data and isinstance(data["tests"], list):
+            source_tests = data["tests"]
+        else:
+            # attempt to find list-like values
+            # common keys to check
+            for key in ("results", "tests", "statistical_tests", "analysis"):
+                if key in data and isinstance(data[key], list):
+                    source_tests = data[key]
+                    break
+            else:
+                # If the dict itself encodes a single test
+                source_tests = [data]
+    elif isinstance(data, list):
+        source_tests = data
+    else:
+        source_tests = [{"raw": data}]
+
+    for item in source_tests:
+        if not isinstance(item, dict):
+            # wrap non-dict items
+            tests.append({"test_name": str(item)})
+            continue
+        mapped = _map_test_item(item)
+        # fallback: if test_name missing, try to infer from keys
+        if not mapped.get("test_name"):
+            # look for first string-valued key
+            for k, v in item.items():
+                if isinstance(v, str) and len(str(v)) < 40:
+                    mapped["test_name"] = mapped.get("test_name") or f"test_{k}"
+                    break
+        tests.append(mapped)
+
+    out = {"tests": tests}
+
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(out, f, indent=2, ensure_ascii=False)
+
+
+def load_normalized(path: str) -> Dict[str, Any]:
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) < 3:
+        print("Usage: python -m analysis.report_utils <in.json> <out.json>")
+        sys.exit(2)
+    normalize_heat_crime_json(sys.argv[1], sys.argv[2])
