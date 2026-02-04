@@ -14,7 +14,7 @@ Example:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import pandas as pd
 
@@ -28,7 +28,7 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
     if TYPE_CHECKING:
-        import geopandas as gpd  # type: ignore
+        import geopandas as gpd
 
 
 @memory.cache
@@ -89,7 +89,7 @@ def load_crime_data(clean: bool = True) -> pd.DataFrame:
         >>> print(f"Loaded {len(df)} incidents")
         Loaded 1500000 incidents
     """
-    return _load_crime_data_parquet(clean=clean)
+    return cast(pd.DataFrame, _load_crime_data_parquet(clean=clean))
 
 
 @memory.cache
