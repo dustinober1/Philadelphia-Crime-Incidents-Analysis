@@ -55,9 +55,13 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 5. Developer can write new modules that follow PEP 8 with docstrings and type hints, passing all pre-commit hooks
 
 **Plans:**
-- [ ] 05-01-PLAN.md — Extract utilities into modular structure with type hints and docstrings
-- [ ] 05-02-PLAN.md — Implement data layer with loading, validation, preprocessing, and caching
-- [ ] 05-03-PLAN.md — Set up quality tools (pytest, mypy, black, ruff, pre-commit)
+- [x] 05-01-PLAN.md — Extract utilities into modular structure with type hints and docstrings
+- [x] 05-02-PLAN.md — Implement data layer with loading, validation, preprocessing, and caching
+- [x] 05-03-PLAN.md — Set up quality tools (pytest, mypy, black, ruff, pre-commit)
+- [ ] 05-04-PLAN.md — Fix mypy errors in data layer (gap closure)
+- [ ] 05-05-PLAN.md — Install dev dependencies and verify quality tools (gap closure)
+- [ ] 05-06-PLAN.md — Create tests for utils modules (gap closure)
+- [ ] 05-07-PLAN.md — Create tests for data layer modules (gap closure)
 
 ### Phase 6 — Configuration & CLI System
 **Goal:** Build a flexible configuration system and CLI entry points for all 13 analyses with rich user feedback
@@ -175,12 +179,12 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 | 2 - Spatial & Socioeconomic | ✅ Complete | 6 | 6/6 |
 | 3 - Policy Deep Dives | ✅ Complete | 6 | 6/6 |
 | 4 - Forecasting & Modeling | ✅ Complete | 7 | 7/7 |
-| 5 - Foundation Architecture | 🟡 Active | 3 | 0/3 |
+| 5 - Foundation Architecture | 🟡 Active | 7 | 3/7 |
 | 6 - Configuration & CLI | ⏸️ Pending | 0 | 0/0 |
 | 7 - Visualization & Testing | ⏸️ Pending | 0 | 0/0 |
 | 8 - Documentation & Migration | ⏸️ Pending | 0 | 0/0 |
 
-**Overall:** 24/24 v1.0 plans complete | 3/0 v1.1 plans created
+**Overall:** 24/24 v1.0 plans complete | 7 plans created, 3/7 complete in Phase 5
 
 ---
 
