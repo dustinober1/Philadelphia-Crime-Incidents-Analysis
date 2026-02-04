@@ -81,8 +81,8 @@ Plans:
 - [x] 04-03-PLAN.md — Classification Model Notebook FORECAST-02 (Wave 2)
 - [x] 04-04-PLAN.md — Heat-Crime Analysis Notebook HYP-HEAT (Wave 2)
 - [x] 04-05-PLAN.md — Integration & Validation (Wave 3)
-- [ ] 04-06-PLAN.md — Gap Closure: Classification Notebook Execution (Wave 4)
-- [ ] 04-07-PLAN.md — Gap Closure: Heat-Crime Notebook Execution (Wave 4)
+- [x] 04-06-PLAN.md — Gap Closure: Classification Notebook Execution (Wave 4)
+- [x] 04-07-PLAN.md — Gap Closure: Heat-Crime Notebook Execution (Wave 4)
 
 Success criteria:
 1. Forecast notebook (Prophet/ARIMA) with 30–60 day horizon, CI bands, and a clear threshold definition for anomalies; artifacts exported.
