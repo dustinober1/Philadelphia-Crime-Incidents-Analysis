@@ -1,6 +1,6 @@
 # ROADMAP: Crime Incidents Philadelphia
 
-**Phases:** 4 | **v1 requirements:** 15 total | All v1 requirements mapped ✓
+**Phases:** 4 | **v1 requirements:** 14 total | All v1 requirements mapped ✓
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
@@ -69,7 +69,7 @@ Success criteria:
 3. Composition analysis showing violent / total ratio by year and stacked-area visualization with interpretation.
 4. Event impact notebook showing difference-in-means for game/holiday days vs controls and a summary report.
 
-### Phase 4 — Forecasting & Predictive Modeling (GAPS IN PROGRESS)
+### Phase 4 — Forecasting & Predictive Modeling COMPLETE
 
 Goal: Deliver short-term forecasts and a violence-classification model with interpretable importances to support operational alerts and deeper research.
 Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
@@ -109,4 +109,5 @@ Success criteria:
 6. ~~`/gsd-execute-phase 2`~~ ✅ Complete — All Phase 2 plans executed
 7. ~~`/gsd-plan-phase 3`~~ ✅ Complete — 6 plans created (1 infra, 4 notebooks, 1 integration)
 8. ~~`/gsd-execute-phase 3`~~ ✅ Complete — All Phase 3 plans executed, 24 artifacts validated
-9. ~~`/gsd-plan-phase 4`~~ ✅ Complete — All Phase 4 plans executed, forecasting models validated
+9. ~~`/gsd-plan-phase 4`~~ ✅ Complete — All Phase 4 plans created
+10. ~~`/gsd-execute-phase 4`~~ ✅ Complete — All Phase 4 plans executed; verification passed

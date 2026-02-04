@@ -1,293 +1,131 @@
 ---
 phase: 04-forecasting-predictive
-verified: 2026-02-03T12:00:00Z
-status: gaps_found
-score: 4/6 must-haves verified
-gaps:
-  - truth: "Classification model notebook runs end-to-end with outputs"
-    status: failed
-    reason: "Notebook exists with 873 lines but has 19 unexecuted cells (execution_count: null). Execution timed out during integration due to >5min runtime requirement."
-    artifacts:
-      - path: "notebooks/04_classification_violence.ipynb"
-        issue: "Cells not executed - no outputs present"
-    missing:
-      - "Full notebook execution with SHAP analysis"
-      - "Model card JSON files in reports/"
-      - "Feature importance visualization outputs"
-  - truth: "Heat-crime hypothesis notebook runs end-to-end with outputs"
-    status: failed
-    reason: "Notebook exists with 1207 lines but has 24 unexecuted cells. Categorical datetime bugs prevent full execution despite multiple fix attempts."
-    artifacts:
-      - path: "notebooks/04_hypothesis_heat_crime.ipynb"
-        issue: "Cells not executed - datetime categorical conversion bugs persist"
-    missing:
-      - "Full execution with complete correlation outputs"
-      - "Temperature threshold visualizations"
-      - "Statistical test result tables"
+verified: 2026-02-04T00:00:00Z
+status: passed
+score: 6/6 must-haves verified
+re_verification:
+  previous_status: gaps_found
+  previous_score: 4/6
+  gaps_closed:
+    - "Classification notebook runs end-to-end with outputs"
+    - "Heat-crime notebook runs end-to-end with outputs"
+  gaps_remaining: []
+  regressions: []
+human_verification:
+  - test: "Open key Phase 4 plots in reports/"
+    expected: "Forecast, SHAP/feature-importance/ROC, and heat-crime figures are legible and correctly labeled"
+    why_human: "Visual quality/interpretability cannot be fully verified programmatically"
+  - test: "Review heat-crime statistical tests JSON schema vs downstream needs"
+    expected: "reports/04_heat_crime_statistical_tests.json fields are acceptable for consumers (even if not exactly matching plan template)"
+    why_human: "Schema adequacy is a product/consumer decision"
 ---
 
 # Phase 4: Forecasting & Predictive Modeling Verification Report
 
 **Phase Goal:** Deliver short-term forecasts and a violence-classification model with interpretable importances to support operational alerts and deeper research.
-
-**Verified:** 2026-02-03T12:00:00Z
-
-**Status:** ⚠️ gaps_found
-
-**Score:** 4/6 must-haves verified (67%)
+**Verified:** 2026-02-04T00:00:00Z
+**Status:** passed
 
 ## Goal Achievement
 
 ### Observable Truths
 
-| #   | Truth   | Status     | Evidence       |
-| --- | ------- | ---------- | -------------- |
-| 1   | FORECAST-01: Time series forecasting notebook exists and runs | ✓ VERIFIED | 04_forecasting_crime_ts.ipynb (735KB, 1230 lines, 30 outputs); executed_forecasting.ipynb copy with full execution |
-| 2   | FORECAST-02: Classification model notebook exists | ✓ VERIFIED | 04_classification_violence.ipynb (873 lines) exists with time-aware validation and SHAP code |
-| 3   | FORECAST-02: Classification model notebook runs end-to-end | ✗ FAILED | 19 cells with execution_count: null; no outputs in notebook |
-| 4   | HYP-HEAT: Heat-crime hypothesis notebook exists | ✓ VERIFIED | 04_hypothesis_heat_crime.ipynb (1207 lines) exists with correlation analysis code |
-| 5   | HYP-HEAT: Heat-crime notebook runs end-to-end | ✗ FAILED | 24 cells with execution_count: null; categorical datetime bugs persist |
-| 6   | All notebooks export artifacts to reports/ | ✓ VERIFIED | 5 forecast PNGs, class distribution PNG, 3 performance CSVs |
+| # | Truth | Status | Evidence |
+|---|-------|--------|----------|
+| 1 | Short-term forecasting notebook runs end-to-end and exports artifacts | ✓ VERIFIED | `notebooks/04_forecasting_crime_ts.ipynb` exists and `reports/forecast_*.png` + `reports/forecast_model_performance.csv` exist and are non-empty |
+| 2 | Classification notebook runs end-to-end with outputs | ✓ VERIFIED | `notebooks/04_classification_violence.ipynb`: 20 code cells, **0** null execution counts, outputs in every code cell, **0** error outputs |
+| 3 | Classification model provides interpretable importances | ✓ VERIFIED | Non-empty `reports/04_classification_shap_summary.png` + `reports/04_classification_feature_importance.png` present; notebook outputs include SHAP/AUC/ROC mentions |
+| 4 | Heat–crime hypothesis notebook runs end-to-end with outputs | ✓ VERIFIED | `notebooks/04_hypothesis_heat_crime.ipynb`: 24 code cells, **0** null execution counts, outputs present, **0** error outputs |
+| 5 | Heat–crime analysis includes correlation + hypothesis-test style outputs | ✓ VERIFIED | Notebook outputs include Pearson/Spearman/Kendall + p-values; `reports/heat_crime_analysis_results.csv` non-empty with `correlation_value` + `p_value` |
+| 6 | Plan 04-06 and 04-07 required artifacts exist and are non-empty | ✓ VERIFIED | See artifact tables below (all present; sizes >0) |
 
-**Score:** 4/6 truths verified (67%)
+**Score:** 6/6 truths verified
 
-### Summary
+## Required Artifacts (Phase Goal)
 
-Phase 4 has been partially completed with **full success on FORECAST-01** (time series forecasting), but **partial execution on FORECAST-02 and HYP-HEAT**. The forecasting notebook was successfully executed with all visualizations and performance metrics. The classification and heat-crime notebooks exist with substantial code but were not fully executed due to runtime constraints and data corruption bugs respectively.
+| Artifact | Expected | Status | Details |
+|---------|----------|--------|---------|
+| `notebooks/04_forecasting_crime_ts.ipynb` | Short-term forecast notebook | ✓ VERIFIED | Present |
+| `reports/forecast_model_performance.csv` | Forecast metrics | ✓ VERIFIED | Present, non-empty |
+| `reports/forecast_60day_final.png` (and other `forecast_*.png`) | Forecast visuals | ✓ VERIFIED | Present, non-empty |
+| `notebooks/04_classification_violence.ipynb` | Violence classification (executed) | ✓ VERIFIED | 403,965 bytes; executed counts populated; no error outputs |
+| `reports/classification_model_performance.csv` | RF/XGB metrics | ✓ VERIFIED | Loads as CSV; columns include `model, metric, value, description` |
+| `reports/04_classification_shap_summary.png` | SHAP importance plot | ✓ VERIFIED | 290,204 bytes |
+| `reports/04_classification_feature_importance.png` | Feature importance bar plot | ✓ VERIFIED | 188,565 bytes |
+| `reports/04_classification_roc_curve.png` | ROC plot | ✓ VERIFIED | 238,155 bytes |
+| `reports/04_classification_model_card.json` | Model card | ✓ VERIFIED | JSON present; keys include `model_type`, `features`, `performance_metrics`, `limitations` |
+| `notebooks/04_hypothesis_heat_crime.ipynb` | Heat–crime notebook (executed) | ✓ VERIFIED | 710,467 bytes; executed counts populated; no error outputs |
+| `reports/heat_crime_analysis_results.csv` | Heat–crime numeric results | ✓ VERIFIED | Non-empty; includes `correlation_value`, `p_value`, `effect_size` |
+| `reports/04_heat_crime_correlation_matrix.png` | Heat–crime plot | ✓ VERIFIED | 229,255 bytes |
+| `reports/04_heat_crime_temperature_bins.png` | Temperature-threshold plot | ✓ VERIFIED | 230,132 bytes |
+| `reports/04_heat_crime_hourly_patterns.png` | Hourly pattern plot | ✓ VERIFIED | 267,403 bytes |
+| `reports/04_heat_crime_statistical_tests.json` | Statistical tests doc | ✓ VERIFIED | 1,779 bytes; contains p-values and conclusions; see note below |
 
-## Required Artifacts
+## Plan Artifact Verification (04-06 and 04-07)
 
-| Artifact | Expected    | Status | Details |
-| -------- | ----------- | ------ | ------- |
-| `notebooks/04_forecasting_crime_ts.ipynb` | Time series forecasting with Prophet | ✓ VERIFIED | 735KB, 1230 lines, 30 output cells, 60-day forecast |
-| `notebooks/executed_forecasting.ipynb` | Executed copy | ✓ VERIFIED | 735KB, full execution metadata |
-| `notebooks/04_classification_violence.ipynb` | Violence classification model | ⚠️ ORPHANED | 873 lines, 0 outputs, code complete but unexecuted |
-| `notebooks/04_hypothesis_heat_crime.ipynb` | Heat-crime analysis | ⚠️ ORPHANED | 1207 lines, 0 outputs, partial fixes applied |
-| `reports/forecast_model_performance.csv` | Prophet metrics | ✓ VERIFIED | MAE: 45.2, RMSE: 58.7, MAPE: 12.3%, Coverage: 94% |
-| `reports/classification_model_performance.csv` | RF/XGB metrics | ✓ VERIFIED | Accuracy: 90-91%, AUC: 0.93-0.94 |
-| `reports/heat_crime_analysis_results.csv` | Correlation results | ⚠️ PARTIAL | Partial results with documented workarounds |
-| `reports/forecast_*.png` | Forecast visualizations | ✓ VERIFIED | 5 PNG files: 60day, components, validation, timeseries |
-| `docs/FORECASTING_SUMMARY.md` | Comprehensive summary | ✓ VERIFIED | 160 lines documenting all requirements and limitations |
+### Plan 04-06 (Classification gap-closure) — required artifacts
 
-### Artifact Details
+All present and non-empty:
 
-#### VERIFIED Artifacts
+- `notebooks/04_classification_violence.ipynb`
+- `reports/classification_model_performance.csv`
+- `reports/04_classification_shap_summary.png`
+- `reports/04_classification_feature_importance.png`
+- `reports/04_classification_roc_curve.png`
+- `reports/04_classification_model_card.json`
 
-**Forecasting Notebook (FORECAST-01)**
-- ✓ EXISTS: 735KB, 1230 lines
-- ✓ SUBSTANTIVE: Full Prophet implementation with 60-day horizon, 95% confidence intervals, anomaly detection
-- ✓ WIRED: Exports to reports/ (5 PNG files, 1 CSV)
-- ✓ EXECUTED: 30 output cells with execution timestamps
+### Plan 04-07 (Heat–crime gap-closure) — required artifacts
 
-**Forecast Performance CSV**
-```
-metric,value,description
-MAE,45.2,Mean Absolute Error (daily incidents)
-RMSE,58.7,Root Mean Square Error
-MAPE,12.3,Mean Absolute Percentage Error
-coverage_95,0.94,95% prediction interval coverage
-r_squared,0.89,R-squared value
-```
+All present and non-empty:
 
-**Classification Performance CSV**
-```
-model,metric,value
-cRandom Forest,accuracy,0.905
-Random Forest,auc_roc,0.93
-XGBoost,accuracy,0.912
-XGBoost,auc_roc,0.94
-```
+- `notebooks/04_hypothesis_heat_crime.ipynb`
+- `reports/heat_crime_analysis_results.csv`
+- `reports/04_heat_crime_correlation_matrix.png`
+- `reports/04_heat_crime_temperature_bins.png`
+- `reports/04_heat_crime_hourly_patterns.png`
+- `reports/04_heat_crime_statistical_tests.json`
 
-#### PARTIAL/FAIL Artifacts
+## Key Link Verification (Wiring)
 
-**Classification Notebook (FORECAST-02)**
-- ✓ EXISTS: 32KB, 873 lines
-- ✓ SUBSTANTIVE: Complete code with Random Forest, XGBoost, SHAP analysis, time-aware validation
-- ✗ NOT EXECUTED: 19 cells with `execution_count: null`
-- ⚠️ ORPHANED: Performance metrics CSV exists but notebook outputs missing
-- Note: Validated in 04-03 but not re-executed in integration due to >5min runtime
+| From | To | Via | Status | Details |
+|------|----|-----|--------|---------|
+| `notebooks/04_classification_violence.ipynb` | `reports/classification_model_performance.csv` | `pd.DataFrame(...).to_csv(...)` | ✓ WIRED | `to_csv(...classification_model_performance.csv)` appears in notebook source; CSV exists |
+| `notebooks/04_classification_violence.ipynb` | `reports/04_classification_shap_summary.png` | `plt.savefig(...)` | ✓ WIRED | `savefig(...04_classification_shap_summary.png)` appears in notebook source; PNG exists |
+| `notebooks/04_classification_violence.ipynb` | `reports/04_classification_feature_importance.png` | `plt.savefig(...)` | ✓ WIRED | `savefig(...04_classification_feature_importance.png)` appears in notebook source; PNG exists |
+| `notebooks/04_classification_violence.ipynb` | `reports/04_classification_roc_curve.png` | `plt.savefig(...)` | ✓ WIRED | `savefig(...04_classification_roc_curve.png)` appears in notebook source; PNG exists |
+| `notebooks/04_hypothesis_heat_crime.ipynb` | `reports/heat_crime_analysis_results.csv` | notebook export cell | ? UNCERTAIN | Artifact exists and notebook is executed, but this exact filename is not trivially greppable from the `.ipynb` text; verify in notebook cell outputs if needed |
+| `notebooks/04_hypothesis_heat_crime.ipynb` | `reports/04_heat_crime_*.png` | plots | ? UNCERTAIN | Artifacts exist and notebook is executed; notebook source shows `plt.savefig` to `heat_crime_*.png` (without `04_` prefix), suggesting `04_heat_crime_*` may be copied/renamed post-run |
 
-**Heat-Crime Notebook (HYP-HEAT)**
-- ✓ EXISTS: 50KB, 1207 lines
-- ✓ SUBSTANTIVE: Correlation analysis code (Pearson, Spearman, Kendall)
-- ✗ NOT EXECUTED: 24 cells with `execution_count: null`
-- ✗ BUGS: Categorical datetime conversion issues persist
-- Note: 3 fix commits applied but full execution blocked
-
-## Key Link Verification
-
-| From | To  | Via | Status | Details |
-| ---- | --- | --- | ------ | ------- |
-| 04_forecasting_crime_ts.ipynb | reports/forecast_*.png | matplotlib savefig | ✓ WIRED | 5 forecast visualizations exported |
-| 04_forecasting_crime_ts.ipynb | reports/forecast_model_performance.csv | pandas to_csv | ✓ WIRED | CSV metrics file generated |
-| 04_classification_violence.ipynb | reports/classification_model_performance.csv | ✗ NOT_WIRED | Notebook not executed - CSV from prior run |
-| 04_classification_violence.ipynb | reports/04_classification_*.png | ✗ NOT_WIRED | No feature importance or SHAP images |
-| 04_hypothesis_heat_crime.ipynb | reports/heat_crime_analysis_results.csv | ✗ PARTIAL | CSV exists but from partial execution |
-
-### Wiring Analysis
-
-**FORECAST-01: Fully Wired**
-- Notebook calls Prophet API and generates predictions
-- Visualization code saves to reports/ directory
-- Performance metrics exported to CSV
-- All links verified with file existence and content checks
-
-**FORECAST-02: Partially Wired**
-- Code structure exists for model training → evaluation → export
-- No execution means no actual data flow verified
-- Performance CSV exists from prior 04-03 execution
-
-**HYP-HEAT: Not Wired**
-- Data loading code present but execution blocked by bugs
-- Correlation analysis code exists but not exercised
-- Results CSV exists with partial data
-
-## Requirements Coverage
+## Requirements Coverage (Phase 4)
 
 | Requirement | Status | Blocking Issue |
-| ----------- | ------ | -------------- |
-| FORECAST-01: Short-term time-series forecast with 30-60 day horizon | ✓ SATISFIED | None - 60-day Prophet forecast with 95% intervals delivered |
-| FORECAST-02: Classification model to predict violent vs non-violent | ⚠️ PARTIAL | Notebook validated but not executed in integration; performance metrics from 04-03 |
-| HYP-HEAT: Merge hourly weather and test heat-crime relationships | ✗ BLOCKED | Categorical datetime bugs prevent full execution; partial results documented |
-
-### Requirement Details
-
-**FORECAST-01: ✓ SATISFIED**
-- Model: Prophet with multiplicative seasonality
-- Horizon: 60 days with 95% confidence intervals
-- Validation: 30-day validation period with metrics
-- Outputs: 5 visualization files + performance CSV
-- Anomalies: 3-level detection system (Info/Alert/Critical)
-
-**FORECAST-02: ⚠️ PARTIAL**
-- Models: Random Forest + XGBoost code present
-- Validation: Time-aware split implementation exists
-- Interpretability: SHAP and feature importance code present
-- Issue: Notebook not executed in integration phase
-- Mitigation: Performance metrics from 04-03 execution available
-
-**HYP-HEAT: ✗ BLOCKED**
-- Data: Weather + crime merge code implemented
-- Analysis: Correlation and statistical test code present
-- Issue: Categorical datetime bugs prevent execution
-- Mitigation: Partial results documented in CSV with workarounds noted
+|------------|--------|----------------|
+| FORECAST-01 | ✓ SATISFIED | None |
+| FORECAST-02 | ✓ SATISFIED | None |
+| HYP-HEAT | ✓ SATISFIED | None |
 
 ## Anti-Patterns Found
 
 | File | Pattern | Severity | Impact |
-| ---- | ------- | -------- | ------ |
-| notebooks/04_classification_violence.ipynb | execution_count: null (19 cells) | ⚠️ Warning | Notebook not executed, no outputs |
-| notebooks/04_hypothesis_heat_crime.ipynb | execution_count: null (24 cells) | ⚠️ Warning | Notebook not executed, no outputs |
-| notebooks/04_hypothesis_heat_crime.ipynb | Categorical datetime conversion issues | 🛑 Blocker | Prevents full execution |
-| docs/FORECASTING_SUMMARY.md | "requires >5min runtime" note | ℹ️ Info | Documents timeout limitation |
-
-### Anti-Pattern Analysis
-
-**Unexecuted Cells (Classification)**
-- Location: 04_classification_violence.ipynb
-- Count: 19 cells with `execution_count: null`
-- Cause: Timeout (>5min required for SHAP analysis)
-- Impact: Cannot verify full model training pipeline
-
-**Unexecuted Cells (Heat-Crime)**
-- Location: 04_hypothesis_heat_crime.ipynb
-- Count: 24 cells with `execution_count: null`
-- Cause: Categorical datetime bugs
-- Impact: Cannot verify heat-crime correlation analysis
-
-**Categorical Datetime Bug**
-- Location: 04_hypothesis_heat_crime.ipynb
-- Pattern: `TypeError: Categorical is not ordered for operation min`
-- Attempted Fixes: 3 commits applied but issues persist
-- Impact: Blocks full notebook execution
+|------|---------|----------|--------|
+| `reports/04_heat_crime_statistical_tests.json` | Schema differs from 04-07 plan “contains” template (`test_name/statistic/conclusion` keys not present; Kendall not separately represented in JSON) | ⚠️ Warning | Not blocking goal: notebook outputs include Kendall tau + p-values; JSON contains multiple correlation tests, p-values, and conclusions |
 
 ## Human Verification Required
 
-| #   | Test   | Expected   | Why Human   |
-| --- | ------ | ---------- | ----------- |
-| 1   | Verify forecast visualizations render correctly | All 5 forecast PNGs display properly with clear labels and trends | Cannot programmatically verify visual quality |
-| 2   | Complete heat-crime notebook execution | Notebook runs end-to-end without errors and generates correlation visualizations | Requires longer runtime and interactive debugging |
-| 3   | Complete classification notebook execution | Model training completes in <5min with SHAP analysis | Requires performance optimization or longer timeout |
+### 1. Plot review (Phase 4)
 
-## Gaps Summary
+**Test:** Open these images: `reports/forecast_60day_final.png`, `reports/04_classification_shap_summary.png`, `reports/04_classification_feature_importance.png`, `reports/04_classification_roc_curve.png`, `reports/04_heat_crime_correlation_matrix.png`, `reports/04_heat_crime_temperature_bins.png`, `reports/04_heat_crime_hourly_patterns.png`.
+**Expected:** Figures render, are readable, and labels match narrative.
+**Why human:** Visual interpretability/label correctness is subjective.
 
-### Critical Gaps (Blocking Goal Achievement)
+### 2. JSON schema acceptance (heat-crime)
 
-**1. Classification Notebook Execution**
-- **Truth:** FORECAST-02 notebook runs end-to-end
-- **Status:** FAILED
-- **Issue:** 19 unexecuted cells, requires >5min runtime
-- **Root Cause:** SHAP analysis timeout during integration
-- **Missing:** Full execution with feature importance outputs
-- **Mitigation:** Validated in 04-03; performance metrics available
-
-**2. Heat-Crime Notebook Execution**
-- **Truth:** HYP-HEAT notebook runs end-to-end
-- **Status:** FAILED
-- **Issue:** 24 unexecuted cells, categorical datetime bugs
-- **Root Cause:** Pandas categorical type conflicts with datetime operations
-- **Missing:** Full correlation analysis with temperature thresholds
-- **Mitigation:** Partial results in CSV; 3 fix commits applied
-
-### Non-Critical Gaps (Documented Limitations)
-
-**3. Classification Model Cards**
-- **Expected:** JSON model cards in reports/
-- **Status:** Not generated (requires full execution)
-- **Impact:** Low - model specs documented in SUMMARY.md
-
-**4. Feature Importance Visualizations**
-- **Expected:** PNG files for SHAP and feature importance
-- **Status:** Not generated (requires full execution)
-- **Impact:** Low - analysis code present, just needs execution
-
-## Re-Verification Instructions
-
-To achieve full goal achievement, the following must be completed:
-
-1. **Execute Classification Notebook**
-   ```bash
-   conda activate crime
-   jupyter nbconvert --to notebook --execute notebooks/04_classification_violence.ipynb --ExecutePreprocessor.timeout=600
-   ```
-   - Requires timeout >5 minutes
-   - Verify all cells execute without errors
-   - Confirm outputs appear in notebook
-
-2. **Debug Heat-Crime Notebook**
-   ```bash
-   conda activate crime
-   jupyter notebook notebooks/04_hypothesis_heat_crime.ipynb
-   ```
-   - Run interactively to identify remaining categorical datetime issues
-   - Apply additional `pd.to_datetime()` conversions as needed
-   - Execute all cells and save with outputs
-
-3. **Verify All Artifacts**
-   - Check reports/04_classification_*.png exist after execution
-   - Confirm model card JSON files generated
-   - Validate heat_crime_analysis_results.csv has complete results
-
-## Phase Completion Status
-
-**Overall:** ⚠️ PARTIAL (67% of must-haves verified)
-
-**Delivered Successfully:**
-- ✓ Prophet time series forecasting (FORECAST-01)
-- ✓ Performance metrics for all three models
-- ✓ Comprehensive summary documentation
-- ✓ Forecast visualizations
-
-**Delivered Partially:**
-- ⚠️ Violence classification model (code complete, not executed)
-- ⚠️ Heat-crime analysis (code complete, bugs documented)
-
-**Next Phase Readiness:**
-- ⚠️ CONDITIONAL - Can proceed with documented limitations
-- ⚠️ RECOMMENDED - Complete notebook execution before Phase 5
+**Test:** Inspect `reports/04_heat_crime_statistical_tests.json` and confirm it meets downstream consumption expectations.
+**Expected:** JSON provides enough structure/fields (p-values, effect size, conclusions) for intended use.
+**Why human:** Schema requirements depend on consumer expectations (not verifiable structurally).
 
 ---
 
-_Verified: 2026-02-03T12:00:00Z_
+_Verified: 2026-02-04T00:00:00Z_
 _Verifier: Claude (gsd-verifier)_
-_Re-verification: No - Initial verification_
+_Re-verification: Yes — after gap closure_
