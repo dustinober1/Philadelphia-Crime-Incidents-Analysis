@@ -94,12 +94,53 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Will be populated during roadmap creation) | Phase 1 | Pending |
+| ARCH-01 | Phase 5 | Pending |
+| ARCH-02 | Phase 5 | Pending |
+| ARCH-03 | Phase 5 | Pending |
+| ARCH-04 | Phase 6 | Pending |
+| ARCH-05 | Phase 6 | Pending |
+| ARCH-06 | Phase 6 | Pending |
+| CONFIG-01 | Phase 6 | Pending |
+| CONFIG-02 | Phase 6 | Pending |
+| CONFIG-03 | Phase 6 | Pending |
+| CONFIG-04 | Phase 6 | Pending |
+| CONFIG-05 | Phase 6 | Pending |
+| DATA-01 | Phase 5 | Pending |
+| DATA-02 | Phase 5 | Pending |
+| DATA-03 | Phase 5 | Pending |
+| DATA-04 | Phase 5 | Pending |
+| DATA-05 | Phase 7 | Pending |
+| VIZ-01 | Phase 7 | Pending |
+| VIZ-02 | Phase 7 | Pending |
+| VIZ-03 | Phase 7 | Pending |
+| VIZ-04 | Phase 7 | Pending |
+| VIZ-05 | Phase 7 | Pending |
+| TEST-01 | Phase 7 | Pending |
+| TEST-02 | Phase 7 | Pending |
+| TEST-03 | Phase 7 | Pending |
+| TEST-04 | Phase 7 | Pending |
+| TEST-05 | Phase 7 | Pending |
+| TEST-06 | Phase 7 | Pending |
+| TEST-07 | Phase 7 | Pending |
+| TEST-08 | Phase 7 | Pending |
+| DOCS-01 | Phase 8 | Pending |
+| DOCS-02 | Phase 8 | Pending |
+| DOCS-03 | Phase 8 | Pending |
+| DOCS-04 | Phase 8 | Pending |
+| DOCS-05 | Phase 8 | Pending |
+| MIGRATE-01 | Phase 8 | Pending |
+| MIGRATE-02 | Phase 8 | Pending |
+| MIGRATE-03 | Phase 8 | Pending |
+| MIGRATE-04 | Phase 8 | Pending |
+| MIGRATE-05 | Phase 8 | Pending |
+| MIGRATE-06 | Phase 8 | Pending |
+| MIGRATE-07 | Phase 8 | Pending |
+| MIGRATE-08 | Phase 8 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 46 total
-- Mapped to phases: 0
-- Unmapped: 46 ⚠️
+- Mapped to phases: 46 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-04*
