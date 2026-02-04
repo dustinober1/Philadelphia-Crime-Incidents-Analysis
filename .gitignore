@@ -5,6 +5,14 @@
 data/external/.cache/
 data/external/*.parquet
 
+# Build and cache directories
+.cache/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+
 # Existing entries
 data/processed/crime_incidents_combined.parquet
 .venv/
@@ -12,9 +20,8 @@ data/processed/crime_incidents_combined.parquet
 analysis_output.log
 *.pyc
 __pycache__/
-.pytest_cache/
 *.parquet.DS_Store
-*.parquet 
+*.parquet
 # Firebase CLI debug log (created when commands run with --debug)
 @firebase-debug.log
 firebase-debug.log
