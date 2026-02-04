@@ -4,9 +4,9 @@
 
 This analysis examines the impact of major events (sports games, holidays, celebrations) on crime patterns in Philadelphia using difference-in-means testing.
 
-**Analysis Period:** 2015-01-01 to 2026-01-20  
-**Total Days Analyzed:** 4,037  
-**Event Days:** 986  
+**Analysis Period:** 2015-01-01 to 2026-01-20
+**Total Days Analyzed:** 4,037
+**Event Days:** 986
 **Control Days:** 3,051
 
 ### Key Finding
@@ -92,5 +92,5 @@ The following event-crime combinations showed statistically significant differen
 - `event_spillover.png`: Day before/after effects for sports events
 
 ---
-*Generated: 2026-02-02 20:23*  
+*Generated: 2026-02-02 20:23*
 *Notebook: event_impact_analysis.ipynb*

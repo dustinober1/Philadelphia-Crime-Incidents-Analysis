@@ -1,8 +1,8 @@
 # Phase 1 Plan: Notebook Refactoring - COVID Impact Analysis
-**Wave:** 2  
-**Depends on:** Wave 1 (Infrastructure)  
-**Files modified:** `notebooks/covid_lockdown_crime_landscape.ipynb`  
-**Autonomous:** Yes  
+**Wave:** 2
+**Depends on:** Wave 1 (Infrastructure)
+**Files modified:** `notebooks/covid_lockdown_crime_landscape.ipynb`
+**Autonomous:** Yes
 
 ---
 
@@ -258,7 +258,7 @@ Displacement hypothesis: During lockdown, people stayed home → commercial area
 ---
 
 ## Estimated Effort
-**Time:** 4-5 hours  
+**Time:** 4-5 hours
 **Complexity:** Medium-High (displacement analysis adds complexity)
 
 ---

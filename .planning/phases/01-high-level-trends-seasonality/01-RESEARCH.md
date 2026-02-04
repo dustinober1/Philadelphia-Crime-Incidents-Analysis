@@ -114,19 +114,19 @@ from .config import CRIME_DATA_PATH
 def load_data(clean: bool = True) -> pd.DataFrame:
     """Load crime incidents dataset with consistent date handling."""
     df = pd.read_parquet(CRIME_DATA_PATH)
-    
+
     # Convert categorical dispatch_date to datetime
     if df['dispatch_date'].dtype.name == 'category':
         df['dispatch_date'] = pd.to_datetime(
-            df['dispatch_date'].astype(str), 
+            df['dispatch_date'].astype(str),
             errors='coerce'
         )
     elif not pd.api.types.is_datetime64_any_dtype(df['dispatch_date']):
         df['dispatch_date'] = pd.to_datetime(df['dispatch_date'], errors='coerce')
-    
+
     if clean:
         df = df.dropna(subset=['dispatch_date'])
-    
+
     return df
 ```
 
@@ -139,12 +139,12 @@ def load_data(clean: bool = True) -> pd.DataFrame:
 def classify_crime_category(df: pd.DataFrame) -> pd.DataFrame:
     """Classify crimes into Violent, Property, or Other categories."""
     df = df.copy()
-    
+
     # Violent: Homicide (100), Rape (200), Robbery (300), Aggravated Assault (400)
     violent_codes = [100, 200, 300, 400]
     # Property: Burglary (500), Theft (600), Motor Vehicle Theft (700)
     property_codes = [500, 600, 700]
-    
+
     def categorize(ucr_code):
         if ucr_code in violent_codes:
             return 'Violent'
@@ -152,7 +152,7 @@ def classify_crime_category(df: pd.DataFrame) -> pd.DataFrame:
             return 'Property'
         else:
             return 'Other'
-    
+
     df['crime_category'] = df['ucr_general'].apply(categorize)
     return df
 ```
@@ -246,7 +246,7 @@ import matplotlib.pyplot as plt
 fig, ax = plt.subplots(figsize=(14, 8))
 
 # Main plot
-ax.plot(annual_totals['year'], annual_totals['total_crimes'], 
+ax.plot(annual_totals['year'], annual_totals['total_crimes'],
         marker='o', linewidth=3, markersize=10, color='#2E86AB')
 
 # Peak annotation

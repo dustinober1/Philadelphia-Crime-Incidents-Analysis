@@ -1,16 +1,13 @@
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 
-def _map_test_item(item: Dict[str, Any]) -> Dict[str, Any]:
+def _map_test_item(item: dict[str, Any]) -> dict[str, Any]:
     # Try common key variants and normalize to canonical keys
     out = {}
     # name
     out["test_name"] = (
-        item.get("test_name")
-        or item.get("name")
-        or item.get("test")
-        or item.get("testName")
+        item.get("test_name") or item.get("name") or item.get("test") or item.get("testName")
     )
     # statistic value
     out["statistic"] = (
@@ -25,15 +22,10 @@ def _map_test_item(item: Dict[str, Any]) -> Dict[str, Any]:
     )
     # effect size
     out["effect_size"] = (
-        item.get("effect_size")
-        or item.get("effect")
-        or item.get("d")
-        or item.get("cohen_d")
+        item.get("effect_size") or item.get("effect") or item.get("d") or item.get("cohen_d")
     )
     # conclusion / interpretation
-    out["conclusion"] = (
-        item.get("conclusion") or item.get("interpretation") or item.get("result")
-    )
+    out["conclusion"] = item.get("conclusion") or item.get("interpretation") or item.get("result")
     # confidence interval
     ci = item.get("ci") or item.get("ci_lower") or None
     if isinstance(ci, (list, tuple)) and len(ci) >= 2:
@@ -52,10 +44,10 @@ def normalize_heat_crime_json(in_path: str, out_path: str) -> None:
     The canonical schema is:
     {"tests": [ {"test_name":..., "statistic":..., "p_value":..., "effect_size":..., "conclusion":..., "ci_lower":..., "ci_upper":...}, ... ] }
     """
-    with open(in_path, "r", encoding="utf-8") as f:
+    with open(in_path, encoding="utf-8") as f:
         data = json.load(f)
 
-    tests: List[Dict[str, Any]] = []
+    tests: list[dict[str, Any]] = []
 
     # If data is a dict with top-level "tests" or similar
     if isinstance(data, dict):
@@ -98,8 +90,8 @@ def normalize_heat_crime_json(in_path: str, out_path: str) -> None:
         json.dump(out, f, indent=2, ensure_ascii=False)
 
 
-def load_normalized(path: str) -> Dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as f:
+def load_normalized(path: str) -> dict[str, Any]:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 

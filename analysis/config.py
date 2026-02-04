@@ -25,12 +25,12 @@ PHILLY_LAT_MAX: float = 40.15
 # 500=Burglary, 600=Theft, 700=Vehicle Theft, 800=Arson, 900=Other
 SEVERITY_WEIGHTS: dict[int, float] = {
     100: 10.0,  # Homicide
-    200: 8.0,   # Rape
-    300: 6.0,   # Robbery
-    400: 5.0,   # Aggravated Assault
-    500: 3.0,   # Burglary
-    600: 1.0,   # Theft
-    700: 2.0,   # Vehicle Theft
-    800: 4.0,   # Arson
-    900: 0.5,   # Other
+    200: 8.0,  # Rape
+    300: 6.0,  # Robbery
+    400: 5.0,  # Aggravated Assault
+    500: 3.0,  # Burglary
+    600: 1.0,  # Theft
+    700: 2.0,  # Vehicle Theft
+    800: 4.0,  # Arson
+    900: 0.5,  # Other
 }

@@ -1,8 +1,8 @@
 # Phase 1 Plan: Infrastructure & Configuration
-**Wave:** 1  
-**Depends on:** None  
-**Files modified:** `analysis/`, `config/`, `pyproject.toml`  
-**Autonomous:** Yes  
+**Wave:** 1
+**Depends on:** None
+**Files modified:** `analysis/`, `config/`, `pyproject.toml`
+**Autonomous:** Yes
 
 ---
 
@@ -223,7 +223,7 @@ Notebook paths (from research):
 ---
 
 ## Estimated Effort
-**Time:** 4-6 hours  
+**Time:** 4-6 hours
 **Complexity:** Medium (scaffolding, no complex algorithms)
 
 ---

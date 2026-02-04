@@ -1,6 +1,6 @@
 2026-02-02 18:27:33,458 | INFO | Starting Phase 1 orchestration
 2026-02-02 18:27:33,458 | INFO | Starting annual_trend...
-2026-02-02 18:27:35,313 | ERROR | Notebook annual_trend failed: 
+2026-02-02 18:27:35,313 | ERROR | Notebook annual_trend failed:
 ---------------------------------------------------------------------------
 Exception encountered at "In [3]":
 ---------------------------------------------------------------------------
@@ -41,7 +41,7 @@ Traceback (most recent call last):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
   File "/opt/anaconda3/lib/python3.13/site-packages/papermill/execute.py", line 251, in raise_for_execution_errors
     raise error
-papermill.exceptions.PapermillExecutionError: 
+papermill.exceptions.PapermillExecutionError:
 ---------------------------------------------------------------------------
 Exception encountered at "In [3]":
 ---------------------------------------------------------------------------

@@ -11,11 +11,10 @@ Or from Python:
     results = orchestrate_phase2()
 """
 
-from pathlib import Path
 import subprocess
 import sys
 from datetime import datetime
-from typing import Dict, List, Optional
+from pathlib import Path
 
 # Phase 2 notebooks in execution order
 NOTEBOOKS = [
@@ -27,7 +26,7 @@ NOTEBOOKS = [
 ]
 
 
-def run_notebook(notebook_name: str, repo_root: Path, timeout: int = 600) -> Dict:
+def run_notebook(notebook_name: str, repo_root: Path, timeout: int = 600) -> dict:
     """Execute a notebook using jupyter nbconvert.
 
     Args:
@@ -81,15 +80,13 @@ def run_notebook(notebook_name: str, repo_root: Path, timeout: int = 600) -> Dic
             result["success"] = True
             print(f" done ({duration:.1f}s)")
         else:
-            result["error"] = (
-                proc_result.stderr[:500] if proc_result.stderr else "Unknown error"
-            )
-            print(f" FAILED")
+            result["error"] = proc_result.stderr[:500] if proc_result.stderr else "Unknown error"
+            print(" FAILED")
             print(f"    Error: {result['error'][:200]}...")
 
     except subprocess.TimeoutExpired:
         result["error"] = f"Timeout after {timeout}s"
-        print(f" TIMEOUT")
+        print(" TIMEOUT")
     except Exception as e:
         result["error"] = str(e)
         print(f" ERROR: {e}")
@@ -97,7 +94,7 @@ def run_notebook(notebook_name: str, repo_root: Path, timeout: int = 600) -> Dic
     return result
 
 
-def validate_phase2(repo_root: Path) -> Dict:
+def validate_phase2(repo_root: Path) -> dict:
     """Run validation script and return results."""
     validate_script = repo_root / "scripts" / "validate_phase2.py"
 
@@ -123,15 +120,15 @@ def validate_phase2(repo_root: Path) -> Dict:
             "error": result.stderr if not success else None,
         }
     except Exception as e:
-        print(f" ERROR")
+        print(" ERROR")
         return {"success": False, "error": str(e)}
 
 
 def orchestrate_phase2(
-    repo_root: Optional[Path] = None,
-    notebooks: Optional[List[str]] = None,
+    repo_root: Path | None = None,
+    notebooks: list[str] | None = None,
     skip_validation: bool = False,
-) -> Dict:
+) -> dict:
     """Run all Phase 2 notebooks and validate outputs.
 
     Args:
@@ -220,9 +217,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Orchestrate Phase 2 notebooks")
-    parser.add_argument(
-        "--skip-validation", action="store_true", help="Skip validation step"
-    )
+    parser.add_argument("--skip-validation", action="store_true", help="Skip validation step")
     parser.add_argument(
         "--notebook", type=str, nargs="+", help="Run specific notebooks (default: all)"
     )

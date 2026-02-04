@@ -1,7 +1,7 @@
 # Phase 1 Execution Plans: Index
-**Phase:** High-Level Trends & Seasonality  
-**Status:** Ready for Execution  
-**Created:** 2026-02-02  
+**Phase:** High-Level Trends & Seasonality
+**Status:** Ready for Execution
+**Created:** 2026-02-02
 
 ---
 
@@ -25,8 +25,8 @@ This directory contains detailed execution plans for Phase 1, broken down into 3
 | [05-PLAN-covid.md](./05-PLAN-covid.md) | 2 | COVID impact notebook (CHIEF-03) | 6 | 4-5h | Wave 1 |
 | [06-PLAN-integration.md](./06-PLAN-integration.md) | 3 | Testing & documentation | 7 | 3-4h | Waves 1 & 2 |
 
-**Total Tasks:** 31  
-**Total Estimated Effort:** 17-23 hours  
+**Total Tasks:** 31
+**Total Estimated Effort:** 17-23 hours
 
 ---
 
@@ -202,6 +202,6 @@ All Wave 2 plans follow same structure:
 
 ---
 
-**Plans Status:** ✅ Complete and ready for execution  
-**Requirements Coverage:** 3/3 (CHIEF-01, CHIEF-02, CHIEF-03)  
-**Total Tasks:** 31 across 5 plan files  
+**Plans Status:** ✅ Complete and ready for execution
+**Requirements Coverage:** 3/3 (CHIEF-01, CHIEF-02, CHIEF-03)
+**Total Tasks:** 31 across 5 plan files

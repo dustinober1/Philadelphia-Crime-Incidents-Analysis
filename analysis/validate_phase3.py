@@ -1,13 +1,13 @@
 """Validation script for Phase 3 artifacts."""
 
 from pathlib import Path
-from typing import Dict, List, Tuple
+
 import pandas as pd
 
 
 def validate_phase3_artifacts(
     repo_root: Path,
-) -> Dict[str, List[Tuple[str, bool, str]]]:
+) -> dict[str, list[tuple[str, bool, str]]]:
     """Validate all Phase 3 artifacts.
 
     Returns dict with validation results by notebook.
@@ -38,9 +38,7 @@ def validate_phase3_artifacts(
     if report_path.exists():
         content = report_path.read_text()
         has_verdict = "SUPPORTED" in content or "NOT SUPPORTED" in content
-        results["retail_theft"].append(
-            ("verdict", has_verdict, "Report contains verdict")
-        )
+        results["retail_theft"].append(("verdict", has_verdict, "Report contains verdict"))
 
     # Vehicle Crimes (POLICY-02)
     checks = [
@@ -61,9 +59,7 @@ def validate_phase3_artifacts(
         try:
             stats = pd.read_csv(stats_path)
             has_pct = "pct_of_crimes" in stats.columns or "pct_within" in stats.columns
-            pct_col = (
-                "pct_of_crimes" if "pct_of_crimes" in stats.columns else "pct_within"
-            )
+            pct_col = "pct_of_crimes" if "pct_of_crimes" in stats.columns else "pct_within"
             pct_valid = stats[pct_col].between(0, 100).all() if has_pct else False
             results["vehicle_crimes"].append(
                 ("quantification", has_pct and pct_valid, "Valid % quantification")
@@ -112,7 +108,7 @@ def validate_phase3_artifacts(
     return results
 
 
-def cross_reference_checks(repo_root: Path) -> List[Tuple[str, bool, str]]:
+def cross_reference_checks(repo_root: Path) -> list[tuple[str, bool, str]]:
     """Run cross-reference validation checks."""
     reports_dir = repo_root / "reports"
     checks = []
@@ -160,9 +156,7 @@ def cross_reference_checks(repo_root: Path) -> List[Tuple[str, bool, str]]:
     return checks
 
 
-def print_validation_report(
-    results: Dict, cross_checks: List = None
-) -> Tuple[int, int]:
+def print_validation_report(results: dict, cross_checks: list = None) -> tuple[int, int]:
     """Print validation report and return pass/fail counts."""
     total_pass = 0
     total_fail = 0

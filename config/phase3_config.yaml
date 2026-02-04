@@ -36,7 +36,7 @@ events:
       lat: 39.9012
       lon: -75.1720
       teams: ["76ers", "Flyers"]
-  
+
   # Major holidays to analyze
   holidays:
     - name: "New Year's Day"
@@ -54,7 +54,7 @@ events:
     - name: "Thanksgiving"
       month: 11
       fourth_thursday: true
-  
+
   buffer_days: 1  # Include day before/after for spillover
   control_weeks: 4  # Compare to same day-of-week in adjacent weeks
 

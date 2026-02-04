@@ -10,13 +10,12 @@ This module provides functions for:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Optional
 
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 
-from analysis.phase2_config_loader import load_phase2_config, Phase2Config
+from analysis.phase2_config_loader import Phase2Config, load_phase2_config
 
 
 def get_repo_root() -> Path:
@@ -28,7 +27,7 @@ def clean_coordinates(
     df: pd.DataFrame,
     x_col: str = "point_x",
     y_col: str = "point_y",
-    config: Optional[Phase2Config] = None,
+    config: Phase2Config | None = None,
 ) -> pd.DataFrame:
     """Filter DataFrame to valid WGS84 coordinates for Philadelphia.
 
@@ -105,14 +104,12 @@ def load_boundaries(name: str) -> gpd.GeoDataFrame:
         file_path = repo_root / config.boundaries.census_tracts_file
     else:
         raise ValueError(
-            f"Unknown boundary name: {name}. "
-            "Expected 'police_districts' or 'census_tracts'."
+            f"Unknown boundary name: {name}. " "Expected 'police_districts' or 'census_tracts'."
         )
 
     if not file_path.exists():
         raise FileNotFoundError(
-            f"Boundary file not found: {file_path}. "
-            "Run scripts/download_boundaries.py first."
+            f"Boundary file not found: {file_path}. " "Run scripts/download_boundaries.py first."
         )
 
     return gpd.read_file(file_path)
@@ -152,7 +149,7 @@ def df_to_geodataframe(
 
 def spatial_join_districts(
     df: pd.DataFrame,
-    district_gdf: Optional[gpd.GeoDataFrame] = None,
+    district_gdf: gpd.GeoDataFrame | None = None,
     x_col: str = "point_x",
     y_col: str = "point_y",
 ) -> pd.DataFrame:
@@ -208,7 +205,7 @@ def spatial_join_districts(
 
 def spatial_join_tracts(
     df: pd.DataFrame,
-    tract_gdf: Optional[gpd.GeoDataFrame] = None,
+    tract_gdf: gpd.GeoDataFrame | None = None,
     x_col: str = "point_x",
     y_col: str = "point_y",
 ) -> pd.DataFrame:
@@ -264,7 +261,7 @@ def spatial_join_tracts(
 
 def calculate_severity_score(
     df: pd.DataFrame,
-    weights: Optional[Dict[int, float]] = None,
+    weights: dict[int, float] | None = None,
     ucr_col: str = "ucr_general",
 ) -> pd.Series:
     """Calculate weighted severity score per record.
@@ -318,7 +315,7 @@ def get_coordinate_stats(
     df: pd.DataFrame,
     x_col: str = "point_x",
     y_col: str = "point_y",
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Get statistics about coordinate coverage.
 
     Parameters

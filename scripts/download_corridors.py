@@ -1,11 +1,11 @@
 """Download highway and transit corridor data for Phase 3."""
 
+from pathlib import Path
+
 import geopandas as gpd
 import pandas as pd
 import requests
 from shapely.geometry import LineString
-from pathlib import Path
-import time
 
 
 def download_highways_osm(bbox: tuple) -> gpd.GeoDataFrame:
@@ -57,9 +57,7 @@ def download_highways_osm(bbox: tuple) -> gpd.GeoDataFrame:
     if features:
         return gpd.GeoDataFrame(features, crs="EPSG:4326")
     else:
-        return gpd.GeoDataFrame(
-            columns=["geometry", "name", "type", "osm_id"], crs="EPSG:4326"
-        )
+        return gpd.GeoDataFrame(columns=["geometry", "name", "type", "osm_id"], crs="EPSG:4326")
 
 
 def create_fallback_highways() -> gpd.GeoDataFrame:
@@ -222,9 +220,7 @@ def main():
     print(f"Created {len(septa)} SEPTA subway line segments")
 
     # Combine and save
-    corridors = gpd.GeoDataFrame(
-        pd.concat([highways, septa], ignore_index=True), crs="EPSG:4326"
-    )
+    corridors = gpd.GeoDataFrame(pd.concat([highways, septa], ignore_index=True), crs="EPSG:4326")
 
     # Clean up the data
     corridors["name"] = corridors["name"].fillna("Unknown")

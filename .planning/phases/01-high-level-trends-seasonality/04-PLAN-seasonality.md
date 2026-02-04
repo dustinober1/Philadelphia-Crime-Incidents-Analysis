@@ -1,8 +1,8 @@
 # Phase 1 Plan: Notebook Refactoring - Seasonality Analysis
-**Wave:** 2  
-**Depends on:** Wave 1 (Infrastructure)  
-**Files modified:** `notebooks/summer_crime_spike_analysis.ipynb`  
-**Autonomous:** Yes  
+**Wave:** 2
+**Depends on:** Wave 1 (Infrastructure)
+**Files modified:** `notebooks/summer_crime_spike_analysis.ipynb`
+**Autonomous:** Yes
 
 ---
 
@@ -220,7 +220,7 @@ From research: "18.3% increase July vs January" — ensure this type of quantifi
 ---
 
 ## Estimated Effort
-**Time:** 3-4 hours  
+**Time:** 3-4 hours
 **Complexity:** Medium (similar to Task 2.1-2.6 but for different notebook)
 
 ---

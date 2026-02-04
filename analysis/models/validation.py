@@ -8,14 +8,15 @@ All imports use absolute paths via __file__ to ensure modules work regardless
 of working directory.
 """
 
-import os
 import sys
+from collections.abc import Callable
 from pathlib import Path
-import pandas as pd
+from typing import Any
+
 import numpy as np
-from typing import Optional, List, Dict, Any, Callable
-from sklearn.model_selection import TimeSeriesSplit
+import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import TimeSeriesSplit
 
 # Ensure absolute path resolution
 MODULE_DIR = Path(__file__).parent.absolute()
@@ -29,7 +30,7 @@ def time_series_cv_score(
     y: pd.Series,
     n_splits: int = 5,
     scoring: str = "neg_mean_absolute_error",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Perform time series cross-validation and return scores.
 
@@ -121,7 +122,7 @@ def walk_forward_validation(
 
 def compute_regression_metrics(
     y_true: pd.Series, y_pred: pd.Series, prefix: str = ""
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Compute comprehensive regression metrics.
 
@@ -147,8 +148,8 @@ def compute_regression_metrics(
 
 
 def compute_forecast_accuracy(
-    actual: pd.Series, forecast: pd.Series, seasonality: Optional[int] = None
-) -> Dict[str, float]:
+    actual: pd.Series, forecast: pd.Series, seasonality: int | None = None
+) -> dict[str, float]:
     """
     Compute forecast accuracy metrics including MASE.
 
@@ -180,11 +181,11 @@ def compute_forecast_accuracy(
 def create_model_card(
     model_name: str,
     model_type: str,
-    features: List[str],
-    train_metrics: Dict[str, float],
-    test_metrics: Dict[str, float],
-    limitations: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    features: list[str],
+    train_metrics: dict[str, float],
+    test_metrics: dict[str, float],
+    limitations: list[str] | None = None,
+) -> dict[str, Any]:
     """
     Create a model card documenting model performance and limitations.
 
@@ -213,9 +214,7 @@ def create_model_card(
     return card
 
 
-def check_residual_autocorrelation(
-    residuals: pd.Series, max_lag: int = 40
-) -> Dict[str, Any]:
+def check_residual_autocorrelation(residuals: pd.Series, max_lag: int = 40) -> dict[str, Any]:
     """
     Check for autocorrelation in model residuals (important for time series).
 
@@ -226,7 +225,6 @@ def check_residual_autocorrelation(
     Returns:
         Dictionary with autocorrelation diagnostics
     """
-    from scipy import stats
 
     # Ljung-Box test for autocorrelation
     # Low p-value indicates significant autocorrelation (bad)
@@ -251,7 +249,7 @@ def check_residual_autocorrelation(
 
 def validate_temporal_split(
     train_dates: pd.Series, test_dates: pd.Series, min_gap_days: int = 0
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Validate that train/test split maintains temporal order and gaps.
 

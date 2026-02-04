@@ -1,7 +1,7 @@
 """Validate Phase 2 artifacts and cross-reference outputs."""
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 
 def validate_phase2(repo_root: Path) -> dict:
@@ -228,9 +228,7 @@ def cross_reference_outputs(repo_root: Path) -> dict:
                     outside_centroids += 1
 
             if outside_centroids > 0:
-                issues.append(
-                    f"{outside_centroids} hotspot centroids outside Philadelphia bounds"
-                )
+                issues.append(f"{outside_centroids} hotspot centroids outside Philadelphia bounds")
         else:
             warnings.append("Cannot verify centroids bounds - files missing")
 

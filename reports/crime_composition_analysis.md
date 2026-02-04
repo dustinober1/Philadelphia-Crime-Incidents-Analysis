@@ -1,15 +1,15 @@
 # Crime Composition Analysis Report
 
-**Analysis Period:** 2015-2024  
-**Generated:** 2026-02-02 20:23  
+**Analysis Period:** 2015-2024
+**Generated:** 2026-02-02 20:23
 **Notebook:** `crime_composition.ipynb`
 
 ---
 
 ## Executive Summary
 
-This analysis examines the year-by-year composition of crime in Philadelphia, 
-focusing on the ratio of violent crimes to total crimes and how this has shifted 
+This analysis examines the year-by-year composition of crime in Philadelphia,
+focusing on the ratio of violent crimes to total crimes and how this has shifted
 across different periods including the COVID-19 pandemic.
 
 ## Violent Crime Ratio by Period
@@ -39,8 +39,8 @@ across different periods including the COVID-19 pandemic.
 ## Key Findings
 
 ### 1. COVID-19 Impact on Crime Composition
-The violent crime ratio **increased** during 2020-2021 (11.3%), 
-likely due to decreased property crime reporting during lockdowns. This does not necessarily mean more violent crime occurred in 
+The violent crime ratio **increased** during 2020-2021 (11.3%),
+likely due to decreased property crime reporting during lockdowns. This does not necessarily mean more violent crime occurred in
 absolute terms, but rather that violent crime comprised a larger share of reported incidents.
 
 ### 2. Recent Trend
@@ -58,7 +58,7 @@ Despite year-to-year fluctuations, the overall composition remains relatively st
 - Property crimes represent **26-46%** of total
 
 ### 5. Violent Crime Internal Composition
-Within violent crimes, **Aggravated Assault** remains the dominant category, 
+Within violent crimes, **Aggravated Assault** remains the dominant category,
 accounting for ~55% of all violent crimes.
 
 

@@ -55,6 +55,6 @@ The data **supports** a significant increase in theft incidents. Theft has incre
 - `retail_theft_monthly_heatmap.png` - Monthly patterns by year
 
 ---
-*Generated: 2026-02-02 20:23*  
-*Notebook: retail_theft_trend.ipynb*  
+*Generated: 2026-02-02 20:23*
+*Notebook: retail_theft_trend.ipynb*
 *Requirement: POLICY-01*

@@ -8,12 +8,12 @@ All imports use absolute paths via __file__ to ensure modules work regardless
 of working directory.
 """
 
-import os
 import sys
 from pathlib import Path
-import pandas as pd
+from typing import Any
+
 import numpy as np
-from typing import Optional, Tuple, Dict, Any
+import pandas as pd
 
 # Ensure absolute path resolution
 MODULE_DIR = Path(__file__).parent.absolute()
@@ -21,9 +21,7 @@ REPO_ROOT = MODULE_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 
-def prepare_prophet_data(
-    df: pd.DataFrame, date_col: str, value_col: str
-) -> pd.DataFrame:
+def prepare_prophet_data(df: pd.DataFrame, date_col: str, value_col: str) -> pd.DataFrame:
     """
     Prepare time series data in Prophet format (ds, y columns).
 
@@ -45,7 +43,7 @@ def prepare_prophet_data(
 
 def create_train_test_split(
     df: pd.DataFrame, test_days: int = 30
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Create time-aware train/test split for time series validation.
 
@@ -73,7 +71,7 @@ def get_prophet_config(
     daily: bool = False,
     changepoint_prior_scale: float = 0.05,
     interval_width: float = 0.95,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get standard Prophet model configuration for crime forecasting.
 
@@ -103,9 +101,9 @@ def get_prophet_config(
 def evaluate_forecast(
     actual: pd.Series,
     predicted: pd.Series,
-    lower: Optional[pd.Series] = None,
-    upper: Optional[pd.Series] = None,
-) -> Dict[str, float]:
+    lower: pd.Series | None = None,
+    upper: pd.Series | None = None,
+) -> dict[str, float]:
     """
     Evaluate forecast performance using common metrics.
 
@@ -175,12 +173,8 @@ def detect_anomalies(
     residual_mean = residuals.mean()
 
     # Anomaly if residual exceeds threshold OR outside prediction interval
-    threshold_anomaly = np.abs(residuals - residual_mean) > (
-        threshold_std * residual_std
-    )
-    interval_anomaly = (df[actual_col] < df[lower_col]) | (
-        df[actual_col] > df[upper_col]
-    )
+    threshold_anomaly = np.abs(residuals - residual_mean) > (threshold_std * residual_std)
+    interval_anomaly = (df[actual_col] < df[lower_col]) | (df[actual_col] > df[upper_col])
 
     anomalies = threshold_anomaly | interval_anomaly
 

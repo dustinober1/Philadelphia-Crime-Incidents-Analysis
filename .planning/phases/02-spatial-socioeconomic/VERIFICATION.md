@@ -1,9 +1,9 @@
 # Phase 2 Verification Report
 
-**Phase:** 02-spatial-socioeconomic  
-**Goal:** Identify hotspots, temporal hotspots for robbery, and per-tract crime rates normalized by population.  
-**Requirements Covered:** PATROL-01, PATROL-02, PATROL-03, HYP-SOCIO  
-**Verification Date:** 2026-02-02  
+**Phase:** 02-spatial-socioeconomic
+**Goal:** Identify hotspots, temporal hotspots for robbery, and per-tract crime rates normalized by population.
+**Requirements Covered:** PATROL-01, PATROL-02, PATROL-03, HYP-SOCIO
+**Verification Date:** 2026-02-02
 
 ---
 
@@ -105,7 +105,7 @@ Actionable Recommendations:
 ```
 Factor Weights:
 - crime_count: 0.25 (volume-based)
-- violent_ratio: 0.30 (severity-based) 
+- violent_ratio: 0.30 (severity-based)
 - trend: 0.20 (YoY momentum)
 - percapita_rate: 0.25 (population-normalized per 100K)
 ```

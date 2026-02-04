@@ -14,7 +14,6 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
 
 import geopandas as gpd
 import pandas as pd
@@ -47,9 +46,7 @@ CENSUS_TRACTS_PRIMARY = (
     "https://api.census.gov/data/2020/acs/acs5?"
     "get=B01003_001E,NAME&for=tract:*&in=state:42&in=county:101"
 )
-CENSUS_TRACTS_GEOJSON = (
-    "https://www2.census.gov/geo/tiger/TIGER2020/TRACT/tl_2020_42_tract.zip"
-)
+CENSUS_TRACTS_GEOJSON = "https://www2.census.gov/geo/tiger/TIGER2020/TRACT/tl_2020_42_tract.zip"
 # Alternative: Census Reporter API for pre-joined data
 CENSUS_REPORTER_TRACTS = (
     "https://api.censusreporter.org/1.0/geo/show/tiger2020?geo_ids=14000US42101*"
@@ -66,7 +63,7 @@ def download_json(url: str, timeout: int = REQUEST_TIMEOUT) -> dict:
     return response.json()
 
 
-def download_police_districts(output_path: Path) -> Tuple[bool, str]:
+def download_police_districts(output_path: Path) -> tuple[bool, str]:
     """Download police district boundaries.
 
     Returns:
@@ -102,13 +99,9 @@ def download_police_districts(output_path: Path) -> Tuple[bool, str]:
 
     # Add standardized dist_num column (integer) for joining with crime data
     if "dist_numc" in gdf.columns:
-        gdf["dist_num"] = pd.to_numeric(gdf["dist_numc"], errors="coerce").astype(
-            "Int64"
-        )
+        gdf["dist_num"] = pd.to_numeric(gdf["dist_numc"], errors="coerce").astype("Int64")
     elif "dist_num" in gdf.columns:
-        gdf["dist_num"] = pd.to_numeric(gdf["dist_num"], errors="coerce").astype(
-            "Int64"
-        )
+        gdf["dist_num"] = pd.to_numeric(gdf["dist_num"], errors="coerce").astype("Int64")
 
     # Re-save with standardized column
     gdf.to_file(output_path, driver="GeoJSON")
@@ -119,9 +112,7 @@ def download_police_districts(output_path: Path) -> Tuple[bool, str]:
     # Note: Philadelphia has 21 geographic police districts (some numbers skipped)
     # Crime data may reference additional administrative district codes
     if district_count < 20 or district_count > 25:
-        logger.warning(
-            f"District count {district_count} outside expected range (20-25)"
-        )
+        logger.warning(f"District count {district_count} outside expected range (20-25)")
 
     if "dist_num" in gdf.columns:
         logger.info(f"District numbers: {sorted(gdf['dist_num'].dropna().unique())}")
@@ -129,7 +120,7 @@ def download_police_districts(output_path: Path) -> Tuple[bool, str]:
     return True, source
 
 
-def download_census_tracts_with_pop(output_path: Path) -> Tuple[bool, str]:
+def download_census_tracts_with_pop(output_path: Path) -> tuple[bool, str]:
     """Download census tract boundaries with population data.
 
     Returns:
@@ -215,9 +206,7 @@ def download_census_tracts_with_pop(output_path: Path) -> Tuple[bool, str]:
             logger.warning(f"Some tracts have population > 15,000 (max: {pop_max})")
 
         if total_pop < 1_400_000 or total_pop > 1_700_000:
-            logger.warning(
-                f"Total population {total_pop:,.0f} outside expected range (1.4M-1.7M)"
-            )
+            logger.warning(f"Total population {total_pop:,.0f} outside expected range (1.4M-1.7M)")
     else:
         logger.warning("No population column found in census tract data")
 

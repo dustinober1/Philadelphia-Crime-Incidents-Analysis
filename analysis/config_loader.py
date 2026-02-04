@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
@@ -18,7 +18,7 @@ class Phase1Config:
     """Load and validate Phase 1 configuration."""
 
     config_path: Path = DEFAULT_CONFIG_PATH
-    data: Dict[str, Any] | None = None
+    data: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         config_path = self.config_path
@@ -36,7 +36,7 @@ class Phase1Config:
         """Return the configuration version string."""
         return self.data["version"]  # type: ignore[index]
 
-    def get_notebook_params(self, notebook_name: str) -> Dict[str, Any]:
+    def get_notebook_params(self, notebook_name: str) -> dict[str, Any]:
         """Return parameters for a configured notebook.
 
         Parameters
@@ -74,9 +74,7 @@ class Phase1Config:
         self._ensure_notebook(notebook_name)
         outputs = self.data[notebook_name]["outputs"]  # type: ignore[index]
         if artifact_type not in outputs:
-            raise KeyError(
-                f"Artifact type '{artifact_type}' not defined for {notebook_name}"
-            )
+            raise KeyError(f"Artifact type '{artifact_type}' not defined for {notebook_name}")
 
         version_value = version or self.data["version"]  # type: ignore[index]
         output_dir = Path(self.data["environment"]["output_dir"])  # type: ignore[index]
@@ -87,7 +85,7 @@ class Phase1Config:
         if notebook_name not in NOTEBOOKS:
             raise KeyError(f"Unknown notebook: {notebook_name}")
 
-    def _validate(self, data: Dict[str, Any]) -> None:
+    def _validate(self, data: dict[str, Any]) -> None:
         required_top = {"version", "environment"} | NOTEBOOKS
         missing = required_top - data.keys()
         if missing:
@@ -100,13 +98,11 @@ class Phase1Config:
 
         self._validate_dates(data)
 
-    def _validate_dates(self, data: Dict[str, Any]) -> None:
+    def _validate_dates(self, data: dict[str, Any]) -> None:
         covid_params = data.get("covid", {}).get("params", {})
         lockdown_date = covid_params.get("lockdown_date")
         if lockdown_date:
             try:
                 datetime.strptime(lockdown_date, "%Y-%m-%d")
             except ValueError as exc:
-                raise ValueError(
-                    "covid.params.lockdown_date must be YYYY-MM-DD"
-                ) from exc
+                raise ValueError("covid.params.lockdown_date must be YYYY-MM-DD") from exc

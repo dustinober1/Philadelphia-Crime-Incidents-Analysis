@@ -22,7 +22,7 @@ Requirements covered: POLICY-01 (retail theft), POLICY-02 (vehicle crimes), POLI
 - Include month-by-month breakdown to identify specific periods of increase
 
 ### Vehicle Crimes Analysis (POLICY-02)
-- Include "Theft from Vehicle" and "Motor Vehicle Theft" 
+- Include "Theft from Vehicle" and "Motor Vehicle Theft"
 - Overlay with major transit/highway corridors:
   - Highways: I-76, I-95, I-676, US-1
   - SEPTA lines: Market-Frankford, Broad Street Line

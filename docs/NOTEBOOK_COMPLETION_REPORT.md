@@ -28,7 +28,7 @@
 ### 2. **Key Findings**
 - ✅ **Peak Crime Year Identification**:
   - Total: 2015 (176,768 incidents)
-  - Violent: 2020 (19,467 incidents)  
+  - Violent: 2020 (19,467 incidents)
   - Property: 2023 (105,166 incidents)
 
 - ✅ **Percentage Change from Peak to 2025**:
@@ -171,7 +171,7 @@ The feeling that Philadelphia is getting safer is **NOT just a feeling**—it's 
 ## Testing & Validation
 
 ✅ **Code Testing**: All cells tested for correctness
-✅ **Data Integrity**: Verified data loading and category classifications  
+✅ **Data Integrity**: Verified data loading and category classifications
 ✅ **Output Validation**: Confirmed all calculations and aggregations
 ✅ **Visualization**: Generated professional, publication-ready chart
 ✅ **Documentation**: Comprehensive inline and standalone documentation

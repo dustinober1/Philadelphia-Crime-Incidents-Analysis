@@ -32,7 +32,7 @@ A complete, self-contained Jupyter notebook that answers: **"Is Philadelphia act
 cd "/Users/dustinober/Projects/Crime Incidents Philadelphia"
 ```
 
-### 2. Activate environment  
+### 2. Activate environment
 ```bash
 source .venv/bin/activate
 ```
@@ -77,10 +77,10 @@ jupyter notebook notebooks/philadelphia_safety_trend_analysis.ipynb
 
 ## Key Insights
 
-✅ **Violent crimes down 23.4%** since 2020 peak  
-✅ **Property crimes down 15.7%** since 2023 peak  
-✅ **Overall 13.7% decrease** from 2015 to 2025  
-✅ **Trend is improving** - past 2-3 years show recovery  
+✅ **Violent crimes down 23.4%** since 2020 peak
+✅ **Property crimes down 15.7%** since 2023 peak
+✅ **Overall 13.7% decrease** from 2015 to 2025
+✅ **Trend is improving** - past 2-3 years show recovery
 ✅ **Perception justified** - city objectively safer than peak years
 
 ---
@@ -130,15 +130,15 @@ Refer to:
 
 ---
 
-**Status**: ✅ Ready to execute  
-**Compliance**: ✅ Follows all project guidelines  
-**Testing**: ✅ Code validated  
+**Status**: ✅ Ready to execute
+**Compliance**: ✅ Follows all project guidelines
+**Testing**: ✅ Code validated
 **Documentation**: ✅ Comprehensive
 
 ---
 
-*Created: February 1, 2026*  
-*Analysis Period: 2015-2025 (11 years)*  
+*Created: February 1, 2026*
+*Analysis Period: 2015-2025 (11 years)*
 *Answer: Philadelphia IS getting safer (objectively, from peak years)*
 
 ---
@@ -198,5 +198,5 @@ jupyter notebook notebooks/covid_lockdown_crime_landscape.ipynb
 
 ---
 
-*Created: February 1, 2026*  
+*Created: February 1, 2026*
 *Analysis Period: 2018–Present (with 2022 excluded as transition)*

@@ -8,15 +8,15 @@ All imports use absolute paths via __file__ to ensure modules work regardless
 of working directory.
 """
 
-import os
 import sys
 from pathlib import Path
-import pandas as pd
+from typing import Any
+
 import numpy as np
-from typing import Optional, Tuple, Dict, Any, List
+import pandas as pd
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 
 # Ensure absolute path resolution
 MODULE_DIR = Path(__file__).parent.absolute()
@@ -26,7 +26,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 def create_time_aware_split(
     X: pd.DataFrame, y: pd.Series, test_size: float = 0.2, ensure_sorted: bool = True
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
     Create time-aware train/test split (no shuffling).
 
@@ -52,9 +52,7 @@ def create_time_aware_split(
         y = y.iloc[order]
 
     if len(X) != len(y):
-        raise ValueError(
-            f"X and y must be same length after sorting (X={len(X)}, y={len(y)})"
-        )
+        raise ValueError(f"X and y must be same length after sorting (X={len(X)}, y={len(y)})")
 
     split_idx = int(len(X) * (1 - test_size))
 
@@ -66,9 +64,7 @@ def create_time_aware_split(
     return X_train, X_test, y_train, y_test
 
 
-def get_time_series_cv(
-    n_splits: int = 5, max_train_size: Optional[int] = None
-) -> TimeSeriesSplit:
+def get_time_series_cv(n_splits: int = 5, max_train_size: int | None = None) -> TimeSeriesSplit:
     """
     Get time series cross-validator for hyperparameter tuning.
 
@@ -91,7 +87,7 @@ def train_random_forest(
     min_samples_leaf: int = 2,
     random_state: int = 42,
     scale_features: bool = True,
-) -> Tuple[Any, Optional[StandardScaler]]:
+) -> tuple[Any, StandardScaler | None]:
     """
     Train Random Forest classifier with sensible defaults.
 
@@ -141,7 +137,7 @@ def train_xgboost(
     learning_rate: float = 0.1,
     random_state: int = 42,
     scale_features: bool = False,
-) -> Tuple[Any, Optional[StandardScaler]]:
+) -> tuple[Any, StandardScaler | None]:
     """
     Train XGBoost classifier with sensible defaults.
 
@@ -183,7 +179,7 @@ def train_xgboost(
 
 
 def extract_feature_importance(
-    model: Any, feature_names: List[str], top_n: Optional[int] = None
+    model: Any, feature_names: list[str], top_n: int | None = None
 ) -> pd.DataFrame:
     """
     Extract and rank feature importances from trained model.
@@ -206,9 +202,7 @@ def extract_feature_importance(
     return importance_df.reset_index(drop=True)
 
 
-def compute_shap_values(
-    model: Any, X: pd.DataFrame, sample_size: Optional[int] = 100
-) -> Any:
+def compute_shap_values(model: Any, X: pd.DataFrame, sample_size: int | None = 100) -> Any:
     """
     Compute SHAP values for model interpretability.
 
@@ -222,11 +216,7 @@ def compute_shap_values(
     """
     import shap
 
-    X_sample = (
-        X
-        if sample_size is None
-        else X.sample(min(sample_size, len(X)), random_state=42)
-    )
+    X_sample = X if sample_size is None else X.sample(min(sample_size, len(X)), random_state=42)
 
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_sample)
@@ -237,9 +227,9 @@ def compute_shap_values(
 def evaluate_classifier(
     y_true: pd.Series,
     y_pred: pd.Series,
-    y_prob: Optional[pd.Series] = None,
-    target_names: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    y_prob: pd.Series | None = None,
+    target_names: list[str] | None = None,
+) -> dict[str, Any]:
     """
     Evaluate classification model with comprehensive metrics.
 
@@ -270,7 +260,7 @@ def evaluate_classifier(
     return results
 
 
-def handle_class_imbalance(y_train: pd.Series) -> Dict[int, float]:
+def handle_class_imbalance(y_train: pd.Series) -> dict[int, float]:
     """
     Calculate class weights for imbalanced datasets.
 

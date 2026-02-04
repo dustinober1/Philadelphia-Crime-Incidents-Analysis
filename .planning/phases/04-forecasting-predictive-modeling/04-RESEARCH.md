@@ -150,7 +150,7 @@ def correlation_with_significance(x, y, method='pearson'):
     """Calculate correlation with significance testing"""
     corr, p_value = stats.pearsonr(x, y)
     n = len(x)
-    
+
     return {
         'correlation': corr,
         'p_value': p_value,
@@ -276,7 +276,7 @@ import shap
 
 # Prepare data maintaining temporal order
 X_train = X[train_mask]
-y_train = y[train_mask] 
+y_train = y[train_mask]
 X_test = X[test_mask]
 y_test = y[test_mask]
 
@@ -325,16 +325,16 @@ def analyze_correlation(x, y, x_label='', y_label=''):
     """
     # Pearson correlation
     pearson_r, pearson_p = stats.pearsonr(x, y)
-    
+
     # Spearman rank correlation (robust to outliers)
     spearman_r, spearman_p = stats.spearmanr(x, y)
-    
+
     # Kendall tau (robust to outliers, good for small samples)
     kendall_tau, kendall_p = stats.kendalltau(x, y)
-    
+
     # Linear regression for effect size
     slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
-    
+
     results = {
         'pearson_r': pearson_r,
         'pearson_p': pearson_p,
@@ -347,11 +347,11 @@ def analyze_correlation(x, y, x_label='', y_label=''):
         'regression_r_squared': r_value**2,
         'regression_p_value': p_value,
         'n_observations': len(x),
-        'strength': 'negligible' if abs(pearson_r) < 0.1 else 
-                   'small' if abs(pearson_r) < 0.3 else 
+        'strength': 'negligible' if abs(pearson_r) < 0.1 else
+                   'small' if abs(pearson_r) < 0.3 else
                    'medium' if abs(pearson_r) < 0.5 else 'large'
     }
-    
+
     return results
 ```
 

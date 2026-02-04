@@ -1,8 +1,8 @@
 # Phase 1 Plan: Integration & Testing
-**Wave:** 3  
-**Depends on:** Wave 1 (Infrastructure), Wave 2 (All Notebook Refactoring)  
-**Files modified:** `analysis/orchestrate_phase1.py`, test files, documentation  
-**Autonomous:** Yes  
+**Wave:** 3
+**Depends on:** Wave 1 (Infrastructure), Wave 2 (All Notebook Refactoring)
+**Files modified:** `analysis/orchestrate_phase1.py`, test files, documentation
+**Autonomous:** Yes
 
 ---
 
@@ -261,7 +261,7 @@ This task is optional; only pursue if initial execution is >10 minutes
 ---
 
 ## Estimated Effort
-**Time:** 3-4 hours  
+**Time:** 3-4 hours
 **Complexity:** Medium (integration and testing focus)
 
 ---

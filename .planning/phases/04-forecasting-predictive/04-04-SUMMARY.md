@@ -22,7 +22,7 @@ tech-stack:
   patterns: [correlation analysis, hypothesis testing, effect size calculation]
 
 key-files:
-  created: 
+  created:
     - notebooks/04_hypothesis_heat_crime.ipynb
   modified: []
 

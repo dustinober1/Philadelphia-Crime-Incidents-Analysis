@@ -1,8 +1,8 @@
 # Phase 1 Plan: Notebook Refactoring - Annual Trends
-**Wave:** 2  
-**Depends on:** Wave 1 (Infrastructure)  
-**Files modified:** `notebooks/philadelphia_safety_trend_analysis.ipynb`  
-**Autonomous:** Yes  
+**Wave:** 2
+**Depends on:** Wave 1 (Infrastructure)
+**Files modified:** `notebooks/philadelphia_safety_trend_analysis.ipynb`
+**Autonomous:** Yes
 
 ---
 
@@ -221,7 +221,7 @@ Heavy annotation philosophy (from research): "Every notable point labeled and ex
 ---
 
 ## Estimated Effort
-**Time:** 3-4 hours  
+**Time:** 3-4 hours
 **Complexity:** Medium (refactoring existing code, not creating from scratch)
 
 ---

@@ -61,7 +61,7 @@ NOTEBOOK_QUICK_REFERENCE.md                               (Quick start guide)
    ├─ Load dataset
    └─ Display overview
 
-2. Aggregate Crime by Year  
+2. Aggregate Crime by Year
    ├─ Extract years (2015-2025)
    └─ Calculate annual totals
 
@@ -236,7 +236,7 @@ All deliverables have been successfully created and are ready for use.
 
 ---
 
-*Notebook Created: February 1, 2026*  
-*Analysis Period: 2015-2025*  
-*Data Source: Philadelphia Police Department Crime Incidents*  
+*Notebook Created: February 1, 2026*
+*Analysis Period: 2015-2025*
+*Data Source: Philadelphia Police Department Crime Incidents*
 *Question Answered: YES - Philadelphia IS getting safer*

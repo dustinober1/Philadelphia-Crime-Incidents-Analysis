@@ -8,14 +8,13 @@ All functions return matplotlib/plotly objects suitable for embedding in noteboo
 Uses absolute path resolution via __file__ for consistency.
 """
 
-import os
 import sys
 from pathlib import Path
-import pandas as pd
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
-from typing import Optional, List, Dict, Any, Tuple
 
 # Ensure absolute path resolution
 MODULE_DIR = Path(__file__).parent.absolute()
@@ -30,13 +29,13 @@ plt.rcParams["figure.figsize"] = (12, 6)
 def plot_forecast_with_intervals(
     actual: pd.Series,
     forecast: pd.Series,
-    lower: Optional[pd.Series] = None,
-    upper: Optional[pd.Series] = None,
+    lower: pd.Series | None = None,
+    upper: pd.Series | None = None,
     title: str = "Crime Forecast",
     xlabel: str = "Date",
     ylabel: str = "Incidents",
-    figsize: Tuple[int, int] = (14, 7),
-    save_path: Optional[str] = None,
+    figsize: tuple[int, int] = (14, 7),
+    save_path: str | None = None,
 ) -> plt.Figure:
     """
     Plot time series forecast with confidence intervals.
@@ -106,8 +105,8 @@ def plot_forecast_with_intervals(
 def plot_forecast_components(
     components_df: pd.DataFrame,
     title: str = "Forecast Components",
-    figsize: Tuple[int, int] = (14, 10),
-    save_path: Optional[str] = None,
+    figsize: tuple[int, int] = (14, 10),
+    save_path: str | None = None,
 ) -> plt.Figure:
     """
     Plot decomposed forecast components (trend, seasonality, etc.).
@@ -134,9 +133,7 @@ def plot_forecast_components(
         axes = [axes]
 
     for ax, col in zip(axes, component_cols):
-        ax.plot(
-            components_df["ds"], components_df[col], color="steelblue", linewidth=1.5
-        )
+        ax.plot(components_df["ds"], components_df[col], color="steelblue", linewidth=1.5)
         ax.set_ylabel(col.replace("_", " ").title(), fontsize=10)
         ax.grid(True, alpha=0.3)
 
@@ -154,8 +151,8 @@ def plot_forecast_components(
 def plot_residuals_diagnostics(
     residuals: pd.Series,
     title: str = "Residuals Diagnostics",
-    figsize: Tuple[int, int] = (14, 8),
-    save_path: Optional[str] = None,
+    figsize: tuple[int, int] = (14, 8),
+    save_path: str | None = None,
 ) -> plt.Figure:
     """
     Create diagnostic plots for forecast residuals.
@@ -214,8 +211,8 @@ def plot_feature_importance(
     importance_df: pd.DataFrame,
     top_n: int = 20,
     title: str = "Feature Importance",
-    figsize: Tuple[int, int] = (10, 8),
-    save_path: Optional[str] = None,
+    figsize: tuple[int, int] = (10, 8),
+    save_path: str | None = None,
 ) -> plt.Figure:
     """
     Plot feature importance from classification model.
@@ -255,8 +252,8 @@ def plot_shap_summary(
     X: pd.DataFrame,
     title: str = "SHAP Feature Importance",
     max_display: int = 20,
-    figsize: Tuple[int, int] = (10, 8),
-    save_path: Optional[str] = None,
+    figsize: tuple[int, int] = (10, 8),
+    save_path: str | None = None,
 ) -> plt.Figure:
     """
     Plot SHAP summary for model interpretability.
@@ -292,10 +289,10 @@ def plot_shap_summary(
 
 def plot_correlation_matrix(
     df: pd.DataFrame,
-    columns: Optional[List[str]] = None,
+    columns: list[str] | None = None,
     title: str = "Correlation Matrix",
-    figsize: Tuple[int, int] = (12, 10),
-    save_path: Optional[str] = None,
+    figsize: tuple[int, int] = (12, 10),
+    save_path: str | None = None,
 ) -> plt.Figure:
     """
     Plot correlation matrix heatmap.
@@ -352,8 +349,8 @@ def plot_anomaly_detection(
     value_col: str,
     anomaly_col: str,
     title: str = "Anomaly Detection",
-    figsize: Tuple[int, int] = (14, 7),
-    save_path: Optional[str] = None,
+    figsize: tuple[int, int] = (14, 7),
+    save_path: str | None = None,
 ) -> plt.Figure:
     """
     Plot time series with anomalies highlighted.
@@ -412,10 +409,10 @@ def plot_anomaly_detection(
 
 def plot_confusion_matrix(
     cm: np.ndarray,
-    class_names: Optional[List[str]] = None,
+    class_names: list[str] | None = None,
     title: str = "Confusion Matrix",
-    figsize: Tuple[int, int] = (8, 6),
-    save_path: Optional[str] = None,
+    figsize: tuple[int, int] = (8, 6),
+    save_path: str | None = None,
 ) -> plt.Figure:
     """
     Plot confusion matrix heatmap.
@@ -463,8 +460,8 @@ def plot_roc_curve(
     y_true: np.ndarray,
     y_prob: np.ndarray,
     title: str = "ROC Curve",
-    figsize: Tuple[int, int] = (8, 6),
-    save_path: Optional[str] = None,
+    figsize: tuple[int, int] = (8, 6),
+    save_path: str | None = None,
 ) -> plt.Figure:
     """
     Plot ROC curve for binary classification.
@@ -479,7 +476,7 @@ def plot_roc_curve(
     Returns:
         matplotlib Figure object
     """
-    from sklearn.metrics import roc_curve, auc
+    from sklearn.metrics import auc, roc_curve
 
     fig, ax = plt.subplots(figsize=figsize)
 

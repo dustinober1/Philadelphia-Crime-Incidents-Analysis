@@ -1,8 +1,8 @@
 """Create event calendar for Phase 3 event impact analysis."""
 
-import pandas as pd
-from datetime import datetime
 from pathlib import Path
+
+import pandas as pd
 
 
 def generate_holidays(start_year: int, end_year: int) -> pd.DataFrame:
@@ -22,11 +22,6 @@ def generate_holidays(start_year: int, end_year: int) -> pd.DataFrame:
     """
     from pandas.tseries.holiday import (
         USFederalHolidayCalendar,
-        Holiday,
-        nearest_workday,
-        USMemorialDay,
-        USLaborDay,
-        USThanksgivingDay,
     )
 
     cal = USFederalHolidayCalendar()
@@ -220,17 +215,13 @@ def main():
     # Save
     calendar.to_parquet(output_path, index=False)
 
-    print(f"\n=== Event Calendar Summary ===")
+    print("\n=== Event Calendar Summary ===")
     print(f"Total events: {len(calendar)}")
-    print(
-        f"Date range: {calendar['date'].min().date()} to {calendar['date'].max().date()}"
-    )
-    print(f"\nEvents by type:")
+    print(f"Date range: {calendar['date'].min().date()} to {calendar['date'].max().date()}")
+    print("\nEvents by type:")
     print(calendar["event_type"].value_counts().to_string())
-    print(f"\nSports events by team:")
-    print(
-        calendar[calendar["event_type"] == "sports"]["team"].value_counts().to_string()
-    )
+    print("\nSports events by team:")
+    print(calendar[calendar["event_type"] == "sports"]["team"].value_counts().to_string())
     print(f"\nSaved to: {output_path}")
 
 
