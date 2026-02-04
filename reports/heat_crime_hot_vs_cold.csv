@@ -1,0 +1,4 @@
+Crime Type,Cold Mean,Hot Mean,Percent Change,p-value,Cohens d
+Total Crime,426.78,511.81,+19.9%,6.84e-156,0.919
+Violent Crime,40.67,48.90,+20.2%,1.81e-111,0.764
+Property Crime,132.78,161.16,+21.4%,2.22e-116,0.782

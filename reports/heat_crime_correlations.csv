@@ -1,0 +1,4 @@
+Crime Type,Pearson r,p-value,Spearman ρ,R²,Effect Size
+Total Crime,0.3612,1.29e-224,0.3479,0.1305,Medium
+Violent Crime,0.2987,8.53e-151,0.2993,0.0892,Small
+Property Crime,0.3113,2.77e-164,0.2998,0.0969,Medium
