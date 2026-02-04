@@ -2,7 +2,7 @@
 
 This module provides a complete data layer for crime incident analysis:
 - Loading: load_crime_data, load_boundaries, load_external_data
-- Validation: validate_crime_data, validate_coordinates
+- Validation: validate_crime_data, validate_coordinates, CrimeIncidentValidator
 - Preprocessing: filter_by_date_range, aggregate_by_period
 - Caching: clear_cache
 
@@ -18,10 +18,28 @@ from analysis.data.loading import load_crime_data, load_boundaries, load_externa
 # Exports from cache.py
 from analysis.data.cache import memory, clear_cache
 
+# Exports from validation.py
+from analysis.data.validation import (
+    CrimeIncidentValidator,
+    validate_crime_data,
+    validate_coordinates,
+    PHILLY_LON_MIN,
+    PHILLY_LON_MAX,
+    PHILLY_LAT_MIN,
+    PHILLY_LAT_MAX,
+)
+
 __all__ = [
     "load_crime_data",
     "load_boundaries",
     "load_external_data",
     "memory",
     "clear_cache",
+    "CrimeIncidentValidator",
+    "validate_crime_data",
+    "validate_coordinates",
+    "PHILLY_LON_MIN",
+    "PHILLY_LON_MAX",
+    "PHILLY_LAT_MIN",
+    "PHILLY_LAT_MAX",
 ]
