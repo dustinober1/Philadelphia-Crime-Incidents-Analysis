@@ -1,19 +1,19 @@
 model,metric,value,description
-Random Forest,accuracy,0.905,Overall accuracy
-Random Forest,precision_violent,0.87,Precision for violent class
-Random Forest,recall_violent,0.78,Recall for violent class
-Random Forest,f1_violent,0.82,F1-score for violent class
-Random Forest,auc_roc,0.93,Area under ROC curve
-Random Forest,precision_nonviolent,0.91,Precision for non-violent class
-Random Forest,recall_nonviolent,0.96,Recall for non-violent class
-XGBoost,accuracy,0.912,Overall accuracy
-XGBoost,precision_violent,0.88,Precision for violent class
-XGBoost,recall_violent,0.80,Recall for violent class
-XGBoost,f1_violent,0.84,F1-score for violent class
-XGBoost,auc_roc,0.94,Area under ROC curve
-XGBoost,precision_nonviolent,0.92,Precision for non-violent class
-XGBoost,recall_nonviolent,0.96,Recall for non-violent class
-Meta,class_imbalance,0.095,Violent crime percentage
-Meta,random_seed,42,Reproducibility seed
+Random Forest,accuracy,0.8972830276101826,Overall accuracy
+Random Forest,precision_violent,0.0,Precision for violent class
+Random Forest,recall_violent,0.0,Recall for violent class
+Random Forest,f1_violent,0.0,F1-score for violent class
+Random Forest,auc_roc,0.504787572010999,Area under ROC curve
+Random Forest,precision_nonviolent,0.8972830276101826,Precision for non-violent class
+Random Forest,recall_nonviolent,1.0,Recall for non-violent class
+XGBoost,accuracy,0.8972830276101826,Overall accuracy
+XGBoost,precision_violent,0.0,Precision for violent class
+XGBoost,recall_violent,0.0,Recall for violent class
+XGBoost,f1_violent,0.0,F1-score for violent class
+XGBoost,auc_roc,0.5012382043007392,Area under ROC curve
+XGBoost,precision_nonviolent,0.8972830276101826,Precision for non-violent class
+XGBoost,recall_nonviolent,1.0,Recall for non-violent class
+Meta,class_imbalance,0.0953273310789843,Violent crime percentage
+Meta,random_seed,42.0,Reproducibility seed
 Meta,test_size,0.2,Test set fraction
-Meta,n_features,15,Number of features used
+Meta,n_features,13.0,Number of features used
