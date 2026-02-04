@@ -1,0 +1,38 @@
+[tool.mypy]
+python_version = "3.11" # Adjust to your project's Python version
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+strict = true
+
+disallow_untyped_defs = true
+disallow_any_unimported = true
+disallow_any_untyped = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_equality = true
+implicit_reexport = false
+local_partial_types = true
+no_implicit_reexport = true
+
+files = ["analysis/", "scripts/"] # Adjust these paths to match your project structure
+
+exclude = [
+    "venv/", # Virtual environment
+    "build/", # Build artifacts
+    "dist/", # Distribution packages
+    "docs/", # Documentation files
+    "notebooks/", # Jupyter notebooks
+    ".ipynb_checkpoints/", # Jupyter notebook checkpoints
+    "data/", # Data directories
+    "__pycache__/", # Python bytecode cache
+    ".git/", # Git directory
+    ".planning/", # Planning directory
+    ".pytest_cache/", # Pytest cache
+    ".ruff_cache/", # Ruff cache
+    "tests/", # Test files
+]
