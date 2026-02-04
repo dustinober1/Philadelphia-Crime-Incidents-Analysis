@@ -14,9 +14,10 @@ Example:
 from __future__ import annotations
 
 import sys
+from collections.abc import Callable
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import pandas as pd
 

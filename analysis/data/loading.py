@@ -14,11 +14,12 @@ Example:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import pandas as pd
 
 from analysis.config import CRIME_DATA_PATH
+
 from .cache import memory
 
 # Optional geopandas import for spatial data
@@ -128,7 +129,7 @@ def _load_boundaries_geojson(name: Literal["police_districts", "census_tracts"])
 
 def load_boundaries(
     name: Literal["police_districts", "census_tracts"],
-) -> "gpd.GeoDataFrame":
+) -> gpd.GeoDataFrame:
     """Load boundary data as a GeoDataFrame.
 
     This function loads geographic boundary data for police districts

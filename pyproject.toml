@@ -100,12 +100,15 @@ ignore = [
     "E501",  # line too long (handled by black)
     "B008",  # do not perform function calls in argument defaults
     "B904",  # raise without from inside except
+    "B905",  # zip without strict parameter (optional, not a bug)
 ]
 unfixable = ["B"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
 "tests/*" = ["ARG"]       # Allow unused arguments in tests
+"analysis/utils/__init__.py" = ["ARG"]  # Stub functions need *args/**kwargs for API compatibility
+"analysis/data/preprocessing.py" = ["ARG"]  # date_col parameter for future extensibility
 
 [tool.ruff.lint.isort]
 known-first-party = ["analysis"]

@@ -10,7 +10,6 @@ This module provides functions for:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import geopandas as gpd
 import pandas as pd

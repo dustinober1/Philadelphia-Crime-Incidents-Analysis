@@ -16,10 +16,9 @@ Example:
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 
 import pandas as pd
-from pydantic import BaseModel, Field, field_validator, ValidationError
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 # Coordinate bounds for Philadelphia
 PHILLY_LON_MIN = -75.3

@@ -7,11 +7,10 @@ This module provides functions for classifying crimes into categories
 from __future__ import annotations
 
 import pandas as pd
-from typing import Dict
 
 # UCR hundred-bands: 1=Homicide, 2=Rape, 3=Robbery, 4=Agg Assault,
 # 5=Burglary, 6=Theft, 7=Vehicle Theft
-CRIME_CATEGORY_MAP: Dict[str, set[int]] = {
+CRIME_CATEGORY_MAP: dict[str, set[int]] = {
     "Violent": {1, 2, 3, 4},  # Homicide, Rape, Robbery, Aggravated Assault
     "Property": {5, 6, 7},  # Burglary, Theft, Vehicle Theft
 }

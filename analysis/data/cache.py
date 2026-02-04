@@ -9,9 +9,10 @@ Example:
     >>> clear_cache()  # Clear all cached data
 """
 
-from joblib import Memory
-from pathlib import Path
 import shutil
+from pathlib import Path
+
+from joblib import Memory
 
 # Cache location: project root/.cache/joblib
 _CACHE_DIR = Path(__file__).resolve().parent.parent.parent / ".cache" / "joblib"
