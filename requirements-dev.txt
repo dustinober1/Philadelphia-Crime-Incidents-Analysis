@@ -1,0 +1,25 @@
+# Development dependencies for Crime Incidents Philadelphia
+# Install with: pip install -r requirements-dev.txt
+# Or add to conda environment: conda install --file requirements-dev.txt
+
+# Testing
+pytest>=8.0
+pytest-cov>=6.0
+
+# Code quality
+black>=25.0
+ruff>=0.9
+mypy>=1.15
+
+# Type stubs for mypy
+pandas-stubs>=2.0
+geopandas-stubs>=1.0
+types-requests>=2.32
+types-PyYAML>=6.0
+
+# Git hooks
+pre-commit>=4.0
+
+# Data validation and caching (if not in conda)
+pydantic>=2.12
+joblib>=1.4
