@@ -8,7 +8,7 @@
 | 2 | Spatial & Socioeconomic Analysis | Identify where and why crimes concentrate | PATROL-01, PATROL-02, PATROL-03, HYP-SOCIO | 4 | ✅ COMPLETE |
 | 3 | Policy Deep Dives & Event Impacts | Validate specific narratives and measure event impacts | POLICY-01, POLICY-02, POLICY-03, HYP-EVENTS | 4 | ✅ COMPLETE |
 | 4 | Forecasting & Predictive Modeling | Build forecasts and classification models | FORECAST-01, FORECAST-02, HYP-HEAT | 4 | ✅ COMPLETE |
-| 5 | Foundation Architecture | Establish module structure, data layer, and quality standards | ARCH-01, ARCH-02, ARCH-03, DATA-01, DATA-02, DATA-03, DATA-04, QUAL-01, QUAL-02, QUAL-03, QUAL-04, QUAL-05, QUAL-06 | 5 | 🟡 ACTIVE |
+| 5 | Foundation Architecture | Establish module structure, data layer, and quality standards | ARCH-01, ARCH-02, ARCH-03, DATA-01, DATA-02, DATA-03, DATA-04, QUAL-01, QUAL-02, QUAL-03, QUAL-04, QUAL-05, QUAL-06 | 3 | 🟡 ACTIVE |
 | 6 | Configuration & CLI System | Build configuration system and CLI entry points | CONFIG-01, CONFIG-02, CONFIG-03, CONFIG-04, CONFIG-05, ARCH-04, ARCH-05, ARCH-06 | 5 | ⏸️ PENDING |
 | 7 | Visualization & Testing | Implement visualization utilities and comprehensive testing | VIZ-01, VIZ-02, VIZ-03, VIZ-04, VIZ-05, TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, TEST-06, TEST-07, TEST-08 | 5 | ⏸️ PENDING |
 | 8 | Documentation & Migration | Document new workflow and migrate notebooks to scripts | DOCS-01, DOCS-02, DOCS-03, DOCS-04, DOCS-05, MIGRATE-01, MIGRATE-02, MIGRATE-03, MIGRATE-04, MIGRATE-05, MIGRATE-06, MIGRATE-07, MIGRATE-08 | 5 | ⏸️ PENDING |
@@ -53,6 +53,11 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 3. Developer can use black, ruff, and mypy on codebase with zero violations in new modules
 4. Developer can load cached data after first load using the new caching layer, with cache invalidated on data changes
 5. Developer can write new modules that follow PEP 8 with docstrings and type hints, passing all pre-commit hooks
+
+**Plans:**
+- [ ] 05-01-PLAN.md — Extract utilities into modular structure with type hints and docstrings
+- [ ] 05-02-PLAN.md — Implement data layer with loading, validation, preprocessing, and caching
+- [ ] 05-03-PLAN.md — Set up quality tools (pytest, mypy, black, ruff, pre-commit)
 
 ### Phase 6 — Configuration & CLI System
 **Goal:** Build a flexible configuration system and CLI entry points for all 13 analyses with rich user feedback
@@ -170,12 +175,12 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 | 2 - Spatial & Socioeconomic | ✅ Complete | 6 | 6/6 |
 | 3 - Policy Deep Dives | ✅ Complete | 6 | 6/6 |
 | 4 - Forecasting & Modeling | ✅ Complete | 7 | 7/7 |
-| 5 - Foundation Architecture | 🟡 Active | 0 | 0/0 |
+| 5 - Foundation Architecture | 🟡 Active | 3 | 0/3 |
 | 6 - Configuration & CLI | ⏸️ Pending | 0 | 0/0 |
 | 7 - Visualization & Testing | ⏸️ Pending | 0 | 0/0 |
 | 8 - Documentation & Migration | ⏸️ Pending | 0 | 0/0 |
 
-**Overall:** 24/24 v1.0 plans complete | 0/0 v1.1 plans created
+**Overall:** 24/24 v1.0 plans complete | 3/0 v1.1 plans created
 
 ---
 
@@ -191,5 +196,6 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 8. ~~`/gsd-execute-phase 3`~~ ✅ Complete
 9. ~~`/gsd-plan-phase 4`~~ ✅ Complete
 10. ~~`/gsd-execute-phase 4`~~ ✅ Complete
-11. ~~Approve v1.1 roadmap~~ ✅ Active
-12. **Next:** `/gsd-plan-phase 5`
+11. ~~Approve v1.1 roadmap~~ ✅ Complete
+12. ~~`/gsd-plan-phase 5`~~ ✅ Complete
+13. **Next:** `/gsd-execute-phase 5`
