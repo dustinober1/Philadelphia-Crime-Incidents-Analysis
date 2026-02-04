@@ -8,30 +8,39 @@ A Python-first, notebook-driven data science repository that answers high-value 
 
 Provide clear, reproducible, evidence-based answers to policy and operations questions about crime in Philadelphia so leaders can make defensible deployment and policy decisions.
 
+## Current Milestone: v1.1 Script-Based Refactor
+
+**Goal:** Convert from notebook-based to script-based architecture with module structure, CLI entry points, and comprehensive testing for better code quality and maintainability.
+
+**Target features:**
+- Module-based structure under `analysis/` with reusable utilities
+- CLI entry points for all 13 analyses using typer
+- Configuration system (CLI args + YAML files) with pydantic validation
+- New data layer with validation and caching
+- Testing framework (pytest) with 90%+ coverage
+- Rich progress bars and configurable output formats
+- Migration of all notebooks to scripts with verification
+- Delete notebooks after successful conversion
+
 ## Requirements
 
 ### Validated
 
-- ✓ Notebook-driven, reproducible analyses (existing) — inferred from repository notebooks
-- ✓ Data artifact layer with cleaned Parquet inputs (existing) — `data/crime_incidents_combined.parquet`
-- ✓ Report export pipeline to `reports/` (existing) — generated figures and Markdown artifacts
+- ✓ All v1 notebook-driven analyses delivered — Phase 1-4 complete (22 plans executed)
+- ✓ Data artifact layer with cleaned Parquet inputs — `data/crime_incidents_combined.parquet`
+- ✓ Report export pipeline to `reports/` — 60+ artifacts delivered
+- ✓ Predictive models — Prophet forecasts, violence classification, heat-crime hypothesis
 
 ### Active
 
-- [ ] CHIEF-01: Annual aggregation and trend analysis for Violent vs Property crime (year-over-year)
-- [ ] CHIEF-02: Monthly seasonality decomposition and month-by-month distribution (boxplots)
-- [ ] CHIEF-03: Pre/during/post COVID comparative time series with lockdown annotation
-- [ ] PATROL-01: Spatial hotspot detection (clustering) and heatmap outputs with centroids
-- [ ] PATROL-02: Hour × Weekday heatmap for Robbery to inform shift timing
-- [ ] PATROL-03: District-level weighted severity scoring and choropleth
-- [ ] POLICY-01: Focused Retail Theft 5-year trend analysis (validate media claims)
-- [ ] POLICY-02: Vehicle-related crime spatial localization and corridor overlay
-- [ ] POLICY-03: Yearly violent/total composition ratio and stacked area visualization
-- [ ] FORECAST-01: Short-term time-series forecast for incident counts (30–60 days)
-- [ ] FORECAST-02: Classification model to predict violent vs non-violent incidents with feature importances
-- [ ] HYP-HEAT: Merge hourly weather and test heat–crime relationships (temperature thresholds)
-- [ ] HYP-SOCIO: Spatial join to Census tracts and compute crime rates per 1,000 residents
-- [ ] HYP-EVENTS: Event-day feature engineering (games, holidays) and event-impact analysis
+- [ ] ARCH-01 through ARCH-06: Module-based architecture with CLI entry points
+- [ ] CONFIG-01 through CONFIG-05: Configuration system (CLI args + YAML)
+- [ ] DATA-01 through DATA-05: New data layer with validation and caching
+- [ ] VIZ-01 through VIZ-05: Visualization utilities with multi-format output
+- [ ] TEST-01 through TEST-08: Testing framework with 90%+ coverage
+- [ ] DOCS-01 through DOCS-05: Documentation updates for script-based workflow
+- [ ] MIGRATE-01 through MIGRATE-08: Convert 13 notebooks to scripts and verify
+- [ ] QUAL-01 through QUAL-06: Code quality standards and tooling
 
 ### Out of Scope
 
@@ -59,4 +68,4 @@ Provide clear, reproducible, evidence-based answers to policy and operations que
 | Use Prophet/ARIMA for forecasting; XGBoost/RandomForest for classification | Balance between explainability and predictive power; supported in Python ecosystem | — Pending |
 
 ---
-*Last updated: 2026-02-02 after initial questioning and project initialization*
+*Last updated: 2026-02-04 after milestone v1.1 initiation*

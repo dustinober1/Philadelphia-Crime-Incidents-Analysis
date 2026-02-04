@@ -1,73 +1,105 @@
 # Requirements: Crime Incidents Philadelphia
 
-**Defined:** 2026-02-02
+**Defined:** 2026-02-04
 **Core Value:** Provide clear, reproducible, evidence-based answers to policy and operations questions about crime in Philadelphia
 
-## v1 Requirements
+## v1.1 Requirements
 
-### Chief (High-Level Trends)
+### Architecture (ARCH)
 
-- [x] **CHIEF-01**: Annual aggregation of crime counts for the last 10 years and trend line comparing Violent vs Property crimes
-- [x] **CHIEF-02**: Monthly seasonality decomposition and month-level boxplots; quantify month-to-month percentage differences (e.g., July vs January)
-- [x] **CHIEF-03**: Comparative pre/during/post COVID time series with lockdown annotation and analysis of displacement effects
+- [ ] **ARCH-01**: Create module-based structure under `analysis/` with separate submodules for each analysis category (trends, spatial, policy, forecasting)
+- [ ] **ARCH-02**: Extract reusable utility functions from notebooks into dedicated modules (data, visualization, validation, metrics)
+- [ ] **ARCH-03**: Implement new data layer (`analysis/data/`) to replace `analysis.utils.load_data()` with cleaner API
+- [ ] **ARCH-04**: Create CLI entry points for each analysis using typer (13 scripts matching notebook count)
+- [ ] **ARCH-05**: Implement Rich/typer progress bars and console output for long-running operations
+- [ ] **ARCH-06**: Design configuration system with CLI args for runtime and YAML files for defaults
 
-### Patrol (Resource Allocation)
+### Configuration (CONFIG)
 
-- [x] **PATROL-01**: Spatial clustering (DBSCAN/KMeans) to identify hotspots; export centroids and heatmap tiles
-- [x] **PATROL-02**: Hour × Weekday heatmap for Robbery incidents and peak-hour identification
-- [x] **PATROL-03**: District-level severity scoring (weighted by crime severity) and choropleth map
+- [ ] **CONFIG-01**: Create `config/` directory with separate YAML files for each analysis (trends.yaml, hotspots.yaml, etc.)
+- [ ] **CONFIG-02**: Define schema for all config files using pydantic for validation
+- [ ] **CONFIG-03**: Implement CLI argument parsing with typer, overriding YAML defaults
+- [ ] **CONFIG-04**: Create global config file for shared parameters (data paths, output directories, logging level)
+- [ ] **CONFIG-05**: Implement environment variable support for sensitive parameters (API keys, paths)
 
-### Policy (Deep Dives)
+### Data Layer (DATA)
 
-- [x] **POLICY-01**: Retail Theft 5-year trend filtered to specific offense codes and a report validating/invalidating the media narrative
-- [x] **POLICY-02**: Vehicle-related crimes geospatial analysis with corridor overlay and neighborhood localization
-- [x] **POLICY-03**: Year-by-year violent / total crime ratio and stacked area chart of composition changes
+- [ ] **DATA-01**: Create `analysis/data/` module with functions for loading crime data, external data, and boundary data
+- [ ] **DATA-02**: Implement data validation functions to check for missingness, date ranges, coordinate validity
+- [ ] **DATA-03**: Create data preprocessing utilities (filtering, aggregation, merging)
+- [ ] **DATA-04**: Implement caching layer for expensive data operations
+- [ ] **DATA-05**: Create test fixtures for sample data in `tests/fixtures/`
 
-### Forecasting (Predictive Analytics)
+### Visualization (VIZ)
 
-- [x] **FORECAST-01**: Short-term time-series forecast (Prophet/ARIMA) with 30–60 day horizon and prediction intervals
-- [x] **FORECAST-02**: Classification model (RandomForest/XGBoost) to predict violent vs non-violent incidents and generate feature-importances
+- [ ] **VIZ-01**: Extract visualization utilities into `analysis/visualization/` module
+- [ ] **VIZ-02**: Support multiple output formats (PNG, SVG, HTML, JSON) via CLI argument
+- [ ] **VIZ-03**: Implement consistent styling using existing color palettes from `analysis.config.COLORS`
+- [ ] **VIZ-04**: Create publication-quality output (300 DPI) for all figures
+- [ ] **VIZ-05**: Save figures to `reports/` with configurable naming conventions
 
-### Hypotheses & External Data
+### Testing (TEST)
 
-- [x] **HYP-HEAT**: Merge hourly weather and test heat–crime relationships; find temperature thresholds where violent crime changes
-- [x] **HYP-SOCIO**: Spatially join crimes to Census tracts and compute crime rates per 1,000 residents
-- [x] **HYP-EVENTS**: Engineer event-day features (sports games, holidays) and measure event impacts on crime categories
+- [ ] **TEST-01**: Set up pytest framework with 90%+ coverage target
+- [ ] **TEST-02**: Write unit tests for all utility functions in `analysis/utils/`
+- [ ] **TEST-03**: Write unit tests for data layer functions (loading, validation, preprocessing)
+- [ ] **TEST-04**: Write end-to-end tests for each CLI script (13 scripts)
+- [ ] **TEST-05**: Create test fixtures for sample data and expected outputs
+- [ ] **TEST-06**: Implement pytest-cov for coverage reporting
+- [ ] **TEST-07**: Create integration tests that validate outputs against notebook-generated artifacts
+- [ ] **TEST-08**: Add pre-commit hooks for linting and testing
+
+### Documentation (DOCS)
+
+- [ ] **DOCS-01**: Update AGENTS.md to reflect script-based workflow (replace notebook rules with script rules)
+- [ ] **DOCS-02**: Create CLI help documentation (typer auto-generates)
+- [ ] **DOCS-03**: Write module docstrings for all new modules
+- [ ] **DOCS-04**: Create migration guide for converting notebooks to scripts
+- [ ] **DOCS-05**: Update README.md with script-based examples
+
+### Migration (MIGRATE)
+
+- [ ] **MIGRATE-01**: Convert Chief (3 notebooks): trends, seasonality, COVID → CLI scripts
+- [ ] **MIGRATE-02**: Convert Patrol (4 notebooks): hotspots, robbery heatmap, district severity, census rates → CLI scripts
+- [ ] **MIGRATE-03**: Convert Policy (4 notebooks): retail theft, vehicle crimes, composition, events → CLI scripts
+- [ ] **MIGRATE-04**: Convert Forecasting (2 notebooks): time series, classification, heat-crime → CLI scripts
+- [ ] **MIGRATE-05**: Verify all converted scripts produce identical outputs to notebooks (within tolerance)
+- [ ] **MIGRATE-06**: Delete notebooks after successful conversion and verification
+- [ ] **MIGRATE-07**: Update PROJECT.md to reflect script-based architecture
+- [ ] **MIGRATE-08**: Update ROADMAP.md to remove notebook-based workflow references
+
+### Quality & Standards (QUAL)
+
+- [ ] **QUAL-01**: Add type hints to all functions (mypy compatible)
+- [ ] **QUAL-02**: Follow PEP 8 code style with black formatter
+- [ ] **QUAL-03**: Add docstrings to all functions following Google or NumPy style
+- [ ] **QUAL-04**: Add ruff/flake8 for linting
+- [ ] **QUAL-05**: Create requirements-dev.txt for development dependencies (pytest, black, ruff, mypy, typer, rich, pydantic)
+- [ ] **QUAL-06**: Add pre-commit configuration (black, ruff, mypy, pytest)
 
 ## v2 Requirements
 
-- (deferred items such as interactive dashboards, real-time alerts, mobile app integrations)
+- (deferred items such as interactive dashboards, real-time alerts, additional ML models)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Real-time streaming dashboard | Focus is reproducible analysis and static reports for v1 |
-| Production API / Hosted Service | Not required for stakeholder deliverables in v1 |
+| Keeping notebooks as production tools | Milestone goal is script-based architecture |
+| Notebooks as development documentation | Delete after conversion |
+| Rewriting algorithms | Existing analysis logic is preserved, only structure changes |
+| New analysis capabilities | Focus on conversion, not new features |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHIEF-01 | Phase 1 | Complete |
-| CHIEF-02 | Phase 1 | Complete |
-| CHIEF-03 | Phase 1 | Complete |
-| PATROL-01 | Phase 2 | Complete |
-| PATROL-02 | Phase 2 | Complete |
-| PATROL-03 | Phase 2 | Complete |
-| POLICY-01 | Phase 3 | Complete |
-| POLICY-02 | Phase 3 | Complete |
-| POLICY-03 | Phase 3 | Complete |
-| FORECAST-01 | Phase 4 | Complete |
-| FORECAST-02 | Phase 4 | Complete |
-| HYP-HEAT | Phase 4 | Complete |
-| HYP-SOCIO | Phase 2 | Complete |
-| HYP-EVENTS | Phase 3 | Complete |
+| (Will be populated during roadmap creation) | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 14 total
-- Mapped to phases: 14
-- Unmapped: 0 ✓
+- v1.1 requirements: 46 total
+- Mapped to phases: 0
+- Unmapped: 46 ⚠️
 
 ---
-*Requirements defined: 2026-02-02*
+*Requirements defined: 2026-02-04*
