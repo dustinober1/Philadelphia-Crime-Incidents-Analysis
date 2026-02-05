@@ -90,10 +90,10 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 - [x] 06-06-PLAN.md — Implement Policy and Forecasting commands (6 commands)
 - [x] 06-07-PLAN.md — Integrate Rich progress bars across all commands
 
-### Phase 7 — Visualization & Testing
+### Phase 7 — Visualization & Testing 🟢 Almost Complete
 **Goal:** Implement comprehensive visualization utilities with multi-format output and complete testing coverage for all analysis scripts
 
-**Completed:** 2026-02-05 (Planned)
+**Completed:** 2026-02-05 (Gap closure in progress)
 
 **Dependencies:** Phase 5 (module structure) and Phase 6 (CLI configuration)
 
@@ -102,20 +102,23 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 - Testing: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, TEST-06, TEST-07, TEST-08
 
 **Success criteria:**
-1. User can generate figures in PNG, SVG, HTML, or JSON formats via CLI argument (`--output-format`)
+1. User can generate figures in PNG, SVG, or PDF formats via CLI argument (`--output-format`)
 2. User can see consistent styling across all figures using project color palettes
 3. Developer can run `pytest` and see 90%+ coverage for all analysis code including CLI scripts
 4. Developer can verify outputs match notebook-generated artifacts using integration tests
 5. Developer can commit changes and have pre-commit hooks automatically run linting and tests
 
 **Plans:**
-- [ ] 07-01-PLAN.md — Create visualization module (style, helpers, plots)
-- [ ] 07-02-PLAN.md — Create test fixtures (sample data, conftest.py)
-- [ ] 07-03-PLAN.md — Create CLI tests for Chief commands (3 commands)
-- [ ] 07-04-PLAN.md — Create CLI tests for Patrol commands (4 commands)
-- [ ] 07-05-PLAN.md — Create CLI tests for Policy and Forecasting commands (6 commands)
-- [ ] 07-06-PLAN.md — Create integration tests and verify coverage
-- [ ] 07-07-PLAN.md — Update pre-commit hooks with pytest
+- [x] 07-01-PLAN.md — Create visualization module (style, helpers, plots)
+- [x] 07-02-PLAN.md — Create test fixtures (sample data, conftest.py)
+- [x] 07-03-PLAN.md — Create CLI tests for Chief commands (3 commands)
+- [x] 07-04-PLAN.md — Create CLI tests for Patrol commands (4 commands)
+- [x] 07-05-PLAN.md — Create CLI tests for Policy and Forecasting commands (6 commands)
+- [x] 07-06-PLAN.md — Create integration tests and verify coverage
+- [x] 07-07-PLAN.md — Update pre-commit hooks with pytest
+- [ ] 07-08-PLAN.md — Add --output-format to Chief and Forecasting CLI commands (gap closure)
+- [ ] 07-09-PLAN.md — Add --output-format to Patrol and Policy CLI commands (gap closure)
+- [ ] 07-10-PLAN.md — Wire figure generation to all CLI commands and update tests (gap closure)
 
 ### Phase 8 — Documentation & Migration
 **Goal:** Document the new script-based workflow, migrate all notebooks to scripts, verify outputs, and update project documentation
