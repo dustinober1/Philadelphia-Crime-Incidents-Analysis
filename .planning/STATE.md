@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-05 (06-02: Configuration system with pydantic-settings)
-**Last Execution:** Phase 6 Plan 2 (Configuration schemas)
+**Updated:** 2026-02-05 (06-03: Modular CLI structure)
+**Last Execution:** Phase 6 Plan 3 (Modular CLI structure)
 
 ---
 
@@ -29,20 +29,20 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 ## Current Position
 
 **Phase:** 6 - Configuration & CLI System
-**Plan:** 2/7 complete
-**Status:** 🟡 Active (Configuration system implemented)
-**Last Activity:** 2026-02-05 — Completed 06-02: Configuration schemas
+**Plan:** 3/7 complete
+**Status:** 🟡 Active (CLI structure implemented)
+**Last Activity:** 2026-02-05 — Completed 06-03: Modular CLI structure
 
 **Progress Bar:**
 
 ```
 v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: █████░░░░░░░░░░░░░░░  29% (1.29/5 phases complete, Phase 6 2/7)
+v1.1: ██████░░░░░░░░░░░░░░  33% (1.33/5 phases complete, Phase 6 3/7)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🟡 Active (Phase 5 complete, Phase 6 2/7 plans done)
+- v1.1: 🟡 Active (Phase 5 complete, Phase 6 3/7 plans done)
 
 ---
 
@@ -143,7 +143,7 @@ Plans: 5 plans
 **Plans:** 7 total
 - 06-01: CLI framework dependencies ✅ Complete
 - 06-02: Configuration schemas ✅ Complete
-- 06-03: Modular CLI structure ⏸️ Pending
+- 06-03: Modular CLI structure ✅ Complete
 - 06-04: Progress bars ⏸️ Pending
 - 06-05: Chief CLI commands ⏸️ Pending
 - 06-06: Patrol CLI commands ⏸️ Pending
@@ -206,6 +206,8 @@ Plans: 5 plans
 | Quality Tools | Set target-version to py313 | ruff/black don't support py314 yet |
 | Quality Tools | Use ignore_missing_imports for geopandas, shapely, joblib | No type stubs available, handled via mypy overrides |
 | Quality Tools | Removed analysis/utils.py duplicate module | Conflicted with analysis/utils/ package, mypy duplicate module error |
+| CLI | Use kebab-case command names for multi-word commands | Standard CLI convention (robbery-heatmap, district-severity, retail-theft) |
+| CLI | Fast flag is CLI-only parameter, not stored in config | BaseConfig has fast_sample_frac, fast is runtime behavior flag |
 
 ### Validated Patterns (v1.0)
 - Data loading via `analysis.utils.load_data()` → To be replaced in Phase 5
@@ -236,14 +238,14 @@ Plans: 5 plans
 ## Session Continuity
 
 **Last session:** 2026-02-05
-**Stopped at:** Completed Phase 6 Plan 2 (Configuration system)
+**Stopped at:** Completed Phase 6 Plan 3 (Modular CLI structure)
 **Resume file:** None
 
 **Current Session Goals:**
 1. ✅ Create v1.1 roadmap (Phases 5-8)
 2. ✅ Execute Phase 5 plans (05-01 ✅, 05-02 ✅, 05-04 ✅, 05-05 ✅, 05-06 ✅, 05-07 ✅, 05-08 ✅, 05-09 ✅)
 3. ✅ Plan Phase 6 (Configuration & CLI)
-4. 🟡 Execute Phase 6 plans (06-01 ✅)
+4. 🟡 Execute Phase 6 plans (06-01 ✅, 06-02 ✅, 06-03 ✅)
 
 **Todos:**
 - [x] Plan Phase 5 (Foundation Architecture) - Complete
@@ -257,7 +259,8 @@ Plans: 5 plans
 - [x] Plan Phase 6 (Configuration & CLI) - Complete
 - [x] Execute Phase 6 Plan 01 (CLI framework dependencies) - Complete
 - [x] Execute Phase 6 Plan 02 (Configuration schemas) - Complete
-- [ ] Execute Phase 6 Plan 03-07
+- [x] Execute Phase 6 Plan 03 (Modular CLI structure) - Complete
+- [ ] Execute Phase 6 Plan 04-07
 - [ ] Plan Phase 7 (Visualization & Testing)
 - [ ] Execute Phase 7 plans
 - [ ] Plan Phase 8 (Documentation & Migration)
@@ -272,11 +275,12 @@ Plans: 5 plans
 - Data layer complete: joblib caching, Pydantic validation, preprocessing utilities, mypy clean
 - Deviations fixed: pydantic installed, geopandas optional, UCR/PSA schema aligned with data, mypy errors fixed
 - Phase 5 complete: 6/6 main plans + 3 gap closure plans (module structure ✅, data layer ✅, quality tooling ✅, mypy fixes ✅, dev dependencies installed ✅, utils tests ✅, data layer tests ✅)
-- Phase 6 started: 2/7 plans complete (CLI framework dependencies and configuration system implemented)
-- Configuration system: 13 config schemas (TrendsConfig, SeasonalityConfig, COVIDConfig, HotspotsConfig, RobberyConfig, DistrictConfig, CensusConfig, RetailTheftConfig, VehicleCrimesConfig, CompositionConfig, EventsConfig, TimeSeriesConfig, ClassificationConfig)
-- Configuration system: 5 YAML files (global.yaml, chief.yaml, patrol.yaml, policy.yaml, forecasting.yaml) with multi-source loading (CLI > env > YAML > defaults)
+- Phase 6 progress: 3/7 plans complete (CLI framework dependencies, configuration system, CLI structure)
+- CLI structure: 4 command groups (chief, patrol, policy, forecasting) with 13 placeholder commands
+- CLI entry point: `python -m analysis.cli` working with help text and version/info commands
+- Configuration system: 13 config schemas with 5 YAML files, multi-source loading (CLI > env > YAML > defaults)
 - Test coverage: classification.py 100%, temporal.py 100%, loading.py 85%, validation.py 92%, preprocessing.py 100%
 - Total test count: 183 tests passing (93 new data layer tests)
 
 ---
-*State updated: 2026-02-05 00:44 UTC*
+*State updated: 2026-02-05 00:57 UTC*
