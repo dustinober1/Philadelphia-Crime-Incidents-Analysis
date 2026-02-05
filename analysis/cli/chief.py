@@ -1,9 +1,23 @@
 """Chief-level trend analysis commands."""
 
+from pathlib import Path
+
 import typer
 from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeRemainingColumn,
+)
 
 from analysis.config.schemas.chief import COVIDConfig, SeasonalityConfig, TrendsConfig
+from analysis.data.loading import load_crime_data
+from analysis.data.preprocessing import aggregate_by_period, filter_by_date_range
+from analysis.utils.classification import classify_crime_category
+from analysis.utils.temporal import extract_temporal_features
 
 # Create typer app for this command group
 app = typer.Typer(help="Chief-level trend analyses (annual trends, seasonality, COVID impact)")
@@ -26,12 +40,80 @@ def trends(
     console.print(f"  Version: {config.version}")
     console.print(f"  Fast mode: {fast}")
     console.print()
-    console.print("[yellow]Command logic will be implemented in plan 06-04[/yellow]")
 
-    # TODO: Implement analysis logic in 06-04
-    # - Load data using analysis.data.load_crime_data()
-    # - Run trends analysis
-    # - Generate plots and reports
+    # Progress bar for multi-stage workflow
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeRemainingColumn(),
+    ) as progress:
+        # Stage 1: Load data
+        load_task = progress.add_task("Loading crime data...", total=100)
+
+        df = load_crime_data(clean=True)
+        if fast:
+            df = df.sample(frac=config.fast_sample_frac, random_state=42)
+            console.print(
+                f"[yellow]Fast mode: Using {len(df)} rows ({config.fast_sample_frac:.0%} sample)[/yellow]"
+            )
+
+        progress.update(load_task, advance=100, description="Data loaded")
+
+        # Stage 2: Preprocess data
+        prep_task = progress.add_task("Preprocessing data...", total=100)
+
+        # Add temporal features
+        df = extract_temporal_features(df)
+
+        # Filter by date range
+        start_date = f"{config.start_year}-01-01"
+        end_date = f"{config.end_year}-12-31"
+        df = filter_by_date_range(df, start=start_date, end=end_date, date_col="dispatch_date")
+
+        # Classify crimes
+        df = classify_crime_category(df)
+
+        progress.update(prep_task, advance=100, description="Preprocessing complete")
+
+        # Stage 3: Generate analysis
+        analyze_task = progress.add_task("Analyzing trends...", total=100)
+
+        # Aggregate by year
+        annual_df = aggregate_by_period(
+            df, period="YE", date_col="dispatch_date", count_col="objectid"
+        )
+
+        progress.update(analyze_task, advance=100, description="Analysis complete")
+
+        # Stage 4: Save outputs
+        output_task = progress.add_task("Saving outputs...", total=100)
+
+        # Create output directory
+        output_path = Path(config.output_dir) / config.version / "chief"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        # Save summary statistics
+        summary_file = output_path / f"{config.report_name}_summary.txt"
+        with open(summary_file, "w") as f:
+            f.write("Annual Trends Analysis Summary\n")
+            f.write("=" * 40 + "\n")
+            f.write(f"Period: {config.start_year}-{config.end_year}\n")
+            f.write(f"Total incidents: {len(df)}\n")
+            f.write("\nAnnual totals:\n")
+            for row in annual_df.sort_values("dispatch_date").itertuples():
+                year = row.dispatch_date.year
+                count = row.count
+                f.write(f"  {year}: {count:,.0f}\n")
+
+        progress.update(output_task, advance=100, description="Outputs saved")
+
+    console.print()
+    console.print("[green]:heavy_check_mark:[/green] [bold green]Analysis complete[/bold green]")
+    console.print(f"  Total incidents analyzed: [cyan]{len(df):,.0f}[/cyan]")
+    console.print(f"  Output directory: [cyan]{output_path}[/cyan]")
+    console.print(f"  Summary file: [cyan]{summary_file.name}[/cyan]")
 
 
 @app.command()
