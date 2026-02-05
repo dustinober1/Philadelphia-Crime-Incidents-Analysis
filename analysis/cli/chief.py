@@ -1,0 +1,76 @@
+"""Chief-level trend analysis commands."""
+
+import typer
+from rich.console import Console
+
+from analysis.config.schemas.chief import COVIDConfig, SeasonalityConfig, TrendsConfig
+
+# Create typer app for this command group
+app = typer.Typer(help="Chief-level trend analyses (annual trends, seasonality, COVID impact)")
+console = Console()
+
+
+@app.command()
+def trends(
+    start_year: int = typer.Option(2015, help="Start year for analysis", min=2006, max=2026),
+    end_year: int = typer.Option(2024, help="End year for analysis", min=2006, max=2026),
+    version: str = typer.Option("v1.0", help="Output version tag"),
+    fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+) -> None:
+    """Generate annual crime trends analysis."""
+    # Load config (fast flag controls behavior, not stored in config)
+    config = TrendsConfig(start_year=start_year, end_year=end_year, version=version)
+
+    console.print("[bold blue]Annual Trends Analysis[/bold blue]")
+    console.print(f"  Period: {config.start_year}-{config.end_year}")
+    console.print(f"  Version: {config.version}")
+    console.print(f"  Fast mode: {fast}")
+    console.print()
+    console.print("[yellow]Command logic will be implemented in plan 06-04[/yellow]")
+
+    # TODO: Implement analysis logic in 06-04
+    # - Load data using analysis.data.load_crime_data()
+    # - Run trends analysis
+    # - Generate plots and reports
+
+
+@app.command()
+def seasonality(
+    summer_months: list[int] = typer.Option([6, 7, 8], help="Summer months"),
+    winter_months: list[int] = typer.Option([12, 1, 2], help="Winter months"),
+    version: str = typer.Option("v1.0", help="Output version tag"),
+    fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+) -> None:
+    """Analyze seasonal crime patterns."""
+    config = SeasonalityConfig(
+        summer_months=summer_months, winter_months=winter_months, version=version
+    )
+
+    console.print("[bold blue]Seasonality Analysis[/bold blue]")
+    console.print(f"  Summer months: {config.summer_months}")
+    console.print(f"  Winter months: {config.winter_months}")
+    console.print(f"  Fast mode: {fast}")
+    console.print()
+    console.print("[yellow]Command logic will be implemented in plan 06-04[/yellow]")
+
+    # TODO: Implement analysis logic in 06-04
+
+
+@app.command()
+def covid(
+    lockdown_date: str = typer.Option("2020-03-01", help="COVID lockdown date"),
+    before_years: list[int] = typer.Option([2018, 2019], help="Pre-COVID years for comparison"),
+    version: str = typer.Option("v1.0", help="Output version tag"),
+    fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+) -> None:
+    """Analyze COVID impact on crime patterns."""
+    config = COVIDConfig(lockdown_date=lockdown_date, before_years=before_years, version=version)
+
+    console.print("[bold blue]COVID Impact Analysis[/bold blue]")
+    console.print(f"  Lockdown date: {config.lockdown_date}")
+    console.print(f"  Before years: {config.before_years}")
+    console.print(f"  Fast mode: {fast}")
+    console.print()
+    console.print("[yellow]Command logic will be implemented in plan 06-04[/yellow]")
+
+    # TODO: Implement analysis logic in 06-04
