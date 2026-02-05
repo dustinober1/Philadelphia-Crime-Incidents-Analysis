@@ -21,6 +21,7 @@ from analysis.config.schemas.patrol import (
     HotspotsConfig,
     RobberyConfig,
 )
+from analysis.visualization import plot_bar, save_figure
 
 app = typer.Typer(help="Patrol operations analyses")
 console = Console()
@@ -115,6 +116,24 @@ def hotspots(
         output_path = Path(config.output_dir) / config.version / "patrol"
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # Create figure: cluster sizes bar plot (if clusters found)
+        if n_clusters > 0:
+            cluster_sizes = df[df["cluster"] != -1].groupby("cluster").size()
+            cluster_df = cluster_sizes.reset_index()
+            cluster_df.columns = ["cluster", "incidents"]
+
+            fig = plot_bar(
+                cluster_df,
+                x_col="cluster",
+                y_col="incidents",
+                title="Crime Hotspot Cluster Sizes",
+                xlabel="Cluster ID",
+                ylabel="Number of Incidents",
+            )
+
+            figure_path = output_path / f"{config.report_name}_clusters.{config.output_format}"
+            save_figure(fig, figure_path, output_format=config.output_format)
+
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
             f.write("Hotspots Analysis Summary\n")
@@ -186,6 +205,35 @@ def robbery_heatmap(
         output_path = Path(config.output_dir) / config.version / "patrol"
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # Create figure: temporal heatmap (if seaborn available)
+        try:
+            import matplotlib.pyplot as plt
+            import seaborn as sns  # noqa: F401
+
+            from analysis.visualization import setup_style
+
+            # Create pivot table for heatmap
+            heatmap_data = df.groupby(["time_bin", "hour"]).size().unstack(fill_value=0)
+
+            # Filter out empty rows/columns to avoid NaN warnings
+            heatmap_data = heatmap_data.loc[(heatmap_data.sum(axis=1) > 0), :]
+            heatmap_data = heatmap_data.loc[:, (heatmap_data.sum(axis=0) > 0)]
+
+            if not heatmap_data.empty and heatmap_data.sum().sum() > 0:
+                setup_style()
+                fig, ax = plt.subplots(figsize=(12, 8))
+                sns.heatmap(heatmap_data, cmap="YlOrRd", annot=False, ax=ax)
+                ax.set_title("Robbery Temporal Heatmap", fontsize=14, fontweight="bold", pad=20)
+                ax.set_xlabel("Hour of Day")
+                ax.set_ylabel("Time Bin")
+                plt.tight_layout()
+
+                figure_path = output_path / f"{config.report_name}_heatmap.{config.output_format}"
+                save_figure(fig, figure_path, output_format=config.output_format)
+                plt.close(fig)
+        except (ImportError, RuntimeError):
+            pass  # Skip heatmap if seaborn not available or data invalid
+
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
             f.write("Robbery Heatmap Analysis Summary\n")
@@ -255,6 +303,25 @@ def district_severity(
         output_task = progress.add_task("Saving outputs...", total=100)
         output_path = Path(config.output_dir) / config.version / "patrol"
         output_path.mkdir(parents=True, exist_ok=True)
+
+        # Create figure: district severity bar plot (top 10)
+        district_df = district_scores.reset_index()
+        district_df.columns = ["district", "severity_score"]
+
+        # Top 10 districts
+        top_districts = district_df.head(10)
+
+        fig = plot_bar(
+            top_districts,
+            x_col="district",
+            y_col="severity_score",
+            title="District Severity Scores (Top 10)",
+            xlabel="Police District",
+            ylabel="Severity Score",
+        )
+
+        figure_path = output_path / f"{config.report_name}_severity.{config.output_format}"
+        save_figure(fig, figure_path, output_format=config.output_format)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
