@@ -18,6 +18,22 @@ Python version: 3.14+
 
 ## Common Commands
 
+### v1.1 CLI System (Primary)
+
+```bash
+# Run any analysis via CLI
+python -m analysis.cli chief trends --fast
+python -m analysis.cli patrol hotspots --fast
+python -m analysis.cli policy retail-theft --fast
+python -m analysis.cli forecasting time-series --fast
+
+# Show all available commands
+python -m analysis.cli --help
+
+# Environment variable override (CRIME_* prefix)
+CRIME_OUTPUT_FORMAT=svg python -m analysis.cli chief trends
+```
+
 ### Running Phase 1 Analyses (Annual Trends, Seasonality, COVID Impact)
 
 ```bash
@@ -97,6 +113,7 @@ jupyter notebook notebooks/<notebook_name>.ipynb
 
 The project is organized into phases corresponding to stakeholder questions:
 
+- **v1.1 CLI System** (Primary): `python -m analysis.cli <command>` — 13 commands across 4 groups
 - **Phase 1 (Chief):** High-level trends & seasonality — `analysis/orchestrate_phase1.py`
 - **Phase 2 (Patrol):** Spatial analysis, hotspots, district severity — `analysis/orchestrate_phase2.py`
 - **Phase 3 (Policy):** Policy analysis (retail theft, vehicle crimes, events) — `analysis/orchestrate_phase3.py`
@@ -124,6 +141,9 @@ Notebooks are executed via **papermill** through orchestrators in `analysis/orch
 | `analysis/data/loading.py` | v1.1: `load_crime_data()` with joblib caching |
 | `analysis/data/validation.py` | v1.1: Pydantic validation (`CrimeIncidentValidator`) |
 | `analysis/data/preprocessing.py` | v1.1: `filter_by_date_range()`, `aggregate_by_period()` |
+| `analysis/config/` | v1.1: Pydantic-settings config package with BaseConfig, GlobalConfig |
+| `analysis/config/schemas/` | v1.1: Analysis-specific configs (chief, patrol, policy, forecasting) |
+| `analysis/cli/` | v1.1: CLI entry points with typer (13 commands across 4 groups) |
 | `analysis/config.py` | Constants: `CRIME_DATA_PATH`, `REPORTS_DIR`, `COLORS` palette |
 | `analysis/models/classification.py` | Violence classification models |
 | `analysis/models/time_series.py` | Time-aware train/test splits |
@@ -154,6 +174,10 @@ Configuration is loaded via Pydantic-based loaders (e.g., `analysis/config_loade
 **Count column:** Use `'objectid'` for incident counting, not `'incident_id'`
 **Date aggregation:** Use `'ME'`/`'YE'` for month/year-end (pandas 2.2+), not `'M'`/`'Y'` (deprecated)
 **geopandas imports:** Wrap in try/except for environments without spatial packages
+**Coordinate columns:** Crime data uses `point_x`/`point_y`, not `lng`/`lat`
+**load_crime_data():** Only accepts `clean` parameter; cache is always enabled
+**filter_by_date_range():** Uses `start`/`end` args, not `start_date`/`end_date`
+**aggregate_by_period():** Returns DataFrame with 3 columns when aggregating counts
 
 ### Output Artifacts
 
@@ -238,6 +262,14 @@ See `AGENTS.md` for complete notebook rules.
 - Cache performance tests: time first vs second load, verify 5x+ speedup
 - Coverage target: 90%+ for all new modules
 - Mark slow tests with `@pytest.mark.slow` decorator
+
+### CLI Development Guidelines (v1.1)
+
+- All commands use Rich progress bars with 5 columns: SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeRemainingColumn
+- Color coding: blue headers `[bold blue]`, green success `[green]`, yellow warnings `[yellow]`
+- Fast mode flag `--fast` for 10% sampling in all commands
+- Output files go to `reports/{version}/{group}/` directory structure
+- Graceful fallback for optional dependencies (prophet, sklearn, geopandas)
 
 ## Key Dependencies
 
