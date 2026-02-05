@@ -74,11 +74,20 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 - Architecture: ARCH-04, ARCH-05, ARCH-06
 
 **Success criteria:**
-1. User can run `python -m analysis.cli.trends --help` and see clear CLI arguments and documentation
+1. User can run `python -m analysis.cli --help` and see clear CLI arguments and documentation
 2. User can override YAML config defaults with CLI arguments (e.g., `--output-format svg`)
 3. User can see progress bars and status messages for long-running operations using Rich output
 4. Developer can add a new analysis by creating a YAML config file and CLI script with pydantic validation
 5. Developer can configure sensitive parameters via environment variables without committing them to code
+
+**Plans:**
+- [ ] 06-01-PLAN.md — Install CLI dependencies (typer, rich, pydantic-settings)
+- [ ] 06-02-PLAN.md — Create configuration system with schemas and YAML files
+- [ ] 06-03-PLAN.md — Build CLI entry point structure with 4 command groups
+- [ ] 06-04-PLAN.md — Implement Chief commands (trends, seasonality, covid)
+- [ ] 06-05-PLAN.md — Implement Patrol commands (hotspots, robbery, district, census)
+- [ ] 06-06-PLAN.md — Implement Policy and Forecasting commands (6 commands)
+- [ ] 06-07-PLAN.md — Integrate Rich progress bars across all commands
 
 ### Phase 7 — Visualization & Testing
 **Goal:** Implement comprehensive visualization utilities with multi-format output and complete testing coverage for all analysis scripts
@@ -181,11 +190,11 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 | 3 - Policy Deep Dives | ✅ Complete | 6 | 6/6 |
 | 4 - Forecasting & Modeling | ✅ Complete | 7 | 7/7 |
 | 5 - Foundation Architecture | ✅ Complete | 7 | 7/7 |
-| 6 - Configuration & CLI | ⏸️ Pending | 0 | 0/0 |
+| 6 - Configuration & CLI | 📋 Planned | 7 | 0/7 |
 | 7 - Visualization & Testing | ⏸️ Pending | 0 | 0/0 |
 | 8 - Documentation & Migration | ⏸️ Pending | 0 | 0/0 |
 
-**Overall:** 24/24 v1.0 plans complete | 7/7 plans complete in Phase 5
+**Overall:** 24/24 v1.0 plans complete | 7/7 plans complete in Phase 5 | 7 plans ready in Phase 6
 
 ---
 
@@ -204,4 +213,5 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 11. ~~Approve v1.1 roadmap~~ ✅ Complete
 12. ~~`/gsd-plan-phase 5`~~ ✅ Complete
 13. ~~`/gsd-execute-phase 5`~~ ✅ Complete
-14. **Next:** `/gsd-plan-phase 6`
+14. ~~`/gsd-plan-phase 6`~~ ✅ Complete
+15. **Next:** `/gsd:execute-phase 6`
