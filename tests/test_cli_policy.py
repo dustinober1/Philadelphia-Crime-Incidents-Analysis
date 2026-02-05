@@ -78,6 +78,10 @@ class TestPolicyRetailTheft:
         assert "Baseline period" in content
         assert "incidents" in content.lower()
 
+        # Check for figure file
+        figure_file = output_path / "retail_theft_report_trend.png"
+        assert figure_file.exists(), f"Figure file not created: {figure_file}"
+
 
 class TestPolicyVehicleCrimes:
     """Tests for the 'policy vehicle-crimes' command."""
@@ -128,6 +132,10 @@ class TestPolicyVehicleCrimes:
         assert "UCR codes" in content
         assert "incidents" in content.lower()
 
+        # Check for figure file
+        figure_file = output_path / "vehicle_crimes_report_trend.png"
+        assert figure_file.exists(), f"Figure file not created: {figure_file}"
+
 
 class TestPolicyComposition:
     """Tests for the 'policy composition' command."""
@@ -176,6 +184,10 @@ class TestPolicyComposition:
         assert "Crime Composition Analysis Summary" in content
         assert "Top" in content and "crime categories" in content
         assert "UCR" in content
+
+        # Check for figure file
+        figure_file = output_path / "composition_report_categories.png"
+        assert figure_file.exists(), f"Figure file not created: {figure_file}"
 
 
 class TestPolicyEvents:

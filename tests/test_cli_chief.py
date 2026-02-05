@@ -64,11 +64,25 @@ class TestChiefTrends:
         # Check for expected output files
         expected_files = [
             "annual_trends_report_summary.txt",
+            "annual_trends_report_trend.png",
         ]
 
         for filename in expected_files:
             file_path = output_dir / filename
             assert file_path.exists(), f"Expected output file not created: {file_path}"
+
+    def test_chief_trends_output_format(self, tmp_output_dir: Path) -> None:
+        """Test trends command with different output formats."""
+        for fmt in ["png", "svg"]:
+            result = runner.invoke(
+                app,
+                ["chief", "trends", "--output-format", fmt, "--fast", "--version", "test"],
+            )
+            assert result.exit_code == 0, f"Command failed for format {fmt}: {result.output}"
+
+            # Check that figure file with correct extension exists
+            figure_path = Path("reports/test/chief") / f"annual_trends_report_trend.{fmt}"
+            assert figure_path.exists(), f"Figure not created for format {fmt}: {figure_path}"
 
     def test_chief_trends_date_range(self, tmp_output_dir: Path) -> None:
         """Test trends command with custom date range."""
@@ -126,6 +140,7 @@ class TestChiefSeasonality:
         # Check for expected output files
         expected_files = [
             "seasonality_report_summary.txt",
+            "seasonality_report_seasonal.png",
         ]
 
         for filename in expected_files:
@@ -166,6 +181,7 @@ class TestChiefCovid:
         # Check for expected output files
         expected_files = [
             "covid_impact_report_summary.txt",
+            "covid_impact_report_covid_impact.png",
         ]
 
         for filename in expected_files:

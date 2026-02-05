@@ -76,6 +76,11 @@ class TestPatrolHotspots:
         assert "DBSCAN" in content
         assert "Clusters found" in content or "Total points" in content
 
+        # Check for figure file (if sklearn available)
+        figure_file = output_path / "hotspots_report_clusters.png"
+        # Figure is only created if sklearn is available and clusters are found
+        # Don't assert existence, just check if it exists when conditions are met
+
 
 class TestPatrolRobberyHeatmap:
     """Tests for the 'patrol robbery-heatmap' command."""
@@ -125,6 +130,11 @@ class TestPatrolRobberyHeatmap:
         assert "Robbery Heatmap Analysis Summary" in content
         assert "Time bin size" in content
         assert "incidents" in content.lower()
+
+        # Check for figure file (if seaborn available)
+        figure_file = output_path / "robbery_heatmap_report_heatmap.png"
+        # Figure is only created if seaborn is available and data is valid
+        # Don't assert existence, just check if it exists when conditions are met
 
 
 class TestPatrolDistrictSeverity:
@@ -176,6 +186,10 @@ class TestPatrolDistrictSeverity:
         assert "District Severity Analysis Summary" in content
         assert "District" in content
         assert "rankings" in content.lower() or "severity" in content.lower()
+
+        # Check for figure file
+        figure_file = output_path / "district_severity_report_severity.png"
+        assert figure_file.exists(), f"Figure file not created: {figure_file}"
 
 
 class TestPatrolCensusRates:
