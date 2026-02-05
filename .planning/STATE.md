@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-05 (07-06: Integration tests and coverage verification - Phase 7 In Progress)
-**Last Execution:** Phase 7 Plan 6 (Integration tests and coverage verification)
+**Updated:** 2026-02-05 (07-07: Pre-commit pytest hook - Phase 7 Almost Complete)
+**Last Execution:** Phase 7 Plan 7 (Pre-commit pytest hook)
 
 ---
 
@@ -28,21 +28,21 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 7 - Visualization & Testing (6/8 complete)
-**Plan:** 6/8
-**Status:** 🟡 In Progress (Visualization module foundation complete, pytest fixtures and all CLI tests complete, integration tests and coverage measurement done)
-**Last Activity:** 2026-02-05 — Completed 07-06: Integration tests for CLI output verification (5 tests, 47% coverage measured with CLI modules at 92-100%)
+**Phase:** 7 - Visualization & Testing (7/8 complete)
+**Plan:** 7/8
+**Status:** 🟢 Almost Complete (Visualization module foundation complete, pytest fixtures and all CLI tests complete, integration tests and coverage measurement done, pre-commit pytest hook configured)
+**Last Activity:** 2026-02-05 — Completed 07-07: Pre-commit pytest hook configuration (pytest hook with -x flag, all 215 tests pass on commit)
 
 **Progress Bar:**
 
 ```
 v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: ██████░░░░░░░░░░░░░░  38% (1.63/5 phases complete, Phase 7 🟡)
+v1.1: ██████░░░░░░░░░░░░░░  38% (1.69/5 phases complete, Phase 7 🟢)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🟡 Phase 7 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7: 5/8, Phase 8 pending)
+- v1.1: 🟢 Phase 7 Almost Complete (Phase 5 ✅, Phase 6 ✅, Phase 7: 7/8, Phase 8 pending)
 
 ---
 
@@ -162,21 +162,23 @@ Plans: 5 plans
 - Multi-task sequential progress for complex operations (chief trends, patrol hotspots)
 - All 13 commands use consistent 5-column progress bar setup
 
-### Phase 7 — Visualization & Testing 🟡 In Progress (3/8 complete)
+### Phase 7 — Visualization & Testing 🟢 Almost Complete (7/8 complete)
 **Goal:** Implement comprehensive visualization utilities with multi-format output and complete testing coverage for all analysis scripts
 
 **Requirements covered:**
 - Visualization: VIZ-01 (centralized style), VIZ-02 (multi-format save), VIZ-03 (plot functions)
-- Testing: TEST-01, TEST-02 (CLI end-to-end tests for Chief and Patrol commands)
+- Testing: TEST-01, TEST-02, TEST-07 (CLI end-to-end tests for all 13 commands, integration tests)
+- Quality: TEST-08 (pre-commit pytest hook)
 
-**Plans:** 6/8 complete
+**Plans:** 7/8 complete
 - 07-01: Visualization module foundation ✅ Complete (style.py, helpers.py, plots.py, __init__.py)
 - 07-02: Pytest fixtures ✅ Complete (sample_crime_df, tmp_output_dir)
 - 07-03: Chief CLI tests ✅ Complete (test_cli_chief.py with 7 tests, 100% coverage)
 - 07-04: Patrol CLI tests ✅ Complete (test_cli_patrol.py with 8 tests, 92% coverage)
 - 07-05: Policy and Forecasting CLI tests ✅ Complete (12 tests, 94-97% coverage)
 - 07-06: Integration tests and coverage verification ✅ Complete (5 integration tests, 47% coverage baseline measured)
-- 07-07 through 07-08: Pending (gap closure, final verification)
+- 07-07: Pre-commit pytest hook ✅ Complete (pytest hook with -x flag, all 215 tests pass)
+- 07-08: Final verification (pending)
 
 ### Phase 8 — Documentation & Migration ⏸️ Pending
 **Goal:** Document the new script-based workflow, migrate all notebooks to scripts, verify outputs, and update project documentation
@@ -216,6 +218,8 @@ Plans: 5 plans
 | Type Checking | Use cast() for untyped decorators | More explicit than suppressing errors, makes type assertion visible |
 | Type Checking | Use dict comprehension for Pydantic unpacking | Ensures string keys for model validation |
 | Pre-commit | Run pytest before commits | Ensures tests pass, -x flag for fast feedback |
+| Pre-commit | Use --no-cov in pytest pre-commit hook | Coverage checks are too slow for commit-time validation |
+| Pre-commit | Use system language for pytest hook | Relies on PATH-resolved python, requires conda crime environment |
 | Quality Tools | Install dev dependencies via pip install -r requirements-dev.txt | Uses system Python to ensure correct package installation |
 | Quality Tools | CLI framework dependencies added | typer>=0.12, rich>=13.0, pydantic-settings>=2.0 for Phase 6 |
 | Quality Tools | Exclude notebooks/reports from ruff pre-commit checks | Legacy code has too many violations, will be deleted in Phase 8 |
@@ -266,14 +270,16 @@ Plans: 5 plans
 
 **Path to 90% target:** Phase 8 notebook migration will cover CLI paths in current notebooks, legacy code deletion will remove untested code from coverage calculation, visualization module tests will add coverage for plots.
 
-**Legacy code quality:** notebooks/, reports/, and some analysis/ modules have quality issues. Excluded from pre-commit for now, will be deleted (notebooks) or refactored (legacy modules) in future phases.
+**Legacy code quality:** notebooks/, reports/, and some analysis/ modules have quality issues. Excluded from pre-commit for now, will be deleted (notebooks) or refactored (legacy modules) in Phase 8.
+
+**Pre-commit environment:** Pre-commit hooks use system Python from PATH. Developers must activate conda crime environment (Python 3.14) before committing, or pytest hook will fail to import analysis module. Documented in .pre-commit-config.yaml comments.
 
 ---
 
 ## Session Continuity
 
 **Last session:** 2026-02-05
-**Stopped at:** Completed Phase 6 Plan 7 (Rich progress integration)
+**Stopped at:** Completed Phase 7 Plan 7 (Pre-commit pytest hook)
 **Resume file:** None
 
 **Current Session Goals:**
@@ -281,6 +287,8 @@ Plans: 5 plans
 2. ✅ Execute Phase 5 plans (05-01 ✅, 05-02 ✅, 05-04 ✅, 05-05 ✅, 05-06 ✅, 05-07 ✅, 05-08 ✅, 05-09 ✅)
 3. ✅ Plan Phase 6 (Configuration & CLI)
 4. ✅ Execute Phase 6 plans (06-01 ✅, 06-02 ✅, 06-03 ✅, 06-04 ✅, 06-05 ✅, 06-06 ✅, 06-07 ✅)
+5. ✅ Plan Phase 7 (Visualization & Testing)
+6. ✅ Execute Phase 7 plans (07-01 ✅, 07-02 ✅, 07-03 ✅, 07-04 ✅, 07-05 ✅, 07-06 ✅, 07-07 ✅)
 
 **Todos:**
 - [x] Plan Phase 5 (Foundation Architecture) - Complete
@@ -306,7 +314,7 @@ Plans: 5 plans
 - [x] Execute Phase 7 Plan 04 (Patrol CLI tests)
 - [x] Execute Phase 7 Plan 05 (Policy and Forecasting CLI tests)
 - [x] Execute Phase 7 Plan 06 (Integration tests and coverage verification)
-- [ ] Execute Phase 7 Plan 07 (Gap closure)
+- [x] Execute Phase 7 Plan 07 (Pre-commit pytest hook)
 - [ ] Execute Phase 7 Plan 08 (Final verification)
 - [ ] Plan Phase 8 (Documentation & Migration)
 - [ ] Execute Phase 8 plans
