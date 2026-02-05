@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-04 (06-01: CLI framework dependencies installed)
-**Last Execution:** Phase 6 Plan 1 (CLI framework dependencies)
+**Updated:** 2026-02-05 (06-02: Configuration system with pydantic-settings)
+**Last Execution:** Phase 6 Plan 2 (Configuration schemas)
 
 ---
 
@@ -29,20 +29,20 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 ## Current Position
 
 **Phase:** 6 - Configuration & CLI System
-**Plan:** 1/7 complete
-**Status:** 🟡 Active (CLI framework dependencies installed)
-**Last Activity:** 2026-02-04 — Completed 06-01: CLI framework dependencies
+**Plan:** 2/7 complete
+**Status:** 🟡 Active (Configuration system implemented)
+**Last Activity:** 2026-02-05 — Completed 06-02: Configuration schemas
 
 **Progress Bar:**
 
 ```
 v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: ████░░░░░░░░░░░░░░░░  23% (1.14/5 phases complete, Phase 6/5)
+v1.1: █████░░░░░░░░░░░░░░░  29% (1.29/5 phases complete, Phase 6 2/7)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🟡 Active (Phase 5 complete, Phase 6 1/7 plans done)
+- v1.1: 🟡 Active (Phase 5 complete, Phase 6 2/7 plans done)
 
 ---
 
@@ -142,7 +142,7 @@ Plans: 5 plans
 
 **Plans:** 7 total
 - 06-01: CLI framework dependencies ✅ Complete
-- 06-02: Configuration schemas ⏸️ Pending
+- 06-02: Configuration schemas ✅ Complete
 - 06-03: Modular CLI structure ⏸️ Pending
 - 06-04: Progress bars ⏸️ Pending
 - 06-05: Chief CLI commands ⏸️ Pending
@@ -188,6 +188,10 @@ Plans: 5 plans
 | Architecture | Module-based structure with CLI entry points | Better code quality, testing, CI/CD |
 | CLI | Use typer for CLI framework | Modern, type hints support, excellent UX |
 | Config | CLI args + YAML with pydantic validation | Flexibility and type safety |
+| Config | Use pydantic-settings YamlConfigSettingsSource | Simpler than custom YAML parsing, supports multi-source |
+| Config | Namespaced YAML keys to avoid collisions | Prevents duplicate key errors in flat YAML (e.g., forecast_test_size vs classification_test_size) |
+| Config | Added extra: ignore to model_config | Allows YAML files with shared keys across analyses |
+| Config | Maintained backward compatibility with legacy exports | Gradual migration from analysis.config.py constants |
 | Testing | pytest with 90%+ coverage target | High quality standard for production |
 | Migration | Delete notebooks after conversion | Milestone goal is script-based architecture |
 | Quality | Line length 100 for black/ruff | Balances readability and screen utilization |
@@ -231,8 +235,8 @@ Plans: 5 plans
 
 ## Session Continuity
 
-**Last session:** 2026-02-04
-**Stopped at:** Completed Phase 6 Plan 1 (CLI framework dependencies)
+**Last session:** 2026-02-05
+**Stopped at:** Completed Phase 6 Plan 2 (Configuration system)
 **Resume file:** None
 
 **Current Session Goals:**
@@ -252,7 +256,8 @@ Plans: 5 plans
 - [x] Execute Phase 5 Plan 08 (Remaining module tests) - Gap closure plan
 - [x] Plan Phase 6 (Configuration & CLI) - Complete
 - [x] Execute Phase 6 Plan 01 (CLI framework dependencies) - Complete
-- [ ] Execute Phase 6 Plan 02-07
+- [x] Execute Phase 6 Plan 02 (Configuration schemas) - Complete
+- [ ] Execute Phase 6 Plan 03-07
 - [ ] Plan Phase 7 (Visualization & Testing)
 - [ ] Execute Phase 7 plans
 - [ ] Plan Phase 8 (Documentation & Migration)
@@ -267,9 +272,11 @@ Plans: 5 plans
 - Data layer complete: joblib caching, Pydantic validation, preprocessing utilities, mypy clean
 - Deviations fixed: pydantic installed, geopandas optional, UCR/PSA schema aligned with data, mypy errors fixed
 - Phase 5 complete: 6/6 main plans + 3 gap closure plans (module structure ✅, data layer ✅, quality tooling ✅, mypy fixes ✅, dev dependencies installed ✅, utils tests ✅, data layer tests ✅)
-- Phase 6 started: 1/7 plans complete (CLI framework dependencies installed: typer 0.21.1, rich 14.3.2, pydantic-settings 2.12.0)
+- Phase 6 started: 2/7 plans complete (CLI framework dependencies and configuration system implemented)
+- Configuration system: 13 config schemas (TrendsConfig, SeasonalityConfig, COVIDConfig, HotspotsConfig, RobberyConfig, DistrictConfig, CensusConfig, RetailTheftConfig, VehicleCrimesConfig, CompositionConfig, EventsConfig, TimeSeriesConfig, ClassificationConfig)
+- Configuration system: 5 YAML files (global.yaml, chief.yaml, patrol.yaml, policy.yaml, forecasting.yaml) with multi-source loading (CLI > env > YAML > defaults)
 - Test coverage: classification.py 100%, temporal.py 100%, loading.py 85%, validation.py 92%, preprocessing.py 100%
 - Total test count: 183 tests passing (93 new data layer tests)
 
 ---
-*State updated: 2026-02-04 14:00 UTC*
+*State updated: 2026-02-05 00:44 UTC*
