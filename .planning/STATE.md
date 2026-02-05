@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-04 (05-07: Data layer tests complete)
-**Last Execution:** Phase 5 Plan 7 (Data layer tests)
+**Updated:** 2026-02-04 (06-01: CLI framework dependencies installed)
+**Last Execution:** Phase 6 Plan 1 (CLI framework dependencies)
 
 ---
 
@@ -28,21 +28,21 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 5 - Foundation Architecture
-**Plan:** 7/7 complete (plus 3 gap closure plans)
-**Status:** 🟢 Phase complete (Foundation architecture and tests established)
-**Last Activity:** 2026-02-04 — Completed 05-07: Data layer tests
+**Phase:** 6 - Configuration & CLI System
+**Plan:** 1/7 complete
+**Status:** 🟡 Active (CLI framework dependencies installed)
+**Last Activity:** 2026-02-04 — Completed 06-01: CLI framework dependencies
 
 **Progress Bar:**
 
 ```
 v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: ███░░░░░░░░░░░░░░░░░  19% (1/5 phases complete, Phase 5/5)
+v1.1: ████░░░░░░░░░░░░░░░░  23% (1.14/5 phases complete, Phase 6/5)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🟡 Active (Phase 5 complete, 1 of 5 phases done)
+- v1.1: 🟡 Active (Phase 5 complete, Phase 6 1/7 plans done)
 
 ---
 
@@ -108,7 +108,7 @@ Plans: 5 plans
 
 ## v1.1 Planned Phases
 
-### Phase 5 — Foundation Architecture 🟡 Active
+### Phase 5 — Foundation Architecture ✅ COMPLETE
 **Goal:** Establish a robust module-based structure with data layer and quality standards
 
 **Requirements covered:**
@@ -116,19 +116,44 @@ Plans: 5 plans
 - Data Layer: DATA-01, DATA-02, DATA-03, DATA-04
 - Quality & Standards: QUAL-01, QUAL-02, QUAL-03, QUAL-04, QUAL-05, QUAL-06
 
-**Success criteria:**
-1. Developer can import utilities from `analysis.data` and `analysis.utils` to load and validate crime data with proper type hints
-2. Developer can run all existing tests (pytest) and see 90%+ code coverage report for utility functions
-3. Developer can use black, ruff, and mypy on codebase with zero violations in new modules
-4. Developer can load cached data after first load using the new caching layer, with cache invalidated on data changes
-5. Developer can write new modules that follow PEP 8 with docstrings and type hints, passing all pre-commit hooks
+**Plans:** 6 main + 3 gap closure = 9 total
+- 05-01: Utils module structure ✅ Complete
+- 05-02: Data layer with validation and caching ✅ Complete
+- 05-04: Fix mypy errors ✅ Complete
+- 05-05: Quality tooling installation ✅ Complete
+- 05-06: Utils module tests ✅ Complete
+- 05-07: Data layer tests ✅ Complete (gap closure)
+- 05-08: Remaining module tests ✅ Complete (gap closure)
+- 05-09: Fix mypy TYPE_CHECKING imports ✅ Complete (gap closure)
 
-### Phase 6 — Configuration & CLI System ⏸️ Pending
+**Success criteria:** All met
+1. ✅ Developer can import utilities from `analysis.data` and `analysis.utils` to load and validate crime data with proper type hints
+2. ✅ Developer can run all existing tests (pytest) and see 90%+ code coverage report for utility functions
+3. ✅ Developer can use black, ruff, and mypy on codebase with zero violations in new modules
+4. ✅ Developer can load cached data after first load using the new caching layer, with cache invalidated on data changes
+5. ✅ Developer can write new modules that follow PEP 8 with docstrings and type hints, passing all pre-commit hooks
+
+### Phase 6 — Configuration & CLI System 🟡 Active
 **Goal:** Build a flexible configuration system and CLI entry points for all 13 analyses with rich user feedback
 
 **Requirements covered:**
 - Configuration: CONFIG-01, CONFIG-02, CONFIG-03, CONFIG-04, CONFIG-05
 - Architecture: ARCH-04, ARCH-05, ARCH-06
+
+**Plans:** 7 total
+- 06-01: CLI framework dependencies ✅ Complete
+- 06-02: Configuration schemas ⏸️ Pending
+- 06-03: Modular CLI structure ⏸️ Pending
+- 06-04: Progress bars ⏸️ Pending
+- 06-05: Chief CLI commands ⏸️ Pending
+- 06-06: Patrol CLI commands ⏸️ Pending
+- 06-07: Policy/Forecasting CLI commands ⏸️ Pending
+
+**Success criteria:**
+1. Developer can run analysis scripts via CLI using `python -m analysis.cli <command>`
+2. Developer can configure analyses via YAML files with CLI argument overrides
+3. Developer sees rich progress bars during long-running operations
+4. All 13 analyses have CLI entry points with --help documentation
 
 ### Phase 7 — Visualization & Testing ⏸️ Pending
 **Goal:** Implement comprehensive visualization utilities with multi-format output and complete testing coverage for all analysis scripts
@@ -172,6 +197,7 @@ Plans: 5 plans
 | Type Checking | Use dict comprehension for Pydantic unpacking | Ensures string keys for model validation |
 | Pre-commit | Run pytest before commits | Ensures tests pass, -x flag for fast feedback |
 | Quality Tools | Install dev dependencies via pip install -r requirements-dev.txt | Uses system Python to ensure correct package installation |
+| Quality Tools | CLI framework dependencies added | typer>=0.12, rich>=13.0, pydantic-settings>=2.0 for Phase 6 |
 | Quality Tools | Exclude notebooks/reports from ruff pre-commit checks | Legacy code has too many violations, will be deleted in Phase 8 |
 | Quality Tools | Set target-version to py313 | ruff/black don't support py314 yet |
 | Quality Tools | Use ignore_missing_imports for geopandas, shapely, joblib | No type stubs available, handled via mypy overrides |
@@ -191,7 +217,7 @@ Plans: 5 plans
 - New tools for v1.1: typer, rich, pydantic, pytest, pytest-cov, black, ruff, mypy, pre-commit
 - Quality tooling configured: pyproject.toml with pytest (90% coverage), mypy (strict), black (100 char), ruff
 - Pre-commit hooks: black, ruff, pytest, trailing-whitespace, end-of-file-fixer, check-yaml, debug-statements
-- Dev dependencies installed: pytest>=9.0, pytest-cov>=7.0, black>=26.0, ruff>=0.15, mypy>=1.19, pre-commit>=4.5, pandas-stubs>=2.0
+- Dev dependencies installed: pytest>=9.0, pytest-cov>=7.0, black>=26.0, ruff>=0.15, mypy>=1.19, pre-commit>=4.5, pandas-stubs>=2.0, typer>=0.12, rich>=13.0, pydantic-settings>=2.0
 
 ---
 
@@ -206,14 +232,14 @@ Plans: 5 plans
 ## Session Continuity
 
 **Last session:** 2026-02-04
-**Stopped at:** Completed Phase 5 Plan 7 (Data layer tests)
+**Stopped at:** Completed Phase 6 Plan 1 (CLI framework dependencies)
 **Resume file:** None
 
 **Current Session Goals:**
 1. ✅ Create v1.1 roadmap (Phases 5-8)
-2. ✅ Execute Phase 5 plans (05-01 ✅, 05-02 ✅, 05-04 ✅, 05-05 ✅, 05-06 ✅, 05-07 ✅)
-3. [ ] Plan Phase 6 (Configuration & CLI)
-4. [ ] Execute Phase 6 plans
+2. ✅ Execute Phase 5 plans (05-01 ✅, 05-02 ✅, 05-04 ✅, 05-05 ✅, 05-06 ✅, 05-07 ✅, 05-08 ✅, 05-09 ✅)
+3. ✅ Plan Phase 6 (Configuration & CLI)
+4. 🟡 Execute Phase 6 plans (06-01 ✅)
 
 **Todos:**
 - [x] Plan Phase 5 (Foundation Architecture) - Complete
@@ -224,8 +250,9 @@ Plans: 5 plans
 - [x] Execute Phase 5 Plan 06 (Utils module tests) - Complete
 - [x] Execute Phase 5 Plan 07 (Data layer tests) - Gap closure plan
 - [x] Execute Phase 5 Plan 08 (Remaining module tests) - Gap closure plan
-- [ ] Plan Phase 6 (Configuration & CLI)
-- [ ] Execute Phase 6 plans
+- [x] Plan Phase 6 (Configuration & CLI) - Complete
+- [x] Execute Phase 6 Plan 01 (CLI framework dependencies) - Complete
+- [ ] Execute Phase 6 Plan 02-07
 - [ ] Plan Phase 7 (Visualization & Testing)
 - [ ] Execute Phase 7 plans
 - [ ] Plan Phase 8 (Documentation & Migration)
@@ -240,8 +267,9 @@ Plans: 5 plans
 - Data layer complete: joblib caching, Pydantic validation, preprocessing utilities, mypy clean
 - Deviations fixed: pydantic installed, geopandas optional, UCR/PSA schema aligned with data, mypy errors fixed
 - Phase 5 complete: 6/6 main plans + 3 gap closure plans (module structure ✅, data layer ✅, quality tooling ✅, mypy fixes ✅, dev dependencies installed ✅, utils tests ✅, data layer tests ✅)
+- Phase 6 started: 1/7 plans complete (CLI framework dependencies installed: typer 0.21.1, rich 14.3.2, pydantic-settings 2.12.0)
 - Test coverage: classification.py 100%, temporal.py 100%, loading.py 85%, validation.py 92%, preprocessing.py 100%
 - Total test count: 183 tests passing (93 new data layer tests)
 
 ---
-*State updated: 2026-02-04 12:00 UTC*
+*State updated: 2026-02-04 14:00 UTC*
