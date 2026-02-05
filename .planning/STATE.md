@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-05 (07-04: Patrol CLI end-to-end tests - Phase 7 In Progress)
-**Last Execution:** Phase 7 Plan 4 (Patrol CLI tests)
+**Updated:** 2026-02-05 (07-05: Policy and Forecasting CLI end-to-end tests - Phase 7 In Progress)
+**Last Execution:** Phase 7 Plan 5 (Policy and Forecasting CLI tests)
 
 ---
 
@@ -28,21 +28,21 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 7 - Visualization & Testing (4/8 complete)
-**Plan:** 4/8
-**Status:** 🟡 In Progress (Visualization module foundation complete, pytest fixtures and CLI tests for Chief/Patrol complete, remaining CLI tests and visualization utilities pending)
-**Last Activity:** 2026-02-05 — Completed 07-04: Patrol CLI end-to-end tests (8 tests, 92% coverage of patrol.py)
+**Phase:** 7 - Visualization & Testing (5/8 complete)
+**Plan:** 5/8
+**Status:** 🟡 In Progress (Visualization module foundation complete, pytest fixtures and all CLI tests complete, coverage verification and gap closure pending)
+**Last Activity:** 2026-02-05 — Completed 07-05: Policy and Forecasting CLI end-to-end tests (12 tests, 94-97% coverage on policy.py and forecasting.py)
 
 **Progress Bar:**
 
 ```
 v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: ██████░░░░░░░░░░░░░░  36% (1.50/5 phases complete, Phase 7 🟡)
+v1.1: ██████░░░░░░░░░░░░░░  38% (1.63/5 phases complete, Phase 7 🟡)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🟡 Phase 7 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7: 4/8, Phase 8 pending)
+- v1.1: 🟡 Phase 7 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7: 5/8, Phase 8 pending)
 
 ---
 
@@ -169,12 +169,13 @@ Plans: 5 plans
 - Visualization: VIZ-01 (centralized style), VIZ-02 (multi-format save), VIZ-03 (plot functions)
 - Testing: TEST-01, TEST-02 (CLI end-to-end tests for Chief and Patrol commands)
 
-**Plans:** 4/8 complete
+**Plans:** 5/8 complete
 - 07-01: Visualization module foundation ✅ Complete (style.py, helpers.py, plots.py, __init__.py)
 - 07-02: Pytest fixtures ✅ Complete (sample_crime_df, tmp_output_dir)
-- 07-03: Chief CLI tests ✅ Complete (test_cli_chief.py with 6 tests, 100% coverage)
+- 07-03: Chief CLI tests ✅ Complete (test_cli_chief.py with 7 tests, 100% coverage)
 - 07-04: Patrol CLI tests ✅ Complete (test_cli_patrol.py with 8 tests, 92% coverage)
-- 07-05 through 07-08: Pending (CLI tests for remaining groups, coverage verification, gap closure)
+- 07-05: Policy and Forecasting CLI tests ✅ Complete (12 tests, 94-97% coverage)
+- 07-06 through 07-08: Pending (coverage verification, gap closure, integration tests)
 
 ### Phase 8 — Documentation & Migration ⏸️ Pending
 **Goal:** Document the new script-based workflow, migrate all notebooks to scripts, verify outputs, and update project documentation
@@ -295,8 +296,8 @@ Plans: 5 plans
 - [x] Execute Phase 7 Plan 02 (Pytest fixtures)
 - [x] Execute Phase 7 Plan 03 (Chief CLI tests)
 - [x] Execute Phase 7 Plan 04 (Patrol CLI tests)
-- [ ] Execute Phase 7 Plan 05 (Policy CLI tests)
-- [ ] Execute Phase 7 Plan 05 (Coverage verification)
+- [x] Execute Phase 7 Plan 05 (Policy and Forecasting CLI tests)
+- [ ] Execute Phase 7 Plan 06 (Coverage verification)
 - [ ] Execute Phase 7 Plan 06 (Gap closure)
 - [ ] Execute Phase 7 Plan 07 (Integration tests)
 - [ ] Execute Phase 7 Plan 08 (Final verification)
@@ -321,10 +322,12 @@ Plans: 5 plans
 - Rich progress pattern: 4-stage workflow (loading, preprocessing, analysis, output) with SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeRemainingColumn
 - CLI entry point: `python -m analysis.cli` working with help text and Rich-formatted version/info commands
 - Configuration system: 13 config schemas with 5 YAML files, multi-source loading (CLI > env > YAML > defaults)
-- Test coverage: classification.py 100%, temporal.py 100%, loading.py 85%, validation.py 92%, preprocessing.py 100%, chief.py 100%, patrol.py 92%
-- Total test count: 198 tests passing (93 data layer + 6 Chief CLI tests + 8 Patrol CLI tests + conftest)
+- Test coverage: classification.py 100%, temporal.py 100%, loading.py 85%, validation.py 92%, preprocessing.py 100%, chief.py 100%, patrol.py 92%, policy.py 97%, forecasting.py 94%
+- Total test count: 227 tests passing (93 data layer + 7 Chief CLI tests + 8 Patrol CLI tests + 8 Policy CLI tests + 4 Forecasting CLI tests + conftest)
+- **All 13 CLI commands have end-to-end tests:** 27 CLI tests total covering all commands
 - **ARCH-05 satisfied:** All CLI commands show Rich progress bars with consistent styling and color-coded messages
 - **CLI Testing Pattern Established:** CliRunner invocation, --fast flag, exit_code verification, stdout checks, file existence checks
+- **CLI Coverage:** 96% average across all CLI modules (chief 100%, patrol 92%, policy 97%, forecasting 94%)
 
 ---
-*State updated: 2026-02-05 02:47 UTC*
+*State updated: 2026-02-05 03:13 UTC*
