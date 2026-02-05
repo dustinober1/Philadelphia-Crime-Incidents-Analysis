@@ -162,15 +162,14 @@ Plans: 5 plans
 - Multi-task sequential progress for complex operations (chief trends, patrol hotspots)
 - All 13 commands use consistent 5-column progress bar setup
 
-### Phase 7 — Visualization & Testing 🟢 Almost Complete (7/8 complete)
+### Phase 7 — Visualization & Testing ✅ COMPLETE
 **Goal:** Implement comprehensive visualization utilities with multi-format output and complete testing coverage for all analysis scripts
 
 **Requirements covered:**
-- Visualization: VIZ-01 (centralized style), VIZ-02 (multi-format save), VIZ-03 (plot functions)
-- Testing: TEST-01, TEST-02, TEST-07 (CLI end-to-end tests for all 13 commands, integration tests)
-- Quality: TEST-08 (pre-commit pytest hook)
+- Visualization: VIZ-01, VIZ-02, VIZ-03, VIZ-04, VIZ-05
+- Testing: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, TEST-06, TEST-07, TEST-08
 
-**Plans:** 7/8 complete
+**Plans:** 10/10 complete
 - 07-01: Visualization module foundation ✅ Complete (style.py, helpers.py, plots.py, __init__.py)
 - 07-02: Pytest fixtures ✅ Complete (sample_crime_df, tmp_output_dir)
 - 07-03: Chief CLI tests ✅ Complete (test_cli_chief.py with 7 tests, 100% coverage)
@@ -178,7 +177,16 @@ Plans: 5 plans
 - 07-05: Policy and Forecasting CLI tests ✅ Complete (12 tests, 94-97% coverage)
 - 07-06: Integration tests and coverage verification ✅ Complete (5 integration tests, 47% coverage baseline measured)
 - 07-07: Pre-commit pytest hook ✅ Complete (pytest hook with -x flag, all 215 tests pass)
-- 07-08: Final verification (pending)
+- 07-08: Add --output-format to Chief/Forecasting ✅ Complete (gap closure plan)
+- 07-09: Add --output-format to Patrol/Policy ✅ Complete (gap closure plan)
+- 07-10: Wire figure generation to CLI commands ✅ Complete (gap closure plan + memory leak fix)
+
+**Success criteria:** All met
+1. ✅ All 13 CLI commands generate figures in PNG/SVG/PDF formats via --output-format argument
+2. ✅ All figures use consistent styling via setup_style() and project color palette
+3. ✅ Test coverage: 28 CLI tests, 5 integration tests, 90%+ for new Phase 7 artifacts
+4. ✅ Pre-commit hooks configured with pytest, black, ruff, mypy
+5. ✅ Memory leak fixed: all save_figure() calls followed by plt.close(fig)
 
 ### Phase 8 — Documentation & Migration ⏸️ Pending
 **Goal:** Document the new script-based workflow, migrate all notebooks to scripts, verify outputs, and update project documentation
@@ -319,7 +327,9 @@ Plans: 5 plans
 - [x] Execute Phase 7 Plan 05 (Policy and Forecasting CLI tests)
 - [x] Execute Phase 7 Plan 06 (Integration tests and coverage verification)
 - [x] Execute Phase 7 Plan 07 (Pre-commit pytest hook)
-- [x] Execute Phase 7 Plan 08 (CLI Output Format Argument)
+- [x] Execute Phase 7 Plan 08 (Add --output-format to Chief/Forecasting)
+- [x] Execute Phase 7 Plan 09 (Add --output-format to Patrol/Policy)
+- [x] Execute Phase 7 Plan 10 (Wire figure generation and fix memory leak)
 - [ ] Plan Phase 8 (Documentation & Migration)
 - [ ] Execute Phase 8 plans
 - [ ] Verify all v1.1 requirements satisfied
@@ -333,7 +343,8 @@ Plans: 5 plans
 - Deviations fixed: pydantic installed, geopandas optional, UCR/PSA schema aligned with data, mypy errors fixed
 - Phase 5 complete: 6/6 main plans + 3 gap closure plans (module structure ✅, data layer ✅, quality tooling ✅, mypy fixes ✅, dev dependencies installed ✅, utils tests ✅, data layer tests ✅)
 - **Phase 6 COMPLETE:** 7/7 plans (CLI framework dependencies ✅, configuration system ✅, CLI structure ✅, Chief commands ✅, Patrol commands ✅, Policy/Forecasting commands ✅, Rich integration ✅)
-- **All 13 CLI commands implemented with Rich progress bars:**
+- **Phase 7 COMPLETE:** 10/10 plans (visualization module ✅, fixtures ✅, CLI tests ✅, integration tests ✅, pre-commit hook ✅, output format arguments ✅, figure generation ✅, memory leak fix ✅)
+- **All 13 CLI commands implemented with Rich progress bars and figure generation:**
   - Chief (3): trends, seasonality, covid - with multi-task progress (trends)
   - Patrol (4): hotspots, robbery-heatmap, district-severity, census-rates - with multi-task progress (hotspots)
   - Policy (4): retail-theft, vehicle-crimes, composition, events
