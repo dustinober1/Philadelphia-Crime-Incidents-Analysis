@@ -196,6 +196,8 @@ def covid(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Analyze COVID impact on crime patterns."""
+    import pandas as pd
+
     config = COVIDConfig(lockdown_date=lockdown_date, before_years=before_years, version=version)
 
     console.print("[bold blue]COVID Impact Analysis[/bold blue]")
@@ -203,6 +205,59 @@ def covid(
     console.print(f"  Before years: {config.before_years}")
     console.print(f"  Fast mode: {fast}")
     console.print()
-    console.print("[yellow]Command logic will be implemented in plan 06-04[/yellow]")
 
-    # TODO: Implement analysis logic in 06-04
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeRemainingColumn(),
+    ) as progress:
+        load_task = progress.add_task("Loading data...", total=100)
+        df = load_crime_data(clean=True)
+        if fast:
+            df = df.sample(frac=config.fast_sample_frac, random_state=42)
+        progress.update(load_task, advance=100)
+
+        prep_task = progress.add_task("Processing data...", total=100)
+        df = extract_temporal_features(df)
+        df = classify_crime_category(df)
+        progress.update(prep_task, advance=100)
+
+        analyze_task = progress.add_task("Comparing periods...", total=100)
+
+        # Get pre-COVID baseline
+        before_periods = []
+        for year in config.before_years:
+            year_data = filter_by_date_range(df, start=f"{year}-01-01", end=f"{year}-12-31", date_col="dispatch_date")
+            before_periods.append(year_data)
+
+        baseline_df = pd.concat(before_periods, ignore_index=True)
+        baseline_avg = len(baseline_df) / len(config.before_years)
+
+        # Get post-COVID period (2021-2022)
+        after_df = filter_by_date_range(df, start="2021-01-01", end="2022-12-31", date_col="dispatch_date")
+
+        progress.update(analyze_task, advance=100)
+
+        output_task = progress.add_task("Saving outputs...", total=100)
+        output_path = Path(config.output_dir) / config.version / "chief"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        summary_file = output_path / f"{config.report_name}_summary.txt"
+        with open(summary_file, "w") as f:
+            f.write("COVID Impact Analysis Summary\n")
+            f.write("=" * 40 + "\n")
+            f.write(f"Lockdown date: {config.lockdown_date}\n")
+            f.write(f"Before years: {config.before_years}\n")
+            f.write(f"\nAverage incidents (before): {baseline_avg:,.0f}\n")
+            f.write(f"Incidents (after): {len(after_df):,.0f}\n")
+            change_pct = (len(after_df) - baseline_avg) / baseline_avg * 100
+            f.write(f"Change: {change_pct:+.1f}%\n")
+
+        progress.update(output_task, advance=100)
+
+    console.print()
+    console.print("[green]:heavy_check_mark:[/green] [bold green]Analysis complete[/bold green]")
+    console.print(f"  Output directory: [cyan]{output_path}[/cyan]")
+    console.print(f"  Summary file: [cyan]{summary_file.name}[/cyan]")
