@@ -1,6 +1,7 @@
 """Policy evaluation analysis commands."""
 
 from pathlib import Path
+from typing import Literal
 
 import typer
 from rich.console import Console
@@ -32,10 +33,14 @@ def retail_theft(
     baseline_end: str = typer.Option("2020-02-01", help="Baseline period end"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Analyze retail theft trends."""
     config = RetailTheftConfig(
-        baseline_start=baseline_start, baseline_end=baseline_end, version=version
+        baseline_start=baseline_start,
+        baseline_end=baseline_end,
+        version=version,
+        output_format=output_format,
     )
 
     console.print("[bold blue]Retail Theft Analysis[/bold blue]")
@@ -95,6 +100,7 @@ def vehicle_crimes(
     end_date: str = typer.Option("2023-12-31", help="Analysis end date"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Analyze vehicle crime trends."""
     config = VehicleCrimesConfig(
@@ -102,6 +108,7 @@ def vehicle_crimes(
         start_date=start_date,
         end_date=end_date,
         version=version,
+        output_format=output_format,
     )
 
     console.print("[bold blue]Vehicle Crimes Analysis[/bold blue]")
@@ -159,9 +166,10 @@ def composition(
     top_n: int = typer.Option(10, help="Number of top categories to show"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Analyze crime composition over time."""
-    config = CompositionConfig(top_n=top_n, version=version)
+    config = CompositionConfig(top_n=top_n, version=version, output_format=output_format)
 
     console.print("[bold blue]Crime Composition Analysis[/bold blue]")
     console.print(f"  Top N: {config.top_n}")
@@ -216,9 +224,12 @@ def events(
     days_after: int = typer.Option(7, help="Days after event to include"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Analyze impact of events on crime."""
-    config = EventsConfig(days_before=days_before, days_after=days_after, version=version)
+    config = EventsConfig(
+        days_before=days_before, days_after=days_after, version=version, output_format=output_format
+    )
 
     console.print("[bold blue]Event Impact Analysis[/bold blue]")
     console.print(f"  Window: {config.days_before} days before, {config.days_after} days after")

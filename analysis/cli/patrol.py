@@ -1,7 +1,7 @@
 """Patrol operations analysis commands."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import typer
 from rich.console import Console
@@ -35,6 +35,7 @@ def hotspots(
     min_samples: int = typer.Option(50, help="DBSCAN min_samples parameter"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Identify crime hotspots using spatial clustering."""
     from analysis.data.loading import load_crime_data
@@ -43,6 +44,7 @@ def hotspots(
         eps_degrees=eps,
         min_samples=min_samples,
         version=version,
+        output_format=output_format,
     )
 
     console.print("[bold blue]Hotspots Analysis[/bold blue]")
@@ -139,13 +141,16 @@ def robbery_heatmap(
     grid_size: int = typer.Option(20, help="Grid size for heatmap"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Generate temporal heatmap for robbery incidents."""
     import pandas as pd
 
     from analysis.data.loading import load_crime_data
 
-    config = RobberyConfig(time_bin_size=time_bin, grid_size=grid_size, version=version)
+    config = RobberyConfig(
+        time_bin_size=time_bin, grid_size=grid_size, version=version, output_format=output_format
+    )
 
     console.print("[bold blue]Robbery Heatmap Analysis[/bold blue]")
     console.print(f"  Time bin: {config.time_bin_size} minutes")
@@ -204,11 +209,12 @@ def district_severity(
     districts: list[int] | None = typer.Option(None, help="Districts to analyze (default: all)"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Calculate severity scores by police district."""
     from analysis.data.loading import load_crime_data
 
-    config = DistrictConfig(districts=districts, version=version)
+    config = DistrictConfig(districts=districts, version=version, output_format=output_format)
 
     console.print("[bold blue]District Severity Analysis[/bold blue]")
     console.print(f"  Districts: {config.districts or 'All'}")
@@ -271,12 +277,15 @@ def census_rates(
     population_threshold: int = typer.Option(100, help="Minimum population for census tract"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Calculate crime rates per census tract."""
     from analysis.data.loading import load_crime_data
     from analysis.utils.spatial import load_boundaries
 
-    config = CensusConfig(population_threshold=population_threshold, version=version)
+    config = CensusConfig(
+        population_threshold=population_threshold, version=version, output_format=output_format
+    )
 
     console.print("[bold blue]Census Rates Analysis[/bold blue]")
     console.print(f"  Population threshold: {config.population_threshold}")

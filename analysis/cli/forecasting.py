@@ -1,6 +1,7 @@
 """Forecasting and prediction analysis commands."""
 
 from pathlib import Path
+from typing import Literal
 
 import typer
 from rich.console import Console
@@ -29,9 +30,10 @@ def time_series(
     model_type: str = typer.Option("prophet", help="Model type (prophet, arima, ets)"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Generate crime rate forecasts."""
-    config = TimeSeriesConfig(forecast_horizon=horizon, model_type=model_type, version=version)
+    config = TimeSeriesConfig(forecast_horizon=horizon, model_type=model_type, version=version, output_format=output_format)
 
     console.print("[bold blue]Time Series Forecasting[/bold blue]")
     console.print(f"  Horizon: {config.forecast_horizon} periods")
@@ -111,9 +113,10 @@ def classification(
     random_state: int = typer.Option(42, help="Random state for reproducibility"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Train violence classification model."""
-    config = ClassificationConfig(test_size=test_size, random_state=random_state, version=version)
+    config = ClassificationConfig(test_size=test_size, random_state=random_state, version=version, output_format=output_format)
 
     console.print("[bold blue]Violence Classification[/bold blue]")
     console.print(f"  Test size: {config.classification_test_size}")

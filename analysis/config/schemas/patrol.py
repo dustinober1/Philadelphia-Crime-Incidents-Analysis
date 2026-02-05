@@ -1,5 +1,7 @@
 """Configuration schemas for Patrol operations analyses."""
 
+from typing import Literal
+
 from pydantic import Field
 
 from analysis.config.settings import BaseConfig
@@ -23,6 +25,7 @@ class HotspotsConfig(BaseConfig):
 
     # Output
     report_name: str = "hotspots_report"
+    output_format: Literal["png", "svg", "pdf"] = "png"
 
 
 class RobberyConfig(BaseConfig):
@@ -38,6 +41,7 @@ class RobberyConfig(BaseConfig):
 
     # Output
     report_name: str = "robbery_heatmap_report"
+    output_format: Literal["png", "svg", "pdf"] = "png"
 
 
 class DistrictConfig(BaseConfig):
@@ -54,6 +58,7 @@ class DistrictConfig(BaseConfig):
 
     # Output
     report_name: str = "district_severity_report"
+    output_format: Literal["png", "svg", "pdf"] = "png"
 
 
 class CensusConfig(BaseConfig):
@@ -69,3 +74,4 @@ class CensusConfig(BaseConfig):
 
     # Output
     report_name: str = "census_rates_report"
+    output_format: Literal["png", "svg", "pdf"] = "png"

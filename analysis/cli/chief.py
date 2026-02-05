@@ -1,6 +1,7 @@
 """Chief-level trend analysis commands."""
 
 from pathlib import Path
+from typing import Literal
 
 import typer
 from rich.console import Console
@@ -30,10 +31,11 @@ def trends(
     end_year: int = typer.Option(2024, help="End year for analysis", min=2006, max=2026),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Generate annual crime trends analysis."""
     # Load config (fast flag controls behavior, not stored in config)
-    config = TrendsConfig(start_year=start_year, end_year=end_year, version=version)
+    config = TrendsConfig(start_year=start_year, end_year=end_year, version=version, output_format=output_format)
 
     console.print("[bold blue]Annual Trends Analysis[/bold blue]")
     console.print(f"  Period: {config.start_year}-{config.end_year}")
@@ -126,10 +128,11 @@ def seasonality(
     winter_months: list[int] = typer.Option([12, 1, 2], help="Winter months"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Analyze seasonal crime patterns."""
     config = SeasonalityConfig(
-        summer_months=summer_months, winter_months=winter_months, version=version
+        summer_months=summer_months, winter_months=winter_months, version=version, output_format=output_format
     )
 
     console.print("[bold blue]Seasonality Analysis[/bold blue]")
@@ -204,11 +207,12 @@ def covid(
     before_years: list[int] = typer.Option([2018, 2019], help="Pre-COVID years for comparison"),
     version: str = typer.Option("v1.0", help="Output version tag"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
+    output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Analyze COVID impact on crime patterns."""
     import pandas as pd
 
-    config = COVIDConfig(lockdown_date=lockdown_date, before_years=before_years, version=version)
+    config = COVIDConfig(lockdown_date=lockdown_date, before_years=before_years, version=version, output_format=output_format)
 
     console.print("[bold blue]COVID Impact Analysis[/bold blue]")
     console.print(f"  Lockdown date: {config.lockdown_date}")

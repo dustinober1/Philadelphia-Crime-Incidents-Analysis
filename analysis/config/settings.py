@@ -32,7 +32,7 @@ class GlobalConfig(BaseSettings):
     # Output settings
     output_dir: Path = Field(default=_REPO_ROOT / "reports")
     dpi: int = Field(default=300, ge=72, le=600)
-    output_format: str = Field(default="png", pattern="^(png|svg|html|json)$")
+    output_format: str = Field(default="png", pattern="^(png|svg|pdf)$")
 
     # Performance
     fast_sample_frac: float = Field(default=0.1, ge=0.01, le=1.0)
@@ -72,7 +72,7 @@ class BaseConfig(BaseSettings):
     # Global settings (inherited from GlobalConfig)
     output_dir: Path = Field(default=_REPO_ROOT / "reports")
     dpi: int = Field(default=300, ge=72, le=600)
-    output_format: str = Field(default="png", pattern="^(png|svg|html|json)$")
+    output_format: str = Field(default="png", pattern="^(png|svg|pdf)$")
     fast_sample_frac: float = Field(default=0.1, ge=0.01, le=1.0)
     cache_enabled: bool = True
     log_level: str = Field(default="INFO", pattern="^(DEBUG|INFO|WARNING|ERROR)$")

@@ -1,5 +1,7 @@
 """Configuration schemas for Policy evaluation analyses."""
 
+from typing import Literal
+
 from pydantic import Field
 
 from analysis.config.settings import BaseConfig
@@ -19,6 +21,7 @@ class RetailTheftConfig(BaseConfig):
 
     # Output
     report_name: str = "retail_theft_report"
+    output_format: Literal["png", "svg", "pdf"] = "png"
 
 
 class VehicleCrimesConfig(BaseConfig):
@@ -35,6 +38,7 @@ class VehicleCrimesConfig(BaseConfig):
 
     # Output
     report_name: str = "vehicle_crimes_report"
+    output_format: Literal["png", "svg", "pdf"] = "png"
 
 
 class CompositionConfig(BaseConfig):
@@ -50,6 +54,7 @@ class CompositionConfig(BaseConfig):
 
     # Output
     report_name: str = "composition_report"
+    output_format: Literal["png", "svg", "pdf"] = "png"
 
 
 class EventsConfig(BaseConfig):
@@ -68,3 +73,4 @@ class EventsConfig(BaseConfig):
 
     # Output
     report_name: str = "events_impact_report"
+    output_format: Literal["png", "svg", "pdf"] = "png"
