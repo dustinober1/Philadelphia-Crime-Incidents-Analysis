@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import typer
 from rich.console import Console
@@ -115,6 +116,7 @@ def time_series(
 
             figure_path = output_path / f"{config.report_name}_forecast.{config.output_format}"
             save_figure(fig, figure_path, output_format=config.output_format)
+            plt.close(fig)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
@@ -227,6 +229,7 @@ def classification(
 
             figure_path = output_path / f"{config.report_name}_performance.{config.output_format}"
             save_figure(fig, figure_path, output_format=config.output_format)
+            plt.close(fig)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
