@@ -27,6 +27,8 @@ repos:
       # Uses --no-cov to avoid slow coverage checks during commits
       # Uses pass_filenames: false because pytest discovers tests itself
       # Uses always_run: true to run even when no Python files changed
+      # Note: Requires Python 3.14+ (uses system python from PATH)
+      # Developer must activate conda crime environment before committing
       - id: pytest
         name: pytest
         entry: python -m pytest
