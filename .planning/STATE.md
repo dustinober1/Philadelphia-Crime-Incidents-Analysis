@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-05 (07-05: Policy and Forecasting CLI end-to-end tests - Phase 7 In Progress)
-**Last Execution:** Phase 7 Plan 5 (Policy and Forecasting CLI tests)
+**Updated:** 2026-02-05 (07-06: Integration tests and coverage verification - Phase 7 In Progress)
+**Last Execution:** Phase 7 Plan 6 (Integration tests and coverage verification)
 
 ---
 
@@ -28,10 +28,10 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 7 - Visualization & Testing (5/8 complete)
-**Plan:** 5/8
-**Status:** 🟡 In Progress (Visualization module foundation complete, pytest fixtures and all CLI tests complete, coverage verification and gap closure pending)
-**Last Activity:** 2026-02-05 — Completed 07-05: Policy and Forecasting CLI end-to-end tests (12 tests, 94-97% coverage on policy.py and forecasting.py)
+**Phase:** 7 - Visualization & Testing (6/8 complete)
+**Plan:** 6/8
+**Status:** 🟡 In Progress (Visualization module foundation complete, pytest fixtures and all CLI tests complete, integration tests and coverage measurement done)
+**Last Activity:** 2026-02-05 — Completed 07-06: Integration tests for CLI output verification (5 tests, 47% coverage measured with CLI modules at 92-100%)
 
 **Progress Bar:**
 
@@ -169,13 +169,14 @@ Plans: 5 plans
 - Visualization: VIZ-01 (centralized style), VIZ-02 (multi-format save), VIZ-03 (plot functions)
 - Testing: TEST-01, TEST-02 (CLI end-to-end tests for Chief and Patrol commands)
 
-**Plans:** 5/8 complete
+**Plans:** 6/8 complete
 - 07-01: Visualization module foundation ✅ Complete (style.py, helpers.py, plots.py, __init__.py)
 - 07-02: Pytest fixtures ✅ Complete (sample_crime_df, tmp_output_dir)
 - 07-03: Chief CLI tests ✅ Complete (test_cli_chief.py with 7 tests, 100% coverage)
 - 07-04: Patrol CLI tests ✅ Complete (test_cli_patrol.py with 8 tests, 92% coverage)
 - 07-05: Policy and Forecasting CLI tests ✅ Complete (12 tests, 94-97% coverage)
-- 07-06 through 07-08: Pending (coverage verification, gap closure, integration tests)
+- 07-06: Integration tests and coverage verification ✅ Complete (5 integration tests, 47% coverage baseline measured)
+- 07-07 through 07-08: Pending (gap closure, final verification)
 
 ### Phase 8 — Documentation & Migration ⏸️ Pending
 **Goal:** Document the new script-based workflow, migrate all notebooks to scripts, verify outputs, and update project documentation
@@ -235,6 +236,11 @@ Plans: 5 plans
 | Testing | Use --version test for test outputs | Avoids cluttering production reports/ directory |
 | Testing | Test class structure by command group | Better organization (TestChiefTrends, TestChiefSeasonality, TestChiefCovid) |
 | Testing | Verify both exit_code and stdout | Robust testing checks exit code == 0 and expected content |
+| Integration | Pattern matching over exact values | Output verification uses keywords/headers, not exact data values |
+| Integration | --version flag for output isolation | Tests use --version integration-test to avoid cluttering production reports |
+| Integration | pytest.mark.integration decorator | Categorizes integration tests separately from unit tests |
+| Coverage | CLI modules achieve 90%+ target | chief 100%, patrol 92%, policy 97%, forecasting 94% |
+| Coverage | Legacy code at 0-60% coverage | Will be deleted in Phase 8, not a blocker for 90% goal |
 
 ### Validated Patterns (v1.0)
 - Data loading via `analysis.utils.load_data()` → To be replaced in Phase 5
@@ -256,7 +262,9 @@ Plans: 5 plans
 
 ## Blockers/Concerns
 
-**Coverage gap:** Currently at 24% coverage (up from 12%). Data layer modules have 85-100% coverage (loading 85%, validation 92%, preprocessing 100%). Remaining gaps are in legacy code and notebooks (to be deleted in Phase 8).
+**Coverage gap:** Currently at 47% coverage. CLI modules exceed 90% target (92-100%), data layer modules have 85-100% coverage. Remaining gaps are in legacy code (orchestrators, artifact_manager, etc.) at 0-60%, to be deleted in Phase 8 when notebooks are migrated to scripts.
+
+**Path to 90% target:** Phase 8 notebook migration will cover CLI paths in current notebooks, legacy code deletion will remove untested code from coverage calculation, visualization module tests will add coverage for plots.
 
 **Legacy code quality:** notebooks/, reports/, and some analysis/ modules have quality issues. Excluded from pre-commit for now, will be deleted (notebooks) or refactored (legacy modules) in future phases.
 
@@ -297,9 +305,8 @@ Plans: 5 plans
 - [x] Execute Phase 7 Plan 03 (Chief CLI tests)
 - [x] Execute Phase 7 Plan 04 (Patrol CLI tests)
 - [x] Execute Phase 7 Plan 05 (Policy and Forecasting CLI tests)
-- [ ] Execute Phase 7 Plan 06 (Coverage verification)
-- [ ] Execute Phase 7 Plan 06 (Gap closure)
-- [ ] Execute Phase 7 Plan 07 (Integration tests)
+- [x] Execute Phase 7 Plan 06 (Integration tests and coverage verification)
+- [ ] Execute Phase 7 Plan 07 (Gap closure)
 - [ ] Execute Phase 7 Plan 08 (Final verification)
 - [ ] Plan Phase 8 (Documentation & Migration)
 - [ ] Execute Phase 8 plans
@@ -323,11 +330,13 @@ Plans: 5 plans
 - CLI entry point: `python -m analysis.cli` working with help text and Rich-formatted version/info commands
 - Configuration system: 13 config schemas with 5 YAML files, multi-source loading (CLI > env > YAML > defaults)
 - Test coverage: classification.py 100%, temporal.py 100%, loading.py 85%, validation.py 92%, preprocessing.py 100%, chief.py 100%, patrol.py 92%, policy.py 97%, forecasting.py 94%
-- Total test count: 227 tests passing (93 data layer + 7 Chief CLI tests + 8 Patrol CLI tests + 8 Policy CLI tests + 4 Forecasting CLI tests + conftest)
+- Total test count: 220 tests passing (93 data layer + 7 Chief CLI tests + 8 Patrol CLI tests + 8 Policy CLI tests + 4 Forecasting CLI tests + 5 integration tests + conftest)
 - **All 13 CLI commands have end-to-end tests:** 27 CLI tests total covering all commands
 - **ARCH-05 satisfied:** All CLI commands show Rich progress bars with consistent styling and color-coded messages
 - **CLI Testing Pattern Established:** CliRunner invocation, --fast flag, exit_code verification, stdout checks, file existence checks
 - **CLI Coverage:** 96% average across all CLI modules (chief 100%, patrol 92%, policy 97%, forecasting 94%)
+- **Integration Test Pattern:** pytest.mark.integration, --version flag for output isolation, pattern matching (not exact values)
+- **Coverage Baseline (07-06):** 47% overall, CLI modules 92-100%, gaps in legacy code (to be deleted in Phase 8)
 
 ---
-*State updated: 2026-02-05 03:13 UTC*
+*State updated: 2026-02-05 03:36 UTC*
