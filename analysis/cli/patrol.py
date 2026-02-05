@@ -51,6 +51,7 @@ def hotspots(
     console.print(f"  Fast mode: {fast}")
     console.print()
 
+    # Multi-task progress bar for sequential workflow
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -58,13 +59,21 @@ def hotspots(
         TaskProgressColumn(),
         TimeRemainingColumn(),
     ) as progress:
-        load_task = progress.add_task("Loading crime data...", total=100)
+        # Create all tasks upfront (hidden initially)
+        load_task = progress.add_task("Loading crime data...", total=100, visible=False)
+        clean_task = progress.add_task("Cleaning coordinates...", total=100, visible=False)
+        cluster_task = progress.add_task("Running DBSCAN clustering...", total=100, visible=False)
+        output_task = progress.add_task("Saving outputs...", total=100, visible=False)
+
+        # Stage 1: Load data
+        progress.update(load_task, visible=True)
         df: DataFrame = load_crime_data()
         if fast:
             df = df.sample(frac=config.fast_sample_frac, random_state=42).copy()
-        progress.update(load_task, advance=100)
+        progress.update(load_task, advance=100, description="Data loaded")
 
-        clean_task = progress.add_task("Cleaning coordinates...", total=100)
+        # Stage 2: Clean coordinates
+        progress.update(clean_task, visible=True)
 
         # Filter for valid coordinates (Philadelphia bounds)
         # Use point_x and point_y columns (not lng/lat)
@@ -75,7 +84,8 @@ def hotspots(
 
         progress.update(clean_task, advance=100, description=f"Cleaned to {len(df)} valid points")
 
-        cluster_task = progress.add_task("Running DBSCAN clustering...", total=100)
+        # Stage 3: Run DBSCAN clustering
+        progress.update(cluster_task, visible=True)
 
         # Try to import sklearn for clustering
         try:
@@ -98,7 +108,8 @@ def hotspots(
             n_clusters = 0
             n_noise = len(df)
 
-        output_task = progress.add_task("Saving outputs...", total=100)
+        # Stage 4: Save outputs
+        progress.update(output_task, visible=True)
         output_path = Path(config.output_dir) / config.version / "patrol"
         output_path.mkdir(parents=True, exist_ok=True)
 
@@ -114,7 +125,7 @@ def hotspots(
             f.write(f"  Clusters found: {n_clusters}\n")
             f.write(f"  Noise points: {n_noise}\n")
 
-        progress.update(output_task, advance=100)
+        progress.update(output_task, advance=100, description="Outputs saved")
 
     console.print()
     console.print("[green]:heavy_check_mark:[/green] [bold green]Analysis complete[/bold green]")

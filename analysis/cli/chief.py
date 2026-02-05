@@ -41,7 +41,7 @@ def trends(
     console.print(f"  Fast mode: {fast}")
     console.print()
 
-    # Progress bar for multi-stage workflow
+    # Multi-task progress bar for sequential workflow
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -49,20 +49,24 @@ def trends(
         TaskProgressColumn(),
         TimeRemainingColumn(),
     ) as progress:
-        # Stage 1: Load data
-        load_task = progress.add_task("Loading crime data...", total=100)
+        # Create all tasks upfront (hidden initially)
+        load_task = progress.add_task("Loading crime data...", total=100, visible=False)
+        prep_task = progress.add_task("Preprocessing data...", total=100, visible=False)
+        analyze_task = progress.add_task("Analyzing trends...", total=100, visible=False)
+        output_task = progress.add_task("Saving outputs...", total=100, visible=False)
 
+        # Stage 1: Load data
+        progress.update(load_task, visible=True)
         df = load_crime_data(clean=True)
         if fast:
             df = df.sample(frac=config.fast_sample_frac, random_state=42)
             console.print(
                 f"[yellow]Fast mode: Using {len(df)} rows ({config.fast_sample_frac:.0%} sample)[/yellow]"
             )
-
         progress.update(load_task, advance=100, description="Data loaded")
 
         # Stage 2: Preprocess data
-        prep_task = progress.add_task("Preprocessing data...", total=100)
+        progress.update(prep_task, visible=True)
 
         # Add temporal features
         df = extract_temporal_features(df)
@@ -78,7 +82,7 @@ def trends(
         progress.update(prep_task, advance=100, description="Preprocessing complete")
 
         # Stage 3: Generate analysis
-        analyze_task = progress.add_task("Analyzing trends...", total=100)
+        progress.update(analyze_task, visible=True)
 
         # Aggregate by year
         annual_df = aggregate_by_period(
@@ -88,7 +92,7 @@ def trends(
         progress.update(analyze_task, advance=100, description="Analysis complete")
 
         # Stage 4: Save outputs
-        output_task = progress.add_task("Saving outputs...", total=100)
+        progress.update(output_task, visible=True)
 
         # Create output directory
         output_path = Path(config.output_dir) / config.version / "chief"
@@ -155,12 +159,18 @@ def seasonality(
         analyze_task = progress.add_task("Analyzing seasonality...", total=100)
 
         # Filter for complete years
-        df_filtered = filter_by_date_range(df, start="2018-01-01", end="2023-12-31", date_col="dispatch_date")
+        df_filtered = filter_by_date_range(
+            df, start="2018-01-01", end="2023-12-31", date_col="dispatch_date"
+        )
 
         # Calculate seasonal averages
         df_filtered = df_filtered.copy()
         df_filtered["season"] = df_filtered["month"].apply(
-            lambda m: "summer" if m in config.summer_months else ("winter" if m in config.winter_months else "other")
+            lambda m: (
+                "summer"
+                if m in config.summer_months
+                else ("winter" if m in config.winter_months else "other")
+            )
         )
         seasonal_counts = df_filtered.groupby("season")["objectid"].count()
 
@@ -176,7 +186,7 @@ def seasonality(
             f.write("=" * 40 + "\n")
             f.write(f"Summer months: {config.summer_months}\n")
             f.write(f"Winter months: {config.winter_months}\n")
-            f.write(f"\nSeasonal averages:\n")
+            f.write("\nSeasonal averages:\n")
             for season, count in seasonal_counts.items():
                 f.write(f"  {season.capitalize()}: {count:,.0f} incidents\n")
 
@@ -229,14 +239,18 @@ def covid(
         # Get pre-COVID baseline
         before_periods = []
         for year in config.before_years:
-            year_data = filter_by_date_range(df, start=f"{year}-01-01", end=f"{year}-12-31", date_col="dispatch_date")
+            year_data = filter_by_date_range(
+                df, start=f"{year}-01-01", end=f"{year}-12-31", date_col="dispatch_date"
+            )
             before_periods.append(year_data)
 
         baseline_df = pd.concat(before_periods, ignore_index=True)
         baseline_avg = len(baseline_df) / len(config.before_years)
 
         # Get post-COVID period (2021-2022)
-        after_df = filter_by_date_range(df, start="2021-01-01", end="2022-12-31", date_col="dispatch_date")
+        after_df = filter_by_date_range(
+            df, start="2021-01-01", end="2022-12-31", date_col="dispatch_date"
+        )
 
         progress.update(analyze_task, advance=100)
 
