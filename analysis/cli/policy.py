@@ -36,7 +36,7 @@ def retail_theft(
     from rich.progress import Progress
 
     config = RetailTheftConfig(
-        baseline_start=baseline_start, baseline_end=baseline_end, version=version, fast_mode=fast
+        baseline_start=baseline_start, baseline_end=baseline_end, version=version
     )
 
     console.print("[bold blue]Retail Theft Analysis[/bold blue]")
@@ -51,8 +51,8 @@ def retail_theft(
         TimeRemainingColumn(),
     ) as progress:
         load_task = progress.add_task("Loading data...", total=100)
-        df = load_crime_data(use_cache=config.cache_enabled)
-        if config.fast_mode:
+        df = load_crime_data()
+        if fast:
             df = df.sample(frac=config.fast_sample_frac, random_state=42)
         progress.update(load_task, advance=100)
 
@@ -105,7 +105,6 @@ def vehicle_crimes(
         start_date=start_date,
         end_date=end_date,
         version=version,
-        fast_mode=fast,
     )
 
     console.print("[bold blue]Vehicle Crimes Analysis[/bold blue]")
@@ -121,8 +120,8 @@ def vehicle_crimes(
         TimeRemainingColumn(),
     ) as progress:
         load_task = progress.add_task("Loading data...", total=100)
-        df = load_crime_data(use_cache=config.cache_enabled)
-        if config.fast_mode:
+        df = load_crime_data()
+        if fast:
             df = df.sample(frac=config.fast_sample_frac, random_state=42)
         progress.update(load_task, advance=100)
 
