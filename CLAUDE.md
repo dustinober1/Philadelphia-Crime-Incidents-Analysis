@@ -89,6 +89,8 @@ pre-commit install
 /gsd:progress
 ```
 
+**Gap Closure Pattern:** Executors run in parallel to discover gaps, verifier documents them in VERIFICATION.md, orchestrator closes gaps with direct commits, re-verification confirms success.
+
 ### Running Tests
 
 ```bash
@@ -262,6 +264,8 @@ See `AGENTS.md` for complete notebook rules.
 - Cache performance tests: time first vs second load, verify 5x+ speedup
 - Coverage target: 90%+ for all new modules
 - Mark slow tests with `@pytest.mark.slow` decorator
+- CLI tests use `CliRunner` from `typer.testing` with `--fast` flag for fast execution
+- Integration tests use `--version test` to avoid cluttering production reports directory
 
 ### CLI Development Guidelines (v1.1)
 
@@ -270,6 +274,13 @@ See `AGENTS.md` for complete notebook rules.
 - Fast mode flag `--fast` for 10% sampling in all commands
 - Output files go to `reports/{version}/{group}/` directory structure
 - Graceful fallback for optional dependencies (prophet, sklearn, geopandas)
+
+### Visualization Guidelines (v1.1)
+
+- Import from `analysis.visualization`: `save_figure()`, `setup_style()`, `plot_line()`, `plot_bar()`, `plot_heatmap()`
+- All CLI figures must call `plt.close(fig)` after `save_figure()` to prevent memory leaks in tests
+- Use `--output-format png|svg|pdf` argument for multi-format output support
+- Figures saved to `reports/{version}/{group}/` with configurable naming
 
 ## Key Dependencies
 
