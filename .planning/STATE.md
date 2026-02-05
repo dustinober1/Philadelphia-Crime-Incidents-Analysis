@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-05 (07-09: Patrol and Policy Output Format - Phase 7 Almost Complete)
-**Last Execution:** Phase 7 Plan 9 (Patrol and Policy Output Format)
+**Updated:** 2026-02-05 (07-10: Wire Figure Generation - Phase 7 Complete)
+**Last Execution:** Phase 7 Plan 10 (Wire Figure Generation)
 
 ---
 
@@ -28,21 +28,21 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 7 - Visualization & Testing (9/10 complete)
-**Plan:** 9/10
-**Status:** 🟢 Almost Complete (Visualization module foundation complete, pytest fixtures and all CLI tests complete, integration tests and coverage measurement done, pre-commit pytest hook configured, CLI output format argument added to Chief and Forecasting commands)
-**Last Activity:** 2026-02-05 — Completed 07-09: Patrol and Policy Output Format (--output-format on Patrol and Policy commands)
+**Phase:** 7 - Visualization & Testing (10/10 complete)
+**Plan:** 10/10
+**Status:** ✅ COMPLETE (Visualization module foundation complete, pytest fixtures and all CLI tests complete, integration tests and coverage measurement done, pre-commit pytest hook configured, all CLI commands generate figures with --output-format argument)
+**Last Activity:** 2026-02-05 — Completed 07-10: Wire Figure Generation (All 13 CLI commands now generate publication-quality figures)
 
 **Progress Bar:**
 
 ```
 v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: ██████░░░░░░░░░░░░░░  38% (1.69/5 phases complete, Phase 7 🟢)
+v1.1: ██████░░░░░░░░░░░░░░  38% (1.70/5 phases complete, Phase 7 ✅)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🟢 Phase 7 Almost Complete (Phase 5 ✅, Phase 6 ✅, Phase 7: 9/10, Phase 8 pending)
+- v1.1: ✅ Phase 7 Complete (Phase 5 ✅, Phase 6 ✅, Phase 7 ✅, Phase 8 pending)
 
 ---
 
@@ -245,6 +245,10 @@ Plans: 5 plans
 | Integration | pytest.mark.integration decorator | Categorizes integration tests separately from unit tests |
 | Coverage | CLI modules achieve 90%+ target | chief 100%, patrol 92%, policy 97%, forecasting 94% |
 | Coverage | Legacy code at 0-60% coverage | Will be deleted in Phase 8, not a blocker for 90% goal |
+| Figure Generation | All 13 CLI commands generate figures using visualization utilities | plot_line, plot_bar, plot_heatmap, save_figure with output_format parameter |
+| Figure Generation | Close matplotlib figures after saving to prevent memory leaks | plt.close(fig) after save_figure() in forecasting commands |
+| Figure Generation | Skip figure generation for commands requiring optional dependencies | hotspots (sklearn), robbery-heatmap (seaborn), census-rates (geopandas), events (event data) |
+| Figure Generation | Tests verify figure creation with correct format extension | Check for .png, .svg, .pdf files in output directories |
 
 ### Validated Patterns (v1.0)
 - Data loading via `analysis.utils.load_data()` → To be replaced in Phase 5
@@ -345,6 +349,8 @@ Plans: 5 plans
 - **CLI Coverage:** 96% average across all CLI modules (chief 100%, patrol 92%, policy 97%, forecasting 94%)
 - **Integration Test Pattern:** pytest.mark.integration, --version flag for output isolation, pattern matching (not exact values)
 - **Coverage Baseline (07-06):** 47% overall, CLI modules 92-100%, gaps in legacy code (to be deleted in Phase 8)
+- **Figure Generation Complete (07-10):** All 13 CLI commands generate publication-quality figures in PNG/SVG/PDF formats via --output-format argument
+- **Figure Tests Updated:** Tests verify figure creation with correct format extension for all commands
 
 ---
-*State updated: 2026-02-05 11:42 UTC*
+*State updated: 2026-02-05 12:19 UTC*
