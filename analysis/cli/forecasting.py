@@ -36,7 +36,12 @@ def time_series(
     output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Generate crime rate forecasts."""
-    config = TimeSeriesConfig(forecast_horizon=horizon, model_type=model_type, version=version, output_format=output_format)
+    config = TimeSeriesConfig(
+        forecast_horizon=horizon,
+        model_type=model_type,
+        version=version,
+        output_format=output_format,
+    )
 
     console.print("[bold blue]Time Series Forecasting[/bold blue]")
     console.print(f"  Horizon: {config.forecast_horizon} periods")
@@ -99,7 +104,9 @@ def time_series(
             historical_df = monthly_df.copy()
             historical_df["type"] = "historical"
 
-            forecast_subset = forecast[forecast["ds"] > monthly_df["ds"].max()][["ds", "yhat"]].copy()
+            forecast_subset = forecast[forecast["ds"] > monthly_df["ds"].max()][
+                ["ds", "yhat"]
+            ].copy()
             forecast_subset.columns = ["ds", "y"]
             forecast_subset["type"] = "forecast"
 
@@ -143,7 +150,9 @@ def classification(
     output_format: Literal["png", "svg", "pdf"] = typer.Option("png", help="Figure output format"),
 ) -> None:
     """Train violence classification model."""
-    config = ClassificationConfig(test_size=test_size, random_state=random_state, version=version, output_format=output_format)
+    config = ClassificationConfig(
+        test_size=test_size, random_state=random_state, version=version, output_format=output_format
+    )
 
     console.print("[bold blue]Violence Classification[/bold blue]")
     console.print(f"  Test size: {config.classification_test_size}")
@@ -213,10 +222,9 @@ def classification(
 
         # Create figure: model performance bar plot (if sklearn available)
         if test_score is not None:
-            accuracy_df = pd.DataFrame({
-                "dataset": ["Train", "Test"],
-                "accuracy": [train_score, test_score]
-            })
+            accuracy_df = pd.DataFrame(
+                {"dataset": ["Train", "Test"], "accuracy": [train_score, test_score]}
+            )
 
             fig = plot_bar(
                 accuracy_df,
