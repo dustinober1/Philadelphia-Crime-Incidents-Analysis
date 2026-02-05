@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-05 (07-02: Pytest fixtures for fast unit tests - Phase 7 In Progress)
-**Last Execution:** Phase 7 Plan 2 (Pytest fixtures verification)
+**Updated:** 2026-02-05 (07-03: Chief CLI end-to-end tests - Phase 7 In Progress)
+**Last Execution:** Phase 7 Plan 3 (Chief CLI tests)
 
 ---
 
@@ -28,21 +28,21 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 7 - Visualization & Testing (1/8 complete)
-**Plan:** 1/8
-**Status:** 🟡 In Progress (Visualization module foundation complete, remaining visualization utilities and tests pending)
-**Last Activity:** 2026-02-05 — Completed 07-01: Visualization module foundation (style, helpers, plots)
+**Phase:** 7 - Visualization & Testing (3/8 complete)
+**Plan:** 3/8
+**Status:** 🟡 In Progress (Visualization module foundation complete, pytest fixtures and Chief CLI tests complete, remaining visualization utilities and tests pending)
+**Last Activity:** 2026-02-05 — Completed 07-03: Chief CLI end-to-end tests (6 tests, 100% coverage of chief.py)
 
 **Progress Bar:**
 
 ```
 v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: ██████░░░░░░░░░░░░░░  36% (1.38/5 phases complete, Phase 7 🟡)
+v1.1: ██████░░░░░░░░░░░░░░  36% (1.44/5 phases complete, Phase 7 🟡)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🟡 Phase 7 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7: 1/8, Phase 8 pending)
+- v1.1: 🟡 Phase 7 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7: 3/8, Phase 8 pending)
 
 ---
 
@@ -162,16 +162,18 @@ Plans: 5 plans
 - Multi-task sequential progress for complex operations (chief trends, patrol hotspots)
 - All 13 commands use consistent 5-column progress bar setup
 
-### Phase 7 — Visualization & Testing 🟡 In Progress (1/8 complete)
+### Phase 7 — Visualization & Testing 🟡 In Progress (3/8 complete)
 **Goal:** Implement comprehensive visualization utilities with multi-format output and complete testing coverage for all analysis scripts
 
 **Requirements covered:**
 - Visualization: VIZ-01 (centralized style), VIZ-02 (multi-format save), VIZ-03 (plot functions)
-- Testing: Pending
+- Testing: TEST-01 (CLI end-to-end tests for Chief commands)
 
-**Plans:** 1/8 complete
+**Plans:** 3/8 complete
 - 07-01: Visualization module foundation ✅ Complete (style.py, helpers.py, plots.py, __init__.py)
-- 07-02 through 07-08: Pending (pytest fixtures, CLI tests, coverage, remaining visualizations)
+- 07-02: Pytest fixtures ✅ Complete (sample_crime_df, tmp_output_dir)
+- 07-03: Chief CLI tests ✅ Complete (test_cli_chief.py with 6 tests, 100% coverage)
+- 07-04 through 07-08: Pending (CLI tests for other groups, coverage verification, gap closure)
 
 ### Phase 8 — Documentation & Migration ⏸️ Pending
 **Goal:** Document the new script-based workflow, migrate all notebooks to scripts, verify outputs, and update project documentation
@@ -226,6 +228,11 @@ Plans: 5 plans
 | Rich | Color coding: [bold blue] headers, [green] success, [yellow] warnings, [cyan] data | Consistent visual language across all commands |
 | Rich | Use Rich Table for structured data display | version command shows clean tabular output |
 | Rich | Use Rich Panel for informational content | info command frames content in bordered box |
+| Testing | Use CliRunner from typer.testing for CLI tests | Clean invocation without subprocess overhead |
+| Testing | Always use --fast flag in CLI tests | Keeps tests fast (~3s) by using 10% data sample |
+| Testing | Use --version test for test outputs | Avoids cluttering production reports/ directory |
+| Testing | Test class structure by command group | Better organization (TestChiefTrends, TestChiefSeasonality, TestChiefCovid) |
+| Testing | Verify both exit_code and stdout | Robust testing checks exit code == 0 and expected content |
 
 ### Validated Patterns (v1.0)
 - Data loading via `analysis.utils.load_data()` → To be replaced in Phase 5
@@ -285,12 +292,12 @@ Plans: 5 plans
 - [x] Plan Phase 7 (Visualization & Testing)
 - [x] Execute Phase 7 Plan 01 (Style configuration)
 - [x] Execute Phase 7 Plan 02 (Pytest fixtures)
-- [ ] Execute Phase 7 Plan 03 (Multi-format save_figure)
-- [ ] Execute Phase 7 Plan 04 (Plot utilities)
-- [ ] Execute Phase 7 Plan 05 (CLI tests)
-- [ ] Execute Phase 7 Plan 06 (Coverage verification)
-- [ ] Execute Phase 7 Plan 07 (Gap closure)
-- [ ] Execute Phase 7 Plan 08 (Integration tests)
+- [x] Execute Phase 7 Plan 03 (Chief CLI tests)
+- [ ] Execute Phase 7 Plan 04 (CLI tests for other groups)
+- [ ] Execute Phase 7 Plan 05 (Coverage verification)
+- [ ] Execute Phase 7 Plan 06 (Gap closure)
+- [ ] Execute Phase 7 Plan 07 (Integration tests)
+- [ ] Execute Phase 7 Plan 08 (Final verification)
 - [ ] Plan Phase 8 (Documentation & Migration)
 - [ ] Execute Phase 8 plans
 - [ ] Verify all v1.1 requirements satisfied
@@ -312,9 +319,10 @@ Plans: 5 plans
 - Rich progress pattern: 4-stage workflow (loading, preprocessing, analysis, output) with SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeRemainingColumn
 - CLI entry point: `python -m analysis.cli` working with help text and Rich-formatted version/info commands
 - Configuration system: 13 config schemas with 5 YAML files, multi-source loading (CLI > env > YAML > defaults)
-- Test coverage: classification.py 100%, temporal.py 100%, loading.py 85%, validation.py 92%, preprocessing.py 100%
-- Total test count: 183 tests passing (93 new data layer tests)
+- Test coverage: classification.py 100%, temporal.py 100%, loading.py 85%, validation.py 92%, preprocessing.py 100%, chief.py 100%
+- Total test count: 190 tests passing (93 data layer + 6 Chief CLI tests + conftest)
 - **ARCH-05 satisfied:** All CLI commands show Rich progress bars with consistent styling and color-coded messages
+- **CLI Testing Pattern Established:** CliRunner invocation, --fast flag, exit_code verification, stdout checks, file existence checks
 
 ---
-*State updated: 2026-02-05 02:30 UTC*
+*State updated: 2026-02-05 02:44 UTC*
