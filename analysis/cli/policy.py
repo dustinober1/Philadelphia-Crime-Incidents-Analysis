@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
+import matplotlib.pyplot as plt
 import typer
 from rich.console import Console
 from rich.progress import (
@@ -100,6 +101,7 @@ def retail_theft(
 
         figure_path = output_path / f"{config.report_name}_trend.{config.output_format}"
         save_figure(fig, figure_path, output_format=config.output_format)
+        plt.close(fig)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
@@ -188,6 +190,7 @@ def vehicle_crimes(
 
         figure_path = output_path / f"{config.report_name}_trend.{config.output_format}"
         save_figure(fig, figure_path, output_format=config.output_format)
+        plt.close(fig)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
@@ -260,6 +263,7 @@ def composition(
 
         figure_path = output_path / f"{config.report_name}_categories.{config.output_format}"
         save_figure(fig, figure_path, output_format=config.output_format)
+        plt.close(fig)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:

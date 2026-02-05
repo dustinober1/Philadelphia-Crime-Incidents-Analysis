@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
+import matplotlib.pyplot as plt
 import typer
 from rich.console import Console
 from rich.progress import (
@@ -133,6 +134,7 @@ def hotspots(
 
             figure_path = output_path / f"{config.report_name}_clusters.{config.output_format}"
             save_figure(fig, figure_path, output_format=config.output_format)
+            plt.close(fig)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
