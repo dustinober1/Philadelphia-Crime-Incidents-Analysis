@@ -1,0 +1,24 @@
+# Policy evaluation analysis configurations
+
+# Retail theft trend
+focus_stores: null
+baseline_start: "2019-01-01"
+baseline_end: "2020-02-01"
+
+# Vehicle crimes
+ucr_codes: [700]
+start_date: "2019-01-01"
+end_date: "2023-12-31"
+
+# Crime composition
+group_by_ucr_hundred: true
+top_n: 10
+
+# Event impact
+days_before: 7
+days_after: 7
+event_types:
+  - Eagles_Home
+  - Phillies_Home
+  - Sixers_Home
+  - Flyers_Home

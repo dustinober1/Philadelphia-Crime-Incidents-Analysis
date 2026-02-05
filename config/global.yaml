@@ -1,0 +1,20 @@
+# Global shared configuration for all crime analyses
+# These values can be overridden by environment variables (CRIME_* prefix)
+# or CLI arguments (highest priority)
+
+# Data paths (relative to project root)
+crime_data_path: data/crime_incidents_combined.parquet
+boundaries_dir: data/boundaries
+external_dir: data/external
+
+# Output settings
+output_dir: reports
+dpi: 300
+output_format: png
+
+# Performance options
+fast_sample_frac: 0.1
+cache_enabled: true
+
+# Logging
+log_level: INFO

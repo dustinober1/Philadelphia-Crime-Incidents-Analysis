@@ -1,0 +1,17 @@
+# Chief-level trend analysis configurations
+
+# Annual trends analysis
+start_year: 2015
+end_year: 2024
+min_complete_months: 12
+version: v1.0
+
+# Seasonality analysis
+summer_months: [6, 7, 8]
+winter_months: [12, 1, 2]
+significance_level: 0.05
+
+# COVID impact analysis
+lockdown_date: "2020-03-01"
+before_years: [2018, 2019]
+after_years: [2021, 2022]
