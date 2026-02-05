@@ -7,8 +7,12 @@ Provides command groups for each analysis area:
 - forecasting: Forecasting analyses (time series, classification)
 """
 
+from pathlib import Path
+
 import typer
 from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
 
 # Import command groups
 from analysis.cli import chief, forecasting, patrol, policy
@@ -51,25 +55,44 @@ app.add_typer(
 @app.command()
 def version() -> None:
     """Show version information."""
-    console.print("[bold blue]Crime Analysis CLI[/bold blue]")
-    console.print("  Version: [cyan]v1.1[/cyan]")
-    console.print(f"  typer: [cyan]{typer.__version__}[/cyan]")
+    # Create a formatted table for version info
+    table = Table(title="Crime Analysis CLI", show_header=False)
+    table.add_column("Component", style="cyan")
+    table.add_column("Version", style="green")
+
+    table.add_row("CLI Version", "v1.1")
+    table.add_row("typer", f"{typer.__version__}")
+    table.add_row("Python", "3.14+")
+
+    console.print(table)
 
 
 @app.command()
 def info() -> None:
     """Show project information."""
-    from pathlib import Path
+    info_text = """
+[bold cyan]Data sources:[/bold cyan]
+  * Philadelphia Police Department crime incidents
+  * U.S. Census Bureau demographic data
+  * City event schedules
 
-    console.print("[bold blue]Philadelphia Crime Incidents Analysis[/bold blue]")
+[bold cyan]Analysis areas:[/bold cyan]
+  * Chief: High-level trends and seasonality
+  * Patrol: Spatial hotspots and district severity
+  * Policy: Retail theft, vehicle crimes, event impacts
+  * Forecasting: Time series and violence classification
+
+[bold cyan]Reports directory:[/bold cyan] [green]reports/[/green]
+"""
+
+    panel = Panel(
+        info_text.strip(),
+        title="[bold]Philadelphia Crime Incidents Analysis[/bold]",
+        border_style="blue",
+    )
+    console.print(panel)
     console.print()
-    console.print("Data sources:")
-    console.print("  - Philadelphia Police Department crime incidents")
-    console.print("  - U.S. Census Bureau demographic data")
-    console.print("  - City event schedules")
-    console.print()
-    console.print("Reports directory: [cyan]reports/[/cyan]")
-    console.print(f"  (resolved to: [cyan]{Path('reports').resolve()}[/cyan])")
+    console.print(f"Resolved path: [cyan]{Path('reports').resolve()}[/cyan]")
 
 
 if __name__ == "__main__":
