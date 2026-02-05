@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
+import pandas as pd
 import typer
 from rich.console import Console
 from rich.progress import (
@@ -19,6 +20,7 @@ from analysis.data.loading import load_crime_data
 from analysis.data.preprocessing import aggregate_by_period
 from analysis.utils.classification import classify_crime_category
 from analysis.utils.temporal import extract_temporal_features
+from analysis.visualization import plot_bar, plot_line, save_figure
 
 app = typer.Typer(help="Forecasting and prediction analyses")
 console = Console()
@@ -90,6 +92,29 @@ def time_series(
         output_task = progress.add_task("Saving outputs...", total=100)
         output_path = Path(config.output_dir) / config.version / "forecasting"
         output_path.mkdir(parents=True, exist_ok=True)
+
+        # Create figure: historical data and forecast (if prophet available)
+        if forecast is not None:
+            historical_df = monthly_df.copy()
+            historical_df["type"] = "historical"
+
+            forecast_subset = forecast[forecast["ds"] > monthly_df["ds"].max()][["ds", "yhat"]].copy()
+            forecast_subset.columns = ["ds", "y"]
+            forecast_subset["type"] = "forecast"
+
+            combined_df = pd.concat([historical_df, forecast_subset], ignore_index=True)
+
+            fig = plot_line(
+                combined_df,
+                x_col="ds",
+                y_col="y",
+                title=f"Crime Forecast - {config.forecast_horizon} Period Horizon",
+                xlabel="Date",
+                ylabel="Incidents",
+            )
+
+            figure_path = output_path / f"{config.report_name}_forecast.{config.output_format}"
+            save_figure(fig, figure_path, output_format=config.output_format)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
@@ -183,6 +208,25 @@ def classification(
         output_task = progress.add_task("Saving outputs...", total=100)
         output_path = Path(config.output_dir) / config.version / "forecasting"
         output_path.mkdir(parents=True, exist_ok=True)
+
+        # Create figure: model performance bar plot (if sklearn available)
+        if test_score is not None:
+            accuracy_df = pd.DataFrame({
+                "dataset": ["Train", "Test"],
+                "accuracy": [train_score, test_score]
+            })
+
+            fig = plot_bar(
+                accuracy_df,
+                x_col="dataset",
+                y_col="accuracy",
+                title="Violence Classification Model Performance",
+                xlabel="Dataset",
+                ylabel="Accuracy",
+            )
+
+            figure_path = output_path / f"{config.report_name}_performance.{config.output_format}"
+            save_figure(fig, figure_path, output_format=config.output_format)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
