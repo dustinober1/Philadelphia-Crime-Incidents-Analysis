@@ -1,7 +1,16 @@
 """Policy evaluation analysis commands."""
 
+from pathlib import Path
+
 import typer
 from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeRemainingColumn,
+)
 
 from analysis.config.schemas.policy import (
     CompositionConfig,
@@ -9,6 +18,8 @@ from analysis.config.schemas.policy import (
     RetailTheftConfig,
     VehicleCrimesConfig,
 )
+from analysis.data.loading import load_crime_data
+from analysis.data.preprocessing import filter_by_date_range
 
 app = typer.Typer(help="Policy evaluation analyses")
 console = Console()
@@ -22,14 +33,60 @@ def retail_theft(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Analyze retail theft trends."""
+    from rich.progress import Progress
+
     config = RetailTheftConfig(
-        baseline_start=baseline_start, baseline_end=baseline_end, version=version
+        baseline_start=baseline_start, baseline_end=baseline_end, version=version, fast_mode=fast
     )
+
     console.print("[bold blue]Retail Theft Analysis[/bold blue]")
     console.print(f"  Baseline: {config.baseline_start} to {config.baseline_end}")
-    console.print(f"  Fast mode: {fast}")
     console.print()
-    console.print("[yellow]Command logic will be implemented in plan 06-06[/yellow]")
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeRemainingColumn(),
+    ) as progress:
+        load_task = progress.add_task("Loading data...", total=100)
+        df = load_crime_data(use_cache=config.cache_enabled)
+        if config.fast_mode:
+            df = df.sample(frac=config.fast_sample_frac, random_state=42)
+        progress.update(load_task, advance=100)
+
+        filter_task = progress.add_task("Filtering theft incidents...", total=100)
+
+        # Filter for retail theft (UCR 600-699 for general theft)
+        theft_df = df[df["ucr_general"].between(600, 699)].copy()
+
+        # Get baseline period
+        baseline_df = filter_by_date_range(
+            theft_df, config.baseline_start, config.baseline_end, date_col="dispatch_date"
+        )
+        baseline_avg = len(baseline_df)
+
+        progress.update(
+            filter_task, advance=100, description=f"Found {len(theft_df)} theft incidents"
+        )
+
+        output_task = progress.add_task("Saving outputs...", total=100)
+        output_path = Path(config.output_dir) / config.version / "policy"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        summary_file = output_path / f"{config.report_name}_summary.txt"
+        with open(summary_file, "w") as f:
+            f.write("Retail Theft Analysis Summary\n")
+            f.write("=" * 40 + "\n")
+            f.write(f"Baseline period: {config.baseline_start} to {config.baseline_end}\n")
+            f.write(f"Baseline average: {baseline_avg:,.0f} incidents\n")
+            f.write(f"Total theft incidents (all time): {len(theft_df):,.0f}\n")
+
+        progress.update(output_task, advance=100)
+
+    console.print()
+    console.print("[green]:heavy_check_mark:[/green] [bold green]Analysis complete[/bold green]")
 
 
 @app.command(name="vehicle-crimes")
@@ -41,15 +98,64 @@ def vehicle_crimes(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Analyze vehicle crime trends."""
+    from rich.progress import Progress
+
     config = VehicleCrimesConfig(
-        ucr_codes=ucr_codes, start_date=start_date, end_date=end_date, version=version
+        ucr_codes=ucr_codes,
+        start_date=start_date,
+        end_date=end_date,
+        version=version,
+        fast_mode=fast,
     )
+
     console.print("[bold blue]Vehicle Crimes Analysis[/bold blue]")
     console.print(f"  UCR codes: {config.ucr_codes}")
     console.print(f"  Period: {config.start_date} to {config.end_date}")
-    console.print(f"  Fast mode: {fast}")
     console.print()
-    console.print("[yellow]Command logic will be implemented in plan 06-06[/yellow]")
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeRemainingColumn(),
+    ) as progress:
+        load_task = progress.add_task("Loading data...", total=100)
+        df = load_crime_data(use_cache=config.cache_enabled)
+        if config.fast_mode:
+            df = df.sample(frac=config.fast_sample_frac, random_state=42)
+        progress.update(load_task, advance=100)
+
+        filter_task = progress.add_task("Filtering vehicle crimes...", total=100)
+
+        # Filter by UCR codes
+        vehicle_df = df[df["ucr_general"].isin(config.ucr_codes)].copy()
+
+        # Filter by date range
+        vehicle_df = filter_by_date_range(
+            vehicle_df, config.start_date, config.end_date, date_col="dispatch_date"
+        )
+
+        progress.update(
+            filter_task, advance=100, description=f"Found {len(vehicle_df)} vehicle crime incidents"
+        )
+
+        output_task = progress.add_task("Saving outputs...", total=100)
+        output_path = Path(config.output_dir) / config.version / "policy"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        summary_file = output_path / f"{config.report_name}_summary.txt"
+        with open(summary_file, "w") as f:
+            f.write("Vehicle Crimes Analysis Summary\n")
+            f.write("=" * 40 + "\n")
+            f.write(f"UCR codes: {config.ucr_codes}\n")
+            f.write(f"Period: {config.start_date} to {config.end_date}\n")
+            f.write(f"Total incidents: {len(vehicle_df):,.0f}\n")
+
+        progress.update(output_task, advance=100)
+
+    console.print()
+    console.print("[green]:heavy_check_mark:[/green] [bold green]Analysis complete[/bold green]")
 
 
 @app.command(name="composition")
