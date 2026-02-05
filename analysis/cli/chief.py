@@ -19,6 +19,7 @@ from analysis.data.loading import load_crime_data
 from analysis.data.preprocessing import aggregate_by_period, filter_by_date_range
 from analysis.utils.classification import classify_crime_category
 from analysis.utils.temporal import extract_temporal_features
+from analysis.visualization import plot_bar, plot_line, save_figure
 
 # Create typer app for this command group
 app = typer.Typer(help="Chief-level trend analyses (annual trends, seasonality, COVID impact)")
@@ -35,7 +36,9 @@ def trends(
 ) -> None:
     """Generate annual crime trends analysis."""
     # Load config (fast flag controls behavior, not stored in config)
-    config = TrendsConfig(start_year=start_year, end_year=end_year, version=version, output_format=output_format)
+    config = TrendsConfig(
+        start_year=start_year, end_year=end_year, version=version, output_format=output_format
+    )
 
     console.print("[bold blue]Annual Trends Analysis[/bold blue]")
     console.print(f"  Period: {config.start_year}-{config.end_year}")
@@ -100,6 +103,20 @@ def trends(
         output_path = Path(config.output_dir) / config.version / "chief"
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # Create figure: annual crime trend line
+        fig = plot_line(
+            annual_df,
+            x_col="dispatch_date",
+            y_col="count",
+            title=f"Annual Crime Trends ({config.start_year}-{config.end_year})",
+            xlabel="Year",
+            ylabel="Number of Incidents",
+        )
+
+        # Save figure
+        figure_path = output_path / f"{config.report_name}_trend.{config.output_format}"
+        save_figure(fig, figure_path, output_format=config.output_format)
+
         # Save summary statistics
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
@@ -132,7 +149,10 @@ def seasonality(
 ) -> None:
     """Analyze seasonal crime patterns."""
     config = SeasonalityConfig(
-        summer_months=summer_months, winter_months=winter_months, version=version, output_format=output_format
+        summer_months=summer_months,
+        winter_months=winter_months,
+        version=version,
+        output_format=output_format,
     )
 
     console.print("[bold blue]Seasonality Analysis[/bold blue]")
@@ -183,6 +203,21 @@ def seasonality(
         output_path = Path(config.output_dir) / config.version / "chief"
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # Create figure: seasonal comparison bar plot
+        seasonal_df = seasonal_counts.reset_index()
+        fig = plot_bar(
+            seasonal_df,
+            x_col="season",
+            y_col="objectid",
+            title="Seasonal Crime Comparison",
+            xlabel="Season",
+            ylabel="Average Incidents",
+        )
+
+        # Save figure
+        figure_path = output_path / f"{config.report_name}_seasonal.{config.output_format}"
+        save_figure(fig, figure_path, output_format=config.output_format)
+
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
             f.write("Seasonality Analysis Summary\n")
@@ -212,7 +247,12 @@ def covid(
     """Analyze COVID impact on crime patterns."""
     import pandas as pd
 
-    config = COVIDConfig(lockdown_date=lockdown_date, before_years=before_years, version=version, output_format=output_format)
+    config = COVIDConfig(
+        lockdown_date=lockdown_date,
+        before_years=before_years,
+        version=version,
+        output_format=output_format,
+    )
 
     console.print("[bold blue]COVID Impact Analysis[/bold blue]")
     console.print(f"  Lockdown date: {config.lockdown_date}")
@@ -261,6 +301,23 @@ def covid(
         output_task = progress.add_task("Saving outputs...", total=100)
         output_path = Path(config.output_dir) / config.version / "chief"
         output_path.mkdir(parents=True, exist_ok=True)
+
+        # Create figure: before/after comparison bar plot
+        comparison_df = pd.DataFrame(
+            {"Period": ["Before (avg)", "After"], "Incidents": [baseline_avg, len(after_df)]}
+        )
+        fig = plot_bar(
+            comparison_df,
+            x_col="Period",
+            y_col="Incidents",
+            title="COVID Impact on Crime",
+            xlabel="Period",
+            ylabel="Number of Incidents",
+        )
+
+        # Save figure
+        figure_path = output_path / f"{config.report_name}_covid_impact.{config.output_format}"
+        save_figure(fig, figure_path, output_format=config.output_format)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
