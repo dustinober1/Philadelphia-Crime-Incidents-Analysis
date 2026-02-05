@@ -6,6 +6,7 @@ import typer
 from rich.console import Console
 from rich.progress import (
     BarColumn,
+    Progress,
     SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
@@ -33,8 +34,6 @@ def retail_theft(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Analyze retail theft trends."""
-    from rich.progress import Progress
-
     config = RetailTheftConfig(
         baseline_start=baseline_start, baseline_end=baseline_end, version=version
     )
@@ -98,8 +97,6 @@ def vehicle_crimes(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Analyze vehicle crime trends."""
-    from rich.progress import Progress
-
     config = VehicleCrimesConfig(
         ucr_codes=ucr_codes,
         start_date=start_date,
@@ -164,8 +161,6 @@ def composition(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Analyze crime composition over time."""
-    from rich.progress import Progress
-
     config = CompositionConfig(top_n=top_n, version=version)
 
     console.print("[bold blue]Crime Composition Analysis[/bold blue]")
@@ -223,8 +218,6 @@ def events(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Analyze impact of events on crime."""
-    from rich.progress import Progress
-
     config = EventsConfig(days_before=days_before, days_after=days_after, version=version)
 
     console.print("[bold blue]Event Impact Analysis[/bold blue]")
@@ -248,7 +241,7 @@ def events(
 
         # Try to load event data
         try:
-            from analysis.event_utils import load_event_data, get_event_windows
+            from analysis.event_utils import get_event_windows, load_event_data
 
             events_df = load_event_data()
             event_windows = get_event_windows(events_df, config.days_before, config.days_after)
@@ -269,7 +262,9 @@ def events(
         with open(summary_file, "w") as f:
             f.write("Event Impact Analysis Summary\n")
             f.write("=" * 40 + "\n")
-            f.write(f"Event window: {config.days_before} days before, {config.days_after} days after\n")
+            f.write(
+                f"Event window: {config.days_before} days before, {config.days_after} days after\n"
+            )
             f.write(f"Total incidents in dataset: {len(df):,.0f}\n")
             if event_windows is not None:
                 f.write(f"Event windows analyzed: {len(event_windows)}\n")

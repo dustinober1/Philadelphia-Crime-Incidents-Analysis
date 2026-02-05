@@ -7,6 +7,7 @@ import typer
 from rich.console import Console
 from rich.progress import (
     BarColumn,
+    Progress,
     SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
@@ -36,8 +37,6 @@ def hotspots(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Identify crime hotspots using spatial clustering."""
-    from rich.progress import Progress
-
     from analysis.data.loading import load_crime_data
 
     config = HotspotsConfig(
@@ -132,7 +131,6 @@ def robbery_heatmap(
 ) -> None:
     """Generate temporal heatmap for robbery incidents."""
     import pandas as pd
-    from rich.progress import Progress
 
     from analysis.data.loading import load_crime_data
 
@@ -197,8 +195,6 @@ def district_severity(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Calculate severity scores by police district."""
-    from rich.progress import Progress
-
     from analysis.data.loading import load_crime_data
 
     config = DistrictConfig(districts=districts, version=version)
@@ -266,8 +262,6 @@ def census_rates(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Calculate crime rates per census tract."""
-    from rich.progress import Progress
-
     from analysis.data.loading import load_crime_data
     from analysis.utils.spatial import load_boundaries
 

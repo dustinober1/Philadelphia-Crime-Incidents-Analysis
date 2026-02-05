@@ -6,6 +6,7 @@ import typer
 from rich.console import Console
 from rich.progress import (
     BarColumn,
+    Progress,
     SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
@@ -30,8 +31,6 @@ def time_series(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Generate crime rate forecasts."""
-    from rich.progress import Progress
-
     config = TimeSeriesConfig(forecast_horizon=horizon, model_type=model_type, version=version)
 
     console.print("[bold blue]Time Series Forecasting[/bold blue]")
@@ -60,7 +59,9 @@ def time_series(
         monthly_df = monthly_df[["dispatch_date", "count"]].copy()
         monthly_df.columns = ["ds", "y"]
 
-        progress.update(prep_task, advance=100, description=f"Prepared {len(monthly_df)} months of data")
+        progress.update(
+            prep_task, advance=100, description=f"Prepared {len(monthly_df)} months of data"
+        )
 
         model_task = progress.add_task("Training forecast model...", total=100)
 
@@ -74,9 +75,11 @@ def time_series(
             future = model.make_future_dataframe(periods=config.forecast_horizon, freq="ME")
             forecast = model.predict(future)
 
-            console.print(f"[green]Prophet model trained successfully[/green]")
+            console.print("[green]Prophet model trained successfully[/green]")
         except ImportError:
-            console.print("[yellow]Warning: prophet not available, using simple trend projection[/yellow]")
+            console.print(
+                "[yellow]Warning: prophet not available, using simple trend projection[/yellow]"
+            )
             # Simple linear trend as fallback
             forecast = None
 
@@ -110,11 +113,7 @@ def classification(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Train violence classification model."""
-    from rich.progress import Progress
-
-    config = ClassificationConfig(
-        test_size=test_size, random_state=random_state, version=version
-    )
+    config = ClassificationConfig(test_size=test_size, random_state=random_state, version=version)
 
     console.print("[bold blue]Violence Classification[/bold blue]")
     console.print(f"  Test size: {config.classification_test_size}")
