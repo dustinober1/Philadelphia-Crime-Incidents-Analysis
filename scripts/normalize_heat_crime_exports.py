@@ -13,11 +13,10 @@ Usage:
   python scripts/normalize_heat_crime_exports.py
 """
 
-from pathlib import Path
-import json
 import sys
-from analysis import report_utils
+from pathlib import Path
 
+from analysis import report_utils
 
 REPORTS = Path("reports")
 

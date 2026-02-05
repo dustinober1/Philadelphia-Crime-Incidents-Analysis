@@ -28,7 +28,7 @@ def _map_test_item(item: dict[str, Any]) -> dict[str, Any]:
     out["conclusion"] = item.get("conclusion") or item.get("interpretation") or item.get("result")
     # confidence interval
     ci = item.get("ci") or item.get("ci_lower") or None
-    if isinstance(ci, (list, tuple)) and len(ci) >= 2:
+    if isinstance(ci, list | tuple) and len(ci) >= 2:
         out["ci_lower"], out["ci_upper"] = ci[0], ci[1]
     else:
         out["ci_lower"] = item.get("ci_lower") or item.get("ciLower") or None

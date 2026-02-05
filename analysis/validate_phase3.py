@@ -168,7 +168,7 @@ def print_validation_report(results: dict, cross_checks: list = None) -> tuple[i
     for notebook, checks in results.items():
         print(f"\n{notebook.upper().replace('_', ' ')}")
         print("-" * 40)
-        for artifact, passed, desc in checks:
+        for _artifact, passed, desc in checks:
             status = "PASS" if passed else "FAIL"
             icon = "✓" if passed else "✗"
             print(f"  {icon} [{status}] {desc}")
@@ -180,7 +180,7 @@ def print_validation_report(results: dict, cross_checks: list = None) -> tuple[i
     if cross_checks:
         print("\nCROSS-REFERENCE CHECKS")
         print("-" * 40)
-        for check_name, passed, desc in cross_checks:
+        for _check_name, passed, desc in cross_checks:
             status = "PASS" if passed else "FAIL"
             icon = "✓" if passed else "✗"
             print(f"  {icon} [{status}] {desc}")

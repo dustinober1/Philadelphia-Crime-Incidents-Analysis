@@ -114,6 +114,10 @@ unfixable = ["B"]
 "tests/*" = ["ARG"]       # Allow unused arguments in tests
 "analysis/utils/__init__.py" = ["ARG"]  # Stub functions need *args/**kwargs for API compatibility
 "analysis/data/preprocessing.py" = ["ARG"]  # date_col parameter for future extensibility
+"analysis/__init__.py" = ["ARG"]  # Stub function _missing_geopandas needs *args/**kwargs
+"analysis/orchestrate_phase1.py" = ["E402"]  # Module level imports after sys.path manipulation
+"analysis/orchestrate_phase2.py" = ["E402"]  # Module level imports after sys.path manipulation
+"analysis/visualization/forecast_plots.py" = ["SIM108"]  # Ternary operator would reduce readability
 
 [tool.ruff.lint.isort]
 known-first-party = ["analysis"]
