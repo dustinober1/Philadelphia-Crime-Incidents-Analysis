@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-05 (06-06: Policy and Forecasting commands implemented)
-**Last Execution:** Phase 6 Plan 6 (Policy and Forecasting commands implementation)
+**Updated:** 2026-02-05 (06-05: Patrol CLI commands complete)
+**Last Execution:** Phase 6 Plan 5 (Patrol CLI commands)
 
 ---
 
@@ -29,20 +29,20 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 ## Current Position
 
 **Phase:** 6 - Configuration & CLI System
-**Plan:** 6/7 complete
-**Status:** 🟢 Nearly Complete (Policy and Forecasting commands implemented)
-**Last Activity:** 2026-02-05 — Completed 06-06: Policy and Forecasting commands implementation
+**Plan:** 5/7 complete
+**Status:** 🟢 Nearly Complete (Patrol commands implemented)
+**Last Activity:** 2026-02-05 — Completed 06-05: Patrol CLI commands with spatial analysis
 
 **Progress Bar:**
 
 ```
 v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: ██████░░░░░░░░░░░░░░  38% (1.38/5 phases complete, Phase 6 6/7)
+v1.1: ██████░░░░░░░░░░░░░░  36% (1.43/5 phases complete, Phase 6 5/7)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🟢 Nearly Complete (Phase 5 complete, Phase 6 6/7 plans done, 1 remaining)
+- v1.1: 🟢 Nearly Complete (Phase 5 complete, Phase 6 5/7 plans done, 2 remaining)
 
 ---
 
@@ -280,21 +280,20 @@ Plans: 5 plans
 - Data layer complete: joblib caching, Pydantic validation, preprocessing utilities, mypy clean
 - Deviations fixed: pydantic installed, geopandas optional, UCR/PSA schema aligned with data, mypy errors fixed
 - Phase 5 complete: 6/6 main plans + 3 gap closure plans (module structure ✅, data layer ✅, quality tooling ✅, mypy fixes ✅, dev dependencies installed ✅, utils tests ✅, data layer tests ✅)
-- Phase 6 progress: 6/7 plans complete (CLI framework dependencies ✅, configuration system ✅, CLI structure ✅, Chief commands ✅, Patrol commands ✅, Policy/Forecasting commands ✅)
-- **CLI System Complete:** All 13 commands functional with full analysis logic
-  - Chief (3): trends, seasonality, covid
-  - Patrol (4): hotspots, robbery-heatmap, district-severity, census-rates
-  - Policy (4): retail-theft, vehicle-crimes, composition, events
-  - Forecasting (2): time-series, classification
+- Phase 6 progress: 5/7 plans complete (CLI framework dependencies ✅, configuration system ✅, CLI structure ✅, Chief commands ✅, Patrol commands ✅)
+- **Plan 06-05 (Patrol Commands) Complete:**
+  - hotspots: DBSCAN clustering with sklearn, coordinate filtering (point_x/point_y), progress bars
+  - robbery-heatmap: UCR code 300-399 filtering, hourly time binning, incident counts by hour
+  - district-severity: UCR hundred-band severity weights, dc_district filtering, district rankings
+  - census-rates: Census boundary loading with fallback, spatial aggregation, population threshold
+  - SEVERITY_WEIGHTS added to config package for easy importing
+  - All commands support --fast mode for 10% sampling
+  - Output files: reports/v1.0/patrol/{report}_summary.txt
 - Rich progress pattern: 4-stage workflow (loading, preprocessing, analysis, output) with SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeRemainingColumn
 - CLI entry point: `python -m analysis.cli` working with help text and version/info commands
 - Configuration system: 13 config schemas with 5 YAML files, multi-source loading (CLI > env > YAML > defaults)
-- Graceful dependency handling: prophet, sklearn, event_utils all handled with try/except
-- Fast mode: All commands support --fast flag for 10%% sampling
-- Output structure: `reports/v{version}/{analysis}/` with summary files
 - Test coverage: classification.py 100%, temporal.py 100%, loading.py 85%, validation.py 92%, preprocessing.py 100%
 - Total test count: 183 tests passing (93 new data layer tests)
-- All success criteria for Phase 6 met: CLI entry points ✅, YAML config ✅, Rich progress ✅, 13 commands with --help ✅
 
 ---
-*State updated: 2026-02-05 01:10 UTC*
+*State updated: 2026-02-05 01:13 UTC*
