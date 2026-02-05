@@ -22,6 +22,8 @@ from analysis.config.schemas.policy import (
 )
 from analysis.data.loading import load_crime_data
 from analysis.data.preprocessing import filter_by_date_range
+from analysis.utils.temporal import extract_temporal_features
+from analysis.visualization import plot_bar, plot_line, save_figure
 
 app = typer.Typer(help="Policy evaluation analyses")
 console = Console()
@@ -78,6 +80,26 @@ def retail_theft(
         output_task = progress.add_task("Saving outputs...", total=100)
         output_path = Path(config.output_dir) / config.version / "policy"
         output_path.mkdir(parents=True, exist_ok=True)
+
+        # Create figure: monthly trend line plot
+        theft_df = extract_temporal_features(theft_df)
+        monthly_theft = theft_df.groupby(theft_df["dispatch_date"].dt.to_period("M")).size()
+
+        monthly_df = monthly_theft.reset_index()
+        monthly_df.columns = ["date", "incidents"]
+        monthly_df["date"] = monthly_df["date"].dt.to_timestamp()
+
+        fig = plot_line(
+            monthly_df,
+            x_col="date",
+            y_col="incidents",
+            title="Retail Theft Trends",
+            xlabel="Date",
+            ylabel="Number of Incidents",
+        )
+
+        figure_path = output_path / f"{config.report_name}_trend.{config.output_format}"
+        save_figure(fig, figure_path, output_format=config.output_format)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
@@ -147,6 +169,26 @@ def vehicle_crimes(
         output_path = Path(config.output_dir) / config.version / "policy"
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # Create figure: monthly trend line plot
+        vehicle_df = extract_temporal_features(vehicle_df)
+        monthly_vehicle = vehicle_df.groupby(vehicle_df["dispatch_date"].dt.to_period("M")).size()
+
+        monthly_df = monthly_vehicle.reset_index()
+        monthly_df.columns = ["date", "incidents"]
+        monthly_df["date"] = monthly_df["date"].dt.to_timestamp()
+
+        fig = plot_line(
+            monthly_df,
+            x_col="date",
+            y_col="incidents",
+            title="Vehicle Crime Trends",
+            xlabel="Date",
+            ylabel="Number of Incidents",
+        )
+
+        figure_path = output_path / f"{config.report_name}_trend.{config.output_format}"
+        save_figure(fig, figure_path, output_format=config.output_format)
+
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
             f.write("Vehicle Crimes Analysis Summary\n")
@@ -202,6 +244,22 @@ def composition(
         output_task = progress.add_task("Saving outputs...", total=100)
         output_path = Path(config.output_dir) / config.version / "policy"
         output_path.mkdir(parents=True, exist_ok=True)
+
+        # Create figure: top categories bar plot
+        top_df = top_categories.reset_index()
+        top_df.columns = ["ucr_code", "incidents"]
+
+        fig = plot_bar(
+            top_df,
+            x_col="ucr_code",
+            y_col="incidents",
+            title=f"Top {config.top_n} Crime Categories",
+            xlabel="UCR Code (Hundred-Band)",
+            ylabel="Number of Incidents",
+        )
+
+        figure_path = output_path / f"{config.report_name}_categories.{config.output_format}"
+        save_figure(fig, figure_path, output_format=config.output_format)
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
