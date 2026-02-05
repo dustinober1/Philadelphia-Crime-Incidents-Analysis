@@ -92,7 +92,9 @@ def hotspots(
             progress.update(cluster_task, advance=100, description=f"Found {n_clusters} clusters")
 
         except ImportError:
-            console.print("[yellow]Warning: scikit-learn not available, skipping clustering[/yellow]")
+            console.print(
+                "[yellow]Warning: scikit-learn not available, skipping clustering[/yellow]"
+            )
             df["cluster"] = -1
             n_clusters = 0
             n_noise = len(df)
@@ -103,12 +105,12 @@ def hotspots(
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
-            f.write(f"Hotspots Analysis Summary\n")
-            f.write(f"=" * 40 + "\n")
-            f.write(f"DBSCAN parameters:\n")
+            f.write("Hotspots Analysis Summary\n")
+            f.write("=" * 40 + "\n")
+            f.write("DBSCAN parameters:\n")
             f.write(f"  eps: {config.eps_degrees} degrees\n")
             f.write(f"  min_samples: {config.min_samples}\n")
-            f.write(f"\nResults:\n")
+            f.write("\nResults:\n")
             f.write(f"  Total points: {len(df)}\n")
             f.write(f"  Clusters found: {n_clusters}\n")
             f.write(f"  Noise points: {n_noise}\n")
@@ -129,9 +131,9 @@ def robbery_heatmap(
     fast: bool = typer.Option(False, "--fast", help="Fast mode with 10% sample"),
 ) -> None:
     """Generate temporal heatmap for robbery incidents."""
+    import pandas as pd
     from rich.progress import Progress
 
-    import pandas as pd
     from analysis.data.loading import load_crime_data
 
     config = RobberyConfig(time_bin_size=time_bin, grid_size=grid_size, version=version)
@@ -172,11 +174,11 @@ def robbery_heatmap(
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
-            f.write(f"Robbery Heatmap Analysis Summary\n")
-            f.write(f"=" * 40 + "\n")
+            f.write("Robbery Heatmap Analysis Summary\n")
+            f.write("=" * 40 + "\n")
             f.write(f"Time bin size: {config.time_bin_size} minutes\n")
             f.write(f"Total robbery incidents: {len(df)}\n")
-            f.write(f"\nIncidents by hour:\n")
+            f.write("\nIncidents by hour:\n")
             hourly_counts = df.groupby("hour").size()
             for hour, count in hourly_counts.items():
                 f.write(f"  {hour:02d}:00 - {count:,.0f}\n")
@@ -229,9 +231,13 @@ def district_severity(
         df["ucr_hundred"] = (df["ucr_general"] // 100) * 100
         df["severity_weight"] = df["ucr_hundred"].map(SEVERITY_WEIGHTS).fillna(1.0)
 
-        district_scores = df.groupby("dc_dist")["severity_weight"].sum().sort_values(ascending=False)
+        district_scores = (
+            df.groupby("dc_dist")["severity_weight"].sum().sort_values(ascending=False)
+        )
 
-        progress.update(score_task, advance=100, description=f"Scored {len(district_scores)} districts")
+        progress.update(
+            score_task, advance=100, description=f"Scored {len(district_scores)} districts"
+        )
 
         output_task = progress.add_task("Saving outputs...", total=100)
         output_path = Path(config.output_dir) / config.version / "patrol"
@@ -239,10 +245,10 @@ def district_severity(
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
-            f.write(f"District Severity Analysis Summary\n")
-            f.write(f"=" * 40 + "\n")
-            f.write(f"Severity calculated using FBI UCR hierarchy weights\n")
-            f.write(f"\nDistrict rankings:\n")
+            f.write("District Severity Analysis Summary\n")
+            f.write("=" * 40 + "\n")
+            f.write("Severity calculated using FBI UCR hierarchy weights\n")
+            f.write("\nDistrict rankings:\n")
             for district, score in district_scores.head(10).items():
                 f.write(f"  District {district}: {score:,.1f}\n")
 
@@ -316,12 +322,12 @@ def census_rates(
 
         summary_file = output_path / f"{config.report_name}_summary.txt"
         with open(summary_file, "w") as f:
-            f.write(f"Census Rates Analysis Summary\n")
-            f.write(f"=" * 40 + "\n")
+            f.write("Census Rates Analysis Summary\n")
+            f.write("=" * 40 + "\n")
             f.write(f"Population threshold: {config.population_threshold}\n")
             f.write(f"Total incidents: {len(crime_df):,.0f}\n")
             if tract_counts is not None:
-                f.write(f"\nTop 10 tracts by incident count:\n")
+                f.write("\nTop 10 tracts by incident count:\n")
                 for tract, count in tract_counts.head(10).items():
                     f.write(f"  Tract {tract}: {count:,.0f}\n")
 
