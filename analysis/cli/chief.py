@@ -133,9 +133,59 @@ def seasonality(
     console.print(f"  Winter months: {config.winter_months}")
     console.print(f"  Fast mode: {fast}")
     console.print()
-    console.print("[yellow]Command logic will be implemented in plan 06-04[/yellow]")
 
-    # TODO: Implement analysis logic in 06-04
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeRemainingColumn(),
+    ) as progress:
+        load_task = progress.add_task("Loading data...", total=100)
+        df = load_crime_data(clean=True)
+        if fast:
+            df = df.sample(frac=config.fast_sample_frac, random_state=42)
+        progress.update(load_task, advance=100)
+
+        prep_task = progress.add_task("Processing data...", total=100)
+        df = extract_temporal_features(df)
+        df = classify_crime_category(df)
+        progress.update(prep_task, advance=100)
+
+        analyze_task = progress.add_task("Analyzing seasonality...", total=100)
+
+        # Filter for complete years
+        df_filtered = filter_by_date_range(df, start="2018-01-01", end="2023-12-31", date_col="dispatch_date")
+
+        # Calculate seasonal averages
+        df_filtered = df_filtered.copy()
+        df_filtered["season"] = df_filtered["month"].apply(
+            lambda m: "summer" if m in config.summer_months else ("winter" if m in config.winter_months else "other")
+        )
+        seasonal_counts = df_filtered.groupby("season")["objectid"].count()
+
+        progress.update(analyze_task, advance=100)
+
+        output_task = progress.add_task("Saving outputs...", total=100)
+        output_path = Path(config.output_dir) / config.version / "chief"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        summary_file = output_path / f"{config.report_name}_summary.txt"
+        with open(summary_file, "w") as f:
+            f.write("Seasonality Analysis Summary\n")
+            f.write("=" * 40 + "\n")
+            f.write(f"Summer months: {config.summer_months}\n")
+            f.write(f"Winter months: {config.winter_months}\n")
+            f.write(f"\nSeasonal averages:\n")
+            for season, count in seasonal_counts.items():
+                f.write(f"  {season.capitalize()}: {count:,.0f} incidents\n")
+
+        progress.update(output_task, advance=100)
+
+    console.print()
+    console.print("[green]:heavy_check_mark:[/green] [bold green]Analysis complete[/bold green]")
+    console.print(f"  Output directory: [cyan]{output_path}[/cyan]")
+    console.print(f"  Summary file: [cyan]{summary_file.name}[/cyan]")
 
 
 @app.command()
