@@ -17,6 +17,16 @@ Build / Lint / Test Commands
 - Sort imports: `isort .`.
 - Type check: `mypy .`.
 
+Web / API Commands
+- Export API data: `python -m pipeline.export_data --output-dir api/data`.
+- Run API locally: `uvicorn api.main:app --reload`.
+- API Docker local: `docker compose up --build api`.
+- Install web deps: `cd web && npm install`.
+- Web dev server: `cd web && npm run dev`.
+- Web type check: `cd web && npm run typecheck`.
+- Web production build/static export: `cd web && npm run build`.
+- Convenience make targets: `make dev-web`, `make dev-api`, `make export-data`, `make deploy`.
+
 Script Development Guidelines (v1.1)
 - Purpose: scripts are reproducible, testable, and documentable analysis commands.
 - Location: CLI commands live in `analysis/cli/{group}.py`; outputs go to `reports/{version}/{group}/`.
@@ -106,6 +116,7 @@ CI Workflow
 - Pre-commit hooks run `pytest`, `black`, `ruff`, and `mypy` before commits.
 - `pytest` runs with `--no-cov` for fast commit-time validation.
 - Coverage is measured separately with a 90%+ target for new code.
+- PR CI also runs web checks (`npm run lint`, `npm run typecheck` in `web/`).
 
 CLI Quick Reference
 
@@ -148,10 +159,17 @@ Where to look
 - Command groups: `analysis/cli/chief.py`, `analysis/cli/patrol.py`, `analysis/cli/policy.py`, `analysis/cli/forecasting.py`.
 - Shared code: `analysis/`.
 - Output artifacts: `reports/`.
+- Data export pipeline: `pipeline/export_data.py`.
+- API app: `api/main.py`, `api/routers/`, `api/models/`, `api/services/`.
+- API data artifacts: `api/data/`.
+- Web app: `web/src/app/`, `web/src/components/`, `web/src/lib/api.ts`.
+- Deployment config: `firebase.json`, `cloudbuild.yaml`, `.github/workflows/deploy.yml`.
 
 Suggested next steps for contributors
 - 1) Set up and activate `crime`.
-- 2) Run `ruff`, `black`, `mypy`, and `pytest`.
-- 3) Validate usage with `python -m analysis.cli --help`.
+- 2) Run `python -m pipeline.export_data --output-dir api/data`.
+- 3) Run `ruff`, `black`, `mypy`, and `pytest`.
+- 4) Run web checks: `cd web && npm run typecheck && npm run build`.
+- 5) Validate usage with `python -m analysis.cli --help`.
 
 This file is an operational reference for contributors and agents. Update it when tooling or workflow changes.
