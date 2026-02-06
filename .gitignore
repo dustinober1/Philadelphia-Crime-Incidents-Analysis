@@ -25,3 +25,9 @@ __pycache__/
 # Firebase CLI debug log (created when commands run with --debug)
 @firebase-debug.log
 firebase-debug.log
+
+# Web app artifacts
+web/node_modules/
+web/.next/
+web/out/
+web/.env.local
