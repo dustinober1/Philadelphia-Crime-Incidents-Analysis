@@ -1,14 +1,17 @@
-"""Data loading functions with joblib caching.
+"""Data loading utilities with caching.
 
-This module provides functions to load crime data, boundary data, and
-external data sources. All loading functions use joblib caching for
-performance - the first load reads from disk, subsequent loads return
-cached results.
+This module provides functions for loading crime incident data and external
+datasets, with joblib caching to avoid redundant I/O.
 
-Example:
-    >>> from analysis.data import load_crime_data
-    >>> df = load_crime_data()  # First load: reads from parquet
-    >>> df = load_crime_data()  # Second load: returns cached result
+Functions:
+    load_crime_data: Load crime incidents from parquet with caching
+    load_boundaries: Load geographic boundary data (GeoJSON)
+    load_external_data: Load external datasets (weather, etc.)
+
+Cache behavior:
+- First load: Reads from disk and caches in ~/.cache/crime_analysis/
+- Subsequent loads: Returns cached data (5x+ speedup)
+- Cache invalidation: Automatic when data file mtime changes
 """
 
 from __future__ import annotations

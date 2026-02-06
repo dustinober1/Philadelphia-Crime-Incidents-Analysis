@@ -1,15 +1,14 @@
-"""Data preprocessing utilities for crime incident analysis.
+"""Data preprocessing utilities.
 
-This module provides common data transformation functions:
-- Date range filtering
-- Temporal aggregation
-- Temporal feature extraction
+This module provides functions for filtering, aggregating, and preparing
+crime data for analysis.
 
-Example:
-    >>> from analysis.data import load_crime_data, filter_by_date_range, aggregate_by_period
-    >>> df = load_crime_data()
-    >>> df_2020 = filter_by_date_range(df, "2020-01-01", "2020-12-31")
-    >>> monthly = aggregate_by_period(df_2020, period="ME")
+Functions:
+    filter_by_date_range: Filter incidents by date range
+    aggregate_by_period: Aggregate counts by time period (ME, YE, etc.)
+    add_temporal_features: Add extracted temporal features to DataFrame
+
+Note: Uses pandas 2.2+ frequency aliases (ME, YE) not deprecated (M, Y).
 """
 
 from __future__ import annotations

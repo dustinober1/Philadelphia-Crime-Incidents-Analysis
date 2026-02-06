@@ -1,16 +1,18 @@
-"""Data layer module for loading, validation, and preprocessing.
+"""Data layer for crime incident analysis.
 
-This module provides a complete data layer for crime incident analysis:
-- Loading: load_crime_data, load_boundaries, load_external_data
-- Validation: validate_crime_data, validate_coordinates, CrimeIncidentValidator
-- Preprocessing: filter_by_date_range, aggregate_by_period, add_temporal_features
-- Caching: clear_cache
+This package provides data loading, validation, and preprocessing utilities
+for crime incident data, with caching and Pydantic validation.
+
+Modules:
+    loading: Data loading with joblib caching
+    validation: Pydantic validators for crime incident data
+    preprocessing: Filtering, aggregation, and data preparation
 
 Example:
-    >>> from analysis.data import load_crime_data, validate_crime_data, filter_by_date_range
-    >>> df = load_crime_data()
-    >>> validate_crime_data(df)
-    >>> df_2020 = filter_by_date_range(df, "2020-01-01", "2020-12-31")
+    >>> from analysis.data.loading import load_crime_data
+    >>> df = load_crime_data(clean=True)
+    >>> from analysis.data.preprocessing import filter_by_date_range
+    >>> df = filter_by_date_range(df, start="2020-01-01", end="2023-12-31")
 """
 
 # Exports from loading.py

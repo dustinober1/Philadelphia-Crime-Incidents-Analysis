@@ -1,16 +1,16 @@
-"""Data validation using Pydantic models.
+"""Pydantic validators for crime incident data.
 
-This module provides Pydantic-based validation for crime incident data,
-ensuring data quality and consistency. Validation includes:
-- Required field presence (dispatch_date, ucr_general, etc.)
-- Coordinate bounds checking (Philadelphia area)
-- UCR code range validation
-- PSA range validation
+This module provides Pydantic models for validating crime incident data
+schema, ensuring type safety and data quality.
 
-Example:
-    >>> from analysis.data import load_crime_data, validate_crime_data
-    >>> df = load_crime_data()
-    >>> validate_crime_data(df)  # Raises ValueError if validation fails
+Classes:
+    CrimeIncidentValidator: Validates crime incident row data
+
+Validation rules:
+- dispatch_time: Valid datetime, not null
+- ucr_general: Integer 100-9999
+- point_x, point_y: Float coordinates within Philadelphia bounds
+- text_general_code: Non-empty string
 """
 
 from __future__ import annotations
