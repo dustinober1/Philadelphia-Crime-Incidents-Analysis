@@ -1,0 +1,13 @@
+Crime Composition Analysis Summary
+========================================
+Top 10 crime categories (UCR hundred-band):
+  600-Series: 80,321 incidents (23.0%)
+  2600-Series: 60,383 incidents (17.3%)
+  800-Series: 49,698 incidents (14.2%)
+  1400-Series: 33,026 incidents (9.4%)
+  1100-Series: 19,558 incidents (5.6%)
+  1800-Series: 18,602 incidents (5.3%)
+  400-Series: 16,901 incidents (4.8%)
+  500-Series: 16,698 incidents (4.8%)
+  300-Series: 13,895 incidents (4.0%)
+  700-Series: 12,649 incidents (3.6%)

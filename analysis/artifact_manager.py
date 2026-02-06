@@ -5,9 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 def get_versioned_path(template: str, version: str) -> Path:
@@ -48,7 +47,7 @@ def compute_file_hash(filepath: Path) -> str:
     return sha256.hexdigest()
 
 
-def get_git_commit() -> Optional[str]:
+def get_git_commit() -> str | None:
     """Return the current git commit hash, if available.
 
     Returns
@@ -70,10 +69,10 @@ def get_git_commit() -> Optional[str]:
 
 def create_version_manifest(
     version: str,
-    artifacts: List[Path],
-    params: Dict,
+    artifacts: list[Path],
+    params: dict,
     runtime_seconds: float,
-) -> Dict:
+) -> dict:
     """Create a version manifest for generated artifacts.
 
     Parameters
@@ -92,7 +91,7 @@ def create_version_manifest(
     dict
         Manifest dictionary including hashes and metadata.
     """
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     artifact_entries = [
         {"path": str(path), "sha256": compute_file_hash(path)} for path in artifacts
     ]
@@ -107,7 +106,7 @@ def create_version_manifest(
     }
 
 
-def save_manifest(manifest: Dict, output_path: Path) -> None:
+def save_manifest(manifest: dict, output_path: Path) -> None:
     """Save manifest JSON to disk.
 
     Parameters

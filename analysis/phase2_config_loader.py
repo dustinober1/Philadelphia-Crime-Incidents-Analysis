@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 import yaml
 
@@ -22,9 +21,9 @@ class ClusteringConfig:
 class HeatmapConfig:
     """Heatmap analysis parameters."""
 
-    robbery_ucr_range: Tuple[int, int] = (300, 400)
-    hours: Tuple[int, int] = (0, 23)
-    days: List[str] = field(
+    robbery_ucr_range: tuple[int, int] = (300, 400)
+    hours: tuple[int, int] = (0, 23)
+    days: list[str] = field(
         default_factory=lambda: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     )
 
@@ -62,7 +61,7 @@ class Phase2Config:
 
     version: str = "1.0"
     clustering: ClusteringConfig = field(default_factory=ClusteringConfig)
-    severity_weights: Dict[int, float] = field(
+    severity_weights: dict[int, float] = field(
         default_factory=lambda: {
             100: 10.0,
             200: 8.0,
@@ -81,9 +80,9 @@ class Phase2Config:
     boundaries: BoundaryPaths = field(default_factory=BoundaryPaths)
 
     @classmethod
-    def from_yaml(cls, yaml_path: Path) -> "Phase2Config":
+    def from_yaml(cls, yaml_path: Path) -> Phase2Config:
         """Load configuration from YAML file."""
-        with open(yaml_path, "r") as f:
+        with open(yaml_path) as f:
             data = yaml.safe_load(f)
 
         config = cls(version=data.get("version", "1.0"))

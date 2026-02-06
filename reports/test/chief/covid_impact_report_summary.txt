@@ -1,0 +1,8 @@
+COVID Impact Analysis Summary
+========================================
+Lockdown date: 2020-03-01
+Before years: [2018, 2019]
+
+Average incidents (before): 15,686
+Incidents (after): 28,655
+Change: +82.7%

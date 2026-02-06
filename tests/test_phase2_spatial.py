@@ -5,8 +5,6 @@ import pytest
 
 from analysis.phase2_config_loader import (
     ClusteringConfig,
-    CoordinateBounds,
-    Phase2Config,
     load_phase2_config,
 )
 from analysis.spatial_utils import (

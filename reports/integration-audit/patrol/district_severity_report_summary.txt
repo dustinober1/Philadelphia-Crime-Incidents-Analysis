@@ -1,0 +1,15 @@
+District Severity Analysis Summary
+========================================
+Severity calculated using FBI UCR hierarchy weights
+
+District rankings:
+  District 15: 58,030.5
+  District 25: 47,882.5
+  District 22: 47,411.0
+  District 24: 47,142.0
+  District 19: 45,135.5
+  District 35: 44,268.5
+  District 14: 41,343.0
+  District 12: 41,227.5
+  District 39: 36,860.0
+  District 2: 35,744.0

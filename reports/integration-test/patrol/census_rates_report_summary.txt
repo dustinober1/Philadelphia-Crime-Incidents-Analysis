@@ -1,0 +1,4 @@
+Census Rates Analysis Summary
+========================================
+Population threshold: 100
+Total incidents: 349,635

@@ -1,8 +1,8 @@
 """Event impact analysis utilities for Phase 3."""
 
-from typing import List, Set, Dict, Any
+from typing import Any
+
 import pandas as pd
-import numpy as np
 
 
 def identify_event_days(
@@ -33,7 +33,7 @@ def identify_event_days(
     crime_df[date_col] = pd.to_datetime(crime_df[date_col]).dt.normalize()
 
     # Create expanded event dates with buffer
-    event_dates: Set[pd.Timestamp] = set()
+    event_dates: set[pd.Timestamp] = set()
     for date in event_df["date"]:
         for offset in range(-buffer_days, buffer_days + 1):
             event_dates.add(date + pd.Timedelta(days=offset))
@@ -43,7 +43,7 @@ def identify_event_days(
     # Add specific event type indicators
     for event_type in event_df["event_type"].unique():
         type_dates = set(event_df[event_df["event_type"] == event_type]["date"])
-        expanded_dates: Set[pd.Timestamp] = set()
+        expanded_dates: set[pd.Timestamp] = set()
         for date in type_dates:
             for offset in range(-buffer_days, buffer_days + 1):
                 expanded_dates.add(date + pd.Timedelta(days=offset))
@@ -55,9 +55,9 @@ def identify_event_days(
 def get_control_days(
     event_date: pd.Timestamp,
     all_dates: pd.DatetimeIndex,
-    event_dates: Set[pd.Timestamp],
+    event_dates: set[pd.Timestamp],
     n_controls: int = 4,
-) -> List[pd.Timestamp]:
+) -> list[pd.Timestamp]:
     """Get control days for an event (same day-of-week, non-event days).
 
     Parameters
@@ -76,7 +76,7 @@ def get_control_days(
     List[pd.Timestamp]
         Control day dates
     """
-    controls: List[pd.Timestamp] = []
+    controls: list[pd.Timestamp] = []
     all_dates_set = set(all_dates)
 
     # Look for same day-of-week in adjacent weeks
@@ -100,7 +100,7 @@ def calculate_event_impact(
     event_df: pd.DataFrame,
     crime_category: str = None,
     date_col: str = "dispatch_date",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Calculate difference-in-means for event vs control days.
 
     Parameters

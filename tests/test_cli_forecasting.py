@@ -140,4 +140,3 @@ class TestForecastingClassification:
         figure_file = output_path / "classification_report_performance.png"
         # Figure is only created if sklearn is available
         # Don't assert existence, just check if it exists when conditions are met
-

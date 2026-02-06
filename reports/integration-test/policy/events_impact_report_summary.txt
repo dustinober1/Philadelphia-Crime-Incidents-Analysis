@@ -1,0 +1,4 @@
+Event Impact Analysis Summary
+========================================
+Event window: 7 days before, 7 days after
+Total incidents in dataset: 349,635

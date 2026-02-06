@@ -1,0 +1,10 @@
+Violence Classification Summary
+========================================
+Test size: 0.25
+Random state: 42
+Total incidents: 349635
+Violent incidents: 33,417
+
+Model performance:
+  Train accuracy: 0.908
+  Test accuracy: 0.897
