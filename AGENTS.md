@@ -84,10 +84,28 @@ Data & Paths
 - Keep paths relative under `data/` and `reports/`.
 - Never commit raw PII.
 
-Agent Automation & CI Workflow
-- Keep automation script-first and test-first.
-- Keep quality checks deterministic and fast.
-- Ensure command docs remain discoverable via `python -m analysis.cli --help`.
+CLI Testing Pattern
+- All commands must have tests in `tests/test_cli_{group}.py`.
+- Use `CliRunner` from `typer.testing` for invocation.
+- Always use `--fast` in tests for speed.
+- Use `--version test` to avoid cluttering production reports.
+- Verify `exit_code == 0` and expected stdout content.
+- Check expected output files in `reports/test/{group}/`.
+
+Example test pattern:
+
+```python
+def test_chief_trends_basic(tmp_output_dir: Path) -> None:
+    result = runner.invoke(app, ["chief", "trends", "--fast", "--version", "test"])
+    assert result.exit_code == 0
+    assert "Annual Trends Analysis" in result.stdout
+    assert (Path("reports/test/chief") / "annual_trends_report_trend.png").exists()
+```
+
+CI Workflow
+- Pre-commit hooks run `pytest`, `black`, `ruff`, and `mypy` before commits.
+- `pytest` runs with `--no-cov` for fast commit-time validation.
+- Coverage is measured separately with a 90%+ target for new code.
 
 Commit Standards
 - Commit small, focused changes.
