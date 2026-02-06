@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-06 (08-02b: Config/CLI/Visualization Docstrings)
-**Last Execution:** Phase 8 Plan 02b (Config, CLI, and Visualization Docstring Migration)
+**Updated:** 2026-02-06 (08-04: README and Phase 1 Wrapper CLI Migration)
+**Last Execution:** Phase 8 Plan 04 (README v1.1 quickstart and run_phase1.sh CLI migration)
 
 ---
 
@@ -28,21 +28,22 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 8 - Documentation & Migration (6/10 complete)
-**Plan:** 6/10
-**Status:** 🔄 IN PROGRESS (Phase 8 docstring migration underway across config, CLI, and visualization modules)
-**Last Activity:** 2026-02-06 — Completed 08-02b: Add module docstrings to config, CLI, and visualization packages
+**Phase:** 8 - Documentation & Migration (7/10 complete)
+**Plan:** 7/10
+**Status:** 🔄 IN PROGRESS (Phase 8 documentation and migration updates underway)
+**Last Activity:** 2026-02-06 — Completed 08-04: README CLI quickstart and run_phase1 wrapper migration
 
 **Progress Bar:**
 
 ```
-v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: █████████░░░░░░░░░░  45% (2.25/5 phases complete, Phase 8 in progress)
+Overall: ████████░░ 81% (47/58 plans)
+v1.0:    ████████████████████ 100% (4 phases, 24 plans)
+v1.1:    █████████░░░░░░░░░░  47% (2.35/5 phases complete, Phase 8 in progress)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🔄 Phase 8 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7 ✅, Phase 8: 6/10)
+- v1.1: 🔄 Phase 8 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7 ✅, Phase 8: 7/10)
 
 ---
 
@@ -259,6 +260,8 @@ Plans: 5 plans
 | Figure Generation | Tests verify figure creation with correct format extension | Check for .png, .svg, .pdf files in output directories |
 | Documentation | AGENTS.md is script-first with CLI references and no notebook-era rules | Aligns contributor guidance to v1.1 CLI architecture and testing patterns |
 | Documentation | Standardize Google-style module docstrings across config/CLI/visualization modules | Improves IDE discoverability and keeps docs conventions consistent |
+| Documentation | README quickstart is CLI-first with all 13 commands documented | Ensures new users follow v1.1 script workflow immediately |
+| Migration | Keep run_phase1.sh as a compatibility wrapper over CLI commands | Preserves legacy script entrypoint while removing notebook orchestration dependency |
 
 ### Validated Patterns (v1.0)
 - Data loading via `analysis.utils.load_data()` → To be replaced in Phase 5
@@ -292,8 +295,8 @@ Plans: 5 plans
 
 ## Session Continuity
 
-**Last session:** 2026-02-06 03:15 UTC
-**Stopped at:** Completed 08-02b-PLAN.md
+**Last session:** 2026-02-06 04:15 UTC
+**Stopped at:** Completed 08-04-PLAN.md
 **Resume file:** None
 
 **Current Session Goals:**
@@ -366,4 +369,4 @@ Plans: 5 plans
 - **Figure Tests Updated:** Tests verify figure creation with correct format extension for all commands
 
 ---
-*State updated: 2026-02-06 03:15 UTC*
+*State updated: 2026-02-06 04:15 UTC*
