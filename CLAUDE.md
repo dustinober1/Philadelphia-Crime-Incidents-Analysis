@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **Python-first, notebook-driven data science repository** that answers public-safety questions about crime in Philadelphia. The project produces reproducible analyses and static report artifacts (charts, maps, Markdown) for operational decision-making.
+This is a **Python-first, CLI-driven data science repository** that answers public-safety questions about crime in Philadelphia. The project produces reproducible analyses and static report artifacts (charts, maps, Markdown) for operational decision-making.
 
 **Core value:** Provide clear, reproducible, evidence-based answers to policy and operations questions about crime in Philadelphia.
 
@@ -34,22 +34,36 @@ python -m analysis.cli --help
 CRIME_OUTPUT_FORMAT=svg python -m analysis.cli chief trends
 ```
 
-### Running Phase 1 Analyses (Annual Trends, Seasonality, COVID Impact)
+### Manual CLI Execution
+
+All analyses are available as CLI commands:
 
 ```bash
-# Full run (~3-5 minutes)
-./run_phase1.sh
+# Chief-level analyses
+python -m analysis.cli chief trends
+python -m analysis.cli chief seasonality
+python -m analysis.cli chief covid
 
-# Fast mode for testing (10% sample, ~30 seconds)
-./run_phase1.sh v1.0 --fast
+# Patrol analyses
+python -m analysis.cli patrol hotspots
+python -m analysis.cli patrol robbery-heatmap
+python -m analysis.cli patrol district-severity
+python -m analysis.cli patrol census-rates
 
-# Run with validation
-./run_phase1.sh v1.0 --fast --validate
+# Policy analyses
+python -m analysis.cli policy retail-theft
+python -m analysis.cli policy vehicle-crimes
+python -m analysis.cli policy composition
+python -m analysis.cli policy events
 
-# Manual execution
-python analysis/orchestrate_phase1.py --version v1.0
-python analysis/orchestrate_phase1.py --version v1.0 --fast
-python analysis/orchestrate_phase1.py --notebook annual_trend
+# Forecasting
+python -m analysis.cli forecasting time-series
+python -m analysis.cli forecasting classification
+```
+
+For command-specific help:
+```bash
+python -m analysis.cli chief trends --help
 ```
 
 ### Development & Quality Tools (v1.1)
@@ -97,17 +111,7 @@ pre-commit install
 pytest tests/
 ```
 
-### Validating Artifacts
 
-```bash
-python analysis/validate_artifacts.py
-```
-
-### Manual Notebook Execution
-
-```bash
-jupyter notebook notebooks/<notebook_name>.ipynb
-```
 
 ## Architecture
 
@@ -116,19 +120,19 @@ jupyter notebook notebooks/<notebook_name>.ipynb
 The project is organized into phases corresponding to stakeholder questions:
 
 - **v1.1 CLI System** (Primary): `python -m analysis.cli <command>` — 13 commands across 4 groups
-- **Phase 1 (Chief):** High-level trends & seasonality — `analysis/orchestrate_phase1.py`
-- **Phase 2 (Patrol):** Spatial analysis, hotspots, district severity — `analysis/orchestrate_phase2.py`
-- **Phase 3 (Policy):** Policy analysis (retail theft, vehicle crimes, events) — `analysis/orchestrate_phase3.py`
-- **Phase 4 (Forecasting):** Time series forecasting, violence classification, heat-crime hypothesis
+- **Chief:** High-level trends & seasonality — `python -m analysis.cli chief <command>`
+- **Patrol:** Spatial analysis, hotspots, district severity — `python -m analysis.cli patrol <command>`
+- **Policy:** Policy analysis (retail theft, vehicle crimes, events) — `python -m analysis.cli policy <command>`
+- **Forecasting:** Time series forecasting, violence classification — `python -m analysis.cli forecasting <command>`
 
-### Orchestration Pattern
+### CLI Pattern
 
-Notebooks are executed via **papermill** through orchestrators in `analysis/orchestrate_phase*.py`:
+Analyses are executed via CLI commands in `analysis/cli/`:
 
-1. Orchestrator loads configuration from YAML (`config/phase*_config.yaml`)
-2. Parameters are injected into notebooks
-3. Executed notebooks are saved to `reports/` with versioning
-4. Artifacts (PNGs, Markdown reports, JSON manifests) are tracked
+1. CLI loads configuration from YAML (`config/*.yaml`) with CLI argument overrides
+2. Data is loaded via `analysis.data.loading.load_crime_data()` with caching
+3. Analysis produces figures and reports saved to `reports/{version}/{group}/`
+4. Artifacts (PNGs, SVGs, PDFs, Markdown reports) are versioned
 
 ### Key Modules
 
@@ -233,19 +237,21 @@ COLORS = {
 
 See `.planning/REQUIREMENTS.md` for detailed requirements.
 
-## Important Notebook Rules (until v1.1 refactor is complete)
+## Important CLI Development Rules
 
-- Notebooks live in `notebooks/`; publication-ready exports go to `reports/`
-- First code cell must be a **reproducibility cell** (Python version, env name, key package versions)
-- Run notebooks start-to-finish with no errors before committing
-- Commit notebooks **with outputs preserved** (do not clear outputs)
-- Save publication-ready figures (PNG/HTML/PDF) separately to `reports/`
-- Keep heavy processing in `analysis/` helper modules; notebooks should orchestrate
-- Use `analysis.utils.load_data()` and relative paths under `data/`
+- CLI commands live in `analysis/cli/` (chief.py, patrol.py, policy.py, forecasting.py)
+- Output artifacts go to `reports/{version}/{group}/`
+- Use typer.Options with help text for all parameters
+- Use Rich Progress with 5 columns for long-running operations
+- Use `analysis.data.loading.load_crime_data()` for data loading
+- Use `analysis.visualization.save_figure()` followed by `plt.close(fig)` for figures
+- All commands must have tests in `tests/test_cli_{group}.py`
+- Use `--fast` flag in tests for speed
+- Use `--version test` in tests to avoid cluttering production reports
 - All plots must have titles, axis labels, legends, and consistent styling
 - Set seeds for stochastic processes
 
-See `AGENTS.md` for complete notebook rules.
+See `AGENTS.md` for complete CLI development guidelines.
 
 ## Code Style
 
@@ -289,24 +295,24 @@ See `AGENTS.md` for complete notebook rules.
 - **Caching:** joblib
 - **Visualization:** matplotlib, seaborn, plotly, folium, altair
 - **Analysis/ML:** scikit-learn, xgboost, lightgbm, prophet, statsmodels, shap
-- **Orchestration:** papermill, jupyter
+- **CLI Framework:** typer>=0.12, rich>=13.0
 - **Quality:** pytest>=8.0, black>=25.0, ruff>=0.9, mypy>=1.15, pre-commit>=4.0
 
 ## Troubleshooting
 
 | Issue | Check |
 |-------|-------|
-| Config not found | `ls config/phase*_config.yaml` |
-| Papermill errors | Check `reports/execution.log` |
+| Config not found | `ls config/*.yaml` |
 | Missing data | Verify `data/crime_incidents_combined.parquet` exists |
 | Import errors | Ensure `crime` conda environment is activated |
 | Quality tools not found | Run `pip install -r requirements-dev.txt` |
 | mypy errors on geopandas | Use `--ignore-missing-imports` or `# type: ignore` comments |
+| CLI command not found | Run `python -m analysis.cli --help` to see available commands |
 
 ## Documentation Files
 
 - `README.md` — Project overview, quickstart
-- `AGENTS.md` — Comprehensive notebook rules for contributors/agents
+- `AGENTS.md` — Comprehensive CLI development guidelines for contributors/agents
 - `.planning/PROJECT.md` — Project overview, milestones, requirements
 - `.planning/REQUIREMENTS.md` — v1.1 script-based refactor requirements
 - `.planning/ROADMAP.md` — Development roadmap
