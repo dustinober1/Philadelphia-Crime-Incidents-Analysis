@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-06 (08-04: README and Phase 1 Wrapper CLI Migration)
-**Last Execution:** Phase 8 Plan 04 (README v1.1 quickstart and run_phase1.sh CLI migration)
+**Updated:** 2026-02-06 (08-05: Migration Verification Tests)
+**Last Execution:** Phase 8 Plan 05 (Integration tests verifying CLI outputs match notebook artifacts)
 
 ---
 
@@ -28,22 +28,22 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 8 - Documentation & Migration (7/10 complete)
-**Plan:** 7/10
+**Phase:** 8 - Documentation & Migration (8/10 complete)
+**Plan:** 8/10
 **Status:** 🔄 IN PROGRESS (Phase 8 documentation and migration updates underway)
-**Last Activity:** 2026-02-06 — Completed 08-04: README CLI quickstart and run_phase1 wrapper migration
+**Last Activity:** 2026-02-06 — Completed 08-05: Migration verification tests
 
 **Progress Bar:**
 
 ```
-Overall: ████████░░ 81% (47/58 plans)
+Overall: ████████░░ 82% (48/58 plans)
 v1.0:    ████████████████████ 100% (4 phases, 24 plans)
-v1.1:    █████████░░░░░░░░░░  47% (2.35/5 phases complete, Phase 8 in progress)
+v1.1:    ██████████░░░░░░░░░  50% (2.5/5 phases complete, Phase 8 in progress)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🔄 Phase 8 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7 ✅, Phase 8: 7/10)
+- v1.1: 🔄 Phase 8 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7 ✅, Phase 8: 8/10)
 
 ---
 
@@ -261,7 +261,10 @@ Plans: 5 plans
 | Documentation | AGENTS.md is script-first with CLI references and no notebook-era rules | Aligns contributor guidance to v1.1 CLI architecture and testing patterns |
 | Documentation | Standardize Google-style module docstrings across config/CLI/visualization modules | Improves IDE discoverability and keeps docs conventions consistent |
 | Documentation | README quickstart is CLI-first with all 13 commands documented | Ensures new users follow v1.1 script workflow immediately |
-| Migration | Keep run_phase1.sh as a compatibility wrapper over CLI commands | Preserves legacy script entrypoint while removing notebook orchestration dependency |
+ | Migration | Keep run_phase1.sh as a compatibility wrapper over CLI commands | Preserves legacy script entrypoint while removing notebook orchestration dependency |
+ | Migration | Pattern matching instead of exact value comparison for verification | Allows for sampling differences with --fast mode while verifying correct structure |
+ | Migration | Use --version integration-test for migration tests | Isolates test outputs from production reports/ directory |
+ | Testing | Graceful pytest.skip() for optional dependencies | Tests pass if command succeeds, skip gracefully when sklearn/seaborn/prophet/geopandas unavailable |
 
 ### Validated Patterns (v1.0)
 - Data loading via `analysis.utils.load_data()` → To be replaced in Phase 5
@@ -295,8 +298,8 @@ Plans: 5 plans
 
 ## Session Continuity
 
-**Last session:** 2026-02-06 04:15 UTC
-**Stopped at:** Completed 08-04-PLAN.md
+**Last session:** 2026-02-06 09:08 UTC
+**Stopped at:** Completed 08-05-PLAN.md (Migration verification tests)
 **Resume file:** None
 
 **Current Session Goals:**
@@ -305,7 +308,8 @@ Plans: 5 plans
 3. ✅ Plan Phase 6 (Configuration & CLI)
 4. ✅ Execute Phase 6 plans (06-01 ✅, 06-02 ✅, 06-03 ✅, 06-04 ✅, 06-05 ✅, 06-06 ✅, 06-07 ✅)
 5. ✅ Plan Phase 7 (Visualization & Testing)
-6. ✅ Execute Phase 7 plans (07-01 ✅, 07-02 ✅, 07-03 ✅, 07-04 ✅, 07-05 ✅, 07-06 ✅, 07-07 ✅, 07-08 ✅)
+6. ✅ Execute Phase 7 plans (07-01 ✅, 07-02 ✅, 07-03 ✅, 07-04 ✅, 07-05 ✅, 07-06 ✅, 07-07 ✅, 07-08 ✅, 07-09 ✅, 07-10 ✅)
+7. ✅ Execute Phase 8 plans (08-01 ✅, 08-02a ✅, 08-02b ✅, 08-03 ✅, 08-04 ✅, 08-05 ✅)
 
 **Todos:**
 - [x] Plan Phase 5 (Foundation Architecture) - Complete
@@ -335,8 +339,17 @@ Plans: 5 plans
 - [x] Execute Phase 7 Plan 08 (Add --output-format to Chief/Forecasting)
 - [x] Execute Phase 7 Plan 09 (Add --output-format to Patrol/Policy)
 - [x] Execute Phase 7 Plan 10 (Wire figure generation and fix memory leak)
-- [ ] Plan Phase 8 (Documentation & Migration)
-- [ ] Execute Phase 8 plans
+- [x] Plan Phase 8 (Documentation & Migration)
+- [x] Execute Phase 8 Plan 01 (Plan notebook archival strategy)
+- [x] Execute Phase 8 Plan 02a (Archive phase 1-2 notebooks)
+- [x] Execute Phase 8 Plan 02b (Archive phase 3-4 notebooks)
+- [x] Execute Phase 8 Plan 03 (Create ARCHIVE index)
+- [x] Execute Phase 8 Plan 04 (README CLI quickstart and run_phase1 wrapper migration)
+- [x] Execute Phase 8 Plan 05 (Migration verification tests)
+- [ ] Execute Phase 8 Plan 06a (Archive and delete phase 1-2 notebooks)
+- [ ] Execute Phase 8 Plan 06b (Archive and delete phase 3-4 notebooks)
+- [ ] Execute Phase 8 Plan 07a (Create migration completion checklist)
+- [ ] Execute Phase 8 Plan 07b (Run final migration validation)
 - [ ] Verify all v1.1 requirements satisfied
 - [ ] Tag v1.1 complete
 
@@ -349,6 +362,7 @@ Plans: 5 plans
 - Phase 5 complete: 6/6 main plans + 3 gap closure plans (module structure ✅, data layer ✅, quality tooling ✅, mypy fixes ✅, dev dependencies installed ✅, utils tests ✅, data layer tests ✅)
 - **Phase 6 COMPLETE:** 7/7 plans (CLI framework dependencies ✅, configuration system ✅, CLI structure ✅, Chief commands ✅, Patrol commands ✅, Policy/Forecasting commands ✅, Rich integration ✅)
 - **Phase 7 COMPLETE:** 10/10 plans (visualization module ✅, fixtures ✅, CLI tests ✅, integration tests ✅, pre-commit hook ✅, output format arguments ✅, figure generation ✅, memory leak fix ✅)
+- **Phase 8 IN PROGRESS:** 5/10 plans complete (archival strategy ✅, phase 1-2 archive ✅, phase 3-4 archive ✅, archive index ✅, README migration ✅, migration verification tests ✅)
 - **All 13 CLI commands implemented with Rich progress bars and figure generation:**
   - Chief (3): trends, seasonality, covid - with multi-task progress (trends)
   - Patrol (4): hotspots, robbery-heatmap, district-severity, census-rates - with multi-task progress (hotspots)
@@ -367,6 +381,7 @@ Plans: 5 plans
 - **Coverage Baseline (07-06):** 47% overall, CLI modules 92-100%, gaps in legacy code (to be deleted in Phase 8)
 - **Figure Generation Complete (07-10):** All 13 CLI commands generate publication-quality figures in PNG/SVG/PDF formats via --output-format argument
 - **Figure Tests Updated:** Tests verify figure creation with correct format extension for all commands
+- **Migration Verification Tests (08-05):** 13 integration tests verify CLI outputs match notebook artifacts, 12 passed, 1 skipped (geopandas), pattern matching for output verification
 
 ---
-*State updated: 2026-02-06 04:15 UTC*
+*State updated: 2026-02-06 09:08 UTC*
