@@ -13,6 +13,8 @@ Example:
     >>> category = classify_crime_category(100)  # Homicide
     >>> from analysis.utils.temporal import extract_temporal_features
     >>> df = extract_temporal_features(df)
+
+See CLAUDE.md for usage guidance and CLI workflow examples.
 """
 
 from __future__ import annotations
