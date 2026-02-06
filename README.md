@@ -164,3 +164,80 @@ See [docs/MIGRATION.md](docs/MIGRATION.md) for the complete notebook-to-CLI mapp
 
 Original v1.0 notebooks have been archived to `reports/v1.0/notebooks/`.
 They are no longer maintained but preserved for historical reference.
+
+## Philadelphia Crime Explorer Web Stack
+
+This repository now includes:
+
+- Frontend: `web/` (Next.js static export)
+- Backend: `api/` (FastAPI on Cloud Run)
+- Export pipeline: `pipeline/export_data.py` (pre-aggregates API JSON/GeoJSON)
+
+### Local Development
+
+1. Export API data:
+
+```bash
+python -m pipeline.export_data --output-dir api/data
+```
+
+2. Run FastAPI:
+
+```bash
+uvicorn api.main:app --reload
+```
+
+3. Run Next.js:
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+4. Optional Docker API runtime:
+
+```bash
+docker compose up --build api
+```
+
+### Mapbox Setup
+
+Set `web/.env.local`:
+
+```bash
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_public_token
+NEXT_PUBLIC_API_BASE=
+NEXT_PUBLIC_ADMIN_PASSWORD=admin-password
+NEXT_PUBLIC_ADMIN_KEY=admin-api-key
+```
+
+Create a free Mapbox token at [mapbox.com](https://www.mapbox.com/).
+
+### Firebase + Cloud Run Deployment
+
+- Initialize Firebase with Hosting + Firestore:
+
+```bash
+firebase init
+```
+
+- Deploy FastAPI to Cloud Run:
+
+```bash
+gcloud run deploy philly-crime-api --source api/ --region us-east1 --allow-unauthenticated
+```
+
+- Deploy static frontend:
+
+```bash
+cd web && npm run build
+cd .. && firebase deploy --only hosting
+```
+
+### Manual Data Refresh Workflow
+
+1. Replace `data/crime_incidents_combined.parquet` with the latest OpenDataPhilly export.
+2. Run `python -m pipeline.export_data --output-dir api/data`.
+3. Rebuild/deploy the API container (`gcloud builds submit --config cloudbuild.yaml .`).
+4. Hosting serves updated data immediately through `/api/v1/metadata` `last_updated`.

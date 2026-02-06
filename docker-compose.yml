@@ -1,0 +1,14 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMIN_API_KEY=change-me
+      - FIRESTORE_COLLECTION_QUESTIONS=questions
+      - GOOGLE_CLOUD_PROJECT=philly-crime-explorer
+    volumes:
+      - ./api:/app/api

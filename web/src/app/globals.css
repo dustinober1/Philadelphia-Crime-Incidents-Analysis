@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+:root {
+  --violent: #e63946;
+  --property: #457b9d;
+  --other: #a8dadc;
+  --bg: #f8fafc;
+  --text: #111827;
+  --muted: #4b5563;
+}
+
+body {
+  background: radial-gradient(circle at top right, #dbeafe 0%, var(--bg) 45%);
+  color: var(--text);
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.card {
+  @apply rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm;
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "feature": "year",
+    "importance": 0.2887473626606722
+  },
+  {
+    "feature": "month",
+    "importance": 0.2531591988256483
+  },
+  {
+    "feature": "day_of_week",
+    "importance": 0.1356851281654884
+  },
+  {
+    "feature": "hour",
+    "importance": 0.3224083103481911
+  }
+]
