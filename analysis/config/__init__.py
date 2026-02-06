@@ -14,6 +14,8 @@ Schemas:
     patrol: Patrol analysis config (hotspots, robbery, etc.)
     policy: Policy analysis config (retail theft, vehicle crimes, etc.)
     forecasting: Forecasting config (time series, classification)
+
+See CLAUDE.md for usage examples and CLI invocation patterns.
 """
 
 from pathlib import Path

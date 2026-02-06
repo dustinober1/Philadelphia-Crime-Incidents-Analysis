@@ -9,6 +9,8 @@ Schemas:
     PatrolConfig: Patrol analysis configuration
     PolicyConfig: Policy analysis configuration
     ForecastingConfig: Forecasting analysis configuration
+
+See CLAUDE.md for schema usage patterns and override precedence.
 """
 
 from analysis.config.schemas.chief import COVIDConfig, SeasonalityConfig, TrendsConfig

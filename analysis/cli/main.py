@@ -12,6 +12,8 @@ Architecture:
     - typer.App for command registration
     - Rich for console output (progress bars, tables, panels)
     - CliRunner for testing (typer.testing)
+
+See CLAUDE.md for command usage and workflow guidance.
 """
 
 from pathlib import Path
@@ -61,7 +63,11 @@ app.add_typer(
 
 @app.command()
 def version() -> None:
-    """Show version information."""
+    """Show CLI and runtime version details.
+
+    Returns:
+        None: Prints a Rich table with CLI, typer, and Python versions.
+    """
     # Create a formatted table for version info
     table = Table(title="Crime Analysis CLI", show_header=False)
     table.add_column("Component", style="cyan")
@@ -76,7 +82,12 @@ def version() -> None:
 
 @app.command()
 def info() -> None:
-    """Show project information."""
+    """Show project context and data source information.
+
+    Returns:
+        None: Prints a Rich panel with data sources, analysis areas, and
+        resolved reports path.
+    """
     info_text = """
 [bold cyan]Data sources:[/bold cyan]
   * Philadelphia Police Department crime incidents

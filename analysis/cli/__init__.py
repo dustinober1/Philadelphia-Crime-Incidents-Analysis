@@ -15,6 +15,8 @@ Common arguments:
     --fast: Fast mode with 10% sample (for testing)
     --version: Output version tag (default: v1.0)
     --output-format: Figure format (png, svg, pdf)
+
+See CLAUDE.md for usage examples and command reference details.
 """
 
 from analysis.cli.main import app
