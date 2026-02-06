@@ -13,6 +13,8 @@ Temporal features extracted:
 - hour, minute
 - is_weekend (True for Saturday/Sunday)
 - quarter (1-4)
+
+See CLAUDE.md for usage guidance and CLI workflow examples.
 """
 
 from __future__ import annotations
