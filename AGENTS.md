@@ -107,6 +107,28 @@ CI Workflow
 - `pytest` runs with `--no-cov` for fast commit-time validation.
 - Coverage is measured separately with a 90%+ target for new code.
 
+CLI Quick Reference
+
+CLI Command Structure
+- Entry point: `python -m analysis.cli`
+- Groups: `chief`, `patrol`, `policy`, `forecasting`
+- Help: `python -m analysis.cli --help`
+- Command help: `python -m analysis.cli chief trends --help`
+- Example group command: `python -m analysis.cli patrol hotspots --fast`
+
+All 13 Commands
+- Chief: `trends`, `seasonality`, `covid`
+- Patrol: `hotspots`, `robbery-heatmap`, `district-severity`, `census-rates`
+- Policy: `retail-theft`, `vehicle-crimes`, `composition`, `events`
+- Forecasting: `time-series`, `classification`
+
+Common Arguments
+- `--fast`: Fast mode with 10% sample (for testing)
+- `--version`: Output version tag (default: `v1.0`)
+- `--output-format`: Figure format (`png`, `svg`, `pdf`)
+
+Typer auto-generates help from command docstrings and `Option()` parameters.
+
 Commit Standards
 - Commit small, focused changes.
 - Reference affected outputs in `reports/` when artifacts change.
