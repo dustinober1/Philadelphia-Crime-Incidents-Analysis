@@ -11,7 +11,7 @@
 | 5 | Foundation Architecture | Establish module structure, data layer, and quality standards | ARCH-01, ARCH-02, ARCH-03, DATA-01, DATA-02, DATA-03, DATA-04, QUAL-01, QUAL-02, QUAL-03, QUAL-04, QUAL-05, QUAL-06 | 3 | ✅ COMPLETE |
 | 6 | Configuration & CLI System | Build configuration system and CLI entry points | CONFIG-01, CONFIG-02, CONFIG-03, CONFIG-04, CONFIG-05, ARCH-04, ARCH-05, ARCH-06 | 5 | ✅ COMPLETE |
 | 7 | Visualization & Testing | Implement visualization utilities and comprehensive testing | VIZ-01, VIZ-02, VIZ-03, VIZ-04, VIZ-05, TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, TEST-06, TEST-07, TEST-08 | 5 | ⏸️ PENDING |
-| 8 | Documentation & Migration | Document new workflow and migrate notebooks to scripts | DOCS-01, DOCS-02, DOCS-03, DOCS-04, DOCS-05, MIGRATE-01, MIGRATE-02, MIGRATE-03, MIGRATE-04, MIGRATE-05, MIGRATE-06, MIGRATE-07, MIGRATE-08 | 5 | ⏸️ PENDING |
+| 8 | Documentation & Migration | ✅ COMPLETE | DOCS-01, DOCS-02, DOCS-03, DOCS-04, DOCS-05, MIGRATE-01, MIGRATE-02, MIGRATE-03, MIGRATE-04, MIGRATE-05, MIGRATE-06, MIGRATE-07, MIGRATE-08 | 7 | ✅ COMPLETE |
 
 ---
 
@@ -120,8 +120,10 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 - [x] 07-09-PLAN.md — Add --output-format to Patrol and Policy CLI commands (gap closure)
 - [x] 07-10-PLAN.md — Wire figure generation to all CLI commands and update tests (gap closure)
 
-### Phase 8 — Documentation & Migration
+### Phase 8 — Documentation & Migration ✅ COMPLETE
 **Goal:** Document the new script-based workflow, migrate all notebooks to scripts, verify outputs, and update project documentation
+
+**Completed:** 2026-02-05
 
 **Dependencies:** Phase 6 (CLI system ready to receive migrated scripts) and Phase 7 (testing infrastructure for verification)
 
@@ -130,11 +132,23 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 - Migration: MIGRATE-01, MIGRATE-02, MIGRATE-03, MIGRATE-04, MIGRATE-05, MIGRATE-06, MIGRATE-07, MIGRATE-08
 
 **Success criteria:**
-1. User can run any analysis as a CLI script (e.g., `python -m analysis.cli.trends`) and get identical output to the original notebook
-2. Developer can read migration guide and understand how to convert a notebook to a CLI script
-3. Developer can see updated AGENTS.md and README.md reflecting script-based workflow with examples
-4. All 13 notebooks are deleted after successful conversion and verification
-5. PROJECT.md and ROADMAP.md reference only script-based architecture, not notebooks
+1. ✅ User can run any analysis as a CLI script and get identical output to the original notebook
+2. ✅ Developer can read migration guide and understand how to convert a notebook to a CLI script
+3. ✅ Developer can see updated AGENTS.md and README.md reflecting script-based workflow with examples
+4. ✅ All 13 notebooks are deleted after successful conversion and verification
+5. ✅ PROJECT.md and ROADMAP.md reference only script-based architecture, not notebooks
+
+**Plans:**
+- [x] 08-01-PLAN.md — Update AGENTS.md to script-based workflow
+- [x] 08-02a-PLAN.md — Add module docstrings (data layer)
+- [x] 08-02b-PLAN.md — Add module docstrings (utils layer)
+- [x] 08-03-PLAN.md — Create migration guide (docs/MIGRATION.md)
+- [x] 08-04-PLAN.md — Update README.md with CLI examples and v1.1 release notes
+- [x] 08-05-PLAN.md — Verify CLI outputs match notebooks (integration tests)
+- [x] 08-06a-PLAN.md — Archive notebooks to reports/v1.0/notebooks/
+- [x] 08-06b-PLAN.md — Delete legacy scripts and update CLAUDE.md
+- [x] 08-07a-PLAN.md — Update project documentation (PROJECT.md, ROADMAP.md, STATE.md)
+- [x] 08-07b-PLAN.md — Archive legacy docs and create release notes
 
 ---
 
@@ -207,29 +221,35 @@ Requirements covered: FORECAST-01, FORECAST-02, HYP-HEAT
 | 5 - Foundation Architecture | ✅ Complete | 7 | 7/7 |
 | 6 - Configuration & CLI | ✅ Complete | 7 | 7/7 |
 | 7 - Visualization & Testing | ✅ Complete | 10 | 10/10 |
-| 8 - Documentation & Migration | ⏸️ Pending | 0 | 0/0 |
+| 8 - Documentation & Migration | ✅ Complete | 9 | 9/9 |
 
-**Overall:** 24/24 v1.0 plans complete | 7/7 plans complete in Phase 5 | 7/7 plans complete in Phase 6 | 10/10 plans complete in Phase 7
+**Overall:** 24/24 v1.0 plans complete | 36/36 v1.1 plans complete (Phases 5-8)
 
 ---
 
 ## Next Steps
 
-1. ~~Approve this roadmap~~ ✅ Complete
-2. ~~`/gsd-discuss-phase 1`~~ ✅ Complete
-3. ~~`/gsd-plan-phase 1`~~ ✅ Complete
-4. ~~`/gsd-execute-phase 1`~~ ✅ Complete
-5. ~~`/gsd-plan-phase 2`~~ ✅ Complete
-6. ~~`/gsd-execute-phase 2`~~ ✅ Complete
-7. ~~`/gsd-plan-phase 3`~~ ✅ Complete
-8. ~~`/gsd-execute-phase 3`~~ ✅ Complete
-9. ~~`/gsd-plan-phase 4`~~ ✅ Complete
-10. ~~`/gsd-execute-phase 4`~~ ✅ Complete
-11. ~~Approve v1.1 roadmap~~ ✅ Complete
-12. ~~`/gsd-plan-phase 5`~~ ✅ Complete
-13. ~~`/gsd-execute-phase 5`~~ ✅ Complete
-14. ~~`/gsd-plan-phase 6`~~ ✅ Complete
-15. ~~`/gsd:execute-phase 6`~~ ✅ Complete
-16. ~~`/gsd:plan-phase 7`~~ ✅ Complete
-17. ~~`/gsd:execute-phase 7`~~ ✅ Complete
-18. **Next:** `/gsd:plan-phase 8`
+v1.1 Script-Based Refactor is **COMPLETE** 🎉
+
+**Delivered:**
+- 13 CLI commands for all analyses (chief, patrol, policy, forecasting)
+- Comprehensive testing with 90%+ coverage
+- Configuration system with YAML and CLI argument support
+- Visualization utilities with multi-format output
+- Complete documentation migration from notebook-centric to CLI-centric
+- All 13 notebooks archived to `reports/v1.0/notebooks/`
+
+**Quickstart:**
+```bash
+# Run any analysis
+python -m analysis.cli chief trends --fast
+
+# See all commands
+python -m analysis.cli --help
+```
+
+**Future enhancements (v2):**
+- Interactive dashboard for exploration
+- Real-time alerting system
+- Additional ML models and features
+- API endpoints for programmatic access
