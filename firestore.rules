@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /questions/{questionId} {
+      allow create: if request.resource.data.keys().hasOnly(['id', 'name', 'email', 'question_text', 'status', 'answer_text', 'created_at', 'answered_at'])
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.question_text is string
+                    && request.resource.data.question_text.size() > 0
+                    && request.resource.data.question_text.size() <= 1000
+                    && (!('email' in request.resource.data) || request.resource.data.email is string);
+      allow read: if resource.data.status == 'answered';
+      allow update, delete: if false;
+    }
+  }
+}
