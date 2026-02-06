@@ -1,10 +1,16 @@
-"""Spatial utility functions for geographic analysis.
+"""Spatial utilities for crime data.
 
-This module provides functions for:
-- Coordinate cleaning and validation
-- Loading boundary files
-- Spatial joins between crime points and geographic boundaries
-- Severity score calculation
+This module provides functions for spatial operations on crime incident
+data, including coordinate cleaning, spatial joins, and severity scoring.
+
+Functions:
+    clean_coordinates: Remove invalid coordinates (NaN, out of bounds)
+    spatial_join: Join crime data to geographic boundaries
+    calculate_severity_score: Compute severity score based on crime weights
+
+Coordinate bounds (Philadelphia):
+- Longitude: -75.30 to -74.95
+- Latitude: 39.85 to 40.15
 """
 
 from __future__ import annotations

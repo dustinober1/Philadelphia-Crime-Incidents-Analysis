@@ -1,7 +1,18 @@
-"""Temporal feature extraction utilities.
+"""Temporal feature extraction for crime data.
 
 This module provides functions for extracting temporal features from
-timestamp data for crime analysis.
+crime incident dispatch_time fields, supporting time-series analysis
+and seasonality detection.
+
+Functions:
+    extract_temporal_features: Extract year, month, day_of_week, etc.
+
+Temporal features extracted:
+- year, month, day
+- day_of_week (0=Monday, 6=Sunday)
+- hour, minute
+- is_weekend (True for Saturday/Sunday)
+- quarter (1-4)
 """
 
 from __future__ import annotations

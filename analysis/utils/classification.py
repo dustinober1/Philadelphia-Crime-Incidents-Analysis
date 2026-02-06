@@ -1,7 +1,16 @@
-"""Crime classification utilities.
+"""Crime category classification utilities.
 
 This module provides functions for classifying crimes into categories
 (Violent, Property, Other) based on UCR general codes.
+
+Functions:
+    classify_crime_category: Classify a single UCR code into a category
+    CRIME_CATEGORY_MAP: Dictionary mapping category names to UCR code sets
+
+The classification uses UCR hundred-bands (first digit of ucr_general code):
+- Violent: 1xx (Homicide, Rape, Robbery, Aggravated Assault)
+- Property: 5xx, 6xx, 7xx (Burglary, Theft, Vehicle Theft)
+- Other: All other codes
 """
 
 from __future__ import annotations

@@ -1,14 +1,18 @@
-"""Analysis utilities module.
+"""Crime data utility functions.
 
-This module provides reusable utility functions for:
-- Crime classification (analysis.utils.classification)
-- Temporal feature extraction (analysis.utils.temporal)
-- Spatial utilities (analysis.utils.spatial) - optional, requires geopandas
-- Data loading (from analysis.utils.py for backward compatibility)
+This package provides modular utilities for crime data analysis, including
+classification, temporal feature extraction, and spatial operations.
+
+Modules:
+    classification: Crime category classification and UCR code mapping
+    temporal: Temporal feature extraction (year, month, day_of_week, etc.)
+    spatial: Coordinate cleaning, spatial joins, severity scoring
 
 Example:
-    >>> from analysis.utils import classify_crime_category, extract_temporal_features
-    >>> from analysis.utils.spatial import clean_coordinates, df_to_geodataframe
+    >>> from analysis.utils.classification import classify_crime_category
+    >>> category = classify_crime_category(100)  # Homicide
+    >>> from analysis.utils.temporal import extract_temporal_features
+    >>> df = extract_temporal_features(df)
 """
 
 from __future__ import annotations

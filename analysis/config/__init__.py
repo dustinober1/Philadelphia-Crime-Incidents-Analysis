@@ -1,9 +1,19 @@
-"""Configuration system for crime analysis CLI.
+"""Configuration management for analysis scripts.
 
-Uses pydantic-settings for multi-source configuration:
-- YAML files (defaults)
-- Environment variables (overrides)
-- CLI arguments (highest priority)
+This package provides Pydantic-based configuration management with
+multi-source loading (CLI args > env vars > YAML > defaults).
+
+Configuration hierarchy:
+    1. CLI arguments (highest priority)
+    2. Environment variables (CRIME_* prefix)
+    3. YAML config files (config/{group}.yaml)
+    4. Pydantic defaults (lowest priority)
+
+Schemas:
+    chief: Chief-level analysis config (trends, seasonality, covid)
+    patrol: Patrol analysis config (hotspots, robbery, etc.)
+    policy: Policy analysis config (retail theft, vehicle crimes, etc.)
+    forecasting: Forecasting config (time series, classification)
 """
 
 from pathlib import Path

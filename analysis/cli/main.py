@@ -1,10 +1,17 @@
-"""Main CLI application for crime analysis.
+"""CLI entry point using typer.
 
-Provides command groups for each analysis area:
-- chief: High-level trend analyses (trends, seasonality, covid)
-- patrol: Patrol operations analyses (hotspots, robbery, district, census)
-- policy: Policy evaluation analyses (retail theft, vehicle, composition, events)
-- forecasting: Forecasting analyses (time series, classification)
+This module defines the main typer app and command groups for the
+crime analysis CLI system.
+
+Usage:
+    python -m analysis.cli --help
+    python -m analysis.cli chief trends --help
+    python -m analysis.cli chief trends --fast
+
+Architecture:
+    - typer.App for command registration
+    - Rich for console output (progress bars, tables, panels)
+    - CliRunner for testing (typer.testing)
 """
 
 from pathlib import Path
