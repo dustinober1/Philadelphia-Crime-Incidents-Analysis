@@ -1,0 +1,12 @@
+{
+  "total_incidents": 3496353,
+  "date_start": "2006-01-01",
+  "date_end": "2026-01-20",
+  "last_updated": "2026-02-06T22:15:39.569572+00:00",
+  "source": "Philadelphia Police Department via OpenDataPhilly",
+  "colors": {
+    "Violent": "#E63946",
+    "Property": "#457B9D",
+    "Other": "#A8DADC"
+  }
+}
