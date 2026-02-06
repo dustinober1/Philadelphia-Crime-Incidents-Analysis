@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-05 (08-02a: Module Docstrings Verification and Typing Compliance)
-**Last Execution:** Phase 8 Plan 02a (Utils/Data Module Docstrings)
+**Updated:** 2026-02-06 (08-01: AGENTS Script Workflow Migration)
+**Last Execution:** Phase 8 Plan 01 (AGENTS Script-Centric Documentation)
 
 ---
 
@@ -28,21 +28,21 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 8 - Documentation & Migration (4/10 complete)
-**Plan:** 2a/10
-**Status:** 🔄 IN PROGRESS (Phase 8 documentation tasks underway; docstring coverage validated for utils/data modules)
-**Last Activity:** 2026-02-05 — Completed 08-02a: Add comprehensive module docstrings to utils and data modules
+**Phase:** 8 - Documentation & Migration (5/10 complete)
+**Plan:** 5/10
+**Status:** 🔄 IN PROGRESS (Phase 8 documentation migration underway with AGENTS now script-first)
+**Last Activity:** 2026-02-06 — Completed 08-01: Update AGENTS.md to script-based contributor workflow
 
 **Progress Bar:**
 
 ```
 v1.0: ████████████████████ 100% (4 phases, 24 plans)
-v1.1: ███████░░░░░░░░░░░░  40% (2.00/5 phases complete, Phase 8 in progress)
+v1.1: ████████░░░░░░░░░░░  41% (2.05/5 phases complete, Phase 8 in progress)
 ```
 
 **Milestone Progress:**
 - v1.0: ✅ Complete (4 phases, 24 plans, 60+ artifacts)
-- v1.1: 🔄 Phase 8 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7 ✅, Phase 8: 4/10)
+- v1.1: 🔄 Phase 8 In Progress (Phase 5 ✅, Phase 6 ✅, Phase 7 ✅, Phase 8: 5/10)
 
 ---
 
@@ -257,6 +257,7 @@ Plans: 5 plans
 | Figure Generation | Close matplotlib figures after saving to prevent memory leaks | plt.close(fig) after save_figure() in forecasting commands |
 | Figure Generation | Skip figure generation for commands requiring optional dependencies | hotspots (sklearn), robbery-heatmap (seaborn), census-rates (geopandas), events (event data) |
 | Figure Generation | Tests verify figure creation with correct format extension | Check for .png, .svg, .pdf files in output directories |
+| Documentation | AGENTS.md is script-first with CLI references and no notebook-era rules | Aligns contributor guidance to v1.1 CLI architecture and testing patterns |
 
 ### Validated Patterns (v1.0)
 - Data loading via `analysis.utils.load_data()` → To be replaced in Phase 5
@@ -290,8 +291,8 @@ Plans: 5 plans
 
 ## Session Continuity
 
-**Last session:** 2026-02-05 21:48 UTC
-**Stopped at:** Completed 08-02a-PLAN.md
+**Last session:** 2026-02-06 02:54 UTC
+**Stopped at:** Completed 08-01-PLAN.md
 **Resume file:** None
 
 **Current Session Goals:**
@@ -364,4 +365,4 @@ Plans: 5 plans
 - **Figure Tests Updated:** Tests verify figure creation with correct format extension for all commands
 
 ---
-*State updated: 2026-02-05 12:19 UTC*
+*State updated: 2026-02-06 02:54 UTC*
