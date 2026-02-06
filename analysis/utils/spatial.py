@@ -21,7 +21,7 @@ from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
-from shapely.geometry import Point
+from shapely.geometry import Point  # type: ignore[import-untyped]
 
 from analysis.config import (
     PHILLY_LAT_MAX,
@@ -287,7 +287,7 @@ def calculate_severity_score(
     df: pd.DataFrame,
     weights: dict[int, float] | None = None,
     ucr_col: str = "ucr_general",
-) -> pd.Series:
+) -> pd.Series[float]:
     """Calculate weighted severity score per record.
 
     Args:
