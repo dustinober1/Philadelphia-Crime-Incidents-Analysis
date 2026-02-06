@@ -283,7 +283,9 @@ Plans: 5 plans
 | Documentation | AGENTS.md is script-first with CLI references and no notebook-era rules | Aligns contributor guidance to v1.1 CLI architecture and testing patterns |
 | Documentation | Standardize Google-style module docstrings across config/CLI/visualization modules | Improves IDE discoverability and keeps docs conventions consistent |
 | Documentation | README quickstart is CLI-first with all 13 commands documented | Ensures new users follow v1.1 script workflow immediately |
- | Migration | Keep run_phase1.sh as a compatibility wrapper over CLI commands | Preserves legacy script entrypoint while removing notebook orchestration dependency |
+  | Migration | Keep run_phase1.sh as a compatibility wrapper over CLI commands | Preserves legacy script entrypoint while removing notebook orchestration dependency |
+  | Migration | Delete orchestrate_phase*.py and validate_artifacts.py scripts | Scripts no longer needed, all analyses available as CLI commands with pytest tests |
+  | Documentation | Update CLAUDE.md to CLI-first workflow | All notebook-centric references replaced with CLI equivalents, documentation reflects v1.1 architecture |
  | Migration | Pattern matching instead of exact value comparison for verification | Allows for sampling differences with --fast mode while verifying correct structure |
  | Migration | Use --version integration-test for migration tests | Isolates test outputs from production reports/ directory |
  | Testing | Graceful pytest.skip() for optional dependencies | Tests pass if command succeeds, skip gracefully when sklearn/seaborn/prophet/geopandas unavailable |
