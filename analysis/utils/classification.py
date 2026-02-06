@@ -11,6 +11,8 @@ The classification uses UCR hundred-bands (first digit of ucr_general code):
 - Violent: 1xx (Homicide, Rape, Robbery, Aggravated Assault)
 - Property: 5xx, 6xx, 7xx (Burglary, Theft, Vehicle Theft)
 - Other: All other codes
+
+See CLAUDE.md for usage guidance and CLI workflow examples.
 """
 
 from __future__ import annotations
