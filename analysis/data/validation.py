@@ -11,6 +11,8 @@ Validation rules:
 - ucr_general: Integer 100-9999
 - point_x, point_y: Float coordinates within Philadelphia bounds
 - text_general_code: Non-empty string
+
+See CLAUDE.md for usage guidance and CLI workflow examples.
 """
 
 from __future__ import annotations

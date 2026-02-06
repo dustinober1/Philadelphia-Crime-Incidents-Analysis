@@ -1,4 +1,12 @@
-"""Forecasting and prediction analysis commands."""
+"""Forecasting and prediction commands.
+
+Commands:
+    time-series: Prophet-based time series forecasting
+    classification: Violence classification with feature importance
+
+Note: time-series command requires prophet package (optional dependency).
+See CLAUDE.md for usage examples and fallback behavior details.
+"""
 
 from pathlib import Path
 from typing import Literal

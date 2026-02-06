@@ -12,6 +12,8 @@ Cache behavior:
 - First load: Reads from disk and caches in ~/.cache/crime_analysis/
 - Subsequent loads: Returns cached data (5x+ speedup)
 - Cache invalidation: Automatic when data file mtime changes
+
+See CLAUDE.md for usage guidance and CLI workflow examples.
 """
 
 from __future__ import annotations
@@ -118,9 +120,7 @@ def _load_boundaries_geojson(name: Literal["police_districts", "census_tracts"])
     }
 
     if name not in boundary_files:
-        raise ValueError(
-            f"Unknown boundary: {name}. " f"Valid options: {list(boundary_files.keys())}"
-        )
+        raise ValueError(f"Unknown boundary: {name}. Valid options: {list(boundary_files.keys())}")
 
     file_path = boundaries_dir / boundary_files[name]
 

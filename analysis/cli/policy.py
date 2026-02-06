@@ -1,4 +1,13 @@
-"""Policy evaluation analysis commands."""
+"""Policy analysis commands.
+
+Commands:
+    retail-theft: Retail theft trend analysis
+    vehicle-crimes: Vehicle crime corridor analysis
+    composition: Crime composition breakdown
+    events: Event-day impact analysis
+
+See CLAUDE.md for usage examples and policy analysis workflow notes.
+"""
 
 from pathlib import Path
 from typing import Literal

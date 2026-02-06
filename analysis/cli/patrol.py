@@ -1,4 +1,13 @@
-"""Patrol operations analysis commands."""
+"""Patrol analysis commands.
+
+Commands:
+    hotspots: Spatial clustering of crime incidents
+    robbery-heatmap: Temporal heatmap for robbery incidents
+    district-severity: Per-district severity scoring
+    census-rates: Crime rates per census tract (population-normalized)
+
+See CLAUDE.md for usage examples and operational guidance.
+"""
 
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal

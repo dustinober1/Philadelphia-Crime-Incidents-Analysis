@@ -9,6 +9,8 @@ Functions:
     add_temporal_features: Add extracted temporal features to DataFrame
 
 Note: Uses pandas 2.2+ frequency aliases (ME, YE) not deprecated (M, Y).
+
+See CLAUDE.md for usage guidance and CLI workflow examples.
 """
 
 from __future__ import annotations
@@ -132,6 +134,9 @@ def add_temporal_features(df: pd.DataFrame, date_col: str = "dispatch_date") -> 
 
     Returns:
         DataFrame with temporal features added (year, month, day, day_of_week).
+
+    Raises:
+        None.
 
     Example:
         >>> from analysis.data import load_crime_data, add_temporal_features

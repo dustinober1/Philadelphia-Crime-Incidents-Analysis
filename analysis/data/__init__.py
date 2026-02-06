@@ -13,6 +13,8 @@ Example:
     >>> df = load_crime_data(clean=True)
     >>> from analysis.data.preprocessing import filter_by_date_range
     >>> df = filter_by_date_range(df, start="2020-01-01", end="2023-12-31")
+
+See CLAUDE.md for usage guidance and CLI workflow examples.
 """
 
 # Exports from loading.py

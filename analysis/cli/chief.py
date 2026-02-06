@@ -1,4 +1,12 @@
-"""Chief-level trend analysis commands."""
+"""Chief-level analysis commands.
+
+Commands:
+    trends: Annual crime trends analysis
+    seasonality: Seasonal patterns and summer spike analysis
+    covid: Pre/during/post COVID comparison
+
+See CLAUDE.md for usage examples and expected report artifacts.
+"""
 
 from pathlib import Path
 from typing import Literal
