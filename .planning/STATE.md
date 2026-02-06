@@ -1,7 +1,7 @@
 # STATE: Crime Incidents Philadelphia
 
-**Updated:** 2026-02-06 (08-07a: Project Documentation - Phase 8 Complete, v1.1 Milestone Complete)
-**Last Execution:** Phase 8 Plan 7a (Project Documentation)
+**Updated:** 2026-02-06 (08-06a: Archive and Delete Notebooks)
+**Last Execution:** Phase 8 Plan 06a (Archive and Delete Notebooks)
 
 ---
 
@@ -28,17 +28,21 @@ See: `.planning/PROJECT.md` (updated 2026-02-04)
 
 ## Current Position
 
-**Phase:** 8 - Documentation & Migration (9/9 complete)
-**Plan:** 7a/9
-**Status:** ✅ COMPLETE (All project documentation updated to CLI-first architecture, v1.1 milestone complete)
-**Last Activity:** 2026-02-06 — Completed 08-07a: Project Documentation (PROJECT.md, ROADMAP.md, STATE.md updated)
+**Phase:** 8 - Documentation & Migration (9/10 complete)
+**Plan:** 6a/10
+**Status:** 🔄 IN PROGRESS (Notebooks archived and deleted from notebooks/ directory)
+**Last Activity:** 2026-02-06 — Completed 08-06a: Archive and Delete Notebooks (20 notebooks deleted, archive with CLI mappings)
 
 **Progress Bar:**
 
 ```
+Overall: ████████████████████ 98% (59/60 plans)
+v1.0:    ████████████████████ 100% (4 phases, 24 plans)
+v1.1:    ██████████████████░░ 98% (4 phases, 35/36 plans, Phase 8: 9/10)
+```
 Overall: ████████████████████ 100% (60/60 plans)
 v1.0:    ████████████████████ 100% (4 phases, 24 plans)
-v1.1:    ████████████████████ 100% (4/4 phases complete, Phase 8 ✅)
+v1.1:    ████████████████████ 100% (4/4 phases complete, Phase 8 🔄)
 ```
 
 **Milestone Progress:**
@@ -198,7 +202,7 @@ Plans: 5 plans
 - Documentation: DOCS-01, DOCS-02, DOCS-03, DOCS-04, DOCS-05
 - Migration: MIGRATE-01, MIGRATE-02, MIGRATE-03, MIGRATE-04, MIGRATE-05, MIGRATE-06, MIGRATE-07, MIGRATE-08
 
-**Plans:** 9 total
+**Plans:** 10 total
 - 08-01: Update AGENTS.md to script-based workflow ✅ Complete
 - 08-02a: Add module docstrings (data layer) ✅ Complete
 - 08-02b: Add module docstrings (utils layer) ✅ Complete
@@ -206,8 +210,9 @@ Plans: 5 plans
 - 08-04: Update README.md with CLI examples ✅ Complete
 - 08-05: Verify CLI outputs match notebooks ✅ Complete
 - 08-06a: Archive notebooks to reports/v1.0/notebooks/ ✅ Complete
-- 08-06b: Delete legacy scripts and update CLAUDE.md ✅ Complete
+- 08-06b: Delete legacy scripts and update CLAUDE.md ❌ Not executed
 - 08-07a: Update project documentation ✅ Complete
+- 08-07b: Archive legacy docs and create v1.1 release notes ✅ Complete
 
 **Success criteria:** All met
 1. ✅ AGENTS.md documents script-based workflow (no notebook rules)
@@ -322,8 +327,8 @@ Plans: 5 plans
 
 ## Session Continuity
 
-**Last session:** 2026-02-06 09:26 UTC
-**Stopped at:** Completed 08-07b-PLAN.md (Archive legacy docs and create v1.1 release notes)
+**Last session:** 2026-02-06 09:36 UTC
+**Stopped at:** Completed 08-06a-PLAN.md (Archive and delete notebooks)
 **Resume file:** None
 
 **Current Session Goals:**
@@ -370,7 +375,7 @@ Plans: 5 plans
 - [x] Execute Phase 8 Plan 03 (Create ARCHIVE index)
 - [x] Execute Phase 8 Plan 04 (README CLI quickstart and run_phase1 wrapper migration)
 - [x] Execute Phase 8 Plan 05 (Migration verification tests)
-- [ ] Execute Phase 8 Plan 06a (Archive and delete phase 1-2 notebooks)
+- [x] Execute Phase 8 Plan 06a (Archive and delete phase 1-2 notebooks)
 - [ ] Execute Phase 8 Plan 06b (Archive and delete phase 3-4 notebooks)
 - [x] Execute Phase 8 Plan 07a (Create migration completion checklist)
 - [x] Execute Phase 8 Plan 07b (Archive legacy docs and create v1.1 release notes)
@@ -386,7 +391,7 @@ Plans: 5 plans
 - Phase 5 complete: 6/6 main plans + 3 gap closure plans (module structure ✅, data layer ✅, quality tooling ✅, mypy fixes ✅, dev dependencies installed ✅, utils tests ✅, data layer tests ✅)
 - **Phase 6 COMPLETE:** 7/7 plans (CLI framework dependencies ✅, configuration system ✅, CLI structure ✅, Chief commands ✅, Patrol commands ✅, Policy/Forecasting commands ✅, Rich integration ✅)
 - **Phase 7 COMPLETE:** 10/10 plans (visualization module ✅, fixtures ✅, CLI tests ✅, integration tests ✅, pre-commit hook ✅, output format arguments ✅, figure generation ✅, memory leak fix ✅)
-- **Phase 8 IN PROGRESS:** 7/10 plans complete (archival strategy ✅, phase 1-2 archive ✅, phase 3-4 archive ✅, archive index ✅, README migration ✅, migration verification tests ✅)
+- **Phase 8 IN PROGRESS:** 8/10 plans complete (archival strategy ✅, phase 1-2 archive ✅, phase 3-4 archive ✅, archive index ✅, README migration ✅, migration verification tests ✅, notebook archival & deletion ✅)
 - **All 13 CLI commands implemented with Rich progress bars and figure generation:**
   - Chief (3): trends, seasonality, covid - with multi-task progress (trends)
   - Patrol (4): hotspots, robbery-heatmap, district-severity, census-rates - with multi-task progress (hotspots)
