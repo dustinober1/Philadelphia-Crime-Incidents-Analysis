@@ -3,13 +3,16 @@
 import { FormEvent, useMemo, useState } from "react";
 import useSWR from "swr";
 
-import { fetcher } from "@/lib/api";
+import { fetcher, type QuestionItem } from "@/lib/api";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [authorized, setAuthorized] = useState(false);
   const [answerById, setAnswerById] = useState<Record<string, string>>({});
-  const { data: pending = [], mutate } = useSWR(authorized ? "/api/v1/questions?status=pending" : null, fetcher);
+  const { data: pending = [], mutate } = useSWR<QuestionItem[]>(
+    authorized ? "/api/v1/questions?status=pending" : null,
+    fetcher,
+  );
 
   const validPassword = useMemo(() => process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "admin", []);
 
@@ -56,7 +59,7 @@ export default function AdminPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-bold">Admin Questions</h1>
-      {pending.map((q: any) => (
+      {pending.map((q) => (
         <article key={q.id} className="card space-y-2">
           <p className="font-medium">{q.question_text}</p>
           <textarea

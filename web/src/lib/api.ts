@@ -1,4 +1,5 @@
 import useSWR from "swr";
+import type { FeatureCollection, GeoJsonProperties, Geometry } from "geojson";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "";
 
@@ -25,6 +26,39 @@ export interface MetadataResponse {
   source: string;
   colors: Record<string, string>;
 }
+
+export interface QuestionItem {
+  id: string;
+  name: string;
+  question_text: string;
+  answer_text: string | null;
+  created_at: string;
+}
+
+export interface ForecastPoint {
+  ds: string;
+  yhat: number;
+  yhat_lower: number;
+  yhat_upper: number;
+}
+
+export interface HistoricalPoint {
+  ds: string;
+  y: number;
+}
+
+export interface ForecastResponse {
+  model: string;
+  historical: HistoricalPoint[];
+  forecast: ForecastPoint[];
+}
+
+export interface FeatureImportance {
+  feature: string;
+  importance: number;
+}
+
+export type GeoJson = FeatureCollection<Geometry, GeoJsonProperties>;
 
 export function useAnnualTrends() {
   return useSWR<TrendRow[]>("/api/v1/trends/annual", fetcher);

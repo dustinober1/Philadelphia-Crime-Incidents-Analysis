@@ -4,15 +4,30 @@ import { Area, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, 
 import useSWR from "swr";
 
 import { ChartCard } from "@/components/ChartCard";
-import { fetcher } from "@/lib/api";
+import { fetcher, type FeatureImportance, type ForecastResponse } from "@/lib/api";
 
 export default function ForecastPage() {
-  const { data: forecast } = useSWR("/api/v1/forecasting/time-series", fetcher);
-  const { data: features = [] } = useSWR("/api/v1/forecasting/classification", fetcher);
+  const { data: forecast } = useSWR<ForecastResponse>("/api/v1/forecasting/time-series", fetcher);
+  const { data: features = [] } = useSWR<FeatureImportance[]>(
+    "/api/v1/forecasting/classification",
+    fetcher,
+  );
 
   const chartData = [
-    ...(forecast?.historical?.map((row: any) => ({ ds: row.ds, historical: row.y, forecast: null, low: null, high: null })) ?? []),
-    ...(forecast?.forecast?.map((row: any) => ({ ds: row.ds, historical: null, forecast: row.yhat, low: row.yhat_lower, high: row.yhat_upper })) ?? []),
+    ...(forecast?.historical?.map((row) => ({
+      ds: row.ds,
+      historical: row.y,
+      forecast: null,
+      low: null,
+      high: null,
+    })) ?? []),
+    ...(forecast?.forecast?.map((row) => ({
+      ds: row.ds,
+      historical: null,
+      forecast: row.yhat,
+      low: row.yhat_lower,
+      high: row.yhat_upper,
+    })) ?? []),
   ];
 
   return (

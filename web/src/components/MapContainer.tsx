@@ -5,11 +5,28 @@ import { useMemo, useState } from "react";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 
-export function MapContainer({ districts, tracts, hotspots, corridors }: { districts: any; tracts: any; hotspots: any; corridors: any }) {
+import { GeoJson } from "@/lib/api";
+
+type PopupState = {
+  lngLat: { lng: number; lat: number };
+  properties: Record<string, unknown> | null;
+};
+
+export function MapContainer({
+  districts,
+  tracts,
+  hotspots,
+  corridors,
+}: {
+  districts: GeoJson;
+  tracts: GeoJson;
+  hotspots: GeoJson;
+  corridors: GeoJson;
+}) {
   const [activePolygon, setActivePolygon] = useState<"districts" | "tracts">("districts");
   const [showHotspots, setShowHotspots] = useState(true);
   const [showCorridors, setShowCorridors] = useState(true);
-  const [popup, setPopup] = useState<any>(null);
+  const [popup, setPopup] = useState<PopupState | null>(null);
 
   const polygonData = useMemo(() => (activePolygon === "districts" ? districts : tracts), [activePolygon, districts, tracts]);
 
@@ -30,7 +47,10 @@ export function MapContainer({ districts, tracts, hotspots, corridors }: { distr
         onClick={(event) => {
           const feature = event.features?.[0];
           if (feature) {
-            setPopup({ lngLat: event.lngLat, properties: feature.properties });
+            setPopup({
+              lngLat: event.lngLat,
+              properties: (feature.properties as Record<string, unknown> | null) ?? null,
+            });
           }
         }}
       >

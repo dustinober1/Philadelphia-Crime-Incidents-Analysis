@@ -2,10 +2,10 @@
 
 import useSWR from "swr";
 
-import { fetcher } from "@/lib/api";
+import { fetcher, type QuestionItem } from "@/lib/api";
 
 export function QuestionList() {
-  const { data, isLoading } = useSWR("/api/v1/questions?status=answered", fetcher);
+  const { data, isLoading } = useSWR<QuestionItem[]>("/api/v1/questions?status=answered", fetcher);
 
   if (isLoading) {
     return <p className="text-sm text-slate-500">Loading answered questions...</p>;
@@ -17,7 +17,7 @@ export function QuestionList() {
 
   return (
     <div className="space-y-3">
-      {data.slice(0, 10).map((item: any) => (
+      {data.slice(0, 10).map((item) => (
         <article key={item.id} className="card space-y-2">
           <p className="text-xs text-slate-500">{item.name} - {new Date(item.created_at).toLocaleDateString()}</p>
           <p className="font-medium text-slate-900">{item.question_text}</p>

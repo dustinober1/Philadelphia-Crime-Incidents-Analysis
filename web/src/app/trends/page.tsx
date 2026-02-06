@@ -21,6 +21,19 @@ import { ChartCard } from "@/components/ChartCard";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
 import { fetcher, useAnnualTrends, useMonthlyTrends } from "@/lib/api";
 
+type AnnualSeriesRow = {
+  year: number;
+  Violent: number;
+  Property: number;
+  Other: number;
+};
+
+type RobberyCell = {
+  hour: number;
+  day_of_week: number;
+  count: number;
+};
+
 export default function TrendsPage() {
   const { data: annual = [] } = useAnnualTrends();
   const { data: monthly = [] } = useMonthlyTrends();
@@ -31,13 +44,22 @@ export default function TrendsPage() {
   const [endYear, setEndYear] = useState(2025);
 
   const annualSeries = useMemo(() => {
-    const byYear = new Map<number, any>();
+    const byYear = new Map<number, AnnualSeriesRow>();
     annual.forEach((row) => {
       const year = Number(row.year);
       if (!byYear.has(year)) {
         byYear.set(year, { year, Violent: 0, Property: 0, Other: 0 });
       }
-      byYear.get(year)[row.crime_category || "Other"] = row.count;
+      const bucket = byYear.get(year);
+      if (!bucket) {
+        return;
+      }
+      const category = row.crime_category;
+      if (category === "Violent" || category === "Property" || category === "Other") {
+        bucket[category] = row.count;
+      } else {
+        bucket.Other = row.count;
+      }
     });
     return Array.from(byYear.values()).sort((a, b) => a.year - b.year);
   }, [annual]);
@@ -47,13 +69,22 @@ export default function TrendsPage() {
       const year = Number(String(row.month).slice(0, 4));
       return year >= startYear && year <= endYear;
     });
-    const byMonth = new Map<string, any>();
+    const byMonth = new Map<string, { month: string; Violent: number; Property: number; Other: number }>();
     filtered.forEach((row) => {
       const month = String(row.month).slice(0, 7);
       if (!byMonth.has(month)) {
         byMonth.set(month, { month, Violent: 0, Property: 0, Other: 0 });
       }
-      byMonth.get(month)[row.crime_category || "Other"] = row.count;
+      const bucket = byMonth.get(month);
+      if (!bucket) {
+        return;
+      }
+      const category = row.crime_category;
+      if (category === "Violent" || category === "Property" || category === "Other") {
+        bucket[category] = row.count;
+      } else {
+        bucket.Other = row.count;
+      }
     });
     return Array.from(byMonth.values());
   }, [monthly, startYear, endYear]);
@@ -134,7 +165,9 @@ export default function TrendsPage() {
                 <tr key={hour}>
                   <td className="border p-1">{hour}</td>
                   {[0, 1, 2, 3, 4, 5, 6].map((d) => {
-                    const hit = robberyHeat.find((x: any) => x.hour === hour && x.day_of_week === d);
+                    const hit = (robberyHeat as RobberyCell[]).find(
+                      (x) => x.hour === hour && x.day_of_week === d,
+                    );
                     const value = hit?.count || 0;
                     const intensity = Math.min(255, 40 + Math.floor(value / 2));
                     return <td key={`${hour}-${d}`} className="border p-1" style={{ backgroundColor: `rgb(${intensity}, ${245 - intensity / 2}, ${245 - intensity / 2})` }}>{value}</td>;
