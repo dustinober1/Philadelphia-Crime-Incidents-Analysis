@@ -40,6 +40,9 @@ def extract_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
         columns added. The ``day_of_week`` column uses pandas convention
         where Monday=0 and Sunday=6.
 
+    Raises:
+        None.
+
     Notes:
         - If ``dispatch_datetime`` does not exist but ``dispatch_date`` does,
           the function creates ``dispatch_datetime`` from ``dispatch_date``.

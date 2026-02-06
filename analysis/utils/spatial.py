@@ -11,6 +11,8 @@ Functions:
 Coordinate bounds (Philadelphia):
 - Longitude: -75.30 to -74.95
 - Latitude: 39.85 to 40.15
+
+See CLAUDE.md for usage guidance and CLI workflow examples.
 """
 
 from __future__ import annotations
@@ -35,6 +37,9 @@ def get_repo_root() -> Path:
 
     Returns:
         Path to the repository root directory.
+
+    Raises:
+        None.
     """
     return Path(__file__).resolve().parent.parent.parent
 
@@ -112,12 +117,12 @@ def load_boundaries(name: str) -> gpd.GeoDataFrame:
         file_path = repo_root / "data" / "boundaries" / "census_tracts_pop.geojson"
     else:
         raise ValueError(
-            f"Unknown boundary name: {name}. " "Expected 'police_districts' or 'census_tracts'."
+            f"Unknown boundary name: {name}. Expected 'police_districts' or 'census_tracts'."
         )
 
     if not file_path.exists():
         raise FileNotFoundError(
-            f"Boundary file not found: {file_path}. " "Run scripts/download_boundaries.py first."
+            f"Boundary file not found: {file_path}. Run scripts/download_boundaries.py first."
         )
 
     return gpd.read_file(file_path)
@@ -139,6 +144,9 @@ def df_to_geodataframe(
 
     Returns:
         GeoDataFrame with Point geometry.
+
+    Raises:
+        KeyError: If ``x_col`` or ``y_col`` is missing from the DataFrame.
 
     Examples:
         >>> import pandas as pd
@@ -171,6 +179,10 @@ def spatial_join_districts(
 
     Returns:
         DataFrame with district information joined (adds 'joined_dist_num' column).
+
+    Raises:
+        ValueError: If coordinate columns are missing from ``df``.
+        FileNotFoundError: If default district boundaries are requested but not found.
 
     Examples:
         >>> import pandas as pd
@@ -227,6 +239,10 @@ def spatial_join_tracts(
 
     Returns:
         DataFrame with census tract GEOID and population joined.
+
+    Raises:
+        ValueError: If coordinate columns are missing from ``df``.
+        FileNotFoundError: If default census tract boundaries are requested but not found.
 
     Examples:
         >>> import pandas as pd
@@ -335,6 +351,9 @@ def get_coordinate_stats(
 
     Returns:
         Dictionary with statistics including coverage rate and bounds.
+
+    Raises:
+        ValueError: If coordinate columns are missing from ``df``.
 
     Examples:
         >>> import pandas as pd
