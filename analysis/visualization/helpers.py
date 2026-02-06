@@ -1,7 +1,16 @@
-"""Helper utilities for saving figures in multiple formats.
+"""Figure saving helpers with format-aware export settings.
 
-This module provides the save_figure function which handles saving matplotlib
-figures to various file formats with appropriate quality settings.
+This module provides utilities for saving matplotlib figures in multiple
+formats while keeping output settings consistent across commands.
+
+Functions:
+    save_figure: Save a figure using png, svg, or pdf output formats
+
+Important:
+    Always call ``plt.close(fig)`` after ``save_figure`` in long-running
+    scripts and tests to avoid matplotlib memory growth.
+
+See CLAUDE.md for report output paths and testing conventions.
 """
 
 from pathlib import Path

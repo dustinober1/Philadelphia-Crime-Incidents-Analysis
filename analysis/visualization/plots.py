@@ -1,10 +1,17 @@
-"""Common plot functions for crime analysis visualizations.
+"""Reusable plot types for crime analysis.
 
-This module provides reusable plotting functions that return matplotlib Figure
-objects with consistent styling using the project's color palette.
+This module provides high-level plotting functions for common chart
+types used across the CLI analysis commands.
 
-All functions return Figure objects - the caller is responsible for saving
-using the save_figure() helper.
+Functions:
+    plot_line: Line charts for temporal trends
+    plot_bar: Bar charts for categorical comparisons
+    plot_heatmap: Heatmaps for correlation and pattern exploration
+
+All plots apply ``setup_style`` and use the project color palette for
+consistent outputs.
+
+See CLAUDE.md for command-to-plot mapping and report conventions.
 """
 
 import pandas as pd

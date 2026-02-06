@@ -1,39 +1,33 @@
-"""Visualization module for crime analysis.
+"""Publication-quality visualization utilities.
 
-This module provides a unified API for creating and saving visualizations
-with consistent styling across all analysis outputs. It supports multiple
-output formats (PNG, SVG, PDF) and publication-quality settings.
+This package provides reusable visualization functions with consistent
+styling, multi-format output (PNG, SVG, PDF), and memory-efficient
+figure handling.
 
-Key exports:
-    - setup_style(): Configure matplotlib with project-standard settings
-    - COLORS: Project color palette (Violent, Property, Other)
-    - save_figure(): Save figures in PNG, SVG, or PDF format
-    - plot_line(), plot_bar(), plot_heatmap(): Common plot functions
+Modules:
+    style: Matplotlib style configuration (color palette and rcParams)
+    helpers: Figure saving utilities for reproducible output artifacts
+    plots: Reusable high-level plot helpers for CLI analysis commands
 
 Example:
-    >>> from analysis.visualization import setup_style, save_figure, plot_line
-    >>> import pandas as pd
-    >>>
-    >>> # Create and save a line plot
-    >>> df = pd.DataFrame({'x': [1, 2, 3], 'y': [4, 5, 6]})
-    >>> fig = plot_line(df, 'x', 'y', title='Crime Trend')
-    >>> save_figure(fig, 'output.png', 'png')
+    >>> from analysis.visualization import setup_style, plot_line, save_figure
+    >>> setup_style()
+    >>> fig = plot_line(df, x_col="year", y_col="count", title="Annual Trend")
+    >>> save_figure(fig, "output.png", output_format="png")
 
-The forecast_plots module is also available for specialized forecast
-visualizations and is preserved for backward compatibility.
+See CLAUDE.md for CLI usage patterns and output conventions.
 """
 
 # Style configuration
-from analysis.visualization.style import COLORS, setup_style
+# Forecast plotting functions (preserved for backward compatibility)
+from analysis.visualization import forecast_plots
 
 # Helper functions
 from analysis.visualization.helpers import save_figure
 
 # Plot functions
 from analysis.visualization.plots import plot_bar, plot_heatmap, plot_line
-
-# Forecast plotting functions (preserved for backward compatibility)
-from analysis.visualization import forecast_plots
+from analysis.visualization.style import COLORS, setup_style
 
 __all__ = [
     # Style
