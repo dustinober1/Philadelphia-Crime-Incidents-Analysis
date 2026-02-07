@@ -245,3 +245,205 @@ class TestComputeRegressionMetrics:
         # sklearn metrics raise ValueError on NaN input
         with pytest.raises(ValueError, match="Input contains NaN"):
             compute_regression_metrics(y_true, y_pred)
+
+
+class TestComputeForecastAccuracy:
+    """Tests for compute_forecast_accuracy function."""
+
+    def test_includes_all_regression_metrics(self):
+        """Verify includes mae, rmse, r2, mape, bias from base metrics."""
+        actual = pd.Series([100.0, 200.0, 300.0], index=pd.date_range("2020-01-01", periods=3))
+        forecast = pd.Series([110.0, 210.0, 310.0], index=pd.date_range("2020-01-01", periods=3))
+
+        metrics = compute_forecast_accuracy(actual, forecast)
+
+        # All base regression metrics present
+        assert "mae" in metrics
+        assert "rmse" in metrics
+        assert "r2" in metrics
+        assert "mape" in metrics
+        assert "bias" in metrics
+
+    def test_mase_with_naive_forecast(self):
+        """Verify MASE = mae / naive_error when seasonality=None."""
+        # Create actual values where diff is constant
+        actual = pd.Series([100.0, 110.0, 120.0, 130.0], index=pd.date_range("2020-01-01", periods=4))
+        forecast = pd.Series([105.0, 115.0, 125.0, 135.0], index=pd.date_range("2020-01-01", periods=4))
+
+        metrics = compute_forecast_accuracy(actual, forecast, seasonality=None)
+
+        # Naive error: mean(|diff|) = mean(|10, 10, 10|) = 10
+        # MAE: mean(|105-100|, |115-110|, |125-120|, |135-130|) = 5
+        # MASE = 5 / 10 = 0.5
+        assert "mase" in metrics
+        assert metrics["mase"] == pytest.approx(0.5)
+
+    def test_mase_with_seasonal_naive_forecast(self):
+        """Verify MASE uses seasonal diff when seasonality provided."""
+        # Create seasonal data with period 2
+        actual = pd.Series(
+            [100.0, 200.0, 105.0, 205.0, 110.0, 210.0],
+            index=pd.date_range("2020-01-01", periods=6)
+        )
+        forecast = pd.Series(
+            [102.0, 202.0, 107.0, 207.0, 112.0, 212.0],
+            index=pd.date_range("2020-01-01", periods=6)
+        )
+
+        metrics = compute_forecast_accuracy(actual, forecast, seasonality=2)
+
+        # Seasonal naive error: mean(|diff(2)|) = mean(|5, 5, 5, 5|) = 5
+        # MAE = 2.0
+        # MASE = 2.0 / 5 = 0.4
+        assert "mase" in metrics
+        assert metrics["mase"] == pytest.approx(0.4)
+
+    def test_mase_infinite_when_naive_error_zero(self):
+        """Verify MASE = np.inf when naive_error is 0."""
+        # Create constant series (diff = 0)
+        actual = pd.Series([100.0, 100.0, 100.0, 100.0], index=pd.date_range("2020-01-01", periods=4))
+        forecast = pd.Series([100.0, 100.0, 100.0, 100.0], index=pd.date_range("2020-01-01", periods=4))
+
+        metrics = compute_forecast_accuracy(actual, forecast, seasonality=None)
+
+        # Naive error = 0, so MASE = inf
+        assert metrics["mase"] == np.inf
+
+    def test_naive_forecast_uses_diff(self):
+        """Verify naive_error = mean(|actual.diff()|)."""
+        actual = pd.Series([100.0, 110.0, 120.0, 130.0], index=pd.date_range("2020-01-01", periods=4))
+        forecast = pd.Series([105.0, 115.0, 125.0, 135.0], index=pd.date_range("2020-01-01", periods=4))
+
+        metrics = compute_forecast_accuracy(actual, forecast, seasonality=None)
+
+        # Verify naive error calculation
+        # actual.diff() = [NaN, 10, 10, 10], dropna -> [10, 10, 10]
+        # mean = 10
+        expected_naive_error = 10.0
+        # MASE = MAE / naive_error = 5 / 10 = 0.5
+        assert metrics["mase"] == pytest.approx(0.5)
+
+
+class TestCreateModelCard:
+    """Tests for create_model_card function."""
+
+    def test_returns_dict_with_expected_fields(self):
+        """Verify has 'model_name', 'model_type', 'n_features', 'features', 'train_performance', 'test_performance', 'limitations', 'created_at'."""
+        train_metrics = {"mae": 1.0, "rmse": 2.0}
+        test_metrics = {"mae": 1.5, "rmse": 2.5}
+
+        card = create_model_card(
+            model_name="TestModel",
+            model_type="RandomForest",
+            features=["feature1", "feature2"],
+            train_metrics=train_metrics,
+            test_metrics=test_metrics,
+        )
+
+        assert isinstance(card, dict)
+        assert "model_name" in card
+        assert "model_type" in card
+        assert "n_features" in card
+        assert "features" in card
+        assert "train_performance" in card
+        assert "test_performance" in card
+        assert "limitations" in card
+        assert "created_at" in card
+
+    def test_n_features_matches_feature_list_length(self):
+        """Verify n_features == len(features)."""
+        features = ["feature1", "feature2", "feature3"]
+        train_metrics = {"mae": 1.0}
+        test_metrics = {"mae": 1.5}
+
+        card = create_model_card(
+            model_name="TestModel",
+            model_type="RandomForest",
+            features=features,
+            train_metrics=train_metrics,
+            test_metrics=test_metrics,
+        )
+
+        assert card["n_features"] == len(features)
+
+    def test_train_metrics_preserved(self):
+        """Verify train_metrics dict included unchanged."""
+        train_metrics = {"mae": 1.0, "rmse": 2.0, "r2": 0.95}
+        test_metrics = {"mae": 1.5}
+
+        card = create_model_card(
+            model_name="TestModel",
+            model_type="RandomForest",
+            features=["feature1"],
+            train_metrics=train_metrics,
+            test_metrics=test_metrics,
+        )
+
+        assert card["train_performance"] == train_metrics
+
+    def test_test_metrics_preserved(self):
+        """Verify test_metrics dict included unchanged."""
+        train_metrics = {"mae": 1.0}
+        test_metrics = {"mae": 1.5, "rmse": 2.5, "r2": 0.90}
+
+        card = create_model_card(
+            model_name="TestModel",
+            model_type="RandomForest",
+            features=["feature1"],
+            train_metrics=train_metrics,
+            test_metrics=test_metrics,
+        )
+
+        assert card["test_performance"] == test_metrics
+
+    def test_limitations_default_to_empty_list(self):
+        """Verify limitations=[] when None provided."""
+        train_metrics = {"mae": 1.0}
+        test_metrics = {"mae": 1.5}
+
+        card = create_model_card(
+            model_name="TestModel",
+            model_type="RandomForest",
+            features=["feature1"],
+            train_metrics=train_metrics,
+            test_metrics=test_metrics,
+            limitations=None,
+        )
+
+        assert card["limitations"] == []
+
+    def test_created_at_is_isoformat_timestamp(self):
+        """Verify created_at is string in ISO format."""
+        train_metrics = {"mae": 1.0}
+        test_metrics = {"mae": 1.5}
+
+        card = create_model_card(
+            model_name="TestModel",
+            model_type="RandomForest",
+            features=["feature1"],
+            train_metrics=train_metrics,
+            test_metrics=test_metrics,
+        )
+
+        assert isinstance(card["created_at"], str)
+        # Verify ISO format: YYYY-MM-DDTHH:MM:SS
+        assert "T" in card["created_at"]
+        # Should be parseable as ISO datetime
+        pd.to_datetime(card["created_at"])
+
+    def test_custom_limitations_preserved(self):
+        """Verify custom limitations list included."""
+        train_metrics = {"mae": 1.0}
+        test_metrics = {"mae": 1.5}
+        custom_limitations = ["Small dataset", "Limited features"]
+
+        card = create_model_card(
+            model_name="TestModel",
+            model_type="RandomForest",
+            features=["feature1"],
+            train_metrics=train_metrics,
+            test_metrics=test_metrics,
+            limitations=custom_limitations,
+        )
+
+        assert card["limitations"] == custom_limitations
