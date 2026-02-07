@@ -230,3 +230,140 @@ class TestEnvironmentVariableOverrides:
         config = BaseConfig()
         assert config.dpi == 250
         assert config.output_format == "pdf"
+
+
+class TestFieldValidationConstraints:
+    """Test pydantic field validation constraints."""
+
+    def test_global_config_dpi_validation_too_low(self, monkeypatch):
+        """Verify validation error when DPI < 72."""
+        monkeypatch.setenv("CRIME_DPI", "50")
+
+        with pytest.raises(ValidationError) as exc_info:
+            GlobalConfig()
+        assert "dpi" in str(exc_info.value).lower()
+
+    def test_global_config_dpi_validation_too_high(self, monkeypatch):
+        """Verify validation error when DPI > 600."""
+        monkeypatch.setenv("CRIME_DPI", "1000")
+
+        with pytest.raises(ValidationError) as exc_info:
+            GlobalConfig()
+        assert "dpi" in str(exc_info.value).lower()
+
+    def test_global_config_dpi_validation_boundary_accepts_low(self, monkeypatch):
+        """Verify DPI = 72 is accepted (lower boundary)."""
+        monkeypatch.setenv("CRIME_DPI", "72")
+
+        config = GlobalConfig()
+        assert config.dpi == 72
+
+    def test_global_config_dpi_validation_boundary_accepts_high(self, monkeypatch):
+        """Verify DPI = 600 is accepted (upper boundary)."""
+        monkeypatch.setenv("CRIME_DPI", "600")
+
+        config = GlobalConfig()
+        assert config.dpi == 600
+
+    def test_global_config_output_format_validation_invalid(self, monkeypatch):
+        """Verify error for invalid format (jpg, gif)."""
+        monkeypatch.setenv("CRIME_OUTPUT_FORMAT", "jpg")
+
+        with pytest.raises(ValidationError) as exc_info:
+            GlobalConfig()
+        assert "output_format" in str(exc_info.value).lower()
+
+    def test_global_config_output_format_validation_valid_png(self, monkeypatch):
+        """Verify png format is accepted."""
+        monkeypatch.setenv("CRIME_OUTPUT_FORMAT", "png")
+
+        config = GlobalConfig()
+        assert config.output_format == "png"
+
+    def test_global_config_output_format_validation_valid_svg(self, monkeypatch):
+        """Verify svg format is accepted."""
+        monkeypatch.setenv("CRIME_OUTPUT_FORMAT", "svg")
+
+        config = GlobalConfig()
+        assert config.output_format == "svg"
+
+    def test_global_config_output_format_validation_valid_pdf(self, monkeypatch):
+        """Verify pdf format is accepted."""
+        monkeypatch.setenv("CRIME_OUTPUT_FORMAT", "pdf")
+
+        config = GlobalConfig()
+        assert config.output_format == "pdf"
+
+    def test_global_config_fast_sample_frac_validation_too_low(self, monkeypatch):
+        """Verify validation error when < 0.01."""
+        monkeypatch.setenv("CRIME_FAST_SAMPLE_FRAC", "0.001")
+
+        with pytest.raises(ValidationError) as exc_info:
+            GlobalConfig()
+        assert "fast_sample_frac" in str(exc_info.value).lower()
+
+    def test_global_config_fast_sample_frac_validation_too_high(self, monkeypatch):
+        """Verify validation error when > 1.0."""
+        monkeypatch.setenv("CRIME_FAST_SAMPLE_FRAC", "1.5")
+
+        with pytest.raises(ValidationError) as exc_info:
+            GlobalConfig()
+        assert "fast_sample_frac" in str(exc_info.value).lower()
+
+    def test_global_config_fast_sample_frac_validation_boundary_low(self, monkeypatch):
+        """Verify 0.01 is accepted (lower boundary)."""
+        monkeypatch.setenv("CRIME_FAST_SAMPLE_FRAC", "0.01")
+
+        config = GlobalConfig()
+        assert config.fast_sample_frac == 0.01
+
+    def test_global_config_fast_sample_frac_validation_boundary_high(self, monkeypatch):
+        """Verify 1.0 is accepted (upper boundary)."""
+        monkeypatch.setenv("CRIME_FAST_SAMPLE_FRAC", "1.0")
+
+        config = GlobalConfig()
+        assert config.fast_sample_frac == 1.0
+
+    def test_global_config_log_level_validation_invalid_trace(self, monkeypatch):
+        """Verify error for invalid log level TRACE."""
+        monkeypatch.setenv("CRIME_LOG_LEVEL", "TRACE")
+
+        with pytest.raises(ValidationError) as exc_info:
+            GlobalConfig()
+        assert "log_level" in str(exc_info.value).lower()
+
+    def test_global_config_log_level_validation_invalid_fatal(self, monkeypatch):
+        """Verify error for invalid log level FATAL."""
+        monkeypatch.setenv("CRIME_LOG_LEVEL", "FATAL")
+
+        with pytest.raises(ValidationError) as exc_info:
+            GlobalConfig()
+        assert "log_level" in str(exc_info.value).lower()
+
+    def test_global_config_log_level_validation_valid_debug(self, monkeypatch):
+        """Verify DEBUG log level is accepted."""
+        monkeypatch.setenv("CRIME_LOG_LEVEL", "DEBUG")
+
+        config = GlobalConfig()
+        assert config.log_level == "DEBUG"
+
+    def test_global_config_log_level_validation_valid_info(self, monkeypatch):
+        """Verify INFO log level is accepted."""
+        monkeypatch.setenv("CRIME_LOG_LEVEL", "INFO")
+
+        config = GlobalConfig()
+        assert config.log_level == "INFO"
+
+    def test_global_config_log_level_validation_valid_warning(self, monkeypatch):
+        """Verify WARNING log level is accepted."""
+        monkeypatch.setenv("CRIME_LOG_LEVEL", "WARNING")
+
+        config = GlobalConfig()
+        assert config.log_level == "WARNING"
+
+    def test_global_config_log_level_validation_valid_error(self, monkeypatch):
+        """Verify ERROR log level is accepted."""
+        monkeypatch.setenv("CRIME_LOG_LEVEL", "ERROR")
+
+        config = GlobalConfig()
+        assert config.log_level == "ERROR"
