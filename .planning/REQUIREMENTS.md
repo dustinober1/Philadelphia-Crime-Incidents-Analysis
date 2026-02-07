@@ -13,9 +13,9 @@
 
 ### Runtime Footprint
 
-- [ ] **FOOT-01**: API, web, and pipeline images use slim and/or multi-stage build patterns to reduce final image size compared with naive single-stage builds.
-- [ ] **FOOT-02**: Compose configuration enforces CPU and memory limits for each long-running service in the default local profile.
-- [ ] **FOOT-03**: Docker build layers are structured to maximize dependency caching and reduce rebuild time for iterative local development.
+- [x] **FOOT-01**: API, web, and pipeline images use slim and/or multi-stage build patterns to reduce final image size compared with naive single-stage builds.
+- [x] **FOOT-02**: Compose configuration enforces CPU and memory limits for each long-running service in the default local profile.
+- [x] **FOOT-03**: Docker build layers are structured to maximize dependency caching and reduce rebuild time for iterative local development.
 
 ### Local Config and Data Contract
 
@@ -58,9 +58,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 1 | Complete |
 | CONF-03 | Phase 1 | Complete |
-| FOOT-01 | Phase 2 | Pending |
-| FOOT-02 | Phase 2 | Pending |
-| FOOT-03 | Phase 2 | Pending |
+| FOOT-01 | Phase 2 | Complete |
+| FOOT-02 | Phase 2 | Complete |
+| FOOT-03 | Phase 2 | Complete |
 | DEVX-01 | Phase 3 | Pending |
 | DEVX-02 | Phase 3 | Pending |
 | DEVX-03 | Phase 3 | Pending |
@@ -72,4 +72,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: February 7, 2026*
-*Last updated: February 7, 2026 after Phase 1 completion*
+*Last updated: February 7, 2026 after Phase 2 completion*
