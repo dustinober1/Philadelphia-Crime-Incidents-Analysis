@@ -54,3 +54,42 @@ class TestGlobalConfigDefaults:
         config = GlobalConfig()
         assert config.boundaries_dir.name == "boundaries"
         assert "data" in config.boundaries_dir.parts
+
+
+class TestBaseConfigDefaults:
+    """Test BaseConfig default values."""
+
+    def test_base_config_defaults_output_dir(self):
+        """Verify output_dir defaults correctly."""
+        config = BaseConfig()
+        assert config.output_dir.name == "reports"
+
+    def test_base_config_defaults_dpi(self):
+        """Verify dpi defaults to 300."""
+        config = BaseConfig()
+        assert config.dpi == 300
+
+    def test_base_config_defaults_output_format(self):
+        """Verify output_format defaults to "png"."""
+        config = BaseConfig()
+        assert config.output_format == "png"
+
+    def test_base_config_defaults_fast_sample_frac(self):
+        """Verify fast_sample_frac defaults to 0.1."""
+        config = BaseConfig()
+        assert config.fast_sample_frac == 0.1
+
+    def test_base_config_defaults_cache_enabled(self):
+        """Verify cache_enabled defaults to True."""
+        config = BaseConfig()
+        assert config.cache_enabled is True
+
+    def test_base_config_defaults_log_level(self):
+        """Verify log_level defaults to "INFO"."""
+        config = BaseConfig()
+        assert config.log_level == "INFO"
+
+    def test_base_config_defaults_version(self):
+        """Verify version defaults to "v1.0"."""
+        config = BaseConfig()
+        assert config.version == "v1.0"
