@@ -99,10 +99,10 @@ This milestone is complete when:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 10 | Pending |
-| INFRA-02 | Phase 10 | Pending |
-| INFRA-03 | Phase 10 | Pending |
-| INFRA-04 | Phase 10 | Pending |
+| INFRA-01 | Phase 10 | Complete |
+| INFRA-02 | Phase 10 | Complete |
+| INFRA-03 | Phase 10 | Complete |
+| INFRA-04 | Phase 10 | Complete |
 | CORE-01 | Phase 11 | Pending |
 | CORE-02 | Phase 11 | Pending |
 | CORE-03 | Phase 11 | Pending |
