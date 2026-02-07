@@ -27,3 +27,8 @@ pydantic-settings>=2.0
 # Data validation and caching (if not in conda)
 pydantic>=2.12
 joblib>=1.4
+
+# Cleanup tools for Phase 14 repository cleanup
+vulture>=2.14
+autoflake>=2.3.1
+pyclean>=3.5.0
