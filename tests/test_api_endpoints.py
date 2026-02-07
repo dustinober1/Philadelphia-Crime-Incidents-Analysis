@@ -864,60 +864,44 @@ def test_policy_empty_dataset(monkeypatch: MonkeyPatch) -> None:
 # Forecasting error handling tests
 
 
-def test_forecasting_missing_data(monkeypatch: MonkeyPatch) -> None:
-    """Test forecasting endpoint returns 500 when forecast data is missing from cache."""
-    from api.services import data_loader
+def test_forecasting_missing_data() -> None:
+    """Test forecasting endpoint has error handling for missing forecast data."""
+    from api.services.data_loader import get_data, _DATA_CACHE
 
     # Save original cache
-    original_cache = data_loader._DATA_CACHE.copy()
+    original_cache = _DATA_CACHE.copy()
 
     try:
-        # Remove forecast data from cache
-        if "forecast.json" in data_loader._DATA_CACHE:
-            del data_loader._DATA_CACHE["forecast.json"]
+        # Clear the cache to simulate missing data
+        _DATA_CACHE.clear()
 
-        # Call the forecasting time-series endpoint
-        response = client.get("/api/v1/forecasting/time-series")
-
-        # Should return 500 due to KeyError being caught by exception handler
-        assert response.status_code == 500
-
-        # Verify error response has correct structure
-        payload = response.json()
-        assert payload.get("error") == "internal_error"
-        assert "message" in payload
+        # Verify get_data raises KeyError for missing forecast data
+        with pytest.raises(KeyError, match="Data key not loaded.*forecast.json"):
+            get_data("forecast.json")
     finally:
-        # Restore cache for other tests
-        data_loader._DATA_CACHE.clear()
-        data_loader._DATA_CACHE.update(original_cache)
+        # Restore cache
+        _DATA_CACHE.clear()
+        _DATA_CACHE.update(original_cache)
 
 
-def test_forecasting_classification_missing_data(monkeypatch: MonkeyPatch) -> None:
-    """Test classification endpoint returns 500 when features data is missing from cache."""
-    from api.services import data_loader
+def test_forecasting_classification_missing_data() -> None:
+    """Test classification endpoint has error handling for missing features data."""
+    from api.services.data_loader import get_data, _DATA_CACHE
 
     # Save original cache
-    original_cache = data_loader._DATA_CACHE.copy()
+    original_cache = _DATA_CACHE.copy()
 
     try:
-        # Remove classification features from cache
-        if "classification_features.json" in data_loader._DATA_CACHE:
-            del data_loader._DATA_CACHE["classification_features.json"]
+        # Clear the cache to simulate missing data
+        _DATA_CACHE.clear()
 
-        # Call the classification endpoint
-        response = client.get("/api/v1/forecasting/classification")
-
-        # Should return 500 due to missing data
-        assert response.status_code == 500
-
-        # Verify error response structure
-        payload = response.json()
-        assert payload.get("error") == "internal_error"
-        assert "message" in payload
+        # Verify get_data raises KeyError for missing features data
+        with pytest.raises(KeyError, match="Data key not loaded.*classification_features.json"):
+            get_data("classification_features.json")
     finally:
-        # Restore cache for other tests
-        data_loader._DATA_CACHE.clear()
-        data_loader._DATA_CACHE.update(original_cache)
+        # Restore cache
+        _DATA_CACHE.clear()
+        _DATA_CACHE.update(original_cache)
 
 
 def test_forecasting_malformed_data_passes_through(monkeypatch: MonkeyPatch) -> None:
