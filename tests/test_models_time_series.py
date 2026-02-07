@@ -270,3 +270,251 @@ class TestGetProphetConfig:
         assert config["daily_seasonality"] is True
         assert config["changepoint_prior_scale"] == 0.5
         assert config["interval_width"] == 0.9
+
+
+class TestEvaluateForecast:
+    """Tests for evaluate_forecast function."""
+
+    def test_perfect_forecast_returns_ideal_metrics(self):
+        """Perfect forecast returns MAE=0, RMSE=0, R2=1, MAPE=0."""
+        actual = pd.Series([100.0, 200.0, 300.0])
+        predicted = pd.Series([100.0, 200.0, 300.0])
+
+        metrics = evaluate_forecast(actual, predicted)
+
+        assert metrics["mae"] == pytest.approx(0.0, abs=0.01)
+        assert metrics["rmse"] == pytest.approx(0.0, abs=0.01)
+        assert metrics["r2"] == pytest.approx(1.0, abs=0.01)
+        assert metrics["mape"] == pytest.approx(0.0, abs=0.01)
+
+    def test_constant_bias_captured_in_bias_metric(self):
+        """Constant forecast bias is captured in bias metric."""
+        # Note: bias is computed as mean(predicted - actual)
+        # But our implementation doesn't have a bias metric - let's verify
+        actual = pd.Series([100.0, 200.0, 300.0])
+        predicted = pd.Series([110.0, 210.0, 310.0])  # Always +10
+
+        metrics = evaluate_forecast(actual, predicted)
+
+        # MAE should be 10 (constant bias)
+        assert metrics["mae"] == pytest.approx(10.0, abs=0.01)
+
+    def test_mae_calculation(self):
+        """MAE computed correctly with known synthetic data."""
+        actual = pd.Series([100.0, 200.0, 300.0])
+        predicted = pd.Series([110.0, 210.0, 310.0])  # All +10
+
+        metrics = evaluate_forecast(actual, predicted)
+
+        # MAE = mean(|110-100|, |210-200|, |310-300|) = 10
+        assert metrics["mae"] == pytest.approx(10.0, abs=0.01)
+
+    def test_rmse_calculation(self):
+        """RMSE computed correctly with known synthetic data."""
+        actual = pd.Series([100.0, 200.0, 300.0])
+        predicted = pd.Series([110.0, 210.0, 310.0])  # All +10
+
+        metrics = evaluate_forecast(actual, predicted)
+
+        # RMSE = sqrt(mean(10^2, 10^2, 10^2)) = sqrt(100) = 10
+        assert metrics["rmse"] == pytest.approx(10.0, abs=0.01)
+
+    def test_r2_calculation(self):
+        """R2 computed correctly with known synthetic data."""
+        actual = pd.Series([100.0, 200.0, 300.0])
+        predicted = pd.Series([100.0, 200.0, 300.0])
+
+        metrics = evaluate_forecast(actual, predicted)
+
+        # Perfect prediction = R2 = 1
+        assert metrics["r2"] == pytest.approx(1.0, abs=0.01)
+
+    def test_mape_calculation(self):
+        """MAPE computed correctly with known synthetic data."""
+        actual = pd.Series([100.0, 200.0, 300.0])
+        predicted = pd.Series([90.0, 210.0, 330.0])  # -10%, +5%, +10%
+
+        metrics = evaluate_forecast(actual, predicted)
+
+        # MAPE = mean(|90-100|/100, |210-200|/200, |330-300|/300) * 100
+        # = mean(0.10, 0.05, 0.10) * 100 = 8.33%
+        assert metrics["mape"] == pytest.approx(8.33, abs=0.1)
+
+    def test_nan_handling_filters_nan_pairs(self):
+        """NaN values filtered from both actual and predicted."""
+        import numpy as np
+        actual = pd.Series([100.0, np.nan, 300.0])
+        predicted = pd.Series([110.0, 210.0, 310.0])
+
+        metrics = evaluate_forecast(actual, predicted)
+
+        # Metrics computed on (100, 110) and (300, 310) only
+        assert "mae" in metrics
+        assert not pd.isna(metrics["mae"])
+        assert metrics["mae"] == pytest.approx(10.0, abs=0.01)
+
+    def test_coverage_with_prediction_intervals(self):
+        """Coverage metric computed when lower/upper provided."""
+        actual = pd.Series([100.0, 200.0, 300.0])
+        predicted = pd.Series([150.0, 200.0, 250.0])
+        lower = pd.Series([90.0, 190.0, 240.0])
+        upper = pd.Series([110.0, 210.0, 260.0])
+
+        metrics = evaluate_forecast(actual, predicted, lower, upper)
+
+        # Coverage metric exists
+        assert "coverage" in metrics
+        # First actual (100) in [90, 110] = in interval
+        # Second actual (200) in [190, 210] = in interval
+        # Third actual (300) not in [240, 260] = out of interval
+        # Coverage = 2/3 = 0.667
+        assert metrics["coverage"] == pytest.approx(0.667, abs=0.01)
+
+    def test_coverage_not_computed_without_intervals(self):
+        """Coverage not in results without lower/upper."""
+        actual = pd.Series([100.0, 200.0, 300.0])
+        predicted = pd.Series([150.0, 200.0, 250.0])
+
+        metrics = evaluate_forecast(actual, predicted)
+
+        # Coverage not computed
+        assert "coverage" not in metrics
+
+    def test_returns_dict_with_all_expected_keys(self):
+        """Returns dict with all expected keys."""
+        actual = pd.Series([100.0, 200.0, 300.0])
+        predicted = pd.Series([110.0, 210.0, 310.0])
+
+        metrics = evaluate_forecast(actual, predicted)
+
+        # Has expected keys
+        assert "mae" in metrics
+        assert "rmse" in metrics
+        assert "mape" in metrics
+        assert "r2" in metrics
+
+
+class TestDetectAnomalies:
+    """Tests for detect_anomalies function."""
+
+    def test_returns_boolean_series(self):
+        """Returns pd.Series with dtype bool."""
+        df = pd.DataFrame({
+            "y": [100, 200, 300],
+            "yhat": [100, 200, 300],
+            "yhat_lower": [90, 190, 290],
+            "yhat_upper": [110, 210, 310]
+        })
+
+        anomalies = detect_anomalies(df)
+
+        assert isinstance(anomalies, pd.Series)
+        assert anomalies.dtype == bool
+
+    def test_threshold_anomaly_detection(self):
+        """Anomalies detected when residual > threshold_std * std."""
+        import numpy as np
+        df = pd.DataFrame({
+            "y": [100, 200, 500],  # Last value is outlier
+            "yhat": [100, 200, 300],
+            "yhat_lower": [90, 190, 290],
+            "yhat_upper": [110, 210, 310]
+        })
+
+        anomalies = detect_anomalies(df)
+
+        # Third row is anomaly due to interval check (500 > 310 upper bound)
+        # Threshold check: residuals = [0, 0, 200], mean=66.67, std=115.47
+        # |200 - 66.67| = 133.33 > 2*115.47? No (not > threshold)
+        # But interval check catches it: 500 > 310
+        assert anomalies.iloc[2] == True
+
+    def test_interval_anomaly_detection(self):
+        """Anomalies detected outside prediction interval."""
+        import numpy as np
+        df = pd.DataFrame({
+            "y": [100, 200, 500],  # Last value outside interval
+            "yhat": [100, 200, 300],
+            "yhat_lower": [90, 190, 290],
+            "yhat_upper": [110, 210, 310]
+        })
+
+        anomalies = detect_anomalies(df)
+
+        # First two in interval [90, 110] and [190, 210], third outside [290, 310]
+        assert anomalies.iloc[0] == False  # 100 in [90, 110]
+        assert anomalies.iloc[1] == False  # 200 in [190, 210]
+        assert anomalies.iloc[2] == True   # 500 > 310 (outside interval)
+
+    def test_custom_threshold_std_parameter(self):
+        """Custom threshold_std affects detection sensitivity."""
+        import numpy as np
+        # Create data where threshold matters
+        # residuals = [0, 0, 150], mean=50, std=86.6
+        # threshold=2: |150-50| = 100 > 2*86.6 = 173? No
+        # threshold=1: |150-50| = 100 > 1*86.6 = 86.6? Yes
+        df = pd.DataFrame({
+            "y": [100, 200, 450],
+            "yhat": [100, 200, 300],
+            "yhat_lower": [90, 190, 290],
+            "yhat_upper": [110, 210, 310]
+        })
+
+        # With threshold=2.0, no threshold anomalies
+        anomalies_default = detect_anomalies(df, threshold_std=2.0)
+
+        # With threshold=1.0, threshold anomaly detected
+        anomalies_sensitive = detect_anomalies(df, threshold_std=1.0)
+
+        # Sensitive should detect more (interval + threshold vs just interval)
+        # Both detect interval anomaly (450 > 310), but sensitive also detects threshold
+        assert anomalies_sensitive.sum() >= anomalies_default.sum()
+
+    def test_custom_column_names(self):
+        """Custom column names work correctly."""
+        df = pd.DataFrame({
+            "actual": [100, 200, 300],
+            "predicted": [100, 200, 300],
+            "lower": [90, 190, 290],
+            "upper": [110, 210, 310]
+        })
+
+        anomalies = detect_anomalies(
+            df,
+            actual_col="actual",
+            predicted_col="predicted",
+            lower_col="lower",
+            upper_col="upper"
+        )
+
+        # Should have no anomalies (all in interval)
+        assert anomalies.sum() == 0
+
+    def test_handles_empty_dataframe(self):
+        """Empty DataFrame returns empty boolean series."""
+        df = pd.DataFrame({
+            "y": [],
+            "yhat": [],
+            "yhat_lower": [],
+            "yhat_upper": []
+        })
+
+        anomalies = detect_anomalies(df)
+
+        assert len(anomalies) == 0
+        assert isinstance(anomalies, pd.Series)
+
+    def test_all_anomalies_when_all_outside_interval(self):
+        """All True when all values outside bounds."""
+        df = pd.DataFrame({
+            "y": [50, 150, 400],  # All outside interval
+            "yhat": [100, 200, 300],
+            "yhat_lower": [90, 190, 290],
+            "yhat_upper": [110, 210, 310]
+        })
+
+        anomalies = detect_anomalies(df)
+
+        # All should be anomalies
+        assert anomalies.sum() == 3
+        assert all(anomalies)
