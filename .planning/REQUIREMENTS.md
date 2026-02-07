@@ -23,10 +23,10 @@ Achieve 95% test coverage across Python codebase (analysis/, api/, pipeline/, CL
 
 ### Core Module Testing (CORE)
 
-- [ ] **CORE-01**: analysis/models/ modules have comprehensive unit tests covering ML and statistical logic
-- [ ] **CORE-02**: analysis/data/ modules have unit tests covering data loading and validation logic
-- [ ] **CORE-03**: analysis/utils/ modules have unit tests covering core utility functions
-- [ ] **CORE-04**: Core module tests achieve 60-70% overall coverage milestone
+- [x] **CORE-01**: analysis/models/ modules have comprehensive unit tests covering ML and statistical logic
+- [x] **CORE-02**: analysis/data/ modules have unit tests covering data loading and validation logic
+- [x] **CORE-03**: analysis/utils/ modules have unit tests covering core utility functions
+- [x] **CORE-04**: Core module tests achieve 60-70% overall coverage milestone (achieved 81.75%)
 
 ### API Testing (API)
 

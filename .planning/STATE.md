@@ -4,19 +4,19 @@
 
 **Milestone:** v1.3 Testing & Cleanup
 **Status:** 🚧 IN PROGRESS
-**Phase:** Phase 11 - Core Module Testing
+**Phase:** Phase 12 - API & CLI Testing
 **Start Date:** February 7, 2026
 **Target Completion:** TBD
 
-**Current Focus:** Write comprehensive unit tests for core analysis modules (models/, data/, utils/).
+**Current Focus:** Write tests for API endpoints (FastAPI TestClient) and CLI commands (Typer CliRunner).
 
 **Progress:**
 ```
-[█████░░░░░░░░░░░░░░░░] 58% (3.5/6 phases)
+[██████░░░░░░░░░░░░░░░] 50% (3/6 phases complete, Phase 12 ready to begin)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
-Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans)
-Phase 12: API & CLI           [░░░░░░░░░░] Pending
+Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans) ✓ 81.75% coverage
+Phase 12: API & CLI           [░░░░░░░░░░] Next
 Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
 Phase 15: Quality & CI        [░░░░░░░░░░] Pending
@@ -56,11 +56,10 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Next Actions
 
-1. Execute Phase 11 Plan 6: Write tests for data preprocessing module
-2. Execute Phase 12: Write tests for API & CLI
-3. Execute Phase 13: Write tests for pipeline & support
-4. Execute Phase 14: Repository cleanup
-5. Execute Phase 15: Quality validation & CI integration
+1. Execute Phase 12: Write tests for API endpoints (8 plans) - TestClient integration tests
+2. Execute Phase 13: Write tests for pipeline & CLI (7 plans)
+3. Execute Phase 14: Repository cleanup (6 plans)
+4. Execute Phase 15: Quality validation & CI integration (3 plans)
 
 **Roadmap:** `.planning/milestones/v1.3-ROADMAP.md`
 **Requirements:** `.planning/REQUIREMENTS.md` (32 requirements across 8 categories)
