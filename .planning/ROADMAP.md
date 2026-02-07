@@ -11,7 +11,7 @@
 |---|-------|------|--------------|--------|
 | 1 | Local Compose Baseline | Deliver one-command local bring-up of all required services with local-only defaults | ORCH-01, ORCH-02, ORCH-03, CONF-01, CONF-02, CONF-03 | Complete |
 | 2 | Footprint and Runtime Optimization | Reduce image size/build latency and enforce predictable runtime resource budgets | FOOT-01, FOOT-02, FOOT-03 | Complete |
-| 3 | Developer UX and Operational Reliability | Make local workflow clear, recoverable, and flexible for advanced local scenarios | DEVX-01, DEVX-02, DEVX-03 | Pending |
+| 3 | Developer UX and Operational Reliability | Make local workflow clear, recoverable, and flexible for advanced local scenarios | DEVX-01, DEVX-02, DEVX-03 | Complete |
 
 ## Phase Details
 
@@ -46,6 +46,7 @@
 ## Phase 3: Developer UX and Operational Reliability
 
 **Goal:** Ensure developers can consistently run, troubleshoot, and extend the local compose workflow.
+**Status:** Complete (verified February 7, 2026)
 
 **Requirements:** DEVX-01, DEVX-02, DEVX-03
 
@@ -75,4 +76,4 @@
 **Validation:** Every v1 requirement maps to exactly one phase.
 
 ---
-*Roadmap status: Phase 1 and Phase 2 complete and verified; Phase 3 pending*
+*Roadmap status: Phases 1-3 complete and verified*

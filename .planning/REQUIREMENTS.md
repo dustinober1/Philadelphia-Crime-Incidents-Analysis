@@ -25,9 +25,9 @@
 
 ### Developer UX
 
-- [ ] **DEVX-01**: README local development section makes the compose-first workflow the default path for running the system.
-- [ ] **DEVX-02**: Documentation includes local recovery/reset procedures for common failure modes (rebuild, volume reset, re-export data).
-- [ ] **DEVX-03**: Compose configuration supports optional profiles for non-default advanced workflows without changing the default startup command.
+- [x] **DEVX-01**: README local development section makes the compose-first workflow the default path for running the system.
+- [x] **DEVX-02**: Documentation includes local recovery/reset procedures for common failure modes (rebuild, volume reset, re-export data).
+- [x] **DEVX-03**: Compose configuration supports optional profiles for non-default advanced workflows without changing the default startup command.
 
 ## v2 Requirements
 
@@ -61,9 +61,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOOT-01 | Phase 2 | Complete |
 | FOOT-02 | Phase 2 | Complete |
 | FOOT-03 | Phase 2 | Complete |
-| DEVX-01 | Phase 3 | Pending |
-| DEVX-02 | Phase 3 | Pending |
-| DEVX-03 | Phase 3 | Pending |
+| DEVX-01 | Phase 3 | Complete |
+| DEVX-02 | Phase 3 | Complete |
+| DEVX-03 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 12 total
@@ -72,4 +72,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: February 7, 2026*
-*Last updated: February 7, 2026 after Phase 2 completion*
+*Last updated: February 7, 2026 after Phase 3 completion*
