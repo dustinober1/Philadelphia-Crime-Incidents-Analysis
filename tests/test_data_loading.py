@@ -345,6 +345,9 @@ class TestDatetimeParsing:
 
     def test_dispatch_date_with_invalid_values(self):
         """dispatch_date parsing handles invalid values with errors='coerce'."""
+        # Clear cache to ensure fresh state
+        clear_cache()
+
         # Create a DataFrame with some invalid dates
         dates = ["2020-01-01", "invalid_date", "2020-01-03"]
         df = pd.DataFrame({"dispatch_date": dates})
@@ -363,6 +366,9 @@ class TestCleanParameter:
 
     def test_clean_false_preserves_null_dates(self):
         """clean=False preserves rows with null dispatch_date."""
+        # Clear cache to ensure fresh state
+        clear_cache()
+
         # Create a DataFrame with some null dates
         dates = ["2020-01-01", None, "2020-01-03", None]
         df = pd.DataFrame({
@@ -378,6 +384,9 @@ class TestCleanParameter:
 
     def test_clean_true_drops_null_dates(self):
         """clean=True drops rows with null dispatch_date."""
+        # Clear cache to ensure fresh state
+        clear_cache()
+
         # Create a DataFrame with some null dates
         dates = ["2020-01-01", None, "2020-01-03", None]
         df = pd.DataFrame({
