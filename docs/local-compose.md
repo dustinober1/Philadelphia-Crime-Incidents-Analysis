@@ -73,6 +73,28 @@ docker compose config | rg -n "cpus|mem_limit"
 ./scripts/validate_compose_runtime_budget.sh
 ```
 
+## Runtime mode presets (optional)
+
+Default startup command remains unchanged and is still the standard flow:
+
+```bash
+docker compose up -d --build
+```
+
+Use runtime presets only when you explicitly want different resource envelopes:
+
+- `default`: baseline local behavior; use for normal iteration and parity checks.
+- `low-power`: lower CPU/memory budgets to reduce host pressure.
+- `high-performance`: higher CPU/memory budgets for heavier local workloads.
+
+Commands:
+
+```bash
+./scripts/compose_with_runtime_mode.sh --mode low-power up -d --build
+./scripts/compose_with_runtime_mode.sh --mode high-performance up -d --build
+./scripts/validate_compose_runtime_mode.sh
+```
+
 ## Optional compose profiles
 
 Default startup behavior remains:

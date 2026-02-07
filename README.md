@@ -264,6 +264,26 @@ docker compose up -d --build
 docker compose config | rg -n "cpus|mem_limit"
 ```
 
+### Runtime Mode Presets (Optional)
+
+Default startup remains the primary path:
+
+```bash
+docker compose up -d --build
+```
+
+When machine constraints or local workload demands change, use the runtime mode helper:
+
+- `default`: normal day-to-day local development and baseline behavior checks.
+- `low-power`: reduce container CPU/memory pressure on constrained laptops.
+- `high-performance`: increase container limits for heavier local workloads.
+
+```bash
+./scripts/compose_with_runtime_mode.sh --mode low-power up -d --build
+./scripts/compose_with_runtime_mode.sh --mode high-performance up -d --build
+./scripts/validate_compose_runtime_mode.sh
+```
+
 ### Optional Compose Profiles (Advanced)
 
 Default startup remains unchanged:
