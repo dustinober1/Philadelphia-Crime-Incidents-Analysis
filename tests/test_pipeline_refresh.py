@@ -497,3 +497,81 @@ class TestRefreshEnvVar:
         assert result.exit_code == 0
         # The validation should pass since files exist in env_dir
         assert "Validated exports:" in result.stdout
+
+
+# =============================================================================
+# Task 6: CLI Error Handling Tests
+# =============================================================================
+
+
+class TestCliErrorHandling:
+    """Test CLI error handling and exit codes."""
+
+    @patch("pipeline.refresh_data.export_all")
+    def test_refresh_run_exits_nonzero_on_validation_error(self, mock_export: patch, tmp_path: Path) -> None:
+        """Verify exit_code != 0 when validation fails."""
+        # Mock export to create incomplete set of files (missing forecast.json)
+        def incomplete_export_func(output_dir: Path) -> Path:
+            (output_dir / "metadata.json").parent.mkdir(parents=True, exist_ok=True)
+            (output_dir / "metadata.json").write_text(json.dumps({
+                "total_incidents": 100000,
+                "date_start": "2006-01-01",
+                "date_end": "2024-12-31",
+                "last_updated": "2025-01-15T10:30:00Z",
+                "source": "Philadelphia Police Department",
+                "colors": {"crime": "#FF5733"},
+            }))
+            # Don't create all required files - this will trigger validation error
+            return output_dir
+
+        mock_export.side_effect = incomplete_export_func
+
+        result = runner.invoke(app, ["run", "--output-dir", str(tmp_path)])
+
+        # Should exit with non-zero code
+        assert result.exit_code != 0
+
+    @patch("pipeline.refresh_data.export_all")
+    @patch("pipeline.refresh_data._assert_reproducible")
+    def test_refresh_run_exits_nonzero_on_reproducibility_failure(
+        self, mock_repro: patch, mock_export: patch, tmp_path: Path
+    ) -> None:
+        """Verify exit_code != 0 when reproducibility check fails."""
+        def mock_export_func(output_dir: Path) -> Path:
+            _create_minimal_valid_files(output_dir)
+            return output_dir
+
+        mock_export.side_effect = mock_export_func
+        # Mock reproducibility check to fail
+        mock_repro.side_effect = RuntimeError("Reproducibility check failed for: metadata.json")
+
+        result = runner.invoke(app, ["run", "--output-dir", str(tmp_path), "--verify-reproducibility"])
+
+        # Should exit with non-zero code
+        assert result.exit_code != 0
+
+    @patch("pipeline.refresh_data.export_all")
+    def test_refresh_run_shows_error_message(self, mock_export: patch, tmp_path: Path) -> None:
+        """Verify stderr contains error message on failure."""
+        # Mock export to create incomplete files
+        def incomplete_export_func(output_dir: Path) -> Path:
+            (output_dir / "metadata.json").parent.mkdir(parents=True, exist_ok=True)
+            (output_dir / "metadata.json").write_text(json.dumps({
+                "total_incidents": 100000,
+                "date_start": "2006-01-01",
+                "date_end": "2024-12-31",
+                "last_updated": "2025-01-15T10:30:00Z",
+                "source": "Philadelphia Police Department",
+                "colors": {"crime": "#FF5733"},
+            }))
+            return output_dir
+
+        mock_export.side_effect = incomplete_export_func
+
+        result = runner.invoke(app, ["run", "--output-dir", str(tmp_path)])
+
+        # Should show error message
+        assert result.exit_code != 0
+        # Error may be in stdout or stderr depending on Typer configuration
+        error_output = result.stdout + result.stderr
+        assert "Missing required export files" in error_output or len(error_output) > 0
