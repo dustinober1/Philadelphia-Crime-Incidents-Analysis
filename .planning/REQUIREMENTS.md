@@ -95,11 +95,44 @@ This milestone is complete when:
 
 ## Traceability
 
-*This section will be populated by roadmap creation to map requirements to phases.*
+*Requirements mapped to milestone v1.3 phases (10-15)*
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| *(To be filled by roadmapper)* | | |
+| INFRA-01 | Phase 10 | Pending |
+| INFRA-02 | Phase 10 | Pending |
+| INFRA-03 | Phase 10 | Pending |
+| INFRA-04 | Phase 10 | Pending |
+| CORE-01 | Phase 11 | Pending |
+| CORE-02 | Phase 11 | Pending |
+| CORE-03 | Phase 11 | Pending |
+| CORE-04 | Phase 11 | Pending |
+| API-01 | Phase 12 | Pending |
+| API-02 | Phase 12 | Pending |
+| API-03 | Phase 12 | Pending |
+| API-04 | Phase 12 | Pending |
+| CLI-01 | Phase 12 | Pending |
+| CLI-02 | Phase 12 | Pending |
+| CLI-03 | Phase 12 | Pending |
+| CLI-04 | Phase 12 | Pending |
+| PIPE-01 | Phase 13 | Pending |
+| PIPE-02 | Phase 13 | Pending |
+| PIPE-03 | Phase 13 | Pending |
+| SUPP-01 | Phase 13 | Pending |
+| SUPP-02 | Phase 13 | Pending |
+| SUPP-03 | Phase 13 | Pending |
+| SUPP-04 | Phase 13 | Pending |
+| CLEAN-01 | Phase 14 | Pending |
+| CLEAN-02 | Phase 14 | Pending |
+| CLEAN-03 | Phase 14 | Pending |
+| CLEAN-04 | Phase 14 | Pending |
+| CLEAN-05 | Phase 14 | Pending |
+| CLEAN-06 | Phase 14 | Pending |
+| QUAL-01 | Phase 15 | Pending |
+| QUAL-02 | Phase 15 | Pending |
+| QUAL-03 | Phase 15 | Pending |
+
+**Coverage:** 32/32 requirements mapped ✓
 
 ---
 

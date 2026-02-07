@@ -2,10 +2,25 @@
 
 ## Current Milestone
 
-**Status:** Defining requirements
-**Phase:** Not started
+**Milestone:** v1.3 Testing & Cleanup
+**Status:** 🚧 IN PROGRESS
+**Phase:** Phase 10 - Test Infrastructure & Baseline
 **Start Date:** February 7, 2026
 **Target Completion:** TBD
+
+**Current Focus:** Configure testing infrastructure and measure baseline coverage before writing tests.
+
+**Progress:**
+```
+[░░░░░░░░░░░░░░░░░░░░] 0% (0/6 phases)
+
+Phase 10: Infrastructure     [░░░░░░░░░░] Pending - Ready to begin
+Phase 11: Core Modules        [░░░░░░░░░░] Pending  
+Phase 12: API & CLI           [░░░░░░░░░░] Pending
+Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
+Phase 14: Cleanup             [░░░░░░░░░░] Pending
+Phase 15: Quality & CI        [░░░░░░░░░░] Pending
+```
 
 ## Completed Milestones
 
@@ -41,9 +56,15 @@
 
 ## Next Actions
 
-1. Complete requirements definition for v1.3
-2. Create roadmap with phases 10+ continuing from v1.2
-3. Execute testing coverage and cleanup work
+1. Run `/gsd-plan-phase 10` to create detailed execution plan for test infrastructure
+2. Configure pytest-xdist for parallel test execution
+3. Set coverage enforcement thresholds in pyproject.toml
+4. Measure baseline coverage and document gaps
+5. Establish testing quality criteria
+
+**Roadmap:** `.planning/milestones/v1.3-ROADMAP.md`
+**Requirements:** `.planning/REQUIREMENTS.md` (32 requirements across 8 categories)
+**Research:** `.planning/research/SUMMARY-testing-cleanup.md`
 
 ---
 *State updated: February 7, 2026 — v1.3 milestone started*
