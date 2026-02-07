@@ -4,7 +4,7 @@
 
 **Milestone:** v1.3 Testing & Cleanup
 **Status:** 🚧 IN PROGRESS
-**Phase:** Phase 13 - Pipeline & Supporting Tests
+**Phase:** Phase 14 - Repository Cleanup
 **Start Date:** February 7, 2026
 **Target Completion:** TBD
 
@@ -12,13 +12,13 @@
 
 **Progress:**
 ```
-[████████████░░░░░░░░░] 97% (47/48 summaries complete)
+[████████████░░░░░░░░░] 98% (48/49 summaries complete)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
 Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans) ✓ 81.75% coverage
 Phase 12: API & CLI           [██████████] COMPLETE (8/8 plans) ✓ 88.19% coverage
 Phase 13: Pipeline & Support  [██████████] COMPLETE (7/7 plans) ✓ 88.95% coverage EXCEEDS target
-Phase 14: Cleanup             [░░░░░░░░░░] Pending
+Phase 14: Cleanup             [█░░░░░░░░░] In progress (1/6 plans) - tools installed
 Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 ```
 
@@ -56,8 +56,9 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Next Actions
 
-1. Execute Phase 14: Repository cleanup (6 plans) - Remove deprecated modules, consolidate configs
-2. Execute Phase 15: Quality validation & CI integration (3 plans) - Final validation
+1. Execute Phase 14 Plan 02: Remove deprecated modules
+2. Execute Phase 14 Plans 03-06: Clean up unused imports, remove build artifacts, consolidate configs, final validation
+3. Execute Phase 15: Quality validation & CI integration (3 plans) - Final validation
 
 **Roadmap:** `.planning/milestones/v1.3-ROADMAP.md`
 **Requirements:** `.planning/REQUIREMENTS.md` (32 requirements across 8 categories)
@@ -286,24 +287,27 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **Test execution performance**: Full test suite (824 tests) runs in 7 minutes 4 seconds, Phase 13 tests only (219 tests) complete in ~30 seconds
 - **Testing patterns established**: Mock-based pipeline testing, CLI integration testing with CliRunner, Pydantic validation testing, Matplotlib Agg backend for headless testing
 
+### From Phase 14 Plan 1 (Install Python Cleanup Tools)
+- **Cleanup tool selection**: Chose vulture (dead code detection), autoflake (unused import removal), and pyclean (artifact cleanup) for Phase 14 repository maintenance
+- **Version constraint strategy**: Use >= (minimum version) constraints for cleanup tools to balance stability with ability to receive compatible updates
+- **Tooling foundation pattern**: Establish cleanup tools in separate plan before actual cleanup operations to validate compatibility with existing dependencies
+
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 19:33 UTC
-**Stopped at:** Completed Phase 13 Plan 07 (Final Coverage Report) - Phase 13 complete, 88.95% coverage achieved
-**Resume file:** None (continue with Phase 14 - Cleanup)
+**Last session:** 2026-02-07 20:22 UTC
+**Stopped at:** Completed Phase 14 Plan 01 (Install Python Cleanup Tools) - vulture, autoflake, pyclean installed
+**Resume file:** None (continue with Phase 14 Plan 02 - Remove Deprecated Modules)
 
 **Completed work:**
 - Phase 10: Test infrastructure, CI pipeline, baseline coverage measurement (4/4 plans complete)
 - Phase 11: Core module testing (6/6 plans complete) - 81.75% coverage
 - Phase 12: API & CLI testing (8/8 plans complete) - 88.19% coverage
 - Phase 13: Pipeline & Supporting tests (7/7 plans complete) - 88.95% coverage ✅
-  - Plan 01: Pipeline export operations - 54 tests, 93.27% coverage
-  - Plan 02: Pipeline refresh operations - 30 tests, 100% coverage
-  - Plan 03: Pipeline error handling - 28 tests
-  - Plan 04: Configuration settings - 46 tests, 100% coverage
-  - Plan 05: Configuration schemas - 47 tests, 100% coverage
-  - Plan 06: Visualization utilities - 42 tests, 100% core coverage
-  - Plan 07: Final coverage report - 219 total tests, 88.95% target coverage
+- Phase 14: Repository cleanup (1/6 plans complete)
+  - Plan 01: Install Python cleanup tools - vulture 2.14, autoflake 2.3.1, pyclean 3.5.0 ✅
 
-**Next step:** Execute Phase 14 Plan 01 (Remove Deprecated Code)
+**Next step:** Execute Phase 14 Plan 02 (Remove Deprecated Modules)
+
+---
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 14 in progress (1/6 plans)*
