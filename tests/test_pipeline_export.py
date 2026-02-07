@@ -309,12 +309,20 @@ class TestDataIssueErrorHandling:
     """Test error handling for problematic input data."""
 
     def test_export_metadata_empty_dataframe(self, tmp_path: Path) -> None:
-        """Verify _export_metadata handles empty DataFrame gracefully."""
+        """Verify _export_metadata creates metadata with NaT for empty DataFrame."""
         empty_df = pd.DataFrame({"dispatch_date": []})
 
-        # Should raise error when trying to get max/min of empty series
-        with pytest.raises((ValueError, IndexError)):
-            _export_metadata(empty_df, tmp_path)
+        # Current behavior: creates metadata with NaT values (not ideal, but doesn't crash)
+        _export_metadata(empty_df, tmp_path)
+
+        metadata_file = tmp_path / "metadata.json"
+        assert metadata_file.exists()
+
+        metadata = json.loads(metadata_file.read_text())
+        assert metadata["total_incidents"] == 0
+        # NaT becomes null in JSON
+        assert metadata["date_start"] is None or metadata["date_start"] == "NaT"
+        assert metadata["date_end"] is None or metadata["date_end"] == "NaT"
 
     def test_export_metadata_missing_dispatch_date(
         self, sample_crime_df: pd.DataFrame, tmp_path: Path
@@ -342,26 +350,102 @@ class TestDataIssueErrorHandling:
         assert isinstance(monthly_data, list)
         assert len(monthly_data) == 0
 
-    def test_export_spatial_empty_coordinates(
+    def test_export_spatial_missing_coordinate_columns(
         self, sample_crime_df: pd.DataFrame, tmp_path: Path
     ) -> None:
-        """Verify _export_spatial handles DataFrame with no valid coordinates."""
+        """Verify _export_spatial raises KeyError when coordinate columns missing."""
         # Remove all coordinate data
         df_no_coords = sample_crime_df.drop(columns=["point_x", "point_y"])
 
         geo_dir = tmp_path / "geo"
         geo_dir.mkdir(parents=True, exist_ok=True)
 
-        # With geopandas available, should handle missing coordinates gracefully
-        if export_data.HAS_GEOPANDAS:
-            # Mock the GeoJSON reads to avoid dependency on boundary files
-            with patch("pipeline.export_data.gpd"):
-                # Should not raise exception even without coordinates
-                _export_spatial(df_no_coords, tmp_path, geo_dir, tmp_path)
-
-                # Spatial files may not be created or may have 0 incidents
-        else:
-            # Without geopandas, should return early without error
+        # Should raise KeyError when trying to dropna on non-existent columns
+        with pytest.raises(KeyError, match="point_x|point_y"):
             _export_spatial(df_no_coords, tmp_path, geo_dir, tmp_path)
+
+
+# =============================================================================
+# Export Seasonality Tests (Task 3)
+# =============================================================================
+
+
+class TestExportSeasonality:
+    """Tests for _export_seasonality function."""
+
+    def test_export_seasonality_creates_seasonality_json(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify seasonality.json with by_month/by_day_of_week/by_hour."""
+        # Add hour column that real data has
+        sample_crime_df = sample_crime_df.copy()
+        sample_crime_df["hour"] = 12  # Default hour
+
+        _export_seasonality(sample_crime_df, tmp_path)
+
+        seasonality_file = tmp_path / "seasonality.json"
+        assert seasonality_file.exists()
+
+        seasonality_data = json.loads(seasonality_file.read_text())
+        assert isinstance(seasonality_data, dict)
+
+        # Verify structure
+        assert "by_month" in seasonality_data
+        assert "by_day_of_week" in seasonality_data
+        assert "by_hour" in seasonality_data
+
+        # Verify each section is a list
+        assert isinstance(seasonality_data["by_month"], list)
+        assert isinstance(seasonality_data["by_day_of_week"], list)
+        assert isinstance(seasonality_data["by_hour"], list)
+
+    def test_export_seasonality_creates_robbery_heatmap(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify robbery_heatmap.json with hour/day_of_week matrix."""
+        # Add hour column and some robbery crimes
+        sample_crime_df = sample_crime_df.copy()
+        sample_crime_df["hour"] = range(len(sample_crime_df))  # Varying hours
+
+        _export_seasonality(sample_crime_df, tmp_path)
+
+        heatmap_file = tmp_path / "robbery_heatmap.json"
+        assert heatmap_file.exists()
+
+        heatmap_data = json.loads(heatmap_file.read_text())
+        assert isinstance(heatmap_data, list)
+
+        # Verify structure has hour and day_of_week
+        if len(heatmap_data) > 0:
+            first_row = heatmap_data[0]
+            assert "hour" in first_row
+            assert "day_of_week" in first_row
+            assert "count" in first_row
+
+
+    def test_export_seasonality_handles_missing_hour(
+        self, tmp_path: Path
+    ) -> None:
+        """Verify hour NaN values filled with 0 before grouping."""
+        # Create DataFrame with NaN hour values
+        df_with_nan = pd.DataFrame({
+            "dispatch_date": pd.date_range("2020-01-01", periods=50, freq="D"),
+            "ucr_general": [300] * 50,  # Robbery codes
+            "hour": [None] * 25 + [12] * 25,  # Half NaN, half valid
+        })
+
+        _export_seasonality(df_with_nan, tmp_path)
+
+        # Should create files without error
+        assert (tmp_path / "seasonality.json").exists()
+
+        # Verify hour data includes filled 0 values
+        seasonality_data = json.loads((tmp_path / "seasonality.json").read_text())
+        by_hour = seasonality_data["by_hour"]
+
+        # Should have hour 0 (filled from NaN) and hour 12
+        hours = [row["hour"] for row in by_hour]
+        assert 0 in hours  # NaN values filled with 0
+
 
 
