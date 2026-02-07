@@ -479,24 +479,31 @@ class TestCorruptArtifactDetection:
 class TestRefreshEnvVar:
     """Tests for environment variable configuration."""
 
-    def test_refresh_run_uses_env_output_dir(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Should use PIPELINE_OUTPUT_DIR env variable when set."""
+    @patch("pipeline.refresh_data.export_all")
+    def test_refresh_run_respects_explicit_output_dir_over_env(self, mock_export: patch, tmp_path: Path) -> None:
+        """Explicit --output-dir should take precedence over env var."""
         env_dir = tmp_path / "env_output"
-        env_dir.mkdir(parents=True, exist_ok=True)
+        explicit_dir = tmp_path / "explicit_output"
 
-        # Create minimal valid files in env directory
-        _create_minimal_valid_files(env_dir)
+        def mock_export_func(output_dir: Path) -> Path:
+            _create_minimal_valid_files(output_dir)
+            return output_dir
 
-        # Set environment variable before running CLI
-        monkeypatch.setenv("PIPELINE_OUTPUT_DIR", str(env_dir))
+        mock_export.side_effect = mock_export_func
 
-        # The CliRunner creates a subprocess, so we need to set env in the runner's env
-        # Test that env var is used by checking if files already exist in env_dir
-        result = runner.invoke(app, [], env={"PIPELINE_OUTPUT_DIR": str(env_dir)})
+        # Set env var but also pass explicit --output-dir
+        result = runner.invoke(
+            app,
+            ["--output-dir", str(explicit_dir)],
+            env={"PIPELINE_OUTPUT_DIR": str(env_dir)}
+        )
 
         assert result.exit_code == 0
-        # The validation should pass since files exist in env_dir
-        assert "Validated exports:" in result.stdout
+        # Verify export was called with explicit directory, not env directory
+        mock_export.assert_called_once()
+        call_path = mock_export.call_args[0][0]
+        # Should use explicit dir
+        assert explicit_dir == call_path or str(explicit_dir) in str(call_path)
 
 
 # =============================================================================
