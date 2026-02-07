@@ -22,6 +22,7 @@ from pipeline.export_data import (
     _to_records,
     _write_json,
     app,
+    export_all,
 )
 from pipeline.refresh_data import app as refresh_app
 
@@ -745,4 +746,422 @@ class TestBoundaryConditions:
         # Should have hour 0 entries
         hours = [row["hour"] for row in by_hour]
         assert 0 in hours
+
+
+# =============================================================================
+# Export Policy Tests (Task 5)
+# =============================================================================
+
+
+class TestExportPolicy:
+    """Tests for _export_policy function."""
+
+    def test_export_policy_creates_retail_theft_trend(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify retail_theft_trend.json with UCR 600-699 filtered data."""
+        # Add retail theft crimes (UCR 600-699)
+        df = sample_crime_df.copy()
+        df["ucr_general"] = df["ucr_general"].apply(lambda x: 650 if x == 800 else x)
+
+        _export_policy(df, tmp_path, tmp_path)
+
+        retail_file = tmp_path / "retail_theft_trend.json"
+        assert retail_file.exists()
+
+        retail_data = json.loads(retail_file.read_text())
+        assert isinstance(retail_data, list)
+        # Verify structure
+        if len(retail_data) > 0:
+            assert "month" in retail_data[0]
+            assert "count" in retail_data[0]
+
+    def test_export_policy_creates_vehicle_crime_trend(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify vehicle_crime_trend.json with UCR 700-799 filtered data."""
+        # Add vehicle crimes (UCR 700-799)
+        df = sample_crime_df.copy()
+        df["ucr_general"] = df["ucr_general"].apply(lambda x: 750 if x == 800 else x)
+
+        _export_policy(df, tmp_path, tmp_path)
+
+        vehicle_file = tmp_path / "vehicle_crime_trend.json"
+        assert vehicle_file.exists()
+
+        vehicle_data = json.loads(vehicle_file.read_text())
+        assert isinstance(vehicle_data, list)
+
+    def test_export_policy_creates_composition(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify crime_composition.json with year/crime_category aggregation."""
+        _export_policy(sample_crime_df, tmp_path, tmp_path)
+
+        composition_file = tmp_path / "crime_composition.json"
+        assert composition_file.exists()
+
+        composition_data = json.loads(composition_file.read_text())
+        assert isinstance(composition_data, list)
+        # Verify structure
+        if len(composition_data) > 0:
+            assert "year" in composition_data[0]
+            assert "crime_category" in composition_data[0]
+            assert "count" in composition_data[0]
+
+    def test_export_policy_handles_missing_event_file(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify event_impact.json is empty list when event file missing."""
+        # tmp_path doesn't have event_impact_results.csv
+        _export_policy(sample_crime_df, tmp_path, tmp_path)
+
+        event_file = tmp_path / "event_impact.json"
+        assert event_file.exists()
+
+        event_data = json.loads(event_file.read_text())
+        assert event_data == []  # Empty list when file missing
+
+    def test_export_policy_loads_event_file_when_exists(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify event_impact.json populated when event file exists."""
+        # Create mock event file
+        reports_dir = tmp_path / "reports"
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        event_csv = reports_dir / "event_impact_results.csv"
+        event_csv.write_text("event,date,impact\ntest,2020-01-01,10\n")
+
+        _export_policy(sample_crime_df, tmp_path, tmp_path)
+
+        event_file = tmp_path / "event_impact.json"
+        assert event_file.exists()
+
+        event_data = json.loads(event_file.read_text())
+        assert isinstance(event_data, list)
+        # Should have loaded the CSV data
+        assert len(event_data) > 0
+
+
+# =============================================================================
+# Export Forecasting Tests (Task 6)
+# =============================================================================
+
+
+class TestExportForecasting:
+    """Tests for _export_forecasting function."""
+
+    def test_export_forecasting_fallback_without_prophet(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Set HAS_PROPHET=False, verify LinearFallback model used."""
+        from analysis.utils.classification import classify_crime_category
+        from analysis.utils.temporal import extract_temporal_features
+
+        # Prepare data with temporal features and classification
+        df = extract_temporal_features(sample_crime_df)
+        df["hour"] = 12
+        df = classify_crime_category(df)
+
+        with patch.object(export_data, "HAS_PROPHET", False):
+            _export_forecasting(df, tmp_path)
+
+            forecast_file = tmp_path / "forecast.json"
+            assert forecast_file.exists()
+
+            forecast = json.loads(forecast_file.read_text())
+            assert forecast["model"] == "LinearFallback"
+            assert "historical" in forecast
+            assert "forecast" in forecast
+
+    def test_export_forecasting_creates_classification_features(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify classification_features.json with feature/importance."""
+        from analysis.utils.classification import classify_crime_category
+        from analysis.utils.temporal import extract_temporal_features
+
+        # Prepare data with temporal features and classification
+        df = extract_temporal_features(sample_crime_df)
+        df["hour"] = 12
+        df = classify_crime_category(df)
+
+        _export_forecasting(df, tmp_path)
+
+        features_file = tmp_path / "classification_features.json"
+        assert features_file.exists()
+
+        features = json.loads(features_file.read_text())
+        assert isinstance(features, list)
+        assert len(features) > 0
+
+        # Verify structure
+        first_feature = features[0]
+        assert "feature" in first_feature
+        assert "importance" in first_feature
+
+    def test_export_forecasting_classification_fallback(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify default importances when HAS_SKLEARN=False."""
+        from analysis.utils.classification import classify_crime_category
+        from analysis.utils.temporal import extract_temporal_features
+
+        # Prepare data with temporal features and classification
+        df = extract_temporal_features(sample_crime_df)
+        df["hour"] = 12
+        df = classify_crime_category(df)
+
+        with patch.object(export_data, "HAS_SKLEARN", False):
+            _export_forecasting(df, tmp_path)
+
+            features_file = tmp_path / "classification_features.json"
+            features = json.loads(features_file.read_text())
+
+            # All features should have equal importance (0.25)
+            for feature in features:
+                assert feature["importance"] == 0.25
+
+
+# =============================================================================
+# Export Metadata Tests (Task 7)
+# =============================================================================
+
+
+class TestExportMetadataClass:
+    """Tests for _export_metadata function."""
+
+    def test_export_metadata_creates_json(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify metadata.json created with all required fields."""
+        _export_metadata(sample_crime_df, tmp_path)
+
+        metadata_file = tmp_path / "metadata.json"
+        assert metadata_file.exists()
+
+        metadata = json.loads(metadata_file.read_text())
+        # Verify all required fields
+        assert "total_incidents" in metadata
+        assert "date_start" in metadata
+        assert "date_end" in metadata
+        assert "last_updated" in metadata
+        assert "source" in metadata
+        assert "colors" in metadata
+
+    def test_export_metadata_includes_colors(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify COLORS dict exported in metadata."""
+        _export_metadata(sample_crime_df, tmp_path)
+
+        metadata = json.loads((tmp_path / "metadata.json").read_text())
+        assert "colors" in metadata
+        assert isinstance(metadata["colors"], dict)
+        # COLORS should have some entries
+        assert len(metadata["colors"]) > 0
+
+    def test_export_metadata_date_range(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify date_start and date_end from dispatch_date range."""
+        _export_metadata(sample_crime_df, tmp_path)
+
+        metadata = json.loads((tmp_path / "metadata.json").read_text())
+        assert "date_start" in metadata
+        assert "date_end" in metadata
+        # Verify ISO format dates
+        assert "T" in metadata["date_start"] or "-" in metadata["date_start"]
+        assert "T" in metadata["date_end"] or "-" in metadata["date_end"]
+
+    def test_export_metadata_total_incidents(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify total_incidents matches DataFrame length."""
+        _export_metadata(sample_crime_df, tmp_path)
+
+        metadata = json.loads((tmp_path / "metadata.json").read_text())
+        assert metadata["total_incidents"] == len(sample_crime_df)
+
+    def test_export_metadata_timestamp_format(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify last_updated is ISO format with timezone."""
+        _export_metadata(sample_crime_df, tmp_path)
+
+        metadata = json.loads((tmp_path / "metadata.json").read_text())
+        last_updated = metadata["last_updated"]
+        # ISO format with timezone
+        assert "T" in last_updated
+        assert "+" in last_updated or "Z" in last_updated
+
+
+# =============================================================================
+# Export All Orchestration Tests (Task 8)
+# =============================================================================
+
+
+class TestExportAllOrchestration:
+    """Tests for export_all orchestration function."""
+
+    @patch("pipeline.export_data.load_crime_data")
+    @patch("pipeline.export_data._export_trends")
+    @patch("pipeline.export_data._export_seasonality")
+    @patch("pipeline.export_data._export_spatial")
+    @patch("pipeline.export_data._export_policy")
+    @patch("pipeline.export_data._export_forecasting")
+    @patch("pipeline.export_data._export_metadata")
+    def test_export_all_creates_geo_subdirectory(
+        self,
+        mock_metadata: Mock,
+        mock_forecasting: Mock,
+        mock_policy: Mock,
+        mock_spatial: Mock,
+        mock_seasonality: Mock,
+        mock_trends: Mock,
+        mock_load: Mock,
+        tmp_path: Path,
+    ) -> None:
+        """Verify geo/ directory created under output_dir."""
+        # Create test DataFrame directly
+        import pandas as pd
+        import numpy as np
+        np.random.seed(42)
+        test_df = pd.DataFrame({
+            "objectid": range(1, 101),
+            "dispatch_date": pd.date_range("2020-01-01", periods=100, freq="D"),
+            "ucr_general": [100, 200, 300] * 33 + [100],
+            "point_x": [-75.2] * 100,
+            "point_y": [40.0] * 100,
+            "dc_dist": [1] * 100,
+        })
+        mock_load.return_value = test_df
+
+        export_all(tmp_path)
+
+        geo_dir = tmp_path / "geo"
+        assert geo_dir.exists()
+        assert geo_dir.is_dir()
+
+    @patch("pipeline.export_data.load_crime_data")
+    @patch("pipeline.export_data._export_trends")
+    @patch("pipeline.export_data._export_seasonality")
+    @patch("pipeline.export_data._export_spatial")
+    @patch("pipeline.export_data._export_policy")
+    @patch("pipeline.export_data._export_forecasting")
+    @patch("pipeline.export_data._export_metadata")
+    def test_export_all_calls_all_export_functions(
+        self,
+        mock_metadata: Mock,
+        mock_forecasting: Mock,
+        mock_policy: Mock,
+        mock_spatial: Mock,
+        mock_seasonality: Mock,
+        mock_trends: Mock,
+        mock_load: Mock,
+        tmp_path: Path,
+    ) -> None:
+        """Mock all _export_* functions, verify each called once."""
+        # Create test DataFrame
+        import pandas as pd
+        test_df = pd.DataFrame({
+            "objectid": range(1, 101),
+            "dispatch_date": pd.date_range("2020-01-01", periods=100, freq="D"),
+            "ucr_general": [100] * 100,
+            "point_x": [-75.2] * 100,
+            "point_y": [40.0] * 100,
+            "dc_dist": [1] * 100,
+        })
+        mock_load.return_value = test_df
+
+        export_all(tmp_path)
+
+        # Verify all export functions called
+        mock_trends.assert_called_once()
+        mock_seasonality.assert_called_once()
+        mock_spatial.assert_called_once()
+        mock_policy.assert_called_once()
+        mock_forecasting.assert_called_once()
+        mock_metadata.assert_called_once()
+
+    @patch("pipeline.export_data.load_crime_data")
+    def test_export_all_returns_resolved_path(
+        self, mock_load: Mock, tmp_path: Path
+    ) -> None:
+        """Verify function returns absolute Path to output directory."""
+        # Create test DataFrame with hour column and more rows for Prophet
+        import pandas as pd
+        test_df = pd.DataFrame({
+            "objectid": range(1, 101),  # More rows for monthly aggregation
+            "dispatch_date": pd.date_range("2020-01-01", periods=100, freq="D"),
+            "ucr_general": [100] * 100,
+            "point_x": [-75.2] * 100,
+            "point_y": [40.0] * 100,
+            "dc_dist": [1] * 100,
+            "hour": [12] * 100,
+        })
+        mock_load.return_value = test_df
+
+        result = export_all(tmp_path)
+
+        assert isinstance(result, Path)
+        assert result.is_absolute()
+        assert result == tmp_path
+
+    @patch("pipeline.export_data.load_crime_data")
+    def test_export_all_handles_relative_path(
+        self, mock_load: Mock, tmp_path: Path
+    ) -> None:
+        """Verify relative output_dir converted to absolute."""
+        # Create test DataFrame with hour column and more rows
+        import pandas as pd
+        test_df = pd.DataFrame({
+            "objectid": range(1, 101),  # More rows for monthly aggregation
+            "dispatch_date": pd.date_range("2020-01-01", periods=100, freq="D"),
+            "ucr_general": [100] * 100,
+            "point_x": [-75.2] * 100,
+            "point_y": [40.0] * 100,
+            "dc_dist": [1] * 100,
+            "hour": [12] * 100,
+        })
+        mock_load.return_value = test_df
+
+        # Change to tmp_path and use relative path
+        import os
+
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            result = export_all(Path("output"))
+
+            # Result should be absolute path
+            assert result.is_absolute()
+            assert result.name == "output"
+        finally:
+            os.chdir(original_cwd)
+
+    @patch("pipeline.export_data.load_crime_data")
+    def test_export_all_loads_clean_data(
+        self, mock_load: Mock, tmp_path: Path
+    ) -> None:
+        """Verify load_crime_data called with clean=True."""
+        # Create test DataFrame with hour column and more rows
+        import pandas as pd
+        test_df = pd.DataFrame({
+            "objectid": range(1, 101),  # More rows for monthly aggregation
+            "dispatch_date": pd.date_range("2020-01-01", periods=100, freq="D"),
+            "ucr_general": [100] * 100,
+            "point_x": [-75.2] * 100,
+            "point_y": [40.0] * 100,
+            "dc_dist": [1] * 100,
+            "hour": [12] * 100,
+        })
+        mock_load.return_value = test_df
+
+        export_all(tmp_path)
+
+        # Verify load_crime_data called with clean=True
+        mock_load.assert_called_once_with(clean=True)
+
+
 
