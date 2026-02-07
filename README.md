@@ -173,47 +173,36 @@ This repository now includes:
 - Backend: `api/` (FastAPI on Cloud Run)
 - Data pipeline: `pipeline/export_data.py` and `pipeline/refresh_data.py`
 
-### Local Run (Exact Steps)
+### Local Run (Compose-First)
 
-1. Activate the environment:
-
-```bash
-conda activate crime
-```
-
-2. Build + validate API data artifacts:
+1. Initialize local env files:
 
 ```bash
-python -m pipeline.refresh_data --output-dir api/data
-```
-
-3. Start the API:
-
-```bash
-uvicorn api.main:app --reload
-```
-
-4. Configure frontend env:
-
-```bash
+cp .env.example .env
 cp web/.env.example web/.env.local
 ```
 
-Set `NEXT_PUBLIC_MAPBOX_TOKEN` in `web/.env.local` (create one at [mapbox.com](https://www.mapbox.com/)).
-
-5. Start the web app:
+2. Start the full stack (pipeline + API + web):
 
 ```bash
-cd web
-npm install
-npm run dev
+docker compose up -d --build
 ```
 
-6. Optional local API container:
+3. Verify readiness:
 
 ```bash
-docker compose up --build api
+docker compose ps
+curl http://localhost:8080/api/health
 ```
+
+4. Open the app:
+
+- Web: `http://localhost:3001`
+- API: `http://localhost:8080`
+
+No cloud credentials are required for this local baseline.
+
+For troubleshooting, reset, and contract details, see `docs/local-compose.md`.
 
 ### Required Server Env (Cloud Run)
 
