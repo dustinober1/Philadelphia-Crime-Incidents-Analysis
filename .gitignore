@@ -24,8 +24,12 @@ data/processed/crime_incidents_combined.parquet
 .venv/
 -e .github/
 analysis_output.log
+# Python bytecode
 *.pyc
 __pycache__/
+*.pyo
+*.pyd
+*$py.class
 *.parquet.DS_Store
 *.parquet
 # Firebase CLI debug log (created when commands run with --debug)
