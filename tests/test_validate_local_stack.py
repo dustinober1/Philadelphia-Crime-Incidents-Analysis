@@ -12,10 +12,14 @@ import pytest
 
 def _load_validator_module():
     module_path = Path("scripts/validate_local_stack.py")
+    scripts_dir = str(module_path.parent.resolve())
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
     spec = importlib.util.spec_from_file_location("validate_local_stack", module_path)
     if spec is None or spec.loader is None:
         raise RuntimeError("Failed to load scripts/validate_local_stack.py")
     module = importlib.util.module_from_spec(spec)
+    sys.modules["validate_local_stack"] = module
     spec.loader.exec_module(module)
     return module
 
@@ -29,6 +33,9 @@ def _base_args() -> argparse.Namespace:
         api_health_url="http://127.0.0.1:8080/api/health",
         web_url="http://127.0.0.1:3001",
         timeout_seconds=5,
+        format="human",
+        extended=False,
+        api_base_url="http://127.0.0.1:8080",
     )
 
 
@@ -40,9 +47,11 @@ def test_main_skip_startup_does_not_invoke_compose_up(monkeypatch: pytest.Monkey
     monkeypatch.setattr(
         validate_local_stack,
         "wait_for_health",
-        lambda *_args, **_kwargs: {"ok": True, "missing_exports": []},
+        lambda *_args, **_kwargs: ({"ok": True, "missing_exports": []}, 50.0),
     )
-    monkeypatch.setattr(validate_local_stack, "wait_for_http_ok", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        validate_local_stack, "wait_for_http_ok", lambda *_args, **_kwargs: (None, 25.0)
+    )
 
     assert validate_local_stack.main() == 0
     assert commands == [["docker", "compose", "config"]]
@@ -68,15 +77,19 @@ def test_main_fails_when_missing_exports_present(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(
         validate_local_stack,
         "wait_for_health",
-        lambda *_args, **_kwargs: {
-            "ok": True,
-            "missing_exports": ["incidents.geojson", "metadata.json"],
-        },
+        lambda *_args, **_kwargs: (
+            {
+                "ok": True,
+                "missing_exports": ["incidents.geojson", "metadata.json"],
+            },
+            50.0,
+        ),
     )
-    monkeypatch.setattr(validate_local_stack, "wait_for_http_ok", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        validate_local_stack, "wait_for_http_ok", lambda *_args, **_kwargs: (None, 25.0)
+    )
 
-    with pytest.raises(RuntimeError, match="incidents.geojson, metadata.json"):
-        validate_local_stack.main()
+    assert validate_local_stack.main() == 1
 
 
 def test_main_fails_when_web_endpoint_unreachable(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -85,7 +98,7 @@ def test_main_fails_when_web_endpoint_unreachable(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setattr(
         validate_local_stack,
         "wait_for_health",
-        lambda *_args, **_kwargs: {"ok": True, "missing_exports": []},
+        lambda *_args, **_kwargs: ({"ok": True, "missing_exports": []}, 50.0),
     )
     monkeypatch.setattr(
         validate_local_stack,

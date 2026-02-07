@@ -46,6 +46,48 @@ Common smoke-check failures:
 - `API health missing required exports ...` -> pipeline exports are incomplete; check `docker compose logs pipeline api`.
 - `Web endpoint check failed ...` -> web service is unreachable; check `docker compose logs web`.
 
+### Machine-Readable Output for Automation
+
+The validation script now supports machine-readable output formats for CI/CD integration:
+
+```bash
+# JSON output (for CI parsing)
+python scripts/validate_local_stack.py --format json
+
+# YAML output (for configuration management)
+python scripts/validate_local_stack.py --format yaml
+
+# Human-readable output (default)
+python scripts/validate_local_stack.py --format human
+```
+
+The script returns appropriate exit codes:
+- `0` when validation succeeds
+- `1` when validation fails
+
+The machine-readable output includes timing information for performance monitoring.
+
+### Extended API Endpoint Validation
+
+The validation script now includes extended validation for high-value API endpoints:
+
+```bash
+# Run extended validation on additional API endpoints
+python scripts/validate_local_stack.py --extended
+
+# Run extended validation with JSON output
+python scripts/validate_local_stack.py --extended --format json
+
+# Specify a different API base URL if needed
+python scripts/validate_local_stack.py --extended --api-base-url http://localhost:8080
+```
+
+Extended validation includes:
+- Validation of trends, spatial, policy, forecasting, and metadata endpoints
+- Data integrity checks to ensure responses have expected structure
+- Performance threshold checks with warnings for slow responses
+- Detailed reporting of validation results for each endpoint
+
 4. Open local endpoints:
 
 - Web UI: `http://localhost:${WEB_PORT:-3001}`
@@ -240,6 +282,48 @@ Common smoke-check failures:
 - `API health missing required exports ...` -> pipeline exports are incomplete; check `docker compose logs pipeline api`.
 - `Web endpoint check failed ...` -> web service is unreachable; check `docker compose logs web`.
 
+### Machine-Readable Output for Automation
+
+The validation script now supports machine-readable output formats for CI/CD integration:
+
+```bash
+# JSON output (for CI parsing)
+python scripts/validate_local_stack.py --format json
+
+# YAML output (for configuration management)
+python scripts/validate_local_stack.py --format yaml
+
+# Human-readable output (default)
+python scripts/validate_local_stack.py --format human
+```
+
+The script returns appropriate exit codes:
+- `0` when validation succeeds
+- `1` when validation fails
+
+The machine-readable output includes timing information for performance monitoring.
+
+### Extended API Endpoint Validation
+
+The validation script now includes extended validation for high-value API endpoints:
+
+```bash
+# Run extended validation on additional API endpoints
+python scripts/validate_local_stack.py --extended
+
+# Run extended validation with JSON output
+python scripts/validate_local_stack.py --extended --format json
+
+# Specify a different API base URL if needed
+python scripts/validate_local_stack.py --extended --api-base-url http://localhost:8080
+```
+
+Extended validation includes:
+- Validation of trends, spatial, policy, forecasting, and metadata endpoints
+- Data integrity checks to ensure responses have expected structure
+- Performance threshold checks with warnings for slow responses
+- Detailed reporting of validation results for each endpoint
+
 4. Open the app:
 
 - Web UI: `http://localhost:${WEB_PORT:-3001}`
@@ -277,14 +361,19 @@ When machine constraints or local workload demands change, use the runtime mode 
 - `default`: normal day-to-day local development and baseline behavior checks.
 - `low-power`: reduce container CPU/memory pressure on constrained laptops.
 - `high-performance`: increase container limits for heavier local workloads.
+- `auto`: detect host CPU/RAM and choose a recommended preset before startup.
 
 ```bash
 ./scripts/compose_with_runtime_mode.sh --mode low-power up -d --build
 ./scripts/compose_with_runtime_mode.sh --mode high-performance up -d --build
+./scripts/compose_with_runtime_mode.sh --mode auto up -d --build
+./scripts/compose_with_runtime_mode.sh --recommend
 ./scripts/validate_runtime_guardrails.sh
 # or
 make check-runtime-guardrails
 ```
+
+Resource detection details: `docs/resource-detection.md`
 
 ### Optional Compose Profiles (Advanced)
 

@@ -86,16 +86,21 @@ Use runtime presets only when you explicitly want different resource envelopes:
 - `default`: baseline local behavior; use for normal iteration and parity checks.
 - `low-power`: lower CPU/memory budgets to reduce host pressure.
 - `high-performance`: higher CPU/memory budgets for heavier local workloads.
+- `auto`: detect host resources and choose a recommended preset automatically.
 
 Commands:
 
 ```bash
 ./scripts/compose_with_runtime_mode.sh --mode low-power up -d --build
 ./scripts/compose_with_runtime_mode.sh --mode high-performance up -d --build
+./scripts/compose_with_runtime_mode.sh --mode auto up -d --build
+./scripts/compose_with_runtime_mode.sh --recommend
 ./scripts/validate_runtime_guardrails.sh
 # or
 make check-runtime-guardrails
 ```
+
+See `docs/resource-detection.md` for platform-specific detection behavior and thresholds.
 
 ## Optional compose profiles
 
