@@ -309,6 +309,33 @@ class TestAssertReproducible:
         assert mock_export.call_count == 2
 
     @patch("pipeline.refresh_data.export_all")
+    def test_assert_reproducible_identifies_differing_files(self, mock_export: patch, tmp_path: Path) -> None:
+        """Should list which files differ in error message."""
+        call_count = [0]
+
+        def mock_export_func(output_dir: Path) -> Path:
+            call_count[0] += 1
+            for file_path in _REQUIRED_FILES:
+                full_path = output_dir / file_path
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+                # Write different content on each call
+                full_path.write_text(f'{{"run":{call_count[0]}}}')
+            return output_dir
+
+        mock_export.side_effect = mock_export_func
+
+        with pytest.raises(RuntimeError) as exc_info:
+            _assert_reproducible()
+
+        # Verify error message contains at least one of the differing files
+        error_msg = str(exc_info.value)
+        # All files should differ since they all have different content
+        assert "metadata.json" in error_msg or "annual_trends.json" in error_msg
+
+        assert mock_export.call_count == 2
+
+
+    @patch("pipeline.refresh_data.export_all")
     def test_assert_reproducible_compares_all_required_files(self, mock_export: patch, tmp_path: Path) -> None:
         """Should compare each file in _REQUIRED_FILES."""
         def mock_export_func(output_dir: Path) -> Path:
@@ -447,3 +474,26 @@ class TestCorruptArtifactDetection:
 
         with pytest.raises(json.JSONDecodeError):
             _load_json(test_file)
+
+
+class TestRefreshEnvVar:
+    """Tests for environment variable configuration."""
+
+    def test_refresh_run_uses_env_output_dir(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Should use PIPELINE_OUTPUT_DIR env variable when set."""
+        env_dir = tmp_path / "env_output"
+        env_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create minimal valid files in env directory
+        _create_minimal_valid_files(env_dir)
+
+        # Set environment variable before running CLI
+        monkeypatch.setenv("PIPELINE_OUTPUT_DIR", str(env_dir))
+
+        # The CliRunner creates a subprocess, so we need to set env in the runner's env
+        # Test that env var is used by checking if files already exist in env_dir
+        result = runner.invoke(app, [], env={"PIPELINE_OUTPUT_DIR": str(env_dir)})
+
+        assert result.exit_code == 0
+        # The validation should pass since files exist in env_dir
+        assert "Validated exports:" in result.stdout
