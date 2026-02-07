@@ -2,32 +2,29 @@
 
 ## Current Status
 
-- **Current phase:** Phase 3 complete
-- **Next action:** Audit milestone completion (`$gsd-audit-milestone`)
-- **Roadmap coverage:** 12/12 v1 requirements mapped
+- **Current phase:** Milestone complete (`v1.0 Local Containerized Dev`)
+- **Next action:** Start next milestone definition (`$gsd-new-milestone`)
+- **Roadmap coverage:** v1 shipped (12/12 requirements complete)
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated February 7, 2026)
 
 **Core value:** One `docker compose up` command reliably brings up the complete stack locally with small, resource-constrained containers.
-**Current focus:** Milestone wrap-up and audit
+**Current focus:** Planning next milestone requirements and roadmap
 
 ## Milestone Snapshot
 
-- **Requirements file:** `.planning/REQUIREMENTS.md`
-- **Roadmap file:** `.planning/ROADMAP.md`
-- **Research summary:** `.planning/research/SUMMARY.md`
+- **Milestones:** `.planning/MILESTONES.md`
+- **Roadmap archive:** `.planning/milestones/v1.0-ROADMAP.md`
+- **Requirements archive:** `.planning/milestones/v1.0-REQUIREMENTS.md`
 - **Config:** `.planning/config.json`
 
 ## Notes
 
-- Scope is explicitly local-hosting only.
-- Cloud deployment concerns are out of scope for this milestone.
-- Phase execution should preserve existing brownfield capabilities while improving local container operation.
-- Phase 1 verification report: `.planning/phases/01-local-compose-baseline/01-VERIFICATION.md`.
-- Phase 2 verification report: `.planning/phases/02-footprint-and-runtime-optimization/02-VERIFICATION.md`.
-- Phase 3 verification report: `.planning/phases/03-developer-ux-and-operational-reliability/03-VERIFICATION.md`.
+- No milestone audit file was found for v1.0; archive completed with accepted audit debt.
+- Scope remains local-hosting only until next milestone changes that boundary.
+- Phase execution records remain in `.planning/phases/` as historical implementation detail.
 
 ---
-*State updated: February 7, 2026 after Phase 3 execution and verification*
+*State updated: February 7, 2026 after v1.0 milestone completion*
