@@ -132,6 +132,16 @@ v1.2 will be complete when:
 4. Performance benchmarks show acceptable response times for validation operations
 5. Cross-platform compatibility is verified across Linux, macOS, and Windows WSL
 
+## Traceability
+
+- **Roadmap Link:** [.planning/ROADMAP.md](.planning/ROADMAP.md)
+- **Phase Mapping:**
+  - LWF-03 requirements → Phase 7: Machine-Readable Output for Automation
+  - LWF-04 requirements → Phase 8: Additional API Endpoint Validation  
+  - LWF-05 requirements → Phase 9: Host Resource Detection and Smart Presets
+- **State Tracking:** [.planning/STATE.md](.planning/STATE.md)
+
 ---
 *Requirements defined: February 6, 2026*
 *For milestone: v1.2 Deferred Workflow Enhancements*
+*Traceability added: February 7, 2026*
