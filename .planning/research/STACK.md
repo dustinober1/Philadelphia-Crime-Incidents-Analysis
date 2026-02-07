@@ -1,91 +1,152 @@
-# Stack Research
+# Standard 2025 Stack for Enhancing Local Development Workflows for Containerized Analytics Platforms
 
-**Domain:** Local-first containerized data platform (analysis + API + web)
-**Researched:** February 7, 2026
-**Confidence:** HIGH
+## Executive Summary
 
-## Recommended Stack
+This document outlines the recommended technology stack for enhancing local development workflows in containerized analytics platforms, specifically for the Philadelphia crime analytics platform. The recommendations focus on improving developer productivity, system reliability, and operational efficiency while maintaining compatibility with the existing Python analysis pipeline, FastAPI backend, and Next.js frontend architecture.
 
-### Core Technologies
+## Current State Analysis
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Docker Engine + Compose Spec | Compose v2 | Local multi-service orchestration | One-command startup, explicit service dependencies, standardized local workflow |
-| Python (analysis/pipeline/API images) | 3.12-slim for runtime, 3.14-compatible code | Runs analysis CLI, export pipeline, FastAPI backend | Existing repo already uses Python-first backend/pipeline and has an API Dockerfile |
-| FastAPI + Uvicorn | FastAPI from `api/requirements.txt` | Serves precomputed data and question endpoints | Current backend architecture is already FastAPI and read-optimized |
-| Next.js + React | Next 15.5.2 / React 19.1.1 | Frontend dashboard container | Existing frontend already uses this stack and can run in a dedicated service |
+The Philadelphia crime analytics platform currently utilizes:
+- Python 3.14+ with conda environments
+- FastAPI backend with uvicorn
+- Next.js 15.5.2 frontend
+- Docker Compose for container orchestration
+- Typer for CLI commands
+- Pandas, GeoPandas, scikit-learn for analytics
+- Pytest for testing
 
-### Supporting Libraries
+## Recommended 2025 Stack Components
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| GNU Make (or npm scripts) | latest | Wrap common compose tasks | Use for stable `make up`, `make down`, `make rebuild` commands |
-| `docker buildx` | v0.2x+ | Build cache and multi-stage optimization | Use when image-size and build-time tuning matter |
-| `tini` | stable | PID 1 signal handling in containers | Use for long-running services to avoid zombie processes |
+### 1. Container Orchestration & Development Environment
 
-### Development Tools
+**Docker Compose v2.27+ with Watch Support**
+- **Version**: 2.27.0+
+- **Rationale**: Native file watching capabilities eliminate need for nodemon alternatives, enabling automatic container rebuilding on code changes. The watch feature provides faster feedback loops compared to traditional volume mounting.
+- **Confidence Level**: High
+- **What NOT to use**: Legacy docker-compose v1 or manual container management scripts
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| `docker compose` profiles | Service grouping | Keep optional jobs (one-shot pipeline) separate from always-on services |
-| Healthchecks | Reliable startup ordering | Gate frontend/API dependency readiness with `depends_on` + health checks |
-| `.env` file | Local config injection | Keep local secrets/config centralized and reproducible |
+**Dev Containers (devcontainer.json)**
+- **Version**: Latest specification
+- **Rationale**: Provides consistent development environments across teams, eliminates "works on my machine" issues, and enables seamless VS Code integration with preconfigured tools.
+- **Confidence Level**: High
+- **What NOT to use**: Manual environment setup procedures
 
-## Installation
+### 2. Development Tools & Utilities
 
-```bash
-# Core runtime
-brew install docker
+**Watchdog-based File Monitoring**
+- **Version**: watchdog 6.0.0+
+- **Rationale**: Cross-platform file monitoring solution that integrates well with Python applications. Enables hot-reloading for analysis scripts and API endpoints without restarting containers unnecessarily.
+- **Confidence Level**: Medium
+- **What NOT to use**: Platform-specific file monitoring solutions
 
-# Verify compose
-docker compose version
+**Air (Live Reload for Go-based Development) or entr (Unix utility)**
+- **Alternative**: Watchexec
+- **Version**: watchexec 1.25.0+
+- **Rationale**: Provides efficient file-watching and command execution capabilities for triggering rebuilds and restarts during development. Better performance than polling-based solutions.
+- **Confidence Level**: Medium
+- **What NOT to use**: Custom polling implementations
 
-# Start full local stack
-docker compose up --build
-```
+### 3. Container Registries & Image Management
 
-## Alternatives Considered
+**Docker Buildx with BuildKit**
+- **Version**: Buildx v0.17.0+
+- **Rationale**: Enhanced build performance with parallel processing, caching optimizations, and multi-platform support. Critical for reducing development iteration cycles.
+- **Confidence Level**: High
+- **What NOT to use**: Legacy docker build without BuildKit
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| Multiple focused service images | Single monolithic image | Only for throwaway prototypes where build speed matters more than clarity |
-| Compose-managed local services | Host-installed runtime dependencies | Only when Docker is unavailable on developer machines |
-| Multi-stage builds | Single-stage builds | Single-stage is acceptable for very small scripts with zero native deps |
+**Local Registry (Docker Registry or Harbor)**
+- **Version**: Registry 2.8.3+
+- **Rationale**: Enables faster image pulls during development, reduces external dependencies, and supports advanced caching strategies for multi-stage builds.
+- **Confidence Level**: Medium
+- **What NOT to use**: Pushing to remote registries during active development
 
-## What NOT to Use
+### 4. Service Mesh & Local Networking
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| One giant container for API+web+pipeline | Poor isolation, harder debugging, oversized images | Separate containers per service boundary |
-| Unbounded resource usage | Local machine thrash and inconsistent dev behavior | Compose CPU/memory limits and sane defaults |
-| Production cloud coupling in local flow | Breaks local-only scope and adds fragile dependencies | Local stubs/volumes for dev-only dependencies |
+**Traefik v3.3+ as Local Reverse Proxy**
+- **Version**: 3.3.0+
+- **Rationale**: Modern reverse proxy with automatic service discovery, dynamic configuration, and excellent Docker integration. Simplifies local development networking and enables consistent routing patterns between local and production.
+- **Confidence Level**: Medium
+- **What NOT to use**: Manual nginx configuration for local development
 
-## Stack Patterns by Variant
+**Docker Desktop with Advanced Networking**
+- **Version**: Docker Desktop 4.30.0+
+- **Rationale**: Improved networking performance, DNS resolution, and cross-platform consistency. Essential for complex microservice architectures during development.
+- **Confidence Level**: High
+- **What NOT to use**: Legacy Docker installations without modern networking features
 
-**If iterative feature development is the priority:**
-- Run API + web continuously, keep pipeline as one-shot job service.
-- Because it minimizes rebuild/restart cycle time.
+### 5. Development Databases & Caching
 
-**If reproducible data snapshots are the priority:**
-- Add a dedicated scheduled/triggered refresh container profile.
-- Because it keeps exported artifacts deterministic across machines.
+**Docker Volumes with Named Volumes**
+- **Version**: Docker 26.0+
+- **Rationale**: Persistent data storage for databases during development while maintaining container isolation. Named volumes provide better management than bind mounts for database state.
+- **Confidence Level**: High
+- **What NOT to use**: Bind mounts for database storage (performance and permission issues)
 
-## Version Compatibility
+**Redis Stack for Local Caching**
+- **Version**: Redis 7.2+ with Redis Insight
+- **Rationale**: Integrated caching, session storage, and pub/sub capabilities with comprehensive GUI for debugging. Essential for analytics platforms with heavy data processing.
+- **Confidence Level**: Medium
+- **What NOT to use**: In-memory caching solutions for development (lacks persistence)
 
-| Package A | Compatible With | Notes |
-|-----------|-----------------|-------|
-| Next.js 15.5.2 | React 19.1.1 | Matches existing `web/package.json` |
-| API container `python:3.12-slim` | FastAPI/Uvicorn app | Matches existing `api/Dockerfile` runtime |
-| Compose v2 | Current Docker Desktop/Engine | Needed for modern `docker compose` UX |
+### 6. Monitoring & Debugging Tools
 
-## Sources
+**Okteto for Development Containers**
+- **Version**: 2.20.0+
+- **Rationale**: Provides cloud-native development environments with persistent volumes, selective sync, and IDE integration. Particularly valuable for teams working with Kubernetes-based deployments.
+- **Confidence Level**: Low-Medium
+- **What NOT to use**: Traditional VM-based development environments
 
-- `.planning/PROJECT.md` — scope and constraints
-- `.planning/codebase/STACK.md` — existing stack and deployment context
-- `docker-compose.yml` — current local orchestration baseline
-- `api/Dockerfile` — current API container pattern
-- `web/package.json` — frontend runtime/dependency versions
+**Dive for Image Optimization**
+- **Version**: 0.12.0+
+- **Rationale**: Analyzes container layers and identifies optimization opportunities, reducing image sizes and improving build times during development iterations.
+- **Confidence Level**: Medium
+- **What NOT to use**: Manual inspection of image layers
 
----
-*Stack research for: local containerized crime analytics platform*
-*Researched: February 7, 2026*
+### 7. Testing & Quality Assurance
+
+**Podman Desktop (Alternative to Docker Desktop)**
+- **Version**: 1.12.0+
+- **Rationale**: Rootless container management with improved security model. Good alternative for development environments where Docker Desktop licensing is a concern.
+- **Confidence Level**: Low-Medium
+- **What NOT to use**: Docker with root privileges for development
+
+**GitHub Actions Local Runner (nektos/act)**
+- **Version**: 0.2.60+
+- **Rationale**: Execute CI/CD pipelines locally for faster feedback loops. Ensures local changes match CI behavior before pushing to remote repositories.
+- **Confidence Level**: Medium
+- **What NOT to use**: Separate local testing configurations that differ from CI
+
+### 8. Infrastructure as Code for Local Development
+
+**Terraform for Local Stacks**
+- **Version**: 1.9.0+
+- **Rationale**: Consistent infrastructure provisioning between local, staging, and production environments. Terraform workspaces enable isolated development environments.
+- **Confidence Level**: Low
+- **What NOT to use**: Manual infrastructure setup for local development
+
+**Ansible for Local Configuration Management**
+- **Version**: 9.0.0+
+- **Rationale**: Idempotent configuration management for complex local development setups. Particularly useful for data science environments with multiple dependencies.
+- **Confidence Level**: Low
+- **What NOT to use**: Shell scripts for environment setup
+
+## Integration Recommendations for Philadelphia Crime Analytics Platform
+
+### Immediate Priorities (LWF-03)
+1. Implement Docker Compose watch for automatic service reloading
+2. Configure development containers for consistent team environments
+3. Optimize Docker build processes with BuildKit
+
+### Short-term Goals (LWF-04)
+1. Integrate Traefik for local service routing
+2. Implement local registry for faster image handling
+3. Add monitoring tools for development workflow visibility
+
+### Long-term Objectives (LWF-05)
+1. Evaluate Okteto for cloud-based development environments
+2. Implement local CI/CD runner for faster feedback
+3. Consider infrastructure as code for local development environments
+
+## Conclusion
+
+The recommended stack focuses on improving developer velocity, reducing environment inconsistencies, and maintaining alignment between local development and production deployment patterns. The selected technologies prioritize stability, performance, and community support while remaining compatible with the existing Python/Next.js/FastAPI architecture of the Philadelphia crime analytics platform.

@@ -1,152 +1,233 @@
 # Pitfalls Research
 
-**Domain:** Local-only Dockerized full-stack analytics applications
-**Researched:** February 7, 2026
+**Domain:** Local development workflow enhancement projects for crime analytics platforms
+**Researched:** February 6, 2026
 **Confidence:** HIGH
 
 ## Critical Pitfalls
 
-### Pitfall 1: "One Command" That Still Needs Manual Steps
+### Pitfall 1: Overcomplicating the Default Developer Experience
 
-**What goes wrong:** `docker compose up` starts containers, but developers still must manually run pipeline/export commands.
+**What goes wrong:** Adding too many workflow options makes the default path unclear and increases cognitive load.
 
-**Why it happens:** Pipeline jobs are treated as separate ad hoc scripts, not part of compose contracts.
+**Why it happens:** Teams add multiple workflow variations without considering the impact on new developers or maintaining simplicity.
 
-**How to avoid:** Define pipeline as a compose service/job with clear dependency/trigger behavior and shared artifact output.
+**How to avoid:** Preserve the simplest possible default path (`docker compose up`) while making advanced workflows optional and well-documented.
 
-**Warning signs:** Fresh clone cannot serve complete data without extra undocumented commands.
+**Warning signs:** New team members struggle to identify the basic startup command; documentation becomes scattered across multiple workflows; team members use different startup methods inconsistently.
 
-**Phase to address:** Phase 1 (compose orchestration baseline).
-
----
-
-### Pitfall 2: Bloated Images and Slow Rebuild Loops
-
-**What goes wrong:** Iteration speed collapses because images are large and rebuild on small code changes.
-
-**Why it happens:** Single-stage Dockerfiles, broad copy contexts, and mixed build/runtime dependencies.
-
-**How to avoid:** Multi-stage builds, slim runtime images, pinned dependency layers, and targeted `COPY` ordering.
-
-**Warning signs:** Rebuilds consistently take minutes for small changes; local disk usage spikes.
-
-**Phase to address:** Phase 2 (image and runtime optimization).
+**Phase to address:** Early design phase of workflow enhancements.
 
 ---
 
-### Pitfall 3: Resource Limits Break Legitimate Workloads
+### Pitfall 2: Workflow Changes Without Adequate Regression Testing
 
-**What goes wrong:** Containers OOM or throttle heavily during normal data refresh jobs.
+**What goes wrong:** New workflow features break existing functionality without detection.
 
-**Why it happens:** Limits chosen without profiling or workload awareness.
+**Why it happens:** Insufficient test coverage for workflow changes, especially around default behavior preservation.
 
-**How to avoid:** Start with conservative defaults plus documented override profiles for heavier runs.
+**How to avoid:** Maintain comprehensive regression tests that verify default behavior remains unchanged when adding new workflow options. Include tests that validate `docker compose up` still works as expected after adding presets or profiles.
 
-**Warning signs:** Frequent OOM kills, partial artifact writes, flaky local startup.
+**Warning signs:** Default startup commands behave differently after updates; existing documentation becomes inaccurate; users report regressions in basic functionality.
 
-**Phase to address:** Phase 2 (resource tuning and validation).
-
----
-
-### Pitfall 4: Hidden Cloud Coupling in "Local-Only" Scope
-
-**What goes wrong:** Local startup silently depends on cloud credentials/services.
-
-**Why it happens:** Existing code paths assume production integration defaults.
-
-**How to avoid:** Provide local fallback paths (in-memory/emulator/stubs) and disable cloud-only dependencies by default.
-
-**Warning signs:** `docker compose up` fails on machines without cloud credentials.
-
-**Phase to address:** Phase 1 (local-default configuration hardening).
+**Phase to address:** Implementation and testing phases.
 
 ---
 
-### Pitfall 5: Volume Contract Drift Between Pipeline and API
+### Pitfall 3: Poor Error Handling in Workflow Scripts
 
-**What goes wrong:** Pipeline writes artifacts to locations API does not read, causing stale/missing data.
+**What goes wrong:** Workflow scripts fail silently or provide unhelpful error messages when problems occur.
 
-**Why it happens:** Path conventions are implicit and untested.
+**Why it happens:** Developers focus on happy-path scenarios and don't invest in robust error handling and user feedback.
 
-**How to avoid:** Establish explicit artifact path contract and validate in integration checks.
+**How to avoid:** Implement comprehensive error handling with clear, actionable messages. Include validation checks and provide specific remediation steps when workflows fail.
 
-**Warning signs:** API boots but returns outdated/empty datasets after pipeline run.
+**Warning signs:** Users report vague error messages; support tickets increase due to workflow confusion; developers spend excessive time debugging workflow issues.
 
-**Phase to address:** Phase 3 (verification and developer UX hardening).
+**Phase to address:** Implementation and validation phases.
+
+---
+
+### Pitfall 4: Inconsistent Environment Variable Management
+
+**What goes wrong:** Different workflow paths use inconsistent environment variable handling, leading to configuration drift.
+
+**Why it happens:** Multiple developers add environment variables without centralized management or consistent patterns.
+
+**How to avoid:** Establish clear patterns for environment variable usage across all workflow paths. Use consistent naming conventions and document all variables in `.env.example` files.
+
+**Warning signs:** Applications behave differently depending on how they're started; environment variables are scattered across multiple files; configuration becomes difficult to manage.
+
+**Phase to address:** Design and implementation phases.
+
+---
+
+### Pitfall 5: Missing or Inadequate Documentation for New Workflows
+
+**What goes wrong:** New workflow features are poorly documented, leading to low adoption and user confusion.
+
+**Why it happens:** Teams prioritize implementation over documentation, or documentation isn't updated when workflows change.
+
+**How to avoid:** Treat documentation as part of the workflow implementation. Include usage examples, expected outcomes, and troubleshooting guides for each workflow option.
+
+**Warning signs:** Team members don't use new workflow features; questions about workflow usage increase; users revert to older, less efficient methods.
+
+**Phase to address:** Throughout implementation and before release.
+
+---
+
+### Pitfall 6: Performance Optimization Without Measuring Impact
+
+**What goes wrong:** Performance optimizations are implemented without measuring actual impact on developer productivity.
+
+**Why it happens:** Teams optimize based on assumptions rather than measuring real-world usage patterns and bottlenecks.
+
+**How to avoid:** Establish baseline measurements for key workflow metrics (startup time, rebuild time, test execution time) and measure improvements objectively. Focus on optimizations that provide measurable developer experience benefits.
+
+**Warning signs:** Optimizations take significant development time but provide minimal user benefit; performance metrics aren't tracked; subjective opinions drive optimization decisions.
+
+**Phase to address:** Planning and validation phases.
+
+---
+
+### Pitfall 7: Feature Creep in Workflow Tools
+
+**What goes wrong:** Workflow tools accumulate too many features, becoming complex and difficult to maintain.
+
+**Why it happens:** Teams continuously add features without considering the complexity cost or whether simpler solutions exist.
+
+**How to avoid:** Apply the principle of least complexity. Focus workflow tools on their primary purpose and avoid turning them into Swiss Army knives. Regularly review and simplify existing features.
+
+**Warning signs:** Workflow tools have many rarely-used features; new developers find tools overwhelming; maintenance burden increases disproportionately.
+
+**Phase to address:** Design and review phases.
+
+---
+
+### Pitfall 8: Inadequate Testing Across Different Developer Environments
+
+**What goes wrong:** Workflows work in some environments but fail in others due to hardware or OS differences.
+
+**Why it happens:** Testing is performed only on a limited set of development environments, typically the most powerful or common ones.
+
+**How to avoid:** Test workflows across different hardware configurations (especially lower-powered machines), operating systems, and network conditions. Implement resource-constrained testing to ensure workflows work on various setups.
+
+**Warning signs:** Users with different hardware report workflow failures; workflows perform differently across operating systems; complaints about resource usage increase.
+
+**Phase to address:** Testing and validation phases.
+
+---
+
+### Pitfall 9: Tight Coupling Between Workflow Components
+
+**What goes wrong:** Workflow components become tightly coupled, making changes risky and difficult.
+
+**Why it happens:** Teams don't invest in clean interfaces between workflow components, leading to interdependencies that are hard to manage.
+
+**How to avoid:** Design workflow components with clear interfaces and loose coupling. Allow components to function independently when possible and minimize cross-dependencies.
+
+**Warning signs:** Changes to one workflow component unexpectedly break others; refactoring becomes difficult; workflow components can't be used independently.
+
+**Phase to address:** Architecture and design phases.
+
+---
+
+### Pitfall 10: Neglecting Workflow Performance Monitoring
+
+**What goes wrong:** Workflow performance degrades over time without detection or intervention.
+
+**Why it happens:** No monitoring is in place to track workflow performance metrics, so gradual degradation goes unnoticed.
+
+**How to avoid:** Implement monitoring for key workflow metrics (startup times, build times, test execution times) and set up alerts for significant performance changes. Regularly review performance trends.
+
+**Warning signs:** Workflows gradually become slower over time; developers adapt to slower workflows without reporting issues; performance problems compound across releases.
+
+**Phase to address:** Post-implementation and ongoing maintenance phases.
 
 ## Technical Debt Patterns
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Reusing one Dockerfile for all services | Faster initial setup | Oversized images and poor cache locality | Temporary prototype only |
-| Skipping healthchecks | Less compose config | Flaky startup ordering | Never for default flow |
-| Hardcoding env vars in compose | Quick local bring-up | Config drift and secret leakage | Never; use `.env` contracts |
+| Adding workflow features without updating tests | Faster initial delivery | Accumulated technical debt and future bugs | Never; testing should be part of feature implementation |
+| Copy-pasting environment configurations across files | Quick initial setup | Difficult to maintain and update configurations | Short-term only if centralized configuration is added next |
+| Bypassing standard workflow patterns for "quick fixes" | Immediate problem resolution | Inconsistent and confusing user experience | Never; always follow established patterns |
+| Adding complex conditional logic to workflow scripts | Solving multiple cases in one script | Unmaintainable and hard-to-debug scripts | Never; prefer simpler, more focused scripts |
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Mapbox token | Assume token always present | Graceful no-token behavior for local dev |
-| Firestore-backed questions | Require cloud auth in default path | In-memory fallback/emulator as local default |
-| Exported data files | Bind mount wrong host path | Explicit named volume/path contract |
+| Docker Compose profiles | Modifying default behavior when adding profiles | Keep default behavior unchanged, add profiles as optional overlays |
+| Environment variable handling | Using different patterns across workflow scripts | Centralize environment variable management with consistent patterns |
+| Health checks | Inconsistent readiness validation across services | Standardize health check approaches and validation criteria |
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Reinstalling deps every rebuild | Long build times | Cache dependency layers before source copy | Every code iteration |
-| Running heavy pipeline on API container | API latency spikes/crashes | Isolate pipeline into dedicated service | Moderate dataset growth |
-| Unbounded frontend dev watchers | High CPU fan noise | Tune watch paths and resource limits | On lower-power laptops |
+| Over-optimizing for edge cases | Suboptimal performance for common workflows | Focus optimization efforts on most common usage patterns | When common workflows become slow |
+| Ignoring resource constraints | Workflows fail on lower-powered machines | Test and optimize for minimum recommended hardware | When users report performance issues |
+| Premature optimization | Complex solutions for simple problems | Measure first, then optimize based on actual bottlenecks | When development velocity slows due to complexity |
 
 ## Security Mistakes
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Committing real secrets in compose/env files | Credential exposure | Use `.env.example` + ignored local `.env` |
-| Keeping admin defaults in shipped config | Unauthorized local access | Require explicit override and safe defaults |
-| Exposing all ports by default | Unnecessary attack surface | Publish only required local ports |
+| Exposing sensitive environment variables in workflow output | Credential leakage in logs and terminals | Sanitize output and use secure credential handling |
+| Storing credentials in version control | Unauthorized access to sensitive systems | Use proper secret management and environment-specific files |
+| Weak authentication in local development workflows | Unauthorized access to development systems | Implement appropriate security measures even in local environments |
 
 ## UX Pitfalls
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Ambiguous startup status | Developers don't know when stack is ready | Healthcheck-based readiness + clear logs |
-| Too many startup variants | Confusion about "correct" path | One canonical default command |
-| Missing recovery guidance | Slow troubleshooting | Document reset flows (`down -v`, rebuild, rerun pipeline) |
+| Too many similar workflow options | Confusion about which option to use | Provide clear guidance on when to use each workflow |
+| Inconsistent command interfaces | Difficulty learning and remembering workflows | Standardize command patterns and interfaces |
+| Poor feedback during long-running operations | Uncertainty about operation progress | Provide clear progress indicators and status updates |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Compose bring-up:** All required services start with `docker compose up` from clean clone.
-- [ ] **Pipeline integration:** Fresh startup produces/loads current artifacts without manual shell steps.
-- [ ] **Resource controls:** CPU/memory limits are active and tested under expected local workloads.
-- [ ] **Docs:** README local-run section reflects actual command path and recovery steps.
+- [ ] Default workflow remains unchanged and functional after adding enhancements
+- [ ] New workflow features are properly documented with usage examples
+- [ ] Error handling provides clear, actionable feedback to users
+- [ ] Performance metrics are established and monitored
+- [ ] Cross-platform compatibility is verified
+- [ ] Regression tests protect against unintended behavior changes
+- [ ] Environment variable management follows consistent patterns
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Manual hidden startup steps | MEDIUM | Integrate missing task into compose, update docs/tests |
-| Bloated images | MEDIUM | Refactor Dockerfiles to multi-stage and optimize build context |
-| Volume drift | HIGH | Standardize artifact paths, add startup validation, re-export data |
+| Broken default workflow | HIGH | Revert recent changes, restore working default, implement changes more carefully with proper testing |
+| Poor performance | MEDIUM | Identify bottlenecks, optimize critical paths, establish performance baselines |
+| Documentation gaps | LOW | Create comprehensive documentation, add usage examples, update README files |
 
 ## Pitfall-to-Phase Mapping
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| One command still manual | Phase 1 | Clean-clone startup succeeds with one command |
-| Image bloat and rebuild drag | Phase 2 | Image size + rebuild time regression checks |
-| Resource limits mis-tuned | Phase 2 | Pipeline/API runs complete within capped resources |
-| Cloud coupling in local default | Phase 1 | No cloud credentials required for baseline run |
-| Volume contract drift | Phase 3 | Integration check validates fresh artifacts visible via API |
+| Overcomplicated default experience | Design phase | User testing and feedback sessions |
+| Inadequate regression testing | Implementation phase | Automated test suite with workflow validation |
+| Poor error handling | Implementation phase | Error scenario testing and user feedback |
+| Inconsistent environment management | Design phase | Centralized configuration validation |
+| Missing documentation | Throughout project | Documentation reviews and user acceptance |
+| Unmeasured performance impact | Planning phase | Baseline establishment and measurement protocols |
+| Feature creep | Design phase | Requirements validation and scope management |
+| Environment-specific failures | Testing phase | Multi-environment validation testing |
+| Tight coupling | Architecture phase | Interface design reviews and decoupling tests |
+| Missing performance monitoring | Post-implementation | Metric establishment and monitoring setup |
 
 ## Sources
 
-- `.planning/PROJECT.md`
-- `.planning/codebase/ARCHITECTURE.md`
-- `.planning/codebase/CONCERNS.md`
 - `docker-compose.yml`
+- `scripts/validate_local_stack.py`
+- `scripts/compose_with_runtime_mode.sh`
 - `README.md`
+- `.env.example`
+- `tests/integration/test_phase5_runtime_preset_modes.py`
+- `.planning/milestones/v1.1-ROADMAP.md`
 
 ---
-*Pitfalls research for: local-only containerized stack*
-*Researched: February 7, 2026*
+*Pitfalls research for: milestone v1.2 local development workflow enhancements*
+*Researched: February 6, 2026*

@@ -1,127 +1,142 @@
 # Project Research Summary
 
-**Project:** Crime Incidents Philadelphia - Local Containerized Dev
-**Domain:** Local-first container orchestration for an existing analytics platform
-**Researched:** February 7, 2026
+**Project:** Crime Incidents Philadelphia
+**Domain:** Local development workflow enhancements for a crime analytics platform
+**Researched:** February 6, 2026
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This is a brownfield analytics platform with established Python analysis/pipeline code, a FastAPI backend, and a Next.js frontend. Research confirms the right approach is not architectural reinvention, but operational standardization around Docker Compose as the default local runtime contract.
+Milestone v1.2 should focus on addressing deferred workflow enhancements (LWF-03 to LWF-05) to further improve local development experience and system capabilities. The research indicates that the most valuable enhancements center around machine-readable outputs, additional API validation, and host resource detection for smart preset selection. These improvements build on the existing solid foundation of Docker Compose orchestration, Python analysis pipeline, FastAPI backend, and Next.js frontend.
 
-The recommended strategy is a service-per-boundary container model (web, api, pipeline, supporting services) with one-command startup as a strict requirement. That should be paired with image slimming and per-service resource limits so local development remains fast and reliable on typical laptops.
-
-The largest risks are hidden manual steps, cloud-coupled defaults, and pipeline/API artifact contract drift. These are mitigated by explicit compose service design, local-default fallbacks, and verification checks that exercise fresh-clone startup.
+The recommended approach is to implement these enhancements incrementally while preserving the existing default developer experience. The research suggests prioritizing features that provide immediate value to developers while establishing a foundation for more sophisticated automation in future milestones.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Use Docker Compose v2 as the local orchestrator, preserve existing FastAPI and Next.js stacks, and split runtime concerns across focused containers. Continue with Python slim runtime images and introduce service-specific Dockerfiles/multi-stage builds to improve size and rebuild speed.
+For enhancing local development workflows, the research recommends extending the existing technology stack with targeted additions:
 
 **Core technologies:**
-- Docker Compose: service orchestration and one-command startup contract.
-- FastAPI/Uvicorn container: local API serving precomputed artifacts.
-- Next.js container: local dashboard runtime.
-- Pipeline job container: deterministic artifact refresh/export.
+- Docker Compose v2.20+: Enhanced orchestration for development workflows
+- Python 3.11+: For enhanced development scripts and validation tools
+- FastAPI: Continue leveraging for API validation and health checks
+- Shell/Bash scripting: For workflow automation and environment setup
+- jq/yq: For machine-readable output processing
+- Make: For simplified command interfaces
 
 ### Expected Features
 
 **Must have (table stakes):**
-- One-command startup for all required local services.
-- Service boundaries aligned to web/api/pipeline responsibilities.
-- Healthchecks + startup gating.
-- Reproducible local env/config and persistent artifact storage.
+- Machine-readable output for CI/automation integration (LWF-03)
+- Additional API endpoint validation beyond basic readiness checks (LWF-04)
+- Host resource detection for automatic preset selection (LWF-05)
+- Consistent environment variable management across services
 
 **Should have (competitive):**
-- Multi-stage image optimization and smaller runtime footprints.
-- CPU/memory limits per service with documented override path.
-- Compose profiles for optional workflows.
+- Smart preset selection based on available system resources
+- Advanced smoke testing with domain-specific assertions
+- Workflow shortcuts for common development tasks
+- Comprehensive documentation for new features
 
 **Defer (v2+):**
-- Cloud deployment parity and non-local infrastructure concerns.
+- Automatic resource allocation without user-defined limits
+- Overly complex preset configurations
+- Cross-platform compatibility beyond Unix-like systems
 
 ### Architecture Approach
 
-Retain current codebase architecture and wrap it in a compose-first operational layer: pipeline writes to a stable artifact volume, API serves from that contract, and web consumes API endpoints on the internal compose network. Supporting external dependencies should be optional or locally emulated to preserve local-only scope.
+Implement workflow enhancements as a layered control system around the existing architecture: development utilities that interact with the current service topology without changing core service boundaries. The core architecture (pipeline -> api -> web) remains unchanged, with new workflow tools acting as orchestrators and validators.
 
 **Major components:**
-1. `pipeline` service/job — data refresh and export.
-2. `api` service — endpoint serving from exported artifacts.
-3. `web` service — local dashboard runtime.
-4. `supporting` optional services — local substitutes for external dependencies.
+1. Development utility scripts for enhanced validation and reporting
+2. Environment detection and preset selection mechanisms
+3. Machine-readable output processors for automation
+4. Documentation and command UX improvements
 
 ### Critical Pitfalls
 
-1. **Hidden manual startup steps** — make pipeline/export part of compose contract.
-2. **Image bloat** — use multi-stage builds and tighter copy/dependency layers.
-3. **Resource limits that are too strict** — tune with workload-aware defaults and overrides.
-4. **Cloud-coupled defaults** — enforce local fallbacks in default path.
-5. **Artifact path drift** — enforce and verify a shared pipeline->API volume contract.
+1. **Breaking the default developer experience** — Preserve `docker compose up` as the primary entry point.
+2. **Insufficient regression testing** — Maintain existing functionality while adding new features.
+3. **Poor error messaging** — Provide clear, actionable feedback to developers.
+4. **Configuration drift** — Maintain consistent environment variable handling.
+5. **Over-engineering solutions** — Keep workflow tools focused and maintainable.
+6. **Environment inconsistency** — Ensure workflows work across different hardware configurations.
+7. **Tight coupling** — Maintain loose coupling between workflow components and core services.
 
 ## Implications for Roadmap
 
 Based on research, suggested phase structure:
 
-### Phase 1: Local Compose Baseline
-**Rationale:** Core value depends on one-command local startup first.
-**Delivers:** Full service graph in compose, local-default config, health-gated startup.
-**Addresses:** startup, service separation, local-only execution.
-**Avoids:** hidden manual steps and cloud coupling.
+### Phase 1: Machine-Readable Output Enhancement
+**Rationale:** Immediate value for CI/automation integration; builds on existing validation infrastructure.
+**Delivers:** Enhanced output formats from validation scripts, consistent logging, structured status reports.
+**Addresses:** LWF-03 requirements for automation integration.
+**Avoids:** Manual parsing of unstructured output.
 
-### Phase 2: Footprint and Runtime Optimization
-**Rationale:** After baseline works, optimize size and resource predictability.
-**Delivers:** slim/multi-stage Dockerfiles, tuned CPU/memory limits, rebuild improvements.
-**Uses:** existing stack versions and service-specific build patterns.
-**Implements:** image and runtime budget controls.
+### Phase 2: Extended API Validation
+**Rationale:** Builds on existing smoke-check infrastructure with additional domain-specific validations.
+**Delivers:** Additional API endpoint validation beyond basic readiness checks, domain-specific assertions.
+**Uses:** existing FastAPI backend and validation script infrastructure.
+**Implements:** enhanced confidence in system readiness.
 
-### Phase 3: Verification and Developer UX Hardening
-**Rationale:** lock reliability and onboarding confidence.
-**Delivers:** startup verification checks, docs updates, reset/recovery workflows.
-**Implements:** artifact contract validation and operator guidance.
+### Phase 3: Resource Detection and Smart Presets
+**Rationale:** Addresses LWF-05 requirements for automatic preset selection based on host resources.
+**Delivers:** Host resource detection, automatic preset selection, improved developer onboarding.
+**Implements:** reduced manual configuration and improved resource utilization.
+
+### Phase 4: Workflow Integration and Documentation
+**Rationale:** Consolidates previous phases into a cohesive developer experience.
+**Delivers:** Integrated workflow tools, comprehensive documentation, simplified command interfaces.
+**Implements:** long-term maintainability and ease of use.
 
 ### Phase Ordering Rationale
 
-- Baseline orchestration must precede optimization.
-- Optimization must precede final verification so benchmarks/tests measure target design.
-- Pitfall prevention maps naturally to this order (manual/cloud issues first, bloat/limits second, drift/UX third).
+- Machine-readable output first enables automation and provides foundation for other enhancements.
+- Extended API validation second builds on existing validation infrastructure with minimal risk.
+- Resource detection third adds intelligence to the system after validation foundations are established.
+- Workflow integration fourth ensures all features work cohesively before final documentation.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 2:** service-specific optimization tactics for Python geospatial dependencies.
+- **Phase 3:** final resource thresholds may need local workload validation and cross-platform testing.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 1:** compose orchestration and local config hardening are well-established.
-- **Phase 3:** documentation and verification flow patterns are standard.
+- **Phase 1:** output formatting follows established patterns.
+- **Phase 2:** API validation extends existing patterns.
+- **Phase 4:** documentation and integration follow project conventions.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Strongly grounded in existing repository stack and constraints |
-| Features | HIGH | Directly derived from explicit user scope and local-only objective |
-| Architecture | HIGH | Current boundaries already exist; changes are operational, not structural |
-| Pitfalls | HIGH | Common failure modes are directly relevant to compose-first local stacks |
+| Stack | HIGH | Extends existing project tooling and conventions |
+| Features | HIGH | Directly aligned to active milestone goals in PROJECT.md |
+| Architecture | HIGH | Additive changes; no topology change required |
+| Pitfalls | HIGH | Based on known local development failure modes and existing code paths |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- Confirm exact supporting services to include in default compose vs optional profiles.
-- Validate final resource limits against real local workload runs.
+- Determine specific thresholds for resource-based preset selection.
+- Define exact output formats for machine-readable validation results.
+- Establish integration points between new workflow tools and existing services.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- `.planning/PROJECT.md` — scope and constraints
-- `.planning/codebase/ARCHITECTURE.md` — current architecture
-- `.planning/codebase/STACK.md` — current technology baseline
-- `docker-compose.yml`, `api/Dockerfile`, `web/package.json` — current local/container implementation
+- Existing project architecture (Python pipeline, FastAPI API, Next.js web)
+- Current Docker Compose setup
+- Existing validation scripts
+- Current developer workflow documentation
 
 ### Secondary (MEDIUM confidence)
-- `README.md` — local run conventions and current command surface
+- Industry best practices for local development workflows
+- Common patterns in containerized analytics platforms
+- Standard approaches to CI/automation integration
 
 ---
-*Research completed: February 7, 2026*
+*Research completed: February 6, 2026*
 *Ready for roadmap: yes*
