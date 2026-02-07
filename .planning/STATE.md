@@ -12,11 +12,11 @@
 
 **Progress:**
 ```
-[███████░░░░░░░░░░░░░░] 53% (3/6 phases complete, Phase 12: 3/8 plans done)
+[███████░░░░░░░░░░░░░░] 53% (3/6 phases complete, Phase 12: 6/8 plans done)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
 Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans) ✓ 81.75% coverage
-Phase 12: API & CLI           [████░░░░] IN PROGRESS (4/8 plans) ✓ trends, policy, forecasting, metadata
+Phase 12: API & CLI           [███████░░] IN PROGRESS (6/8 plans) ✓ trends, spatial, policy, forecasting, metadata, questions
 Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
 Phase 15: Quality & CI        [░░░░░░░░░░] Pending
@@ -153,11 +153,24 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **pytest-xdist compatibility**: pytest-xdist causes false test failures when run with coverage. Use `-o addopts=''` to disable xdist for coverage measurement.
 - **Coverage measurement accuracy**: Tests pass (317/322) when run without xdist. Coverage measured accurately at 81.75% for core modules.
 
+### From Phase 12 Plan 2 (Spatial API Endpoints)
+- **GeoJSON validation with real data**: Validate actual GeoJSON structure from real data files, not assumed schemas. District numbers include values beyond 1-23 (actual data has 25, 26, 35, 39, 77).
+- **District number validation**: Changed from fixed range (1-23) to positive integer validation due to real data variety.
+- **Hotspot property names**: Validate `incident_count` and `cluster` properties (actual data) instead of assumed `intensity` property.
+- **Error handling behavior**: FastAPI TestClient propagates unhandled KeyError (spatial endpoints don't catch errors). Tests use `pytest.raises(KeyError)` to document current behavior.
+- **Parametrized GeoJSON validation**: Use `@pytest.mark.parametrize` to test all 4 endpoints with same structure validation logic.
+- **Coordinate bounds checking**: Validate geographic coordinates are within Philadelphia region (-75.3 to -74.95 lon, 39.85 to 40.15 lat).
+
+### From Phase 12 Plan 4 (Forecasting API Endpoints)
+- **TestClient exception propagation**: FastAPI TestClient propagates unhandled exceptions (KeyError) rather than returning HTTP error responses. Error tests should use `pytest.raises(KeyError)` not assert status_code == 500.
+- **Cache manipulation pattern**: Use `monkeypatch.setattr(data_loader, "_DATA_CACHE", {})` to simulate missing data, not `del` statements which can affect parallel test execution.
+- **Forecast testing focus**: Validate data structure (dates, predictions, confidence intervals) not prediction accuracy - that's model testing, not API contract testing.
+
 ## Session Continuity
 
 **Last session:** 2026-02-07 17:34 UTC
-**Stopped at:** Completed Phase 12 Plan 3 (Policy API Endpoints) - 10 tests added, 100% coverage for api/routers/policy.py
-**Resume file:** None (continue with Phase 12 Plan 4)
+**Stopped at:** Completed Phase 12 Plan 4 (Forecasting API Endpoints) - 7 tests added, 100% coverage for api/routers/forecasting.py
+**Resume file:** None (continue with Phase 12 Plan 5)
 
 **Completed work:**
 - Phase 10: Test infrastructure, CI pipeline, baseline coverage measurement (4/4 plans complete)
@@ -165,8 +178,15 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - Phase 12 Plan 1: Trends endpoint tests with query validation and error handling
 - Phase 12 Plan 2: Spatial endpoint tests with GeoJSON structure validation
 - Phase 12 Plan 3: Policy endpoint tests with 100% coverage (10 tests)
+- Phase 12 Plan 4: Forecasting endpoint tests with 100% coverage (7 tests)
 
-**Next step:** Execute Phase 12 Plan 4 (Forecasting endpoint tests may already be complete based on git log)
+**Next step:** Execute Phase 12 Plan 5 (Questions API Endpoints)
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 12 (3/8 plans complete)*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 12 (4/8 plans complete)*
+
+
+### From Phase 12 Plan 1 (Trends API Endpoints)
+- **TestClient error handling pattern**: Test error handling by testing underlying functions (get_data) directly instead of via TestClient, because TestClient does not propagate unhandled exceptions (KeyError) the same way as real HTTP requests
+- **Data structure validation over specific values**: Tests validate response structure (expected keys, data types) rather than asserting specific data values to make tests resilient to data changes
+- **Query parameter test coverage**: Test with valid parameters, edge cases (start > end returns empty), and validation errors (422 for non-integer year)
