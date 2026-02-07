@@ -15,7 +15,7 @@
 [████░░░░░░░░░░░░░░░░░] 50% (3/6 phases)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
-Phase 11: Core Modules        [███░░░░░░░] IN PROGRESS (2/6 plans)
+Phase 11: Core Modules        [████░░░░░░] IN PROGRESS (5/6 plans)
 Phase 12: API & CLI           [░░░░░░░░░░] Pending
 Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
@@ -56,12 +56,11 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Next Actions
 
-1. Execute Phase 11 Plan 5: Write tests for data loading module
-2. Execute Phase 11 Plan 6: Write tests for data preprocessing module
-3. Execute Phase 12: Write tests for API & CLI
-4. Execute Phase 13: Write tests for pipeline & support
-5. Execute Phase 14: Repository cleanup
-6. Execute Phase 15: Quality validation & CI integration
+1. Execute Phase 11 Plan 6: Write tests for data preprocessing module
+2. Execute Phase 12: Write tests for API & CLI
+3. Execute Phase 13: Write tests for pipeline & support
+4. Execute Phase 14: Repository cleanup
+5. Execute Phase 15: Quality validation & CI integration
 
 **Roadmap:** `.planning/milestones/v1.3-ROADMAP.md`
 **Requirements:** `.planning/REQUIREMENTS.md` (32 requirements across 8 categories)
@@ -120,6 +119,12 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **Parametrized boundary testing**: Use @pytest.mark.parametrize for comprehensive edge case testing at coordinate bounds (PHILLY_LON_MIN/MAX, PHILLY_LAT_MIN/MAX).
 - **Accept 94.74% coverage**: Missing 5.26% coverage for unlikely edge cases (when GeoPandas sjoin doesn't produce index_right column, or district boundaries missing dist_num column). These are defensive conditionals that rarely trigger.
 
+### From Phase 11 Plan 5 (Test Data Loading & Cache)
+- **Source code inspection for cached functions**: Since joblib.Memory.cache makes function mocking difficult (cached functions return cached results even when inputs are mocked), use inspect.getsource() to verify error handling code exists in the source. This provides reasonable assurance that error handling is present without requiring complex cache invalidation.
+- **Real cache directory for clear_cache tests**: Instead of mocking filesystem operations for clear_cache tests, use the actual .cache/joblib directory with temporary test files. This provides more realistic testing of the cache clearing behavior.
+- **Category dtype testing**: Explicitly test datetime parsing from category dtype since parquet files commonly store strings as category dtype for compression. This is a critical code path in production data loading.
+- **Mock-based testing for data loading**: Use unittest.mock.patch to mock CRIME_DATA_PATH, pandas.read_parquet, and file operations for fast tests that don't require real data files.
+
 ## Known Issues
 
 ### From Phase 10
@@ -132,8 +137,8 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 16:10 UTC
-**Stopped at:** Completed Phase 11 Plan 4 (Spatial Utilities Testing)
+**Last session:** 2026-02-07 16:20 UTC
+**Stopped at:** Completed Phase 11 Plan 5 (Data Loading & Cache Testing)
 **Resume file:** None (all tasks complete)
 
 **Completed work:**
@@ -142,8 +147,9 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - Phase 10 Plan 3: Measured baseline coverage (0% across 46 modules, 2528 statements), documented per-module breakdown, created prioritized testing roadmap
 - Phase 11 Plan 1: Wrote tests for classification models (38 tests, 91.7% coverage for classification.py)
 - Phase 11 Plan 4: Wrote tests for spatial utilities (74 tests, 94.74% coverage for spatial.py)
+- Phase 11 Plan 5: Wrote tests for data loading and cache (23 tests, 95.65% coverage for cache.py, 87.67% for loading.py)
 
-**Next step:** Execute Phase 11 Plan 5 (Test Data Loading)
+**Next step:** Execute Phase 11 Plan 6 (Test Data Preprocessing)
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 11 (2/6 plans complete)*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 11 (5/6 plans complete)*
