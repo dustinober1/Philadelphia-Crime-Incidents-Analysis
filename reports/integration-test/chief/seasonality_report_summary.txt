@@ -1,9 +1,0 @@
-Seasonality Analysis Summary
-========================================
-Summer months: [6, 7, 8]
-Winter months: [12, 1, 2]
-
-Seasonal averages:
-  Other: 45,294 incidents
-  Summer: 24,146 incidents
-  Winter: 20,947 incidents

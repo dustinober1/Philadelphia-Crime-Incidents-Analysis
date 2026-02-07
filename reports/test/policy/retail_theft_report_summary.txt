@@ -1,5 +1,0 @@
-Retail Theft Analysis Summary
-========================================
-Baseline period: 2019-01-01 to 2020-02-01
-Baseline average: 4,208 incidents
-Total theft incidents (all time): 80,321

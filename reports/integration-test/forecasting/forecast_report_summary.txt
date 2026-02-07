@@ -1,7 +1,0 @@
-Time Series Forecasting Summary
-========================================
-Model: prophet
-Forecast horizon: 12 periods
-Training data: 241 months
-
-Forecast generated successfully

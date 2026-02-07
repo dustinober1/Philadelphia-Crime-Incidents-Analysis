@@ -1,9 +1,0 @@
-Annual Trends Analysis Summary
-========================================
-Period: 2018-2020
-Total incidents: 44899
-
-Annual totals:
-  2018: 15,425
-  2019: 15,947
-  2020: 13,527

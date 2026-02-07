@@ -1,5 +1,0 @@
-Vehicle Crimes Analysis Summary
-========================================
-UCR codes: [700]
-Period: 2019-01-01 to 2023-12-31
-Total incidents: 4,621

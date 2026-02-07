@@ -1,7 +1,0 @@
-Robbery Heatmap Analysis Summary
-========================================
-Time bin size: 60 minutes
-Total robbery incidents: 13895
-
-Incidents by hour:
-  00:00 - 13,895
