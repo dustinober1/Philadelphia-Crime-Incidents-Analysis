@@ -575,3 +575,31 @@ class TestCliErrorHandling:
         # Error may be in stdout or stderr depending on Typer configuration
         error_output = result.stdout + result.stderr
         assert "Missing required export files" in error_output or len(error_output) > 0
+
+    def test_validate_artifacts_zero_incidents(self, tmp_path: Path) -> None:
+        """Verify validation passes when total_incidents is 0."""
+        # Create all required files with zero incidents
+        for file_path in _REQUIRED_FILES:
+            full_path = tmp_path / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            if file_path == "metadata.json":
+                full_path.write_text(json.dumps({
+                    "total_incidents": 0,  # Zero incidents is valid
+                    "date_start": "2006-01-01",
+                    "date_end": "2024-12-31",
+                    "last_updated": "2025-01-15T10:30:00Z",
+                    "source": "Philadelphia Police Department",
+                    "colors": {"crime": "#FF5733"},
+                }))
+            elif file_path == "annual_trends.json":
+                full_path.write_text(json.dumps([{"year": 2020, "count": 0}]))  # Empty but valid structure
+            elif file_path == "forecast.json":
+                full_path.write_text(json.dumps({
+                    "historical": [],
+                    "forecast": [],
+                }))
+            else:
+                full_path.write_text("{}")
+
+        # Should validate successfully even with 0 incidents
+        _validate_artifacts(tmp_path)
