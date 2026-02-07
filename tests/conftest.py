@@ -19,7 +19,7 @@ Usage:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
@@ -95,3 +95,49 @@ def tmp_output_dir(tmp_path: Path) -> Path:
     output_dir = tmp_path / "output"
     output_dir.mkdir(exist_ok=True)
     return output_dir
+
+
+# Quality enforcement fixtures
+
+
+@pytest.fixture
+def strict_assertions() -> None:
+    """Marker fixture indicating tests require strict assertion quality checks.
+
+    Usage:
+        @pytest.mark.usefixtures("strict_assertions")
+        def test_something():
+            # Test with high assertion quality standards
+            ...
+    """
+    yield
+
+
+@pytest.fixture
+def behavior_focused() -> None:
+    """Marker fixture indicating tests should focus on behavior, not implementation.
+
+    When writing tests with this fixture:
+    - Test WHAT the code does, not HOW
+    - Use public APIs, not private internals
+    - Assert on outputs and side effects
+    - Don't assert on internal state or implementation patterns
+    """
+    yield
+
+
+@pytest.fixture
+def coverage_report() -> dict[str, Any]:
+    """Fixture providing test coverage metadata for quality tracking.
+
+    Returns a dict that tests can use to document their coverage intent:
+    {
+        "module": "analysis.data.loading",
+        "function": "load_crime_data",
+        "paths_covered": ["success", "file_not_found", "invalid_format"],
+        "paths_not_covered": ["network_error"],  # Rare case, deferred
+    }
+
+    This helps during test review to ensure critical paths are tested.
+    """
+    return {"module": "", "function": "", "paths_covered": [], "paths_not_covered": []}
