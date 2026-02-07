@@ -202,3 +202,60 @@ class TestValidateArtifactsFailure:
 
         with pytest.raises(RuntimeError, match="forecast.json must contain historical and forecast fields"):
             _validate_artifacts(tmp_path)
+
+
+class TestLoadJson:
+    """Tests for _load_json helper."""
+
+    def test_load_json_parses_valid_file(self, tmp_path: Path) -> None:
+        """Should parse valid JSON file and return dict."""
+        test_data = {"key": "value", "number": 42, "nested": {"a": 1}}
+        test_file = tmp_path / "test.json"
+        test_file.write_text(json.dumps(test_data))
+
+        result = _load_json(test_file)
+        assert result == test_data
+        assert result["key"] == "value"
+        assert result["number"] == 42
+        assert result["nested"]["a"] == 1
+
+    def test_load_json_handles_unicode(self, tmp_path: Path) -> None:
+        """Should handle Unicode characters in JSON."""
+        test_data = {
+            "emoji": "🚨 Crime Data",
+            "international": "犯罪事件",
+            "special_chars": "©®™£€¢¥",
+        }
+        test_file = tmp_path / "unicode.json"
+        test_file.write_text(json.dumps(test_data), encoding="utf-8")
+
+        result = _load_json(test_file)
+        assert result["emoji"] == "🚨 Crime Data"
+        assert result["international"] == "犯罪事件"
+        assert result["special_chars"] == "©®™£€¢¥"
+
+
+class TestCanonicalJson:
+    """Tests for _canonical_json helper."""
+
+    def test_canonical_json_sorts_keys(self, tmp_path: Path) -> None:
+        """Should return JSON with sorted keys for comparison."""
+        test_file = tmp_path / "test.json"
+        # Create JSON with keys in random order
+        test_file.write_text(json.dumps({"z": 1, "a": 2, "m": 3}))
+
+        result = _canonical_json(test_file)
+        # Keys should be sorted alphabetically
+        assert result == '{"a":2,"m":3,"z":1}'
+
+    def test_canonical_json_removes_whitespace(self, tmp_path: Path) -> None:
+        """Should return compact JSON with no extra whitespace."""
+        test_file = tmp_path / "test.json"
+        # Create JSON with formatting
+        test_data = {"key": "value", "nested": {"a": 1, "b": 2}}
+        test_file.write_text(json.dumps(test_data, indent=2))
+
+        result = _canonical_json(test_file)
+        # Should have no extra whitespace
+        assert "  " not in result  # No indentation spaces
+        assert "\n" not in result  # No newlines
