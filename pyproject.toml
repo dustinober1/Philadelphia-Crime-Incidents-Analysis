@@ -43,6 +43,38 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
 ]
+
+[tool.coverage.run]
+source = ["analysis", "api", "pipeline"]
+branch = true                    # Enable branch coverage (more accurate than line coverage)
+parallel = true                   # Required for pytest-xdist
+omit = [
+    "*/tests/*",
+    "*/__init__.py",
+    "*/cli/__main__.py",          # CLI entry point
+]
+
+[tool.coverage.report]
+fail_under = 95.0                # Exit with status 2 if coverage < 95%
+precision = 2                    # Report 2 decimal places
+show_missing = true              # Show missing line numbers
+skip_covered = false             # Show all files, even 100% covered
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+    # Don't complain about abstract methods:
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning",
