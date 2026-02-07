@@ -16,4 +16,4 @@ Complete
 
 ## Commits
 - `767984e` — `docs(06-03): document canonical runtime guardrail workflow`
-- `(phase commit pending)` — roadmap/state/requirements + verification artifacts
+- `8de728b` — roadmap/state/requirements + verification artifacts
