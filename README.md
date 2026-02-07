@@ -35,7 +35,16 @@ docker compose up -d --build
 ```bash
 docker compose ps
 curl http://localhost:8080/api/health
+python scripts/validate_local_stack.py --skip-startup
 ```
+
+Expected smoke-check pass signal:
+- `Local compose smoke check passed`
+
+Common smoke-check failures:
+- `API health check failed ... ok!=true` -> API not ready yet; wait briefly, then rerun.
+- `API health missing required exports ...` -> pipeline exports are incomplete; check `docker compose logs pipeline api`.
+- `Web endpoint check failed ...` -> web service is unreachable; check `docker compose logs web`.
 
 4. Open local endpoints:
 
@@ -220,7 +229,16 @@ docker compose up -d --build
 ```bash
 docker compose ps
 curl http://localhost:8080/api/health
+python scripts/validate_local_stack.py --skip-startup
 ```
+
+Expected smoke-check pass signal:
+- `Local compose smoke check passed`
+
+Common smoke-check failures:
+- `API health check failed ... ok!=true` -> API not ready yet; wait briefly, then rerun.
+- `API health missing required exports ...` -> pipeline exports are incomplete; check `docker compose logs pipeline api`.
+- `Web endpoint check failed ...` -> web service is unreachable; check `docker compose logs web`.
 
 4. Open the app:
 

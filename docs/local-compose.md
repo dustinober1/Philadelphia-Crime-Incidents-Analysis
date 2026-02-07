@@ -22,12 +22,21 @@ docker compose up -d --build
 ```bash
 docker compose ps
 curl http://localhost:8080/api/health
+python scripts/validate_local_stack.py --skip-startup
 ```
 
 Expected services:
 - `pipeline` (healthy)
 - `api` (healthy)
 - `web` (running; health transitions to healthy)
+
+Expected smoke-check pass signal:
+- `Local compose smoke check passed`
+
+Common smoke-check failures and first actions:
+- `API health check failed ... ok!=true`: API readiness is not complete yet; wait briefly and rerun.
+- `API health missing required exports ...`: required exports are missing; inspect `docker compose logs pipeline api`.
+- `Web endpoint check failed ...`: web endpoint is unreachable; inspect `docker compose logs web`.
 
 ## Local URLs
 
