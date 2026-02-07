@@ -28,9 +28,16 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
+    "-nauto",                      # Auto-detect CPU count for local dev
     "--strict-markers",
     "--strict-config",
     "-ra",
+    "--cov=analysis",
+    "--cov=api",
+    "--cov=pipeline",
+    "--cov-report=xml",            # Required for diff-cover
+    "--cov-report=term-missing",   # Show missing lines in terminal
+    "--cov-report=html",           # Generate HTML report for review
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
