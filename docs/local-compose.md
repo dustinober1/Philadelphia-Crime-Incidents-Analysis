@@ -92,7 +92,9 @@ Commands:
 ```bash
 ./scripts/compose_with_runtime_mode.sh --mode low-power up -d --build
 ./scripts/compose_with_runtime_mode.sh --mode high-performance up -d --build
-./scripts/validate_compose_runtime_mode.sh
+./scripts/validate_runtime_guardrails.sh
+# or
+make check-runtime-guardrails
 ```
 
 ## Optional compose profiles
