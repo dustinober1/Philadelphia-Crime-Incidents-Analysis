@@ -360,9 +360,12 @@ class TestDataIssueErrorHandling:
         geo_dir = tmp_path / "geo"
         geo_dir.mkdir(parents=True, exist_ok=True)
 
-        # Should raise KeyError when trying to dropna on non-existent columns
-        with pytest.raises(KeyError, match="point_x|point_y"):
-            _export_spatial(df_no_coords, tmp_path, geo_dir, tmp_path)
+        # Mock GeoPandas to avoid file I/O
+        with patch("pipeline.export_data.HAS_GEOPANDAS", True):
+            with patch("pipeline.export_data.gpd") as mock_gpd:
+                # The error happens before GeoPandas reads - when dropna is called
+                with pytest.raises(KeyError, match="point_x|point_y"):
+                    _export_spatial(df_no_coords, tmp_path, geo_dir, tmp_path)
 
 
 # =============================================================================
