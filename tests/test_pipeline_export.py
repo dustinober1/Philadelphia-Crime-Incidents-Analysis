@@ -212,3 +212,156 @@ class TestEnsureDir:
 
         assert test_dir.exists()
 
+
+# =============================================================================
+# Export Trends Tests (Task 2)
+# =============================================================================
+
+
+class TestExportTrends:
+    """Tests for _export_trends function."""
+
+    def test_export_trends_creates_annual_json(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify annual_trends.json created with year/category/count structure."""
+        _export_trends(sample_crime_df, tmp_path)
+
+        annual_file = tmp_path / "annual_trends.json"
+        assert annual_file.exists()
+
+        annual_data = json.loads(annual_file.read_text())
+        assert isinstance(annual_data, list)
+        assert len(annual_data) > 0
+
+        # Verify structure
+        first_row = annual_data[0]
+        assert "year" in first_row
+        assert "crime_category" in first_row
+        assert "count" in first_row
+
+    def test_export_trends_creates_monthly_json(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify monthly_trends.json created with month/category data."""
+        _export_trends(sample_crime_df, tmp_path)
+
+        monthly_file = tmp_path / "monthly_trends.json"
+        assert monthly_file.exists()
+
+        monthly_data = json.loads(monthly_file.read_text())
+        assert isinstance(monthly_data, list)
+        assert len(monthly_data) > 0
+
+        # Verify structure
+        first_row = monthly_data[0]
+        assert "month" in first_row
+        assert "crime_category" in first_row
+        assert "count" in first_row
+
+    def test_export_trends_creates_covid_comparison(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify covid_comparison.json with Pre/During/Post periods."""
+        _export_trends(sample_crime_df, tmp_path)
+
+        covid_file = tmp_path / "covid_comparison.json"
+        assert covid_file.exists()
+
+        covid_data = json.loads(covid_file.read_text())
+        assert isinstance(covid_data, list)
+        assert len(covid_data) == 3  # Pre, During, Post
+
+        # Verify periods
+        periods = [row["period"] for row in covid_data]
+        assert "Pre" in periods
+        assert "During" in periods
+        assert "Post" in periods
+
+        # Verify structure
+        for row in covid_data:
+            assert "period" in row
+            assert "start" in row
+            assert "end" in row
+            assert "count" in row
+
+    def test_export_trends_handles_empty_dataframe(
+        self, tmp_path: Path
+    ) -> None:
+        """Verify graceful handling of empty input."""
+        empty_df = pd.DataFrame({"dispatch_date": [], "ucr_general": []})
+
+        # Should not raise exception
+        _export_trends(empty_df, tmp_path)
+
+        # Files should still be created
+        assert (tmp_path / "annual_trends.json").exists()
+        assert (tmp_path / "monthly_trends.json").exists()
+        assert (tmp_path / "covid_comparison.json").exists()
+
+
+# =============================================================================
+# Task 2: Data Issue Error Handling Tests
+# =============================================================================
+
+
+class TestDataIssueErrorHandling:
+    """Test error handling for problematic input data."""
+
+    def test_export_metadata_empty_dataframe(self, tmp_path: Path) -> None:
+        """Verify _export_metadata handles empty DataFrame gracefully."""
+        empty_df = pd.DataFrame({"dispatch_date": []})
+
+        # Should raise error when trying to get max/min of empty series
+        with pytest.raises((ValueError, IndexError)):
+            _export_metadata(empty_df, tmp_path)
+
+    def test_export_metadata_missing_dispatch_date(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify appropriate error when dispatch_date column missing."""
+        # Drop dispatch_date column
+        df_no_date = sample_crime_df.drop(columns=["dispatch_date"])
+
+        # Should raise KeyError when dispatch_date is missing
+        with pytest.raises(KeyError):
+            _export_metadata(df_no_date, tmp_path)
+
+    def test_export_trends_empty_dataframe(self, tmp_path: Path) -> None:
+        """Verify _export_trends produces valid empty JSON structures."""
+        empty_df = pd.DataFrame({"dispatch_date": [], "ucr_general": []})
+
+        _export_trends(empty_df, tmp_path)
+
+        # Verify files created with empty lists
+        annual_data = json.loads((tmp_path / "annual_trends.json").read_text())
+        assert isinstance(annual_data, list)
+        assert len(annual_data) == 0
+
+        monthly_data = json.loads((tmp_path / "monthly_trends.json").read_text())
+        assert isinstance(monthly_data, list)
+        assert len(monthly_data) == 0
+
+    def test_export_spatial_empty_coordinates(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify _export_spatial handles DataFrame with no valid coordinates."""
+        # Remove all coordinate data
+        df_no_coords = sample_crime_df.drop(columns=["point_x", "point_y"])
+
+        geo_dir = tmp_path / "geo"
+        geo_dir.mkdir(parents=True, exist_ok=True)
+
+        # With geopandas available, should handle missing coordinates gracefully
+        if export_data.HAS_GEOPANDAS:
+            # Mock the GeoJSON reads to avoid dependency on boundary files
+            with patch("pipeline.export_data.gpd"):
+                # Should not raise exception even without coordinates
+                _export_spatial(df_no_coords, tmp_path, geo_dir, tmp_path)
+
+                # Spatial files may not be created or may have 0 incidents
+        else:
+            # Without geopandas, should return early without error
+            _export_spatial(df_no_coords, tmp_path, geo_dir, tmp_path)
+
+
