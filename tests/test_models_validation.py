@@ -680,3 +680,140 @@ class TestValidateTemporalSplit:
         assert validation["train_size"] == 3
         assert validation["test_size"] == 3
         assert validation["valid_temporal_order"] is True
+
+
+class TestWalkForwardValidation:
+    """Tests for walk_forward_validation function."""
+
+    def test_returns_dataframe_with_results(self):
+        """Verify returns pd.DataFrame."""
+        np.random.seed(42)
+        X = pd.DataFrame({"feature": np.arange(50)}, index=pd.date_range("2020-01-01", periods=50))
+        y = pd.Series(np.arange(50), index=pd.date_range("2020-01-01", periods=50))
+
+        def model_fn():
+            return LinearRegression()
+
+        results = walk_forward_validation(model_fn, X, y, initial_train_size=20, step_size=5)
+
+        assert isinstance(results, pd.DataFrame)
+
+    def test_dataframe_has_expected_columns(self):
+        """Verify has 'train_end_idx', 'test_start_idx', 'n_train', 'n_test', 'error' columns."""
+        np.random.seed(42)
+        X = pd.DataFrame({"feature": np.arange(50)}, index=pd.date_range("2020-01-01", periods=50))
+        y = pd.Series(np.arange(50), index=pd.date_range("2020-01-01", periods=50))
+
+        def model_fn():
+            return LinearRegression()
+
+        results = walk_forward_validation(model_fn, X, y, initial_train_size=20, step_size=5)
+
+        expected_columns = ["train_end_idx", "test_start_idx", "test_end_idx", "n_train", "n_test", "error", "predictions", "actuals"]
+        for col in expected_columns:
+            assert col in results.columns
+
+    def test_initial_train_size_parameter(self):
+        """Verify first iteration uses correct initial_train_size."""
+        np.random.seed(42)
+        X = pd.DataFrame({"feature": np.arange(50)}, index=pd.date_range("2020-01-01", periods=50))
+        y = pd.Series(np.arange(50), index=pd.date_range("2020-01-01", periods=50))
+
+        def model_fn():
+            return LinearRegression()
+
+        results = walk_forward_validation(model_fn, X, y, initial_train_size=30, step_size=5)
+
+        # First iteration should train on first 30 observations
+        assert results.iloc[0]["n_train"] == 30
+        assert results.iloc[0]["train_end_idx"] == 30
+
+    def test_step_size_parameter(self):
+        """Verify step_size affects iteration increments."""
+        np.random.seed(42)
+        X = pd.DataFrame({"feature": np.arange(50)}, index=pd.date_range("2020-01-01", periods=50))
+        y = pd.Series(np.arange(50), index=pd.date_range("2020-01-01", periods=50))
+
+        def model_fn():
+            return LinearRegression()
+
+        results = walk_forward_validation(model_fn, X, y, initial_train_size=20, step_size=5)
+
+        # Check that iterations increment by step_size
+        if len(results) > 1:
+            assert results.iloc[1]["train_end_idx"] == 25
+            assert results.iloc[1]["test_start_idx"] == 25
+
+    def test_custom_metric_function(self):
+        """Verify metric_fn parameter used for error calculation."""
+        np.random.seed(42)
+        X = pd.DataFrame({"feature": np.arange(50)}, index=pd.date_range("2020-01-01", periods=50))
+        y = pd.Series(np.arange(50), index=pd.date_range("2020-01-01", periods=50))
+
+        def model_fn():
+            return LinearRegression()
+
+        # Use MSE instead of default MAE
+        from sklearn.metrics import mean_squared_error
+        results = walk_forward_validation(
+            model_fn, X, y, initial_train_size=20, step_size=5, metric_fn=mean_squared_error
+        )
+
+        # Should have error column (MSE values)
+        assert "error" in results.columns
+        # MSE should be non-negative
+        assert (results["error"] >= 0).all()
+
+    def test_stops_before_end_of_data(self):
+        """Verify loop terminates correctly."""
+        np.random.seed(42)
+        X = pd.DataFrame({"feature": np.arange(30)}, index=pd.date_range("2020-01-01", periods=30))
+        y = pd.Series(np.arange(30), index=pd.date_range("2020-01-01", periods=30))
+
+        def model_fn():
+            return LinearRegression()
+
+        results = walk_forward_validation(model_fn, X, y, initial_train_size=15, step_size=5)
+
+        # Should not attempt validation beyond data bounds
+        assert len(results) > 0
+        # Last test_end_idx should not exceed len(X)
+        assert results.iloc[-1]["test_end_idx"] <= len(X)
+
+    def test_handles_empty_test_set_break(self):
+        """Verify breaks when X_test is empty."""
+        np.random.seed(42)
+        # Small dataset where last step would produce empty test set
+        X = pd.DataFrame({"feature": np.arange(25)}, index=pd.date_range("2020-01-01", periods=25))
+        y = pd.Series(np.arange(25), index=pd.date_range("2020-01-01", periods=25))
+
+        def model_fn():
+            return LinearRegression()
+
+        results = walk_forward_validation(model_fn, X, y, initial_train_size=20, step_size=5)
+
+        # Should break before trying to train on empty test set
+        # Last row should have valid n_test
+        assert (results["n_test"] > 0).all()
+
+    def test_predictions_and_actuals_stored(self):
+        """Verify 'predictions' and 'actuals' columns contain arrays."""
+        np.random.seed(42)
+        X = pd.DataFrame({"feature": np.arange(50)}, index=pd.date_range("2020-01-01", periods=50))
+        y = pd.Series(np.arange(50), index=pd.date_range("2020-01-01", periods=50))
+
+        def model_fn():
+            return LinearRegression()
+
+        results = walk_forward_validation(model_fn, X, y, initial_train_size=20, step_size=5)
+
+        # Check predictions and actuals are arrays
+        for idx in range(len(results)):
+            predictions = results.iloc[idx]["predictions"]
+            actuals = results.iloc[idx]["actuals"]
+            assert isinstance(predictions, np.ndarray)
+            assert isinstance(actuals, np.ndarray)
+            # Length should match n_test
+            assert len(predictions) == results.iloc[idx]["n_test"]
+            assert len(actuals) == results.iloc[idx]["n_test"]
+
