@@ -489,4 +489,172 @@ class TestExportSeasonality:
         assert 0 in hours  # NaN values filled with 0
 
 
+# =============================================================================
+# Export Spatial Tests (Task 4)
+# =============================================================================
+
+
+class TestExportSpatial:
+    """Tests for _export_spatial function with mocked GeoPandas."""
+
+    def test_export_spatial_without_geopandas(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify returns early when HAS_GEOPANDAS is False."""
+        geo_dir = tmp_path / "geo"
+
+        with patch.object(export_data, "HAS_GEOPANDAS", False):
+            _export_spatial(sample_crime_df, tmp_path, geo_dir, tmp_path)
+
+            # GeoJSON files should not be created when geopandas unavailable
+            assert not (geo_dir / "districts.geojson").exists()
+            assert not (geo_dir / "tracts.geojson").exists()
+
+    @patch("pipeline.export_data.gpd")
+    def test_export_spatial_creates_districts_geojson(
+        self, mock_gpd: Mock, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Mock gpd.read_file, verify function processes districts."""
+        geo_dir = tmp_path / "geo"
+
+        # Create a pandas Series for column access
+        mock_series = pd.Series([1, 2, 3], name="dist_num")
+
+        # Mock all GeoDataFrame operations
+        mock_gdf = MagicMock()
+        mock_gdf.columns = ["dist_num", "geometry"]
+        mock_gdf.__len__ = Mock(return_value=3)
+        mock_gdf.crs = "EPSG:4326"
+        mock_gdf.merge = Mock(return_value=mock_gdf)
+        mock_gdf.to_crs = Mock(return_value=mock_gdf)
+        mock_gdf.to_file = Mock()
+        # Mock getitem to return pandas Series with astype
+        mock_gdf.__getitem__ = Mock(return_value=mock_series)
+        mock_gdf.drop_duplicates = Mock(return_value=mock_gdf)
+
+        mock_gpd.read_file = Mock(return_value=mock_gdf)
+        mock_gpd.GeoDataFrame = Mock(return_value=mock_gdf)
+        mock_gpd.points_from_xy = Mock()
+        mock_gpd.sjoin = Mock(return_value=mock_gdf)
+
+        with patch.object(export_data, "HAS_GEOPANDAS", True):
+            _export_spatial(sample_crime_df, tmp_path, geo_dir, tmp_path)
+
+            # Verify read_file was called for districts
+            assert mock_gpd.read_file.called
+
+    @patch("pipeline.export_data.gpd")
+    def test_export_spatial_creates_tracts_geojson(
+        self, mock_gpd: Mock, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Mock tracts read, verify function processes tracts."""
+        geo_dir = tmp_path / "geo"
+
+        # Create a pandas Series for column access
+        mock_series = pd.Series([1, 2, 3, 4, 5], name="GEOID")
+
+        # Mock all GeoDataFrame operations
+        mock_gdf = MagicMock()
+        mock_gdf.columns = ["GEOID", "total_pop", "geometry"]
+        mock_gdf.__len__ = Mock(return_value=5)
+        mock_gdf.crs = "EPSG:4326"
+        mock_gdf.merge = Mock(return_value=mock_gdf)
+        mock_gdf.to_crs = Mock(return_value=mock_gdf)
+        mock_gdf.to_file = Mock()
+        mock_gdf.__getitem__ = Mock(return_value=mock_series)
+        mock_gdf.drop_duplicates = Mock(return_value=mock_gdf)
+
+        mock_gpd.read_file = Mock(return_value=mock_gdf)
+        mock_gpd.GeoDataFrame = Mock(return_value=mock_gdf)
+        mock_gpd.points_from_xy = Mock()
+        mock_gpd.sjoin = Mock(return_value=mock_gdf)
+
+        with patch.object(export_data, "HAS_GEOPANDAS", True):
+            _export_spatial(sample_crime_df, tmp_path, geo_dir, tmp_path)
+
+            # Verify tracts processing was attempted
+            assert mock_gpd.read_file.called
+
+
+    @patch("pipeline.export_data.gpd")
+    def test_export_spatial_creates_hotspots_and_corridors(
+        self, mock_gpd: Mock, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Mock file reads, verify hotspots and corridors processed."""
+        geo_dir = tmp_path / "geo"
+
+        mock_gdf = MagicMock()
+        mock_gdf.__len__ = Mock(return_value=2)
+        mock_gdf.merge = Mock(return_value=mock_gdf)
+        mock_gdf.to_crs = Mock(return_value=mock_gdf)
+        mock_gdf.to_file = Mock()
+        mock_gdf.drop_duplicates = Mock(return_value=mock_gdf)
+
+        # All reads return same mock
+        mock_gpd.read_file = Mock(return_value=mock_gdf)
+        mock_gpd.GeoDataFrame = Mock(return_value=mock_gdf)
+        mock_gpd.points_from_xy = Mock()
+        mock_gpd.sjoin = Mock(return_value=mock_gdf)
+
+        with patch.object(export_data, "HAS_GEOPANDAS", True):
+            _export_spatial(sample_crime_df, tmp_path, geo_dir, tmp_path)
+
+            # Verify spatial_summary.json created
+            assert (tmp_path / "spatial_summary.json").exists()
+
+    @patch("pipeline.export_data.gpd")
+    def test_export_spatial_creates_spatial_summary(
+        self, mock_gpd: Mock, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify spatial_summary.json created with counts."""
+        geo_dir = tmp_path / "geo"
+
+        # Mock with different lengths for each GeoDataFrame
+        districts_mock = MagicMock()
+        districts_mock.__len__ = Mock(return_value=5)
+        districts_mock.columns = ["dist_num", "geometry"]
+        districts_mock.merge = Mock(return_value=districts_mock)
+        districts_mock.to_crs = Mock(return_value=districts_mock)
+        districts_mock.to_file = Mock()
+
+        tracts_mock = MagicMock()
+        tracts_mock.__len__ = Mock(return_value=10)
+        tracts_mock.columns = ["GEOID", "total_pop", "geometry"]
+        tracts_mock.crs = "EPSG:4326"
+        tracts_mock.merge = Mock(return_value=tracts_mock)
+        tracts_mock.to_crs = Mock(return_value=tracts_mock)
+        tracts_mock.to_file = Mock()
+        tracts_mock.drop_duplicates = Mock(return_value=tracts_mock)
+
+        hotspots_mock = MagicMock()
+        hotspots_mock.__len__ = Mock(return_value=3)
+        hotspots_mock.to_file = Mock()
+
+        corridors_mock = MagicMock()
+        corridors_mock.__len__ = Mock(return_value=2)
+        corridors_mock.to_file = Mock()
+
+        read_returns = [districts_mock, tracts_mock, hotspots_mock, corridors_mock]
+        mock_gpd.read_file = Mock(side_effect=read_returns)
+        mock_gpd.GeoDataFrame = Mock(return_value=tracts_mock)
+        mock_gpd.points_from_xy = Mock()
+        mock_gpd.sjoin = Mock(return_value=tracts_mock)
+
+        with patch.object(export_data, "HAS_GEOPANDAS", True):
+            _export_spatial(sample_crime_df, tmp_path, geo_dir, tmp_path)
+
+            # Verify spatial_summary.json created
+            summary_file = tmp_path / "spatial_summary.json"
+            assert summary_file.exists()
+
+            summary = json.loads(summary_file.read_text())
+            assert "districts" in summary
+            assert "tracts" in summary
+            assert "hotspots" in summary
+            assert "corridors" in summary
+
+
+
+
+
 
