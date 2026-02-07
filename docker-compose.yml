@@ -25,6 +25,24 @@ services:
     cpus: "${PIPELINE_CPU_LIMIT:-1.00}"
     mem_limit: "${PIPELINE_MEM_LIMIT:-1536m}"
 
+  pipeline-refresh-once:
+    profiles: ["refresh"]
+    build:
+      context: .
+      dockerfile: pipeline/Dockerfile
+    command: python -m pipeline.refresh_data run --output-dir /shared/api-data
+    environment:
+      PIPELINE_OUTPUT_DIR: /shared/api-data
+    volumes:
+      - shared_api_data:/shared/api-data
+      - ./pipeline:/app/pipeline
+      - ./analysis:/app/analysis
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./reports:/app/reports
+      - ./api:/app/api
+    restart: "no"
+
   api:
     build:
       context: .

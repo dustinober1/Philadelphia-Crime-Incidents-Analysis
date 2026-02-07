@@ -246,6 +246,23 @@ docker compose up -d --build
 docker compose config | rg -n "cpus|mem_limit"
 ```
 
+### Optional Compose Profiles (Advanced)
+
+Default startup remains unchanged:
+
+```bash
+docker compose up -d --build
+```
+
+Advanced users can run a one-shot pipeline refresh with the `refresh` profile:
+
+```bash
+docker compose --profile refresh config
+docker compose --profile refresh run --rm pipeline-refresh-once
+```
+
+Use profile workflows only when needed; they are opt-in overlays and not required for normal local bring-up.
+
 For troubleshooting, reset, and contract details, see `docs/local-compose.md`.
 
 ### Recovery and Reset (Local Compose)

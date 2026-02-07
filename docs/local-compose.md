@@ -64,6 +64,25 @@ docker compose config | rg -n "cpus|mem_limit"
 ./scripts/validate_compose_runtime_budget.sh
 ```
 
+## Optional compose profiles
+
+Default startup behavior remains:
+
+```bash
+docker compose up -d --build
+```
+
+Profile-gated workflow available for advanced local use:
+
+- `refresh` profile: one-shot pipeline export refresh
+
+```bash
+docker compose --profile refresh config
+docker compose --profile refresh run --rm pipeline-refresh-once
+```
+
+Profiles are opt-in overlays and should not be required for routine development startup.
+
 ## Data contract
 
 - Pipeline writes exports to shared volume path `/shared/api-data`.
