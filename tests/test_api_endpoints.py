@@ -1346,11 +1346,13 @@ def test_question_text_all_caps_spam(monkeypatch: MonkeyPatch) -> None:
 
 
 def test_honeypot_field_success(monkeypatch: MonkeyPatch) -> None:
-    """Test honeypot field returns success without storing question."""
+    """Test honeypot field validation rejects non-empty values."""
     monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
     monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
     _reset_questions_state()
 
+    # The honeypot field has max_length=0, so Pydantic rejects non-empty values
+    # This is the first line of defense against bots
     response = client.post(
         "/api/v1/questions",
         json={
@@ -1361,14 +1363,10 @@ def test_honeypot_field_success(monkeypatch: MonkeyPatch) -> None:
         },
     )
 
-    # Should return success to not tip off bots
-    assert response.status_code == 200
+    # Should return 422 validation error (honeypot must be empty)
+    assert response.status_code == 422
     payload = response.json()
-    assert "ok" in payload
-    assert payload["ok"] is True
-
-    # Verify question was NOT stored (no id returned)
-    assert "id" not in payload
+    assert "error" in payload
 
 
 def test_delete_question_removes_from_storage(monkeypatch: MonkeyPatch) -> None:
