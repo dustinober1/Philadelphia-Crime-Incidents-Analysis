@@ -1,0 +1,12 @@
+{
+  "total_incidents": 100,
+  "date_start": "2020-01-01",
+  "date_end": "2020-04-09",
+  "last_updated": "2020-04-09T00:00:00+00:00",
+  "source": "Philadelphia Police Department via OpenDataPhilly",
+  "colors": {
+    "Violent": "#E63946",
+    "Property": "#457B9D",
+    "Other": "#A8DADC"
+  }
+}

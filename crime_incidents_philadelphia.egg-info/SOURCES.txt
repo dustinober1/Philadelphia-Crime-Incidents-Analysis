@@ -69,6 +69,8 @@ tests/test_cli_forecasting.py
 tests/test_cli_main.py
 tests/test_cli_patrol.py
 tests/test_cli_policy.py
+tests/test_config_schemas.py
+tests/test_config_settings.py
 tests/test_data_cache.py
 tests/test_data_loading.py
 tests/test_data_preprocessing.py
@@ -79,7 +81,10 @@ tests/test_models_time_series.py
 tests/test_models_validation.py
 tests/test_phase2_spatial.py
 tests/test_pipeline_export.py
+tests/test_pipeline_refresh.py
 tests/test_runtime_smart_presets.py
 tests/test_temporal.py
 tests/test_utils_spatial.py
 tests/test_validate_local_stack.py
+tests/test_visualization_helpers.py
+tests/test_visualization_plots.py

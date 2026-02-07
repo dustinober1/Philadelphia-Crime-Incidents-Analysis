@@ -1,0 +1,56 @@
+{
+  "by_month": [
+    {
+      "month": 1,
+      "count": 31
+    },
+    {
+      "month": 2,
+      "count": 29
+    },
+    {
+      "month": 3,
+      "count": 31
+    },
+    {
+      "month": 4,
+      "count": 9
+    }
+  ],
+  "by_day_of_week": [
+    {
+      "day_of_week": 0,
+      "count": 14
+    },
+    {
+      "day_of_week": 1,
+      "count": 14
+    },
+    {
+      "day_of_week": 2,
+      "count": 15
+    },
+    {
+      "day_of_week": 3,
+      "count": 15
+    },
+    {
+      "day_of_week": 4,
+      "count": 14
+    },
+    {
+      "day_of_week": 5,
+      "count": 14
+    },
+    {
+      "day_of_week": 6,
+      "count": 14
+    }
+  ],
+  "by_hour": [
+    {
+      "hour": 12,
+      "count": 100
+    }
+  ]
+}

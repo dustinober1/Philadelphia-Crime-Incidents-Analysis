@@ -1,0 +1,22 @@
+[
+  {
+    "month": "2020-01-01T00:00:00",
+    "crime_category": "Violent",
+    "count": 31
+  },
+  {
+    "month": "2020-02-01T00:00:00",
+    "crime_category": "Violent",
+    "count": 29
+  },
+  {
+    "month": "2020-03-01T00:00:00",
+    "crime_category": "Violent",
+    "count": 31
+  },
+  {
+    "month": "2020-04-01T00:00:00",
+    "crime_category": "Violent",
+    "count": 9
+  }
+]

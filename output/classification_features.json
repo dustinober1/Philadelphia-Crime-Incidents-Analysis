@@ -1,0 +1,18 @@
+[
+  {
+    "feature": "year",
+    "importance": 0.0
+  },
+  {
+    "feature": "month",
+    "importance": 0.0
+  },
+  {
+    "feature": "day_of_week",
+    "importance": 0.0
+  },
+  {
+    "feature": "hour",
+    "importance": 0.0
+  }
+]
