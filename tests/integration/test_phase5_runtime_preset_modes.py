@@ -56,19 +56,22 @@ def test_docs_and_scripts_document_runtime_mode_workflow() -> None:
     helper = Path("scripts/compose_with_runtime_mode.sh").read_text(encoding="utf-8")
     mode_validator = Path("scripts/validate_compose_runtime_mode.sh").read_text(encoding="utf-8")
     budget_validator = Path("scripts/validate_compose_runtime_budget.sh").read_text(encoding="utf-8")
+    runtime_guardrails = Path("scripts/validate_runtime_guardrails.sh").read_text(encoding="utf-8")
 
     assert "docker compose up -d --build" in readme
     assert "./scripts/compose_with_runtime_mode.sh --mode low-power up -d --build" in readme
     assert "./scripts/compose_with_runtime_mode.sh --mode high-performance up -d --build" in readme
-    assert "./scripts/validate_compose_runtime_mode.sh" in readme
+    assert "./scripts/validate_runtime_guardrails.sh" in readme
 
     assert "docker compose up -d --build" in runbook
     assert "./scripts/compose_with_runtime_mode.sh --mode low-power up -d --build" in runbook
     assert "./scripts/compose_with_runtime_mode.sh --mode high-performance up -d --build" in runbook
-    assert "./scripts/validate_compose_runtime_mode.sh" in runbook
+    assert "./scripts/validate_runtime_guardrails.sh" in runbook
 
     assert "Modes:" in helper
     assert "check_mode default" in mode_validator
     assert "check_mode low-power" in mode_validator
     assert "check_mode high-performance" in mode_validator
     assert "Default compose runtime budgets match expected baseline values" in budget_validator
+    assert "validate_compose_runtime_mode.sh" in runtime_guardrails
+    assert "validate_compose_runtime_budget.sh" in runtime_guardrails
