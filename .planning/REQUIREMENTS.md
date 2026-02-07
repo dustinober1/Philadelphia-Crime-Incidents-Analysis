@@ -7,11 +7,11 @@
 
 ### Smoke Checks
 
-- [ ] **SMOKE-01**: Developer can run one documented post-start smoke-check command that validates a running local compose stack without requiring a restart.
-- [ ] **SMOKE-02**: Smoke check verifies API health endpoint reports ready (`ok=true`) before passing.
-- [ ] **SMOKE-03**: Smoke check verifies the local web endpoint is reachable and returns a successful HTTP response.
-- [ ] **SMOKE-04**: Smoke check fails when API reports missing required exports/artifacts and prints actionable failure details.
-- [ ] **SMOKE-05**: Local docs place smoke-check usage in the standard startup workflow (start -> verify -> use).
+- [x] **SMOKE-01**: Developer can run one documented post-start smoke-check command that validates a running local compose stack without requiring a restart.
+- [x] **SMOKE-02**: Smoke check verifies API health endpoint reports ready (`ok=true`) before passing.
+- [x] **SMOKE-03**: Smoke check verifies the local web endpoint is reachable and returns a successful HTTP response.
+- [x] **SMOKE-04**: Smoke check fails when API reports missing required exports/artifacts and prints actionable failure details.
+- [x] **SMOKE-05**: Local docs place smoke-check usage in the standard startup workflow (start -> verify -> use).
 
 ### Runtime Presets
 
@@ -44,11 +44,11 @@ Explicitly excluded for this milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SMOKE-01 | Phase 4 | Pending |
-| SMOKE-02 | Phase 4 | Pending |
-| SMOKE-03 | Phase 4 | Pending |
-| SMOKE-04 | Phase 4 | Pending |
-| SMOKE-05 | Phase 4 | Pending |
+| SMOKE-01 | Phase 4 | Complete |
+| SMOKE-02 | Phase 4 | Complete |
+| SMOKE-03 | Phase 4 | Complete |
+| SMOKE-04 | Phase 4 | Complete |
+| SMOKE-05 | Phase 4 | Complete |
 | PRESET-01 | Phase 5 | Pending |
 | PRESET-02 | Phase 5 | Pending |
 | PRESET-03 | Phase 5 | Pending |
@@ -61,4 +61,4 @@ Explicitly excluded for this milestone.
 
 ---
 *Requirements defined: February 7, 2026*
-*Last updated: February 7, 2026 after v1.1 roadmap creation*
+*Last updated: February 7, 2026 after Phase 4 completion*
