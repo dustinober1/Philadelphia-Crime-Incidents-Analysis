@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
@@ -89,7 +90,10 @@ def _assert_reproducible() -> None:
 
 @app.command()
 def run(
-    output_dir: Path = typer.Option(Path("api/data"), help="Output directory for exports"),
+    output_dir: Path = typer.Option(
+        Path(os.getenv("PIPELINE_OUTPUT_DIR", "api/data")),
+        help="Output directory for exports",
+    ),
     verify_reproducibility: bool = typer.Option(
         False,
         "--verify-reproducibility",

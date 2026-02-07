@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse
 from starlette.responses import Response
 
 from api.routers import forecasting, metadata, policy, questions, spatial, trends
-from api.services.data_loader import cache_keys, load_all_data
+from api.services.data_loader import cache_keys, contract_status, load_all_data
 
 logger = logging.getLogger("crime_api")
 if not logger.handlers:
@@ -136,7 +136,13 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 @app.get("/api/health")
 def health() -> dict[str, object]:
-    return {"ok": True, "loaded_keys": cache_keys()}
+    status = contract_status()
+    return {
+        "ok": status["ok"],
+        "loaded_keys": cache_keys(),
+        "data_dir": status["data_dir"],
+        "missing_exports": status["missing_exports"],
+    }
 
 
 app.include_router(trends.router, prefix="/api/v1")
