@@ -118,3 +118,155 @@ class TestPrepareProphetData:
 
         assert "y" in result.columns
         assert result["y"].iloc[0] == 10
+
+
+class TestCreateTrainTestSplit:
+    """Tests for create_train_test_split function."""
+
+    def test_requires_ds_column_raises_value_error(self):
+        """Raises ValueError when 'ds' column missing."""
+        df = pd.DataFrame({"date": ["2020-01-01"], "count": [10]})
+
+        with pytest.raises(ValueError, match="must have 'ds' column"):
+            create_train_test_split(df, test_days=30)
+
+    def test_splits_by_date_cutoff(self):
+        """Splits data based on date cutoff."""
+        df = pd.DataFrame({
+            "ds": pd.date_range("2020-01-01", periods=100),
+            "y": range(100)
+        })
+
+        train, test = create_train_test_split(df, test_days=30)
+
+        # Test: no overlap
+        assert train["ds"].max() < test["ds"].min()
+
+    def test_custom_test_days_parameter(self):
+        """Respects custom test_days parameter."""
+        df = pd.DataFrame({
+            "ds": pd.date_range("2020-01-01", periods=100),
+            "y": range(100)
+        })
+
+        train, test = create_train_test_split(df, test_days=10)
+
+        assert len(test) == 10
+        assert len(train) == 90
+
+    def test_test_days_30_default(self):
+        """Default 30 days held out for testing."""
+        df = pd.DataFrame({
+            "ds": pd.date_range("2020-01-01", periods=100),
+            "y": range(100)
+        })
+
+        train, test = create_train_test_split(df)
+
+        assert len(test) == 30
+        assert len(train) == 70
+
+    def test_no_overlap_between_train_and_test(self):
+        """No overlap between train and test data."""
+        df = pd.DataFrame({
+            "ds": pd.date_range("2020-01-01", periods=100),
+            "y": range(100)
+        })
+
+        train, test = create_train_test_split(df, test_days=30)
+
+        # Test: train ends before test starts
+        assert train["ds"].max() < test["ds"].min()
+        # Test: gap is exactly test_days
+        assert (test["ds"].min() - train["ds"].max()).days == 1
+
+    def test_handles_exact_boundary(self):
+        """Handles boundary dates correctly."""
+        df = pd.DataFrame({
+            "ds": pd.date_range("2020-01-01", periods=31),
+            "y": range(31)
+        })
+
+        train, test = create_train_test_split(df, test_days=30)
+
+        # Test: train has 1 day (day 0)
+        assert len(train) == 1
+        # Test: test has 30 days (days 1-30)
+        assert len(test) == 30
+
+
+class TestGetProphetConfig:
+    """Tests for get_prophet_config function."""
+
+    def test_default_configuration(self):
+        """Returns default Prophet configuration."""
+        config = get_prophet_config()
+
+        assert config["seasonality_mode"] == "multiplicative"
+        assert config["yearly_seasonality"] is True
+        assert config["weekly_seasonality"] is True
+        assert config["daily_seasonality"] is False
+        assert config["changepoint_prior_scale"] == 0.05
+        assert config["interval_width"] == 0.95
+
+    def test_seasonality_mode_additive(self):
+        """Accepts seasonality_mode='additive'."""
+        config = get_prophet_config(seasonality_mode="additive")
+
+        assert config["seasonality_mode"] == "additive"
+        assert config["yearly_seasonality"] is True
+        assert config["weekly_seasonality"] is True
+
+    def test_seasonality_mode_multiplicative(self):
+        """Accepts seasonality_mode='multiplicative'."""
+        config = get_prophet_config(seasonality_mode="multiplicative")
+
+        assert config["seasonality_mode"] == "multiplicative"
+
+    def test_yearly_seasonality_parameter(self):
+        """Passes through yearly_seasonality parameter."""
+        config = get_prophet_config(yearly=False)
+
+        assert config["yearly_seasonality"] is False
+
+    def test_weekly_seasonality_parameter(self):
+        """Passes through weekly_seasonality parameter."""
+        config = get_prophet_config(weekly=False)
+
+        assert config["weekly_seasonality"] is False
+
+    def test_daily_seasonality_parameter(self):
+        """Passes through daily_seasonality parameter."""
+        config = get_prophet_config(daily=True)
+
+        assert config["daily_seasonality"] is True
+
+    def test_changepoint_prior_scale_parameter(self):
+        """Passes through changepoint_prior_scale parameter."""
+        config = get_prophet_config(changepoint_prior_scale=0.1)
+
+        assert config["changepoint_prior_scale"] == 0.1
+
+    def test_interval_width_parameter(self):
+        """Passes through interval_width parameter."""
+        config = get_prophet_config(interval_width=0.8)
+
+        assert config["interval_width"] == 0.8
+
+    def test_all_parameters_combination(self):
+        """Multiple custom parameters work together."""
+        config = get_prophet_config(
+            seasonality_mode="additive",
+            yearly=False,
+            weekly=False,
+            daily=True,
+            changepoint_prior_scale=0.5,
+            interval_width=0.9
+        )
+
+        assert config["seasonality_mode"] == "additive"
+        assert config["yearly_seasonality"] is False
+        assert config["weekly_seasonality"] is False
+        assert config["daily_seasonality"] is True
+        assert config["changepoint_prior_scale"] == 0.5
+        assert config["interval_width"] == 0.9
