@@ -447,3 +447,236 @@ class TestCreateModelCard:
         )
 
         assert card["limitations"] == custom_limitations
+
+
+class TestCheckResidualAutocorrelation:
+    """Tests for check_residual_autocorrelation function."""
+
+    def test_returns_dict_with_diagnostics(self):
+        """Verify returns dict with expected keys."""
+        np.random.seed(42)
+        residuals = pd.Series(np.random.randn(100))
+
+        # Mock statsmodels to return predictable results
+        with patch("statsmodels.stats.diagnostic.acorr_ljungbox") as mock_ljungbox:
+            # Return DataFrame with lb_pvalue column
+            mock_result = pd.DataFrame({"lb_pvalue": [0.1, 0.2, 0.3, 0.4, 0.5]})
+            mock_ljungbox.return_value = mock_result
+
+            diagnostics = check_residual_autocorrelation(residuals, max_lag=5)
+
+            assert isinstance(diagnostics, dict)
+            assert "ljung_box_pvalues" in diagnostics
+            assert "significant_lags" in diagnostics
+            assert "autocorrelation_detected" in diagnostics
+
+    def test_ljung_box_pvalues_array_exists(self):
+        """Verify 'ljung_box_pvalues' key exists and is array."""
+        np.random.seed(42)
+        residuals = pd.Series(np.random.randn(100))
+
+        with patch("statsmodels.stats.diagnostic.acorr_ljungbox") as mock_ljungbox:
+            mock_result = pd.DataFrame({"lb_pvalue": [0.1, 0.2, 0.3]})
+            mock_ljungbox.return_value = mock_result
+
+            diagnostics = check_residual_autocorrelation(residuals, max_lag=3)
+
+            assert "ljung_box_pvalues" in diagnostics
+            assert isinstance(diagnostics["ljung_box_pvalues"], np.ndarray)
+
+    def test_significant_lags_count_exists(self):
+        """Verify 'significant_lags' key exists and is int."""
+        np.random.seed(42)
+        residuals = pd.Series(np.random.randn(100))
+
+        with patch("statsmodels.stats.diagnostic.acorr_ljungbox") as mock_ljungbox:
+            # Return p-values: 2 significant (<0.05), 3 not significant
+            mock_result = pd.DataFrame({"lb_pvalue": [0.01, 0.02, 0.1, 0.2, 0.3]})
+            mock_ljungbox.return_value = mock_result
+
+            diagnostics = check_residual_autocorrelation(residuals, max_lag=5)
+
+            assert "significant_lags" in diagnostics
+            assert isinstance(diagnostics["significant_lags"], (int, np.integer))
+            assert diagnostics["significant_lags"] == 2
+
+    def test_autocorrelation_detected_boolean_exists(self):
+        """Verify 'autocorrelation_detected' key exists."""
+        np.random.seed(42)
+        residuals = pd.Series(np.random.randn(100))
+
+        with patch("statsmodels.stats.diagnostic.acorr_ljungbox") as mock_ljungbox:
+            # All p-values > 0.05 (no autocorrelation)
+            mock_result = pd.DataFrame({"lb_pvalue": [0.1, 0.2, 0.3]})
+            mock_ljungbox.return_value = mock_result
+
+            diagnostics = check_residual_autocorrelation(residuals, max_lag=3)
+
+            assert "autocorrelation_detected" in diagnostics
+            # When all p-values > 0.05, no significant autocorrelation
+            # (lb_pvalue < 0.05).any() returns False
+            assert diagnostics["autocorrelation_detected"] == False
+
+    def test_handles_statsmodels_import_error(self):
+        """Verify returns dict with 'error' key when statsmodels unavailable."""
+        np.random.seed(42)
+        residuals = pd.Series(np.random.randn(100))
+
+        # Mock import to raise exception
+        with patch("statsmodels.stats.diagnostic.acorr_ljungbox", side_effect=ImportError("No module named 'statsmodels'")):
+            diagnostics = check_residual_autocorrelation(residuals, max_lag=5)
+
+            assert isinstance(diagnostics, dict)
+            assert "error" in diagnostics
+            assert "autocorrelation_detected" in diagnostics
+            assert diagnostics["autocorrelation_detected"] is None
+
+    def test_handles_short_residual_series(self):
+        """Verify appropriate handling when len(residuals) < max_lag."""
+        np.random.seed(42)
+        # Short series (only 10 observations)
+        residuals = pd.Series(np.random.randn(10))
+
+        with patch("statsmodels.stats.diagnostic.acorr_ljungbox") as mock_ljungbox:
+            mock_result = pd.DataFrame({"lb_pvalue": [0.1, 0.2]})
+            mock_ljungbox.return_value = mock_result
+
+            diagnostics = check_residual_autocorrelation(residuals, max_lag=40)
+
+            # Should cap lags at len(residuals) // 4 = 2
+            assert mock_ljungbox.call_args[1]["lags"] == 2
+
+    def test_custom_max_lag_parameter(self):
+        """Verify max_lag affects lag count."""
+        np.random.seed(42)
+        residuals = pd.Series(np.random.randn(100))
+
+        with patch("statsmodels.stats.diagnostic.acorr_ljungbox") as mock_ljungbox:
+            mock_result = pd.DataFrame({"lb_pvalue": [0.1, 0.2, 0.3, 0.4, 0.5]})
+            mock_ljungbox.return_value = mock_result
+
+            # Test with custom max_lag
+            diagnostics = check_residual_autocorrelation(residuals, max_lag=10)
+
+            # Should pass capped lags to acorr_ljungbox
+            assert mock_ljungbox.called
+
+
+class TestValidateTemporalSplit:
+    """Tests for validate_temporal_split function."""
+
+    def test_returns_dict_with_validation_results(self):
+        """Verify has 'train_end', 'test_start', 'gap_days', 'valid_temporal_order', 'sufficient_gap', 'train_size', 'test_size', 'test_ratio'."""
+        train_dates = pd.Series(pd.date_range("2020-01-01", periods=50))
+        test_dates = pd.Series(pd.date_range("2020-02-20", periods=30))
+
+        validation = validate_temporal_split(train_dates, test_dates)
+
+        assert isinstance(validation, dict)
+        assert "train_end" in validation
+        assert "test_start" in validation
+        assert "gap_days" in validation
+        assert "valid_temporal_order" in validation
+        assert "sufficient_gap" in validation
+        assert "train_size" in validation
+        assert "test_size" in validation
+        assert "test_ratio" in validation
+
+    def test_valid_temporal_order_true_when_sorted(self):
+        """Verify valid_temporal_order=True when train_max < test_min."""
+        train_dates = pd.Series(pd.date_range("2020-01-01", periods=50))
+        test_dates = pd.Series(pd.date_range("2020-02-20", periods=30))
+
+        validation = validate_temporal_split(train_dates, test_dates)
+
+        assert validation["valid_temporal_order"] is True
+
+    def test_valid_temporal_order_false_when_overlap(self):
+        """Verify valid_temporal_order=False when dates overlap."""
+        train_dates = pd.Series(pd.date_range("2020-01-01", periods=50))
+        # Test dates overlap with training dates
+        test_dates = pd.Series(pd.date_range("2020-01-25", periods=30))
+
+        validation = validate_temporal_split(train_dates, test_dates)
+
+        assert validation["valid_temporal_order"] is False
+
+    def test_gap_days_calculation(self):
+        """Verify gap_days = (test_min - train_max).days."""
+        train_dates = pd.Series(pd.date_range("2020-01-01", periods=50))
+        # Train ends 2020-02-19, test starts 2020-02-25
+        test_dates = pd.Series(pd.date_range("2020-02-25", periods=30))
+
+        validation = validate_temporal_split(train_dates, test_dates)
+
+        # Gap: 2020-02-25 - 2020-02-19 = 6 days
+        assert validation["gap_days"] == 6
+
+    def test_sufficient_gap_true_when_gap_met(self):
+        """Verify sufficient_gap=True when gap >= min_gap_days."""
+        train_dates = pd.Series(pd.date_range("2020-01-01", periods=50))
+        test_dates = pd.Series(pd.date_range("2020-02-25", periods=30))
+
+        validation = validate_temporal_split(train_dates, test_dates, min_gap_days=5)
+
+        assert validation["sufficient_gap"] is True
+
+    def test_sufficient_gap_false_when_gap_insufficient(self):
+        """Verify sufficient_gap=False when gap < min_gap_days."""
+        train_dates = pd.Series(pd.date_range("2020-01-01", periods=50))
+        test_dates = pd.Series(pd.date_range("2020-02-25", periods=30))
+
+        validation = validate_temporal_split(train_dates, test_dates, min_gap_days=10)
+
+        assert validation["sufficient_gap"] is False
+
+    def test_train_size_test_size_counts(self):
+        """Verify train_size = len(train_dates), test_size = len(test_dates)."""
+        train_dates = pd.Series(pd.date_range("2020-01-01", periods=50))
+        test_dates = pd.Series(pd.date_range("2020-02-20", periods=30))
+
+        validation = validate_temporal_split(train_dates, test_dates)
+
+        assert validation["train_size"] == 50
+        assert validation["test_size"] == 30
+
+    def test_test_ratio_calculation(self):
+        """Verify test_ratio = test_size / (train_size + test_size)."""
+        train_dates = pd.Series(pd.date_range("2020-01-01", periods=50))
+        test_dates = pd.Series(pd.date_range("2020-02-20", periods=30))
+
+        validation = validate_temporal_split(train_dates, test_dates)
+
+        expected_ratio = 30 / (50 + 30)
+        assert validation["test_ratio"] == pytest.approx(expected_ratio)
+
+    def test_custom_min_gap_days_parameter(self):
+        """Verify min_gap_days affects sufficient_gap result."""
+        train_dates = pd.Series(pd.date_range("2020-01-01", periods=50))
+        test_dates = pd.Series(pd.date_range("2020-02-25", periods=30))
+
+        # Gap is 6 days
+        validation_5 = validate_temporal_split(train_dates, test_dates, min_gap_days=5)
+        validation_10 = validate_temporal_split(train_dates, test_dates, min_gap_days=10)
+
+        assert validation_5["sufficient_gap"] is True
+        assert validation_10["sufficient_gap"] is False
+
+    def test_handles_datetime_series(self):
+        """Verify works with pd.Series of datetime timestamps."""
+        train_dates = pd.Series([
+            pd.Timestamp("2020-01-01"),
+            pd.Timestamp("2020-01-15"),
+            pd.Timestamp("2020-02-01")
+        ])
+        test_dates = pd.Series([
+            pd.Timestamp("2020-02-10"),
+            pd.Timestamp("2020-02-20"),
+            pd.Timestamp("2020-03-01")
+        ])
+
+        validation = validate_temporal_split(train_dates, test_dates)
+
+        assert validation["train_size"] == 3
+        assert validation["test_size"] == 3
+        assert validation["valid_temporal_order"] is True
