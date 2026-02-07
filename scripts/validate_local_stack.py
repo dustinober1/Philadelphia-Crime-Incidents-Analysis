@@ -29,11 +29,11 @@ def wait_for_health(url: str, timeout_seconds: int = 120) -> dict[str, object]:
             payload = fetch_json(url)
             if payload.get("ok") is True:
                 return payload
-            last_error = f"health not ready: {payload}"
+            last_error = f"health endpoint returned ok!=true; payload={payload}"
         except Exception as exc:
             last_error = str(exc)
         time.sleep(2)
-    raise RuntimeError(f"Timed out waiting for health endpoint: {last_error}")
+    raise RuntimeError(f"API health check failed for {url}: {last_error}")
 
 
 def wait_for_http_ok(url: str, timeout_seconds: int = 120) -> None:
@@ -48,7 +48,7 @@ def wait_for_http_ok(url: str, timeout_seconds: int = 120) -> None:
         except Exception as exc:
             last_error = str(exc)
         time.sleep(2)
-    raise RuntimeError(f"Timed out waiting for URL: {url}; last_error={last_error}")
+    raise RuntimeError(f"Web endpoint check failed for {url}: {last_error}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -93,9 +93,10 @@ def main() -> int:
 
     missing = health.get("missing_exports", [])
     if missing:
-        raise RuntimeError(f"API reports missing exports: {missing}")
+        missing_str = ", ".join(str(name) for name in missing)
+        raise RuntimeError(f"API health missing required exports: {missing_str}")
 
-    print("Local compose stack validation passed")
+    print("Local compose smoke check passed")
     print(f"- API health: {args.api_health_url}")
     print(f"- Web endpoint: {args.web_url}")
     print("- Required API exports: present")
