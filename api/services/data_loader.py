@@ -19,9 +19,7 @@ def load_all_data(data_dir: Path | None = None) -> dict[str, Any]:
         if not path.is_file():
             continue
         rel = str(path.relative_to(root))
-        if path.suffix == ".json":
-            payloads[rel] = json.loads(path.read_text(encoding="utf-8"))
-        elif path.suffix == ".geojson":
+        if path.suffix in {".json", ".geojson"}:
             payloads[rel] = json.loads(path.read_text(encoding="utf-8"))
     _DATA_CACHE.clear()
     _DATA_CACHE.update(payloads)

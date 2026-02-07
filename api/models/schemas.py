@@ -59,6 +59,15 @@ class QuestionResponse(BaseModel):
     answered_at: datetime | None = None
 
 
+class AdminLoginRequest(BaseModel):
+    password: str = Field(min_length=1, max_length=256)
+
+
+class AdminSessionResponse(BaseModel):
+    token: str
+    expires_at: str
+
+
 class MetadataResponse(BaseModel):
     total_incidents: int
     date_start: str

@@ -1,24 +1,47 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import useSWR from "swr";
 
-import { fetcher, type QuestionItem } from "@/lib/api";
+import type { QuestionItem } from "@/lib/api";
+
+async function adminFetcher([path, token]: [string, string]) {
+  const response = await fetch(path, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.message ?? "Admin request failed");
+  }
+  return response.json();
+}
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
-  const [authorized, setAuthorized] = useState(false);
+  const [token, setToken] = useState("");
+  const [authError, setAuthError] = useState("");
   const [answerById, setAnswerById] = useState<Record<string, string>>({});
   const { data: pending = [], mutate } = useSWR<QuestionItem[]>(
-    authorized ? "/api/v1/questions?status=pending" : null,
-    fetcher,
+    token ? ["/api/v1/questions?status=pending", token] : null,
+    adminFetcher,
   );
 
-  const validPassword = useMemo(() => process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "admin", []);
-
-  function onLogin(event: FormEvent) {
+  async function onLogin(event: FormEvent) {
     event.preventDefault();
-    setAuthorized(password === validPassword);
+    setAuthError("");
+    const response = await fetch("/api/v1/questions/admin/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      setAuthError(payload.message ?? "Invalid credentials");
+      return;
+    }
+    const payload = (await response.json()) as { token: string };
+    setToken(payload.token);
+    setPassword("");
   }
 
   async function publish(id: string) {
@@ -27,7 +50,7 @@ export default function AdminPage() {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        "X-Admin-Key": process.env.NEXT_PUBLIC_ADMIN_KEY ?? "",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ answer_text: answerText, status: "answered" }),
     });
@@ -39,18 +62,25 @@ export default function AdminPage() {
   async function remove(id: string) {
     const response = await fetch(`/api/v1/questions/${id}`, {
       method: "DELETE",
-      headers: { "X-Admin-Key": process.env.NEXT_PUBLIC_ADMIN_KEY ?? "" },
+      headers: { Authorization: `Bearer ${token}` },
     });
     if (response.ok) {
       mutate();
     }
   }
 
-  if (!authorized) {
+  if (!token) {
     return (
       <form onSubmit={onLogin} className="card mx-auto max-w-md space-y-3">
         <h1 className="text-xl font-semibold">Admin Login</h1>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded border px-3 py-2" />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full rounded border px-3 py-2"
+          required
+        />
+        {authError && <p className="text-sm text-red-700">{authError}</p>}
         <button className="rounded bg-slate-900 px-4 py-2 text-white">Enter</button>
       </form>
     );
@@ -70,8 +100,12 @@ export default function AdminPage() {
             placeholder="Write answer..."
           />
           <div className="flex gap-2">
-            <button onClick={() => publish(q.id)} className="rounded bg-blue-700 px-3 py-2 text-white">Publish Answer</button>
-            <button onClick={() => remove(q.id)} className="rounded bg-red-700 px-3 py-2 text-white">Delete</button>
+            <button onClick={() => publish(q.id)} className="rounded bg-blue-700 px-3 py-2 text-white">
+              Publish Answer
+            </button>
+            <button onClick={() => remove(q.id)} className="rounded bg-red-700 px-3 py-2 text-white">
+              Delete
+            </button>
           </div>
         </article>
       ))}

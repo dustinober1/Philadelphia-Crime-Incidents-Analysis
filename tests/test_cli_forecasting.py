@@ -79,10 +79,7 @@ class TestForecastingTimeSeries:
         assert "Model:" in content
         assert "Training data" in content
 
-        # Check for figure file (if prophet available)
-        figure_file = output_path / "forecast_report_forecast.png"
-        # Figure is only created if prophet is available
-        # Don't assert existence, just check if it exists when conditions are met
+        # Figure is only created if prophet is available.
 
 
 class TestForecastingClassification:
@@ -136,7 +133,4 @@ class TestForecastingClassification:
         assert "Violence Classification Summary" in content
         assert "Test size" in content or "incidents" in content.lower()
 
-        # Check for figure file (if sklearn available)
-        figure_file = output_path / "classification_report_performance.png"
-        # Figure is only created if sklearn is available
-        # Don't assert existence, just check if it exists when conditions are met
+        # Figure is only created if sklearn is available.

@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import os
 import re
+import secrets
 import time
 import uuid
 from collections import defaultdict, deque
@@ -12,19 +15,25 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 
-from api.models.schemas import QuestionSubmission, QuestionUpdate
+from api.models.schemas import (
+    AdminLoginRequest,
+    AdminSessionResponse,
+    QuestionSubmission,
+    QuestionUpdate,
+)
 
 router = APIRouter(prefix="/questions", tags=["questions"])
 
 _RATE_LIMIT: dict[str, deque[float]] = defaultdict(deque)
 _RATE_LIMIT_WINDOW = 60 * 60
 _RATE_LIMIT_MAX = 5
+_ADMIN_SESSION_TTL_SECONDS = 60 * 60
 
 _IN_MEMORY: dict[str, dict[str, Any]] = {}
 _FIRESTORE_CLIENT = None
 
 
-def _get_firestore_client():
+def _get_firestore_client() -> Any:
     global _FIRESTORE_CLIENT
     if _FIRESTORE_CLIENT is not None:
         return _FIRESTORE_CLIENT
@@ -32,7 +41,7 @@ def _get_firestore_client():
         import firebase_admin
         from firebase_admin import credentials, firestore
 
-        if not firebase_admin._apps:  # type: ignore[attr-defined]
+        if not firebase_admin._apps:
             firebase_admin.initialize_app(credentials.ApplicationDefault())
         _FIRESTORE_CLIENT = firestore.client()
     except Exception:
@@ -50,10 +59,65 @@ def _enforce_rate_limit(client_ip: str) -> None:
     entries.append(now)
 
 
-def _admin_guard(x_admin_key: str | None = Header(default=None)) -> None:
-    expected = os.getenv("ADMIN_API_KEY", "")
-    if not expected or x_admin_key != expected:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin key")
+def _sign_admin_payload(payload: str, secret: str) -> str:
+    return hmac.new(secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+def _get_admin_secret(name: str) -> str:
+    value = os.getenv(name, "").strip()
+    if not value:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"{name} is not configured",
+        )
+    return value
+
+
+def _issue_admin_token() -> tuple[str, str]:
+    secret = _get_admin_secret("ADMIN_TOKEN_SECRET")
+    expires_epoch = int(time.time()) + _ADMIN_SESSION_TTL_SECONDS
+    payload = f"v1:{expires_epoch}"
+    signature = _sign_admin_payload(payload, secret)
+    token = f"{payload}.{signature}"
+    expires_at = datetime.fromtimestamp(expires_epoch, tz=UTC).isoformat()
+    return token, expires_at
+
+
+def _validate_admin_token(token: str) -> bool:
+    try:
+        payload, signature = token.rsplit(".", 1)
+        version, expires_epoch_raw = payload.split(":", 1)
+        if version != "v1":
+            return False
+        expires_epoch = int(expires_epoch_raw)
+    except (TypeError, ValueError):
+        return False
+
+    secret = os.getenv("ADMIN_TOKEN_SECRET", "").strip()
+    if not secret:
+        return False
+    expected_signature = _sign_admin_payload(payload, secret)
+    if not hmac.compare_digest(signature, expected_signature):
+        return False
+    return expires_epoch >= int(time.time())
+
+
+def _extract_bearer_token(authorization: str | None) -> str:
+    if not authorization:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing admin token")
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization header must use Bearer token",
+        )
+    return token
+
+
+def _admin_guard(authorization: str | None = Header(default=None)) -> None:
+    token = _extract_bearer_token(authorization)
+    if not _validate_admin_token(token):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin token")
 
 
 def _validate_question_text(text: str) -> None:
@@ -116,6 +180,15 @@ def _update_question(qid: str, payload: QuestionUpdate) -> dict[str, Any]:
     return result
 
 
+@router.post("/admin/session", response_model=AdminSessionResponse)
+def create_admin_session(payload: AdminLoginRequest) -> dict[str, str]:
+    password = _get_admin_secret("ADMIN_PASSWORD")
+    if not secrets.compare_digest(payload.password, password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    token, expires_at = _issue_admin_token()
+    return {"token": token, "expires_at": expires_at}
+
+
 @router.post("")
 def submit_question(payload: QuestionSubmission, request: Request) -> dict[str, Any]:
     client_ip = request.client.host if request.client else "unknown"
@@ -144,17 +217,19 @@ def submit_question(payload: QuestionSubmission, request: Request) -> dict[str, 
 @router.get("")
 def list_questions(
     status: str = "answered",
-    x_admin_key: str | None = Header(default=None),
+    authorization: str | None = Header(default=None),
 ) -> list[dict[str, Any]]:
     if status not in {"answered", "pending"}:
         raise HTTPException(status_code=422, detail="status must be answered or pending")
     if status == "pending":
-        _admin_guard(x_admin_key)
+        _admin_guard(authorization)
     return _list_questions(status)
 
 
 @router.patch("/{question_id}")
-def answer_question(question_id: str, payload: QuestionUpdate, _: None = Depends(_admin_guard)) -> dict[str, Any]:
+def answer_question(
+    question_id: str, payload: QuestionUpdate, _: None = Depends(_admin_guard)
+) -> dict[str, Any]:
     if payload.status not in {"answered", "pending"}:
         raise HTTPException(status_code=422, detail="status must be answered or pending")
     return _update_question(question_id, payload)

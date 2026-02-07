@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -73,31 +73,32 @@ def _write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _group_size_to_records_frame(grouped: Any, count_name: str = "count") -> Any:
+    sized = grouped.size()
+    return sized.rename(count_name).reset_index()
+
+
 def _export_trends(df: Any, output_dir: Path) -> None:
     categorized = classify_crime_category(df)
     categorized["dispatch_date"] = categorized["dispatch_date"].astype("datetime64[ns]")
     categorized = extract_temporal_features(categorized)
 
-    annual = (
+    annual = _group_size_to_records_frame(
         categorized.groupby(["year", "crime_category"], observed=False)
-        .size()
-        .reset_index(name="count")
-        .sort_values(["year", "crime_category"])
-    )
+    ).sort_values(["year", "crime_category"])
     _write_json(output_dir / "annual_trends.json", _to_records(annual))
 
-    monthly = (
-        categorized.assign(month=categorized["dispatch_date"].dt.to_period("M").dt.to_timestamp())
-        .groupby(["month", "crime_category"], observed=False)
-        .size()
-        .reset_index(name="count")
-        .sort_values(["month", "crime_category"])
-    )
+    monthly = _group_size_to_records_frame(
+        categorized.assign(
+            month=categorized["dispatch_date"].dt.to_period("M").dt.to_timestamp()
+        ).groupby(["month", "crime_category"], observed=False)
+    ).sort_values(["month", "crime_category"])
     _write_json(output_dir / "monthly_trends.json", _to_records(monthly))
 
     pre = categorized[categorized["dispatch_date"] < "2020-03-01"]
     during = categorized[
-        (categorized["dispatch_date"] >= "2020-03-01") & (categorized["dispatch_date"] < "2022-01-01")
+        (categorized["dispatch_date"] >= "2020-03-01")
+        & (categorized["dispatch_date"] < "2022-01-01")
     ]
     post = categorized[categorized["dispatch_date"] >= "2022-01-01"]
 
@@ -119,9 +120,9 @@ def _export_seasonality(df: Any, output_dir: Path) -> None:
     temporal["dispatch_date"] = temporal["dispatch_date"].astype("datetime64[ns]")
     temporal["hour"] = temporal["hour"].fillna(0).astype(int)
 
-    month_counts = temporal.groupby("month", observed=False).size().reset_index(name="count")
-    dow_counts = temporal.groupby("day_of_week", observed=False).size().reset_index(name="count")
-    hour_counts = temporal.groupby("hour", observed=False).size().reset_index(name="count")
+    month_counts = _group_size_to_records_frame(temporal.groupby("month", observed=False))
+    dow_counts = _group_size_to_records_frame(temporal.groupby("day_of_week", observed=False))
+    hour_counts = _group_size_to_records_frame(temporal.groupby("hour", observed=False))
 
     seasonality = {
         "by_month": _to_records(month_counts.sort_values("month")),
@@ -131,12 +132,9 @@ def _export_seasonality(df: Any, output_dir: Path) -> None:
     _write_json(output_dir / "seasonality.json", seasonality)
 
     robbery = temporal[(temporal["ucr_general"] >= 300) & (temporal["ucr_general"] < 400)]
-    robbery_matrix = (
+    robbery_matrix = _group_size_to_records_frame(
         robbery.groupby(["hour", "day_of_week"], observed=False)
-        .size()
-        .reset_index(name="count")
-        .sort_values(["hour", "day_of_week"])
-    )
+    ).sort_values(["hour", "day_of_week"])
     _write_json(output_dir / "robbery_heatmap.json", _to_records(robbery_matrix))
 
 
@@ -151,8 +149,13 @@ def _export_spatial(df: Any, output_dir: Path, geo_dir: Path, repo_root: Path) -
     corridor_path = repo_root / "data" / "boundaries" / "corridors.geojson"
 
     districts = gpd.read_file(district_path)
-    severity = df.groupby("dc_dist", observed=False).size().reset_index(name="total_incidents")
-    severity["severity_score"] = severity["total_incidents"] / severity["total_incidents"].max() * 100
+    severity = _group_size_to_records_frame(
+        df.groupby("dc_dist", observed=False),
+        count_name="total_incidents",
+    )
+    severity["severity_score"] = (
+        severity["total_incidents"] / severity["total_incidents"].max() * 100
+    )
     severity["dc_dist"] = severity["dc_dist"].astype(str)
 
     join_key = "dist_num" if "dist_num" in districts.columns else "dist_numc"
@@ -169,7 +172,9 @@ def _export_spatial(df: Any, output_dir: Path, geo_dir: Path, repo_root: Path) -
 
     tracts = gpd.read_file(tracts_path)
     clean = df.dropna(subset=["point_x", "point_y"]).copy()
-    clean = clean[(clean["point_x"].between(-75.30, -74.95)) & (clean["point_y"].between(39.85, 40.15))]
+    clean = clean[
+        (clean["point_x"].between(-75.30, -74.95)) & (clean["point_y"].between(39.85, 40.15))
+    ]
     if not clean.empty:
         points = gpd.GeoDataFrame(
             clean,
@@ -178,13 +183,13 @@ def _export_spatial(df: Any, output_dir: Path, geo_dir: Path, repo_root: Path) -
         )
         if tracts.crs != points.crs:
             tracts = tracts.to_crs(points.crs)
-        joined = gpd.sjoin(points, tracts[["GEOID", "total_pop", "geometry"]], how="left", predicate="within")
-        rate = (
-            joined.groupby("GEOID", observed=False)
-            .size()
-            .reset_index(name="crime_count")
-            .merge(tracts[["GEOID", "total_pop"]].drop_duplicates(), on="GEOID", how="left")
+        joined = gpd.sjoin(
+            points, tracts[["GEOID", "total_pop", "geometry"]], how="left", predicate="within"
         )
+        rate = _group_size_to_records_frame(
+            joined.groupby("GEOID", observed=False),
+            count_name="crime_count",
+        ).merge(tracts[["GEOID", "total_pop"]].drop_duplicates(), on="GEOID", how="left")
         rate["crime_rate"] = (rate["crime_count"] / rate["total_pop"].clip(lower=1)) * 100000
         tracts = tracts.merge(rate[["GEOID", "crime_count", "crime_rate"]], on="GEOID", how="left")
     tracts["crime_count"] = tracts.get("crime_count", 0).fillna(0).astype(int)
@@ -214,29 +219,28 @@ def _export_policy(df: Any, output_dir: Path, repo_root: Path) -> None:
     work["dispatch_date"] = work["dispatch_date"].astype("datetime64[ns]")
 
     retail = work[(work["ucr_general"] >= 600) & (work["ucr_general"] < 700)]
-    retail_monthly = (
-        retail.assign(month=retail["dispatch_date"].dt.to_period("M").dt.to_timestamp())
-        .groupby("month", observed=False)
-        .size()
-        .reset_index(name="count")
+    retail_monthly = _group_size_to_records_frame(
+        retail.assign(month=retail["dispatch_date"].dt.to_period("M").dt.to_timestamp()).groupby(
+            "month", observed=False
+        )
     )
-    _write_json(output_dir / "retail_theft_trend.json", _to_records(retail_monthly.sort_values("month")))
+    _write_json(
+        output_dir / "retail_theft_trend.json", _to_records(retail_monthly.sort_values("month"))
+    )
 
     vehicle = work[(work["ucr_general"] >= 700) & (work["ucr_general"] < 800)]
-    vehicle_monthly = (
-        vehicle.assign(month=vehicle["dispatch_date"].dt.to_period("M").dt.to_timestamp())
-        .groupby("month", observed=False)
-        .size()
-        .reset_index(name="count")
+    vehicle_monthly = _group_size_to_records_frame(
+        vehicle.assign(month=vehicle["dispatch_date"].dt.to_period("M").dt.to_timestamp()).groupby(
+            "month", observed=False
+        )
     )
-    _write_json(output_dir / "vehicle_crime_trend.json", _to_records(vehicle_monthly.sort_values("month")))
+    _write_json(
+        output_dir / "vehicle_crime_trend.json", _to_records(vehicle_monthly.sort_values("month"))
+    )
 
-    composition = (
+    composition = _group_size_to_records_frame(
         work.groupby(["year", "crime_category"], observed=False)
-        .size()
-        .reset_index(name="count")
-        .sort_values(["year", "crime_category"])
-    )
+    ).sort_values(["year", "crime_category"])
     _write_json(output_dir / "crime_composition.json", _to_records(composition))
 
     event_file = repo_root / "reports" / "event_impact_results.csv"
@@ -256,7 +260,7 @@ def _export_forecasting(df: Any, output_dir: Path) -> None:
     forecast_payload: dict[str, Any]
     if HAS_PROPHET:
         model = Prophet()
-        model.fit(monthly)
+        model.fit(monthly, seed=42)
         future = model.make_future_dataframe(periods=24, freq="ME")
         pred = model.predict(future)[["ds", "yhat", "yhat_lower", "yhat_upper"]]
         pred_records = _to_records(pred)
@@ -301,7 +305,9 @@ def _export_forecasting(df: Any, output_dir: Path) -> None:
         model.fit(features, target)
         importances = [
             {"feature": name, "importance": float(value)}
-            for name, value in zip(features.columns.tolist(), model.feature_importances_, strict=False)
+            for name, value in zip(
+                features.columns.tolist(), model.feature_importances_, strict=False
+            )
         ]
     else:
         importances = [
@@ -316,20 +322,24 @@ def _export_forecasting(df: Any, output_dir: Path) -> None:
 
 def _export_metadata(df: Any, output_dir: Path) -> None:
     dates = df["dispatch_date"].astype("datetime64[ns]")
+    latest = dates.max()
+    if hasattr(latest, "to_pydatetime"):
+        latest_dt = latest.to_pydatetime().replace(tzinfo=UTC)
+    else:
+        latest_dt = datetime.now(UTC)
     metadata = ExportMetadata(
         total_incidents=int(len(df)),
         date_start=dates.min().date().isoformat(),
         date_end=dates.max().date().isoformat(),
-        last_updated=datetime.now(timezone.utc).isoformat(),
+        last_updated=latest_dt.isoformat(),
         source="Philadelphia Police Department via OpenDataPhilly",
         colors=COLORS,
     )
     _write_json(output_dir / "metadata.json", asdict(metadata))
 
 
-@app.command()
-def run(output_dir: Path = typer.Option(Path("api/data"), help="Output directory for exports")) -> None:
-    """Generate all API data exports."""
+def export_all(output_dir: Path) -> Path:
+    """Generate all API data exports and return the resolved output path."""
     repo_root = Path(__file__).resolve().parent.parent
     output_dir = output_dir if output_dir.is_absolute() else (repo_root / output_dir)
     geo_dir = output_dir / "geo"
@@ -350,7 +360,16 @@ def run(output_dir: Path = typer.Option(Path("api/data"), help="Output directory
     _export_forecasting(df, output_dir)
     _export_metadata(df, output_dir)
 
-    typer.echo(f"Export complete: {output_dir}")
+    return output_dir
+
+
+@app.command()
+def run(
+    output_dir: Path = typer.Option(Path("api/data"), help="Output directory for exports")
+) -> None:
+    """Generate all API data exports."""
+    resolved_output = export_all(output_dir)
+    typer.echo(f"Export complete: {resolved_output}")
 
 
 if __name__ == "__main__":

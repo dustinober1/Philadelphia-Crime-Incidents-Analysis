@@ -171,23 +171,37 @@ This repository now includes:
 
 - Frontend: `web/` (Next.js static export)
 - Backend: `api/` (FastAPI on Cloud Run)
-- Export pipeline: `pipeline/export_data.py` (pre-aggregates API JSON/GeoJSON)
+- Data pipeline: `pipeline/export_data.py` and `pipeline/refresh_data.py`
 
-### Local Development
+### Local Run (Exact Steps)
 
-1. Export API data:
+1. Activate the environment:
 
 ```bash
-python -m pipeline.export_data --output-dir api/data
+conda activate crime
 ```
 
-2. Run FastAPI:
+2. Build + validate API data artifacts:
+
+```bash
+python -m pipeline.refresh_data --output-dir api/data
+```
+
+3. Start the API:
 
 ```bash
 uvicorn api.main:app --reload
 ```
 
-3. Run Next.js:
+4. Configure frontend env:
+
+```bash
+cp web/.env.example web/.env.local
+```
+
+Set `NEXT_PUBLIC_MAPBOX_TOKEN` in `web/.env.local` (create one at [mapbox.com](https://www.mapbox.com/)).
+
+5. Start the web app:
 
 ```bash
 cd web
@@ -195,49 +209,101 @@ npm install
 npm run dev
 ```
 
-4. Optional Docker API runtime:
+6. Optional local API container:
 
 ```bash
 docker compose up --build api
 ```
 
-### Mapbox Setup
+### Required Server Env (Cloud Run)
 
-Set `web/.env.local`:
+Set these on the API service:
 
-```bash
-NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_public_token
-NEXT_PUBLIC_API_BASE=
-NEXT_PUBLIC_ADMIN_PASSWORD=admin-password
-NEXT_PUBLIC_ADMIN_KEY=admin-api-key
-```
+- `GOOGLE_CLOUD_PROJECT`
+- `FIRESTORE_COLLECTION_QUESTIONS` (default: `questions`)
+- `CORS_ORIGINS`
+- `ADMIN_PASSWORD` (Secret Manager-backed)
+- `ADMIN_TOKEN_SECRET` (Secret Manager-backed)
 
-Create a free Mapbox token at [mapbox.com](https://www.mapbox.com/).
+Admin auth secrets are server-only. Do not use `NEXT_PUBLIC_*` for admin credentials.
 
-### Firebase + Cloud Run Deployment
-
-- Initialize Firebase with Hosting + Firestore:
+### Quality Gates (Local)
 
 ```bash
-firebase init
+ruff check .
+black --check .
+mypy .
+python -m pytest -q
+cd web && npm install && npm run lint && npm run typecheck && npm run build
 ```
 
-- Deploy FastAPI to Cloud Run:
+### Deploy (Exact Commands)
+
+1. Authenticate CLI tools:
 
 ```bash
-gcloud run deploy philly-crime-api --source api/ --region us-east1 --allow-unauthenticated
+gcloud auth login
+gcloud config set project <GCP_PROJECT_ID>
+firebase login
 ```
 
-- Deploy static frontend:
+2. Ensure Cloud Run secrets exist:
 
 ```bash
-cd web && npm run build
-cd .. && firebase deploy --only hosting
+echo -n "<admin-password>" | gcloud secrets create ADMIN_PASSWORD --data-file=-
+echo -n "<random-token-secret>" | gcloud secrets create ADMIN_TOKEN_SECRET --data-file=-
 ```
 
-### Manual Data Refresh Workflow
+If the secrets already exist, add versions instead:
 
-1. Replace `data/crime_incidents_combined.parquet` with the latest OpenDataPhilly export.
-2. Run `python -m pipeline.export_data --output-dir api/data`.
-3. Rebuild/deploy the API container (`gcloud builds submit --config cloudbuild.yaml .`).
-4. Hosting serves updated data immediately through `/api/v1/metadata` `last_updated`.
+```bash
+echo -n "<admin-password>" | gcloud secrets versions add ADMIN_PASSWORD --data-file=-
+echo -n "<random-token-secret>" | gcloud secrets versions add ADMIN_TOKEN_SECRET --data-file=-
+```
+
+3. Build static web output:
+
+```bash
+cd web && npm ci && npm run build && cd ..
+```
+
+4. Refresh/validate API data:
+
+```bash
+python -m pipeline.refresh_data --output-dir api/data
+```
+
+5. Deploy hosting:
+
+```bash
+firebase deploy --only hosting --project <FIREBASE_PROJECT_ID>
+```
+
+6. Deploy API via Cloud Build + Cloud Run:
+
+```bash
+gcloud builds submit --project <GCP_PROJECT_ID> --config cloudbuild.yaml .
+```
+
+### Rollback
+
+1. Roll back API traffic to a previous Cloud Run revision:
+
+```bash
+gcloud run revisions list --service philly-crime-api --region us-east1
+gcloud run services update-traffic philly-crime-api --region us-east1 --to-revisions <REVISION_NAME>=100
+```
+
+2. Roll back hosting by redeploying a previous commit:
+
+```bash
+git checkout <PREVIOUS_GOOD_COMMIT>
+cd web && npm ci && npm run build && cd ..
+firebase deploy --only hosting --project <FIREBASE_PROJECT_ID>
+```
+
+### Known Limitations
+
+- Forecast output quality depends on historical reporting consistency and may drift when data schema changes.
+- Spatial exports require boundary and corridor files in `data/boundaries/`; missing files reduce map fidelity.
+- Q&A admin auth uses bearer tokens without MFA; deploy behind stronger IAM controls for higher-security environments.

@@ -1,3 +1,9 @@
+substitutions:
+  _REGION: us-east1
+  _SERVICE_NAME: philly-crime-api
+  _QUESTIONS_COLLECTION: questions
+  _CORS_ORIGINS: "http://localhost:3000,https://philly-crime-explorer.web.app,https://philly-crime-explorer.firebaseapp.com"
+
 steps:
   - name: gcr.io/cloud-builders/docker
     args: ["build", "-t", "gcr.io/$PROJECT_ID/philly-crime-api", "-f", "api/Dockerfile", "."]
@@ -9,14 +15,26 @@ steps:
       [
         "run",
         "deploy",
-        "philly-crime-api",
+        "${_SERVICE_NAME}",
         "--image",
         "gcr.io/$PROJECT_ID/philly-crime-api",
         "--region",
-        "us-east1",
+        "${_REGION}",
         "--allow-unauthenticated",
+        "--memory",
+        "512Mi",
+        "--cpu",
+        "1",
+        "--concurrency",
+        "80",
+        "--timeout",
+        "60",
+        "--max-instances",
+        "4",
+        "--set-secrets",
+        "ADMIN_PASSWORD=ADMIN_PASSWORD:latest,ADMIN_TOKEN_SECRET=ADMIN_TOKEN_SECRET:latest",
         "--set-env-vars",
-        "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,FIRESTORE_COLLECTION_QUESTIONS=questions"
+        "^;^GOOGLE_CLOUD_PROJECT=$PROJECT_ID;FIRESTORE_COLLECTION_QUESTIONS=${_QUESTIONS_COLLECTION};CORS_ORIGINS=${_CORS_ORIGINS}"
       ]
 images:
   - gcr.io/$PROJECT_ID/philly-crime-api

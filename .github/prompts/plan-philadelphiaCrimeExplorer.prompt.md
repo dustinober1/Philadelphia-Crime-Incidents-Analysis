@@ -148,7 +148,8 @@ Build a Python script at `pipeline/export_data.py` that reuses your existing `an
 
 26. **Deploy FastAPI to Cloud Run**: 
     - `gcloud run deploy philly-crime-api --source api/ --region us-east1 --allow-unauthenticated`
-    - Set environment variables: `GOOGLE_CLOUD_PROJECT`, `ADMIN_API_KEY` (a secret you generate)
+    - Set environment variables: `GOOGLE_CLOUD_PROJECT`, `FIRESTORE_COLLECTION_QUESTIONS`
+    - Use server-only secrets for admin auth: `ADMIN_PASSWORD`, `ADMIN_TOKEN_SECRET`
     - Configure Firebase Hosting to rewrite `/api/**` → Cloud Run service URL
 
 ---
@@ -280,9 +281,9 @@ Build a Python script at `pipeline/export_data.py` that reuses your existing `an
       - If no answered questions yet, show "Questions are being reviewed — check back soon!"
 
 42. **Admin page** `/admin` `web/src/app/admin/page.tsx`:
-    - Simple password-protected page (hardcoded password check or env var `NEXT_PUBLIC_ADMIN_PASSWORD` — this is a low-stakes admin, not a banking app)
+    - Password-protected page that authenticates against the API (`POST /api/v1/questions/admin/session`)
     - Lists pending questions with answer textarea for each
-    - "Publish Answer" button → `PATCH /api/v1/questions/{id}` with `X-Admin-Key` header
+    - "Publish Answer" button → `PATCH /api/v1/questions/{id}` with `Authorization: Bearer <token>`
     - "Delete" button for spam
     - Answered questions tab to review past answers
 
@@ -340,7 +341,8 @@ Build a Python script at `pipeline/export_data.py` that reuses your existing `an
 
 50. **Cloud Run deployment**:
     - Create a `cloudbuild.yaml` or use `gcloud run deploy` to build and deploy the API container
-    - Set environment variables on Cloud Run: `GOOGLE_CLOUD_PROJECT`, `ADMIN_API_KEY`, `FIRESTORE_COLLECTION_QUESTIONS=questions`
+    - Set environment variables on Cloud Run: `GOOGLE_CLOUD_PROJECT`, `FIRESTORE_COLLECTION_QUESTIONS=questions`, `CORS_ORIGINS`
+    - Set server-side secrets via Secret Manager: `ADMIN_PASSWORD`, `ADMIN_TOKEN_SECRET`
     - Configure Cloud Run to allow unauthenticated access (public API)
     - Set Cloud Run region to `us-east1` (closest to Philadelphia)
 

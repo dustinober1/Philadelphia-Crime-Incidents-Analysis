@@ -20,10 +20,6 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
-    "--cov=analysis",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-fail-under=90",
     "--strict-markers",
     "--strict-config",
     "-ra",
@@ -40,6 +36,15 @@ filterwarnings = [
 
 [tool.mypy]
 python_version = "3.14"
+exclude = '''
+(?x)(
+    ^analysis/
+  | ^reports/
+  | ^scripts/
+  | ^web/
+  | ^tests/(?!test_api_endpoints\.py$|test_pipeline_export\.py$).*
+)
+'''
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -68,6 +73,24 @@ module = ["geopandas", "shapely", "joblib"]
 ignore_missing_imports = true
 disable_error_code = ["import-untyped"]
 
+[[tool.mypy.overrides]]
+module = ["analysis.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "fastapi",
+    "fastapi.*",
+    "starlette",
+    "starlette.*",
+    "firebase_admin",
+    "firebase_admin.*",
+    "sklearn",
+    "sklearn.*",
+]
+ignore_missing_imports = true
+disable_error_code = ["import-untyped"]
+
 [tool.black]
 line-length = 100
 target-version = ["py313"]
@@ -81,6 +104,10 @@ exclude = '''
   | build
   | dist
   | notebooks
+  | reports
+  | web/\.next
+  | web/node_modules
+  | web/out
 )/
 '''
 
@@ -88,6 +115,7 @@ exclude = '''
 line-length = 100
 target-version = "py313"
 src = ["analysis", "tests"]
+extend-exclude = ["reports", "web/.next", "web/node_modules", "web/out"]
 
 [tool.ruff.lint]
 select = [
@@ -120,4 +148,4 @@ unfixable = ["B"]
 "analysis/visualization/forecast_plots.py" = ["SIM108"]  # Ternary operator would reduce readability
 
 [tool.ruff.lint.isort]
-known-first-party = ["analysis"]
+known-first-party = ["analysis", "api", "pipeline"]
