@@ -991,3 +991,92 @@ def test_validation_error_response_structure() -> None:
     assert "details" in payload
     assert payload["error"] == "validation_error"
     assert isinstance(payload["details"], list)
+
+
+# Task 2: HTTP Exception (401, 404, 429) Tests
+
+
+def test_401_unauthorized_missing_token(monkeypatch: MonkeyPatch) -> None:
+    """Test 401 error when admin token is missing."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+    _submit_question()
+
+    response = client.get("/api/v1/questions?status=pending")
+    assert response.status_code == 401
+    assert "Missing admin token" in response.json()["message"]
+
+
+def test_401_invalid_admin_token(monkeypatch: MonkeyPatch) -> None:
+    """Test 401 error when admin token is invalid."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+    _submit_question()
+
+    response = client.get(
+        "/api/v1/questions?status=pending",
+        headers={"Authorization": "Bearer invalid-token-12345"},
+    )
+    assert response.status_code == 401
+    assert "Invalid admin token" in response.json()["message"]
+
+
+def test_401_invalid_admin_password(monkeypatch: MonkeyPatch) -> None:
+    """Test 401 error when admin password is incorrect."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "correct-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    response = client.post("/api/v1/questions/admin/session", json={"password": "wrong-password"})
+    assert response.status_code == 401
+    assert "Invalid credentials" in response.json()["message"]
+
+
+def test_404_question_not_found(monkeypatch: MonkeyPatch) -> None:
+    """Test 404 error when question ID doesn't exist."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    # Login to get valid token
+    login = client.post("/api/v1/questions/admin/session", json={"password": "test-password"})
+    token = login.json()["token"]
+
+    # Try to update non-existent question
+    response = client.patch(
+        "/api/v1/questions/nonexistent-id-12345",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"answer_text": "Test answer", "status": "answered"},
+    )
+    assert response.status_code == 404
+    assert "Question not found" in response.json()["message"]
+
+
+def test_429_rate_limit_exceeded(monkeypatch: MonkeyPatch) -> None:
+    """Test 429 error when rate limit is exceeded."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    # Submit 6 questions (limit is 5 per hour)
+    for i in range(6):
+        response = client.post(
+            "/api/v1/questions",
+            json={
+                "name": f"Test User {i}",
+                "email": "test@example.com",
+                "question_text": f"Question {i}",
+                "honeypot": "",
+            },
+        )
+        if i < 5:
+            assert response.status_code == 200
+        else:
+            # 6th request should be rate limited
+            assert response.status_code == 429
+            assert "Rate limit exceeded" in response.json()["message"]
+
+    # Reset rate limit for other tests
+    _reset_questions_state()
