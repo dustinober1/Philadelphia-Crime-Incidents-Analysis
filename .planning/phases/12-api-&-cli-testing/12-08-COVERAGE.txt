@@ -1,0 +1,374 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.9, pytest-8.4.2, pluggy-1.5.0
+rootdir: /Users/dustinober/Projects/Crime Incidents Philadelphia
+configfile: pyproject.toml
+testpaths: tests
+plugins: xdist-3.8.0, anyio-4.10.0, cov-7.0.0
+collected 607 items
+
+tests/integration/test_local_compose_baseline.py ...                     [  0%]
+tests/integration/test_migration_verification.py ......s......           [  2%]
+tests/integration/test_phase2_footprint_runtime.py ....                  [  3%]
+tests/integration/test_phase3_devx_reliability.py ..F.                   [  3%]
+tests/integration/test_phase4_smoke_check_productization.py ...          [  4%]
+tests/integration/test_phase5_runtime_preset_modes.py ....               [  5%]
+tests/integration/test_phase6_preset_regression_guardrails.py ..F        [  5%]
+tests/test_api_endpoints.py ............................................ [ 12%]
+.................................                                        [ 18%]
+tests/test_api_services.py .............................                 [ 23%]
+tests/test_classification.py .....................................       [ 29%]
+tests/test_cli_chief.py ........                                         [ 30%]
+tests/test_cli_forecasting.py ....                                       [ 31%]
+tests/test_cli_main.py ..........                                        [ 32%]
+tests/test_cli_patrol.py ........                                        [ 34%]
+tests/test_cli_policy.py ........                                        [ 35%]
+tests/test_data_cache.py ............                                    [ 37%]
+tests/test_data_loading.py ..............s.s................             [ 42%]
+tests/test_data_preprocessing.py .................................       [ 48%]
+tests/test_data_validation.py .......................................    [ 54%]
+tests/test_integration_output_verification.py FFFFF                      [ 55%]
+tests/test_models_classification.py .................................... [ 61%]
+..                                                                       [ 61%]
+tests/test_models_time_series.py ....................................... [ 68%]
+.                                                                        [ 68%]
+tests/test_models_validation.py ........................................ [ 74%]
+.............                                                            [ 77%]
+tests/test_phase2_spatial.py .....................                       [ 80%]
+tests/test_pipeline_export.py FF                                         [ 80%]
+tests/test_runtime_smart_presets.py .....                                [ 81%]
+tests/test_temporal.py ................................                  [ 86%]
+tests/test_utils_spatial.py ............................................ [ 94%]
+..............................                                           [ 99%]
+tests/test_validate_local_stack.py ...../opt/anaconda3/lib/python3.13/site-packages/coverage/inorout.py:495: CoverageWarning: Module api/main was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.13.2/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+/opt/anaconda3/lib/python3.13/site-packages/coverage/inorout.py:495: CoverageWarning: Module analysis/cli/main was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.13.2/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+                                 [100%]
+
+=================================== FAILURES ===================================
+____________________ test_profile_validation_script_passes _____________________
+
+    @pytest.mark.integration
+    def test_profile_validation_script_passes() -> None:
+        if shutil.which("docker") is None:
+            pytest.skip("docker is not installed")
+    
+>       subprocess.run(["./scripts/validate_compose_profiles.sh"], check=True)
+
+tests/integration/test_phase3_devx_reliability.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = False, timeout = None, check = True
+popenargs = (['./scripts/validate_compose_profiles.sh'],), kwargs = {}
+process = <Popen: returncode: 127 args: ['./scripts/validate_compose_profiles.sh']>
+stdout = None, stderr = None, retcode = 127
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout (seconds) is given and the process takes too long,
+         a TimeoutExpired exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['./scripts/validate_compose_profiles.sh']' returned non-zero exit status 127.
+
+/opt/anaconda3/lib/python3.13/subprocess.py:577: CalledProcessError
+----------------------------- Captured stderr call -----------------------------
+./scripts/validate_compose_profiles.sh: line 19: rg: command not found
+./scripts/validate_compose_profiles.sh: line 24: rg: command not found
+_________________ test_preset_04_traceability_maps_to_phase_6 __________________
+
+    def test_preset_04_traceability_maps_to_phase_6() -> None:
+        requirements = Path(".planning/REQUIREMENTS.md").read_text(encoding="utf-8")
+        roadmap = Path(".planning/ROADMAP.md").read_text(encoding="utf-8")
+    
+>       assert "| PRESET-04 | Phase 6 |" in requirements
+E       AssertionError: assert '| PRESET-04 | Phase 6 |' in '# Requirements: Crime Incidents Philadelphia v1.3 Testing & Cleanup\n\n## Milestone Goal\n\nAchieve 95% test coverage...ents mapped ✓\n\n---\n\n*Version: v1.3 Testing & Cleanup*  \n*Created: February 7, 2026*  \n*Total Requirements: 30*\n'
+
+tests/integration/test_phase6_preset_regression_guardrails.py:35: AssertionError
+___________ TestChiefTrendsOutput.test_chief_trends_output_structure ___________
+
+self = <test_integration_output_verification.TestChiefTrendsOutput object at 0x15b29dd10>
+
+    def test_chief_trends_output_structure(self) -> None:
+        """Verify chief trends command creates expected output structure.
+    
+        Checks:
+        - Output directory exists: reports/integration-test/chief/
+        - Summary file exists: annual_trends_report_summary.txt
+        - Summary file contains expected headers and keywords
+    
+        Does NOT check:
+        - Exact data values (may vary with sample size)
+        - Pixel-perfect image comparison
+        """
+        result = runner.invoke(
+            app,
+            ["chief", "trends", "--fast", "--version", "integration-test"],
+        )
+    
+>       assert result.exit_code == 0, f"Command failed: {result.output}"
+E       AssertionError: Command failed: Annual Trends Analysis
+E           Period: 2015-2024
+E           Version: integration-test
+E           Fast mode: True
+E         
+E         Fast mode: Using 0 rows (10% sample)
+E           Data loaded           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+E         ⠋ Preprocessing data...                                            0% -:--:--
+E         
+E       assert 1 == 0
+E        +  where 1 = <Result ValueError("Expected 'ucr_general' column for classification")>.exit_code
+
+tests/test_integration_output_verification.py:60: AssertionError
+________ TestPatrolHotspotsOutput.test_patrol_hotspots_output_structure ________
+
+self = <test_integration_output_verification.TestPatrolHotspotsOutput object at 0x15b29df90>
+
+    def test_patrol_hotspots_output_structure(self) -> None:
+        """Verify patrol hotspots command creates expected output structure.
+    
+        Checks:
+        - Output directory exists: reports/integration-test/patrol/
+        - At least one output file exists (PNG or TXT)
+        - Summary contains expected keywords
+    
+        Does NOT check:
+        - Exact cluster counts (may vary with algorithm parameters)
+        - Exact coordinate values
+        """
+        result = runner.invoke(
+            app,
+            ["patrol", "hotspots", "--fast", "--version", "integration-test"],
+        )
+    
+>       assert result.exit_code == 0, f"Command failed: {result.output}"
+E       AssertionError: Command failed: Hotspots Analysis
+E           Epsilon: 0.002 degrees
+E           Min samples: 50
+E           Fast mode: True
+E         
+E           Data loaded             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+E         ⠋ Cleaning coordinates...                                            0% -:--:--
+E         
+E       assert 1 == 0
+E        +  where 1 = <Result KeyError('point_x')>.exit_code
+
+tests/test_integration_output_verification.py:98: AssertionError
+____ TestPolicyRetailTheftOutput.test_policy_retail_theft_output_structure _____
+
+self = <test_integration_output_verification.TestPolicyRetailTheftOutput object at 0x15b29e0d0>
+
+    def test_policy_retail_theft_output_structure(self) -> None:
+        """Verify policy retail-theft command creates expected output structure.
+    
+        Checks:
+        - Output directory exists: reports/integration-test/policy/
+        - Summary file exists
+        - Summary contains retail theft specific keywords
+    
+        Does NOT check:
+        - Exact incident counts
+        - Exact percentage changes
+        """
+        result = runner.invoke(
+            app,
+            ["policy", "retail-theft", "--fast", "--version", "integration-test"],
+        )
+    
+>       assert result.exit_code == 0, f"Command failed: {result.output}"
+E       AssertionError: Command failed: Retail Theft Analysis
+E           Baseline: 2019-01-01 to 2020-02-01
+E         
+E           Loading data...              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+E         ⠋ Filtering theft incidents...                                        0% -:--:--
+E         
+E       assert 1 == 0
+E        +  where 1 = <Result KeyError('ucr_general')>.exit_code
+
+tests/test_integration_output_verification.py:135: AssertionError
+_ TestForecastingClassificationOutput.test_forecasting_classification_output_structure _
+
+self = <test_integration_output_verification.TestForecastingClassificationOutput object at 0x15b29e210>
+
+    def test_forecasting_classification_output_structure(self) -> None:
+        """Verify forecasting classification command creates expected output structure.
+    
+        Checks:
+        - Output directory exists: reports/integration-test/forecasting/
+        - Model metrics file exists
+        - Metrics file contains model evaluation keywords
+    
+        Does NOT check:
+        - Exact accuracy/precision/f1 scores (may vary with sampling)
+        - Exact feature importance values
+    
+        Note: Skips if sklearn is not available (handled gracefully by CLI).
+        """
+        # Check if sklearn is available
+        pytest.importorskip("sklearn", reason="sklearn not installed, skipping classification test")
+    
+        result = runner.invoke(
+            app,
+            ["forecasting", "classification", "--fast", "--version", "integration-test"],
+        )
+    
+        # CLI may exit with 0 even if sklearn issues a warning
+>       assert result.exit_code == 0, f"Command failed: {result.output}"
+E       AssertionError: Command failed: Violence Classification
+E           Test size: 0.25
+E           Random state: 42
+E         
+E           Loading data...       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+E         ⠋ Preparing features...                                            0% -:--:--
+E         
+E       assert 1 == 0
+E        +  where 1 = <Result ValueError("Expected 'ucr_general' column for classification")>.exit_code
+
+tests/test_integration_output_verification.py:179: AssertionError
+____ TestCLIOutputIsolation.test_version_flag_creates_separate_directories _____
+
+self = <test_integration_output_verification.TestCLIOutputIsolation object at 0x15b29e350>
+
+    def test_version_flag_creates_separate_directories(self) -> None:
+        """Verify --version flag creates isolated output directories.
+    
+        Checks:
+        - Different version values create different directories
+        - Integration-test outputs are separate from production outputs
+        """
+        # Run with integration-test version
+        result1 = runner.invoke(
+            app,
+            ["chief", "seasonality", "--fast", "--version", "integration-test"],
+        )
+>       assert result1.exit_code == 0
+E       assert 1 == 0
+E        +  where 1 = <Result ValueError("Expected 'ucr_general' column for classification")>.exit_code
+
+tests/test_integration_output_verification.py:215: AssertionError
+________________________ test_export_output_dir_option _________________________
+
+tmp_path = PosixPath('/private/var/folders/1y/xcjlywls6rn7g8zhsh77nvqw0000gn/T/pytest-of-dustinober/pytest-305/test_export_output_dir_option0')
+
+    def test_export_output_dir_option(tmp_path: Path) -> None:
+        output_dir = tmp_path / "api_data"
+        result = runner.invoke(app, ["--output-dir", str(output_dir)])
+>       assert result.exit_code == 0
+E       assert 1 == 0
+E        +  where 1 = <Result ValueError("Expected 'ucr_general' column for classification")>.exit_code
+
+tests/test_pipeline_export.py:16: AssertionError
+______________________ test_refresh_and_validate_command _______________________
+
+tmp_path = PosixPath('/private/var/folders/1y/xcjlywls6rn7g8zhsh77nvqw0000gn/T/pytest-of-dustinober/pytest-305/test_refresh_and_validate_comm0')
+
+    def test_refresh_and_validate_command(tmp_path: Path) -> None:
+        output_dir = tmp_path / "api_data"
+        result = runner.invoke(refresh_app, ["--output-dir", str(output_dir)])
+>       assert result.exit_code == 0
+E       assert 1 == 0
+E        +  where 1 = <Result ValueError("Expected 'ucr_general' column for classification")>.exit_code
+
+tests/test_pipeline_export.py:24: AssertionError
+=============================== warnings summary ===============================
+../../../../opt/anaconda3/lib/python3.13/site-packages/coverage/config.py:346
+  /opt/anaconda3/lib/python3.13/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] filterwarnings=' in config file pyproject.toml
+    warn(
+
+tests/test_models_classification.py::TestEvaluateClassifier::test_single_class_roc_auc_handles_gracefully
+  /opt/anaconda3/lib/python3.13/site-packages/sklearn/metrics/_classification.py:534: UserWarning: A single label was found in 'y_true' and 'y_pred'. For the confusion matrix to have the correct shape, use the 'labels' parameter to pass all known labels.
+    warnings.warn(
+
+tests/test_models_classification.py::TestEvaluateClassifier::test_single_class_roc_auc_handles_gracefully
+  /opt/anaconda3/lib/python3.13/site-packages/sklearn/metrics/_ranking.py:424: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.13.9-final-0 _______________
+
+Name                          Stmts   Miss Branch BrPart   Cover   Missing
+--------------------------------------------------------------------------
+api/routers/forecasting.py       11      0      0      0 100.00%
+api/routers/metadata.py           8      0      0      0 100.00%
+api/routers/policy.py            17      0      0      0 100.00%
+api/routers/questions.py        163     24     52     15  80.00%   44->46, 56, 69, 91, 98, 101, 110, 137-138, 148-154, 170-174, 178-180, 198, 224->226, 234, 243-246
+api/routers/spatial.py           17      0      0      0 100.00%
+api/routers/trends.py            30      0      6      0 100.00%
+api/services/data_loader.py      46      0     14      0 100.00%
+--------------------------------------------------------------------------
+TOTAL                           292     24     72     15  88.19%
+Coverage HTML written to dir htmlcov
+Coverage JSON written to file coverage.json
+=========================== short test summary info ============================
+FAILED tests/integration/test_phase3_devx_reliability.py::test_profile_validation_script_passes
+FAILED tests/integration/test_phase6_preset_regression_guardrails.py::test_preset_04_traceability_maps_to_phase_6
+FAILED tests/test_integration_output_verification.py::TestChiefTrendsOutput::test_chief_trends_output_structure
+FAILED tests/test_integration_output_verification.py::TestPatrolHotspotsOutput::test_patrol_hotspots_output_structure
+FAILED tests/test_integration_output_verification.py::TestPolicyRetailTheftOutput::test_policy_retail_theft_output_structure
+FAILED tests/test_integration_output_verification.py::TestForecastingClassificationOutput::test_forecasting_classification_output_structure
+FAILED tests/test_integration_output_verification.py::TestCLIOutputIsolation::test_version_flag_creates_separate_directories
+FAILED tests/test_pipeline_export.py::test_export_output_dir_option - assert ...
+FAILED tests/test_pipeline_export.py::test_refresh_and_validate_command - ass...
+======= 9 failed, 595 passed, 3 skipped, 3 warnings in 441.27s (0:07:21) =======
