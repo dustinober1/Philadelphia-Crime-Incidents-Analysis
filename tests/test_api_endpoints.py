@@ -929,3 +929,65 @@ def test_forecasting_malformed_data_passes_through(monkeypatch: MonkeyPatch) -> 
         # Restore cache for other tests
         data_loader._DATA_CACHE.clear()
         data_loader._DATA_CACHE.update(original_cache)
+
+
+# Task 1: Validation Error (422) Tests
+
+
+def test_validation_error_invalid_query_param_type() -> None:
+    """Test validation error for invalid query parameter type."""
+    response = client.get("/api/v1/trends/annual?category=InvalidCategory")
+    assert response.status_code == 200  # Invalid category returns empty list, not 422
+
+    # Test with invalid year format instead
+    response = client.get("/api/v1/trends/monthly?start_year=abc")
+    assert response.status_code == 422
+    payload = response.json()
+    assert "detail" in payload or "details" in payload
+
+
+def test_validation_error_invalid_year_format() -> None:
+    """Test validation error for invalid year format."""
+    response = client.get("/api/v1/trends/monthly?start_year=not-a-number")
+    assert response.status_code == 422
+    payload = response.json()
+    assert "details" in payload
+    # Verify error indicates integer validation failed
+    errors = payload.get("details", [])
+    assert any("year" in str(err).lower() for err in errors)
+
+
+def test_validation_error_missing_required_body() -> None:
+    """Test validation error for missing required request body."""
+    response = client.post("/api/v1/questions")
+    assert response.status_code == 422
+    payload = response.json()
+    assert "details" in payload
+    # Verify error lists missing required fields
+    errors = payload.get("details", [])
+    # FastAPI returns errors with 'loc' (location) and 'msg' fields
+    assert any(err.get("msg") == "Field required" for err in errors)
+
+
+def test_questions_status_validation() -> None:
+    """Test questions status parameter validation."""
+    response = client.get("/api/v1/questions?status=invalid")
+    assert response.status_code == 422
+    payload = response.json()
+    assert "error" in payload
+    assert payload["error"] == "http_error"
+    assert "status must be answered or pending" in payload["message"]
+
+
+def test_validation_error_response_structure() -> None:
+    """Test validation error response has correct structure."""
+    response = client.get("/api/v1/trends/monthly?start_year=invalid")
+    assert response.status_code == 422
+    payload = response.json()
+
+    # Verify error response structure
+    assert "error" in payload
+    assert "message" in payload
+    assert "details" in payload
+    assert payload["error"] == "validation_error"
+    assert isinstance(payload["details"], list)
