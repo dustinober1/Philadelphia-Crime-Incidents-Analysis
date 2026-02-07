@@ -26,7 +26,7 @@ Rationale: Cleanup should happen on clean baseline. Removes confusion about what
 Verify tests pass before cleanup:
 
 ```bash
-pytest tests/ --fast --maxfail=1 -q
+pytest tests/ -m "not slow" --maxfail=1 -q --no-cov
 ```
 
 Expected output: All tests pass (no failures)
@@ -100,7 +100,7 @@ Rationale: Code may be used dynamically (CLI, FastAPI routes, configuration file
 After each cleanup operation, verify tests still pass:
 
 ```bash
-pytest tests/ --fast --maxfail=1 -q
+pytest tests/ -m "not slow" --maxfail=1 -q --no-cov
 ```
 
 If tests fail:
@@ -177,18 +177,18 @@ make clean
 
 # Step-by-step with gates
 git status                           # Gate 1: Clean workspace
-pytest tests/ --fast -q              # Gate 2: Test baseline
+pytest tests/ -m "not slow" -q --no-cov  # Gate 2: Test baseline
 pyclean .                            # Remove artifacts
-pytest tests/ --fast -q              # Gate 6: Test after cleanup
+pytest tests/ -m "not slow" -q --no-cov  # Gate 6: Test after cleanup
 git commit -m "chore: remove Python artifacts"  # Commit changes
 
 # Dead code cleanup with gates
 git status                           # Gate 1
-pytest tests/ --fast -q              # Gate 2
+pytest tests/ -m "not slow" -q --no-cov  # Gate 2
 vulture analysis/ api/ pipeline/     # Generate report
 # [Manual review in dead-code-review.md]
 # [Delete entries marked DELETE, one at a time]
-pytest tests/ --fast -q              # Gate 6 after each deletion
+pytest tests/ -m "not slow" -q --no-cov  # Gate 6 after each deletion
 git diff                             # Review deletions
 git commit -m "refactor: remove dead code"
 ```
