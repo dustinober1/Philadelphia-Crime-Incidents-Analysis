@@ -9,16 +9,43 @@ A reproducible analysis project for Philadelphia crime incidents. This repositor
 - Comprehensive pytest coverage for CLI commands and core analysis modules.
 
 ## Requirements
-- Python 3.14+
-- Conda environment `crime` (see `environment.yml`)
+- Docker Desktop (or Docker Engine + Compose plugin)
+- Python 3.14+ (for analysis CLI workflows)
+- Conda environment `crime` (for analysis CLI workflows, see `environment.yml`)
 
 ## Quickstart
 
-### Prerequisites
-- Python 3.14+
-- Conda environment `crime` (see `environment.yml`)
+### Local Compose Startup (Default)
 
-### Installation
+1. Initialize local env files:
+
+```bash
+cp .env.example .env
+cp web/.env.example web/.env.local
+```
+
+2. Start the full stack (pipeline + API + web):
+
+```bash
+docker compose up -d --build
+```
+
+3. Verify readiness:
+
+```bash
+docker compose ps
+curl http://localhost:8080/api/health
+```
+
+4. Open local endpoints:
+
+- Web UI: `http://localhost:${WEB_PORT:-3001}`
+- API health: `http://localhost:8080/api/health`
+
+No cloud credentials are required for this local baseline.
+For troubleshooting and reset playbooks, see `docs/local-compose.md`.
+
+### Analysis CLI Setup (Optional / Secondary Workflow)
 
 ```bash
 # Create conda environment
@@ -197,8 +224,8 @@ curl http://localhost:8080/api/health
 
 4. Open the app:
 
-- Web: `http://localhost:3001`
-- API: `http://localhost:8080`
+- Web UI: `http://localhost:${WEB_PORT:-3001}`
+- API health: `http://localhost:8080/api/health`
 
 No cloud credentials are required for this local baseline.
 

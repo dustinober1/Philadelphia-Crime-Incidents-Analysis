@@ -34,6 +34,21 @@ Expected services:
 - Web UI: `http://localhost:${WEB_PORT:-3001}`
 - API health: `http://localhost:8080/api/health`
 
+## First-run env contract
+
+Copy `.env.example` to `.env` and keep these local defaults set for first run:
+
+- `WEB_PORT=3001`
+- `PIPELINE_REFRESH_INTERVAL_SECONDS=900`
+- `ADMIN_PASSWORD=change-me`
+- `ADMIN_TOKEN_SECRET=change-me-token-secret`
+- `FIRESTORE_COLLECTION_QUESTIONS=questions`
+- `GOOGLE_CLOUD_PROJECT=local-dev`
+- `CORS_ORIGINS=http://localhost:3001,http://localhost:3000,https://philly-crime-explorer.web.app,https://philly-crime-explorer.firebaseapp.com`
+
+The compose stack starts locally with these values and does not require cloud credentials.
+External analysis API keys in `.env.example` are optional and not required for compose startup.
+
 ## Runtime budgets
 
 Default compose startup enforces resource caps:
