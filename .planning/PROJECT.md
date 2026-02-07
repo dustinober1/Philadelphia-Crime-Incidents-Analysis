@@ -1,8 +1,13 @@
 # Crime Incidents Philadelphia
 
-## Current Milestone: Pending Definition (Post-v1.2)
+## Current Milestone: v1.3 Testing & Cleanup
 
-**Goal:** Define and execute the next milestone after shipping v1.2 deferred workflow enhancements.
+**Goal:** Achieve 95% test coverage across Python codebase and remove all unused/deprecated files to establish a clean quality baseline.
+
+**Target features:**
+- Comprehensive test coverage (95%+) across analysis, API, pipeline, and CLI
+- Repository-wide cleanup of unused files, deprecated scripts, and obsolete documentation
+- Quality baseline establishment for future development
 
 ## Current State
 
@@ -70,7 +75,9 @@ One `docker compose up` command reliably brings up the complete stack locally wi
 
 ### Active
 
-- [ ] Define next milestone requirements (`$gsd-new-milestone`)
+- [ ] Achieve 95% test coverage across Python codebase (analysis, API, pipeline, CLI)
+- [ ] Remove unused/deprecated files and obsolete documentation
+- [ ] Establish clean quality baseline for future development
 
 ### Out of Scope
 
@@ -100,4 +107,4 @@ This is a brownfield monorepo with existing analysis, pipeline, API, and fronten
 </details>
 
 ---
-*Last updated: February 7, 2026 after v1.2 milestone completion*
+*Last updated: February 7, 2026 — v1.3 milestone started*

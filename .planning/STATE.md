@@ -2,10 +2,10 @@
 
 ## Current Milestone
 
-**Status:** Awaiting next milestone definition
-**Phase:** N/A
-**Start Date:** N/A
-**Target Completion:** N/A
+**Status:** Defining requirements
+**Phase:** Not started
+**Start Date:** February 7, 2026
+**Target Completion:** TBD
 
 ## Completed Milestones
 
@@ -41,9 +41,9 @@
 
 ## Next Actions
 
-1. Start the next milestone with `$gsd-new-milestone`
-2. Create fresh `.planning/REQUIREMENTS.md` for the next version scope
-3. Build a new `.planning/ROADMAP.md` phase plan from approved requirements
+1. Complete requirements definition for v1.3
+2. Create roadmap with phases 10+ continuing from v1.2
+3. Execute testing coverage and cleanup work
 
 ---
-*State updated: February 7, 2026 after v1.2 milestone completion*
+*State updated: February 7, 2026 — v1.3 milestone started*
