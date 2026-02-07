@@ -202,6 +202,23 @@ curl http://localhost:8080/api/health
 
 No cloud credentials are required for this local baseline.
 
+### Default Runtime Budgets
+
+The default compose profile applies explicit CPU and memory caps to the long-running services:
+
+- `pipeline`: `PIPELINE_CPU_LIMIT=1.00`, `PIPELINE_MEM_LIMIT=1536m`
+- `api`: `API_CPU_LIMIT=1.00`, `API_MEM_LIMIT=1024m`
+- `web`: `WEB_CPU_LIMIT=1.00`, `WEB_MEM_LIMIT=1024m`
+
+Adjust limits in your local `.env` if your machine is constrained or if services restart under load:
+
+```bash
+cp .env.example .env
+# then edit API_MEM_LIMIT/WEB_MEM_LIMIT/PIPELINE_MEM_LIMIT as needed
+docker compose up -d --build
+docker compose config | rg -n "cpus|mem_limit"
+```
+
 For troubleshooting, reset, and contract details, see `docs/local-compose.md`.
 
 ### Required Server Env (Cloud Run)
