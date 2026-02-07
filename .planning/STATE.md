@@ -12,11 +12,11 @@
 
 **Progress:**
 ```
-[███████░░░░░░░░░░░░░░] 53% (3/6 phases complete, Phase 12: 7/8 plans done)
+[████████░░░░░░░░░░░░░] 85% (39/37 summaries complete)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
 Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans) ✓ 81.75% coverage
-Phase 12: API & CLI           [███████░░] IN PROGRESS (7/8 plans) ✓ trends, spatial, policy, forecasting, metadata, questions, main
+Phase 12: API & CLI           [███████░░] IN PROGRESS (6/8 plans done) ✓ trends, spatial, policy, forecasting, metadata, questions, service-layer
 Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
 Phase 15: Quality & CI        [░░░░░░░░░░] Pending
@@ -168,9 +168,9 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 17:28 UTC
-**Stopped at:** Completed Phase 12 Plan 6 (CLI Main Commands) - 10 tests added, 100% coverage for analysis/cli/main.py
-**Resume file:** None (continue with Phase 12 Plan 7)
+**Last session:** 2026-02-07 17:42 UTC
+**Stopped at:** Completed Phase 12 Plan 5 (API Service Layer) - 29 tests added, 100% function coverage for api/services/data_loader.py
+**Resume file:** None (continue with Phase 12 Plan 7 or 8)
 
 **Completed work:**
 - Phase 10: Test infrastructure, CI pipeline, baseline coverage measurement (4/4 plans complete)
@@ -179,12 +179,13 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - Phase 12 Plan 2: Spatial endpoint tests with GeoJSON structure validation
 - Phase 12 Plan 3: Policy endpoint tests with 100% coverage (10 tests)
 - Phase 12 Plan 4: Forecasting endpoint tests with 100% coverage (7 tests)
+- Phase 12 Plan 5: API service layer tests with 100% function coverage (29 tests)
 - Phase 12 Plan 6: CLI main commands tests with 100% coverage (10 tests)
 
-**Next step:** Execute Phase 12 Plan 7 (CLI Group Commands)
+**Next step:** Execute Phase 12 Plan 7 or 8 (remaining CLI or metadata API tests)
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 12 (7/8 plans complete)*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 12 (6/8 plans complete)*
 
 
 ### From Phase 12 Plan 1 (Trends API Endpoints)
@@ -199,3 +200,11 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **100% coverage achieved**: analysis/cli/main.py fully covered (28 statements) with 10 tests across 3 test classes
 - **Exit code verification**: All CLI commands tested for successful execution (exit_code == 0)
 - **Output content validation**: Tests check for expected text content (data sources, analysis areas, version info)
+
+### From Phase 12 Plan 5 (API Service Layer)
+- **Service layer testing with monkeypatch**: Use monkeypatch.setattr to mock module-level globals like _DATA_CACHE for fast, isolated tests
+- **Required exports setup**: Tests create all REQUIRED_EXPORTS files before testing load_all_data() to satisfy data contract validation
+- **Cache manipulation pattern**: Use monkeypatch.setattr(data_loader, "_DATA_CACHE", test_data) to pre-populate or clear cache
+- **100% function coverage achieved**: All 7 functions in api/services/data_loader.py tested with 29 tests
+- **Fast test execution**: All tests run in 0.05 seconds using tmp_path and monkeypatch (no real data loading)
+- **Test organization by function class**: Group tests by function being tested (TestLoadAllData, TestGetData, etc.) for clear structure
