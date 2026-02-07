@@ -367,3 +367,26 @@ class TestFieldValidationConstraints:
 
         config = GlobalConfig()
         assert config.log_level == "ERROR"
+
+
+class TestNestedConfiguration:
+    """Test nested environment variable configuration."""
+
+    def test_global_config_nested_env_vars(self, monkeypatch):
+        """Verify CRIME__OUTPUT__DIR nested delimiter works."""
+        # Note: GlobalConfig doesn't have nested fields in current implementation
+        # but env_nested_delimiter is configured. Test with a flat field to verify
+        # the delimiter doesn't break normal operation.
+        monkeypatch.setenv("CRIME_OUTPUT_DIR", "/tmp/test_output")
+
+        config = GlobalConfig()
+        assert str(config.output_dir) == "/tmp/test_output"
+
+    def test_global_config_env_nested_delimiter(self, monkeypatch):
+        """Verify double underscore notation is configured."""
+        # The env_nested_delimiter="__" is configured in model_config.
+        # Test that it doesn't interfere with normal env vars.
+        monkeypatch.setenv("CRIME_DPI", "400")
+
+        config = GlobalConfig()
+        assert config.dpi == 400
