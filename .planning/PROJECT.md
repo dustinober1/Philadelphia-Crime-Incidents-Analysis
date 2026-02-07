@@ -2,9 +2,31 @@
 
 ## Current State
 
+Shipped `v1.1 Local Workflow Enhancements` on February 7, 2026.
+
+Current delivered baseline:
+- Compose-first local stack remains default (`docker compose up -d --build`).
+- Canonical smoke-check workflow validates readiness and export health after startup.
+- Optional runtime presets (`low-power`, `high-performance`) are available without changing default behavior.
+- Canonical runtime guardrail entrypoint (`make check-runtime-guardrails`) protects preset/default regression safety.
+
+## Next Milestone Goals
+
+To be defined with `$gsd-new-milestone`.
+
+Recommended starting goals:
+- Define new requirements for deferred workflow enhancements (`LWF-03`..`LWF-05`) and any product-facing scope updates.
+- Reconfirm core value and scope boundaries before selecting next phases.
+- Produce a fresh roadmap linked to the new milestone version.
+
+<details>
+<summary>Archived Context Through v1.1 Completion</summary>
+
+## Previous Current State
+
 Shipped `v1.0 Local Containerized Dev` on February 7, 2026. The project now has a compose-first local runtime with explicit service boundaries (`web`, `api`, `pipeline`), dependency-gated startup health, resource budget controls, and operational recovery/profile guardrails.
 
-## Current Milestone: v1.1 Local Workflow Enhancements
+## Previous Current Milestone: v1.1 Local Workflow Enhancements
 
 **Goal:** Improve local runtime confidence and machine-fit behavior without changing the compose-first default path.
 
@@ -68,5 +90,7 @@ This is a brownfield monorepo with existing analysis, pipeline, API, and fronten
 | Optimize for both image size and runtime resources | Keep local development fast and practical on modest machines | ✓ Good |
 | Success criterion is one-command startup (`docker compose up`) | Clear, observable definition of done | ✓ Good |
 
+</details>
+
 ---
-*Last updated: February 7, 2026 after starting v1.1 milestone*
+*Last updated: February 7, 2026 after v1.1 milestone completion*

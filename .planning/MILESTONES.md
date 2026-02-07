@@ -1,5 +1,31 @@
 # Project Milestones: Crime Incidents Philadelphia
 
+## v1.1 Local Workflow Enhancements (Shipped: 2026-02-07)
+
+**Delivered:** Canonical post-start smoke checks, optional runtime presets, and regression guardrails while preserving default compose startup behavior.
+
+**Phases completed:** 4-6 (9 plans total)
+
+**Key accomplishments:**
+- Hardened smoke-check validation with explicit failure semantics for readiness, missing exports, and web endpoint failures.
+- Standardized smoke-check workflow docs around `python scripts/validate_local_stack.py --skip-startup`.
+- Added runtime preset overlays and wrapper commands for low-power and high-performance local modes.
+- Added deterministic runtime mode/default budget validators and wired integration guardrails.
+- Added canonical guardrail entrypoint `make check-runtime-guardrails` and aligned docs to it.
+- Closed PRESET-04 traceability with milestone-wide audit passing (9/9 requirements satisfied).
+
+**Stats:**
+- 37 files created/modified
+- 1259 lines added, 42 removed
+- 3 phases, 9 plans, 31 tracked work items
+- 39 minutes from milestone kickoff to archived completion artifacts
+
+**Git range:** `feat(04-01): harden smoke-check validator behavior` (`6c9a6ee`) → `feat(06-01): add canonical runtime guardrail command` (`b4084d3`)
+
+**What's next:** Define the next milestone via `$gsd-new-milestone` (fresh requirements + roadmap).
+
+---
+
 ## v1.0 Local Containerized Dev (Shipped: 2026-02-07)
 
 **Delivered:** One-command compose startup for the full local stack with resource-aware containerization and operational guardrails.

@@ -2,30 +2,30 @@
 
 ## Current Position
 
-Phase: 6 (complete)
+Phase: Milestone transition
 Plan: —
-Status: Phase 6 complete and verified
-Last activity: February 7, 2026 — Executed and verified Phase 6 preset/regression guardrail plans
+Status: Milestone v1.1 archived and tagged
+Last activity: February 7, 2026 — Completed milestone archival workflow for v1.1
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated February 7, 2026)
 
 **Core value:** One `docker compose up` command reliably brings up the complete stack locally with small, resource-constrained containers.
-**Current focus:** Run milestone audit for v1.1 completion (`$gsd-audit-milestone`)
+**Current focus:** Start next milestone definition with `$gsd-new-milestone`
 
 ## Milestone Snapshot
 
 - **Milestones:** `.planning/MILESTONES.md`
-- **Roadmap archive:** `.planning/milestones/v1.0-ROADMAP.md`
-- **Requirements archive:** `.planning/milestones/v1.0-REQUIREMENTS.md`
+- **Roadmap archives:** `.planning/milestones/v1.0-ROADMAP.md`, `.planning/milestones/v1.1-ROADMAP.md`
+- **Requirements archives:** `.planning/milestones/v1.0-REQUIREMENTS.md`, `.planning/milestones/v1.1-REQUIREMENTS.md`
 - **Config:** `.planning/config.json`
 
 ## Notes
 
-- No milestone audit file was found for v1.0; archive completed with accepted audit debt.
-- Scope remains local-hosting only until next milestone changes that boundary.
-- Phase execution records remain in `.planning/phases/` as historical implementation detail.
+- Milestone v1.1 audit status: passed (`.planning/v1.1-MILESTONE-AUDIT.md`).
+- Active milestone requirements file intentionally removed as part of archive workflow.
+- Next milestone should begin by defining fresh requirements.
 
 ---
-*State updated: February 7, 2026 after Phase 6 completion*
+*State updated: February 7, 2026 after v1.1 milestone completion*
