@@ -259,3 +259,70 @@ class TestCanonicalJson:
         # Should have no extra whitespace
         assert "  " not in result  # No indentation spaces
         assert "\n" not in result  # No newlines
+
+
+class TestAssertReproducible:
+    """Tests for _assert_reproducible reproducibility verification."""
+
+    @patch("pipeline.refresh_data.export_all")
+    def test_assert_reproducible_passes_deterministic_exports(self, mock_export: patch, tmp_path: Path) -> None:
+        """Should pass when export_all returns same data twice."""
+        # Create deterministic export directory with same content
+        run_dir = tmp_path / "run"
+        run_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create identical files for both runs
+        def mock_export_func(output_dir: Path) -> Path:
+            for file_path in _REQUIRED_FILES:
+                full_path = output_dir / file_path
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+                # Write deterministic content
+                full_path.write_text('{"same":"data"}')
+            return output_dir
+
+        mock_export.side_effect = mock_export_func
+
+        # Should not raise any exception
+        _assert_reproducible()
+
+        assert mock_export.call_count == 2
+
+    @patch("pipeline.refresh_data.export_all")
+    def test_assert_reproducible_detects_differences(self, mock_export: patch, tmp_path: Path) -> None:
+        """Should raise RuntimeError when exports differ."""
+        call_count = [0]
+
+        def mock_export_func(output_dir: Path) -> Path:
+            call_count[0] += 1
+            for file_path in _REQUIRED_FILES:
+                full_path = output_dir / file_path
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+                # Write different content on each call
+                full_path.write_text(f'{{"run":{call_count[0]}}}')
+            return output_dir
+
+        mock_export.side_effect = mock_export_func
+
+        with pytest.raises(RuntimeError, match="Reproducibility check failed"):
+            _assert_reproducible()
+
+        assert mock_export.call_count == 2
+
+    @patch("pipeline.refresh_data.export_all")
+    def test_assert_reproducible_compares_all_required_files(self, mock_export: patch, tmp_path: Path) -> None:
+        """Should compare each file in _REQUIRED_FILES."""
+        def mock_export_func(output_dir: Path) -> Path:
+            # Create all required files
+            for file_path in _REQUIRED_FILES:
+                full_path = output_dir / file_path
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+                full_path.write_text('{"data":"value"}')
+            return output_dir
+
+        mock_export.side_effect = mock_export_func
+
+        # Should not raise when all files match
+        _assert_reproducible()
+
+        # Verify export_all was called twice
+        assert mock_export.call_count == 2
