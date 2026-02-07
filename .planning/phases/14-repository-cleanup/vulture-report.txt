@@ -1,3 +1,25 @@
+================================
+VULTURE DEAD CODE ANALYSIS SUMMARY
+================================
+Analysis date: 2026-02-07
+Packages analyzed: analysis/, api/, pipeline/
+
+-- 80% Confidence (comprehensive) --
+Total unused entities: 10
+- Unused functions: 0
+- Unused classes: 0
+- Unused attributes/variables: 10
+Files affected: 3
+
+-- 90% Confidence (high-confidence) --
+Total unused entities: 10
+Files affected: 3
+
+Note: All unused code detected at 100% confidence, making all findings
+high-confidence candidates for removal after manual review.
+
+[Original vulture output follows]
+
 analysis/__init__.py:42: unused variable 'args' (100% confidence, 1 line)
 analysis/__init__.py:42: unused variable 'kwargs' (100% confidence, 1 line)
 analysis/config/settings.py:51: unused variable 'file_secret_settings' (100% confidence, 1 line)
