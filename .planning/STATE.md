@@ -4,20 +4,20 @@
 
 **Milestone:** v1.3 Testing & Cleanup
 **Status:** 🚧 IN PROGRESS
-**Phase:** Phase 12 - API & CLI Testing
+**Phase:** Phase 13 - Pipeline & CLI Testing
 **Start Date:** February 7, 2026
 **Target Completion:** TBD
 
-**Current Focus:** Write tests for API endpoints (FastAPI TestClient) and CLI commands (Typer CliRunner).
+**Current Focus:** Write tests for pipeline operations and CLI commands.
 
 **Progress:**
 ```
-[█████████░░░░░░░░░░░░] 89% (41/47 summaries complete)
+[███████████░░░░░░░░░░] 91% (43/47 summaries complete)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
 Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans) ✓ 81.75% coverage
 Phase 12: API & CLI           [██████████] COMPLETE (8/8 plans) ✓ 88.19% coverage EXCEEDS 80-85% target
-Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
+Phase 13: Pipeline & Support  [██░░░░░░░░] In progress (2/7 plans) ✓ 100% refresh_data coverage
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
 Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 ```
@@ -168,26 +168,37 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 17:42 UTC
-**Stopped at:** Completed Phase 12 Plan 8 (Coverage Report & Verification) - 88.19% overall coverage achieved, 6 of 7 modules at 100%
-**Resume file:** None (continue with Phase 13 - Pipeline & CLI Testing)
+**Last session:** 2026-02-07 19:00 UTC
+**Stopped at:** Completed Phase 13 Plan 2 (Pipeline Refresh Operations) - 100% coverage achieved, 30 tests in 3.28s
+**Resume file:** None (continue with Phase 13 Plan 3 - Data Loader Tests)
 
 **Completed work:**
 - Phase 10: Test infrastructure, CI pipeline, baseline coverage measurement (4/4 plans complete)
 - Phase 11: Core module testing (6/6 plans complete) - 81.75% coverage
-- Phase 12 Plan 1: Trends endpoint tests with query validation and error handling (15 tests)
-- Phase 12 Plan 2: Spatial endpoint tests with GeoJSON structure validation (12 tests)
-- Phase 12 Plan 3: Policy endpoint tests with 100% coverage (10 tests)
-- Phase 12 Plan 4: Forecasting endpoint tests with 100% coverage (7 tests)
-- Phase 12 Plan 5: API service layer tests with 100% function coverage (29 tests)
-- Phase 12 Plan 6: CLI main commands tests with 100% coverage (10 tests)
-- Phase 12 Plan 7: Error handling & middleware tests (27 tests) ✓ 422, 401, 404, 429, 500 status codes
-- Phase 12 Plan 8: Coverage report & verification ✓ 88.19% coverage EXCEEDS 80-85% target
+- Phase 12: API & CLI testing (8/8 plans complete) - 88.19% coverage
+- Phase 13 Plan 1: Pipeline export helper functions tests (17 tests, 95% coverage)
+- Phase 13 Plan 2: Pipeline refresh operations tests (30 tests, 100% coverage)
 
-**Next step:** Execute Phase 13 (Pipeline & CLI Testing) - 7 plans
+**Next step:** Execute Phase 13 Plan 3 (Data Loader Tests)
+
+**Completed work:**
+- Phase 10: Test infrastructure, CI pipeline, baseline coverage measurement (4/4 plans complete)
+- Phase 11: Core module testing (6/6 plans complete) - 81.75% coverage
+- Phase 12: API & CLI testing (8/8 plans complete) - 88.19% coverage
+- Phase 13 Plan 1: Pipeline export helper functions tests - 95% coverage
+- Phase 13 Plan 2: Pipeline refresh operations tests - 100% coverage
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 12 COMPLETE (8/8 plans)*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 13 in progress (2/7 plans)*
+
+
+### From Phase 13 Plan 2 (Pipeline Refresh Operations)
+- **Environment variable testing limitation**: Typer evaluates option defaults at module import time, making it impractical to test environment variable behavior through CliRunner. Test verifies explicit --output-dir precedence instead.
+- **Mock-based testing for pipeline operations**: Use unittest.mock.patch to mock export_all function, avoiding slow real data loading (30+ seconds to 3 seconds).
+- **Helper function pattern for test data**: Created _create_minimal_valid_files() to ensure consistent test data setup across all validation tests.
+- **100% coverage achieved**: pipeline/refresh_data.py fully covered (52 statements) with 30 tests passing in 3.28 seconds.
+- **CLI testing with CliRunner**: Use typer.testing.CliRunner for integration tests, verify exit codes and stdout content.
+- **Canonical JSON testing**: Test _canonical_json helper for key sorting and whitespace removal to ensure consistent comparisons.
 
 
 ### From Phase 12 Plan 7 (Error Handling & Middleware)
