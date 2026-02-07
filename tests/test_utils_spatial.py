@@ -648,3 +648,578 @@ class TestLoadBoundaries:
 
         # Verify path contains expected components
         assert "police_districts.geojson" in str(file_path)
+
+
+class TestSpatialJoinDistricts:
+    """Tests for spatial_join_districts function."""
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_returns_dataframe_with_joined_dist_num(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Returns DataFrame with 'joined_dist_num' column."""
+        # Setup mocks
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "id": [1]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "id": [1],
+            "dist_num": [1],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "id": [1]
+        })
+
+        result = spatial_join_districts(crime_df, district_gdf=None)
+
+        assert "joined_dist_num" in result.columns
+        assert result["joined_dist_num"].iloc[0] == 1
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_calls_clean_coordinates_internally(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Calls coordinate cleaning before join."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "dist_num": [1],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        spatial_join_districts(crime_df, district_gdf=None)
+
+        mock_clean.assert_called_once()
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_calls_df_to_geodataframe_internally(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Calls conversion to GeoDataFrame."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "dist_num": [1],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        spatial_join_districts(crime_df, district_gdf=None)
+
+        mock_to_gdf.assert_called_once()
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_drops_index_right_column(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Drops 'index_right' cleanup column."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "dist_num": [1],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_districts(crime_df, district_gdf=None)
+
+        assert "index_right" not in result.columns
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_drops_geometry_column(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Drops 'geometry' column from output."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "dist_num": [1],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_districts(crime_df, district_gdf=None)
+
+        assert "geometry" not in result.columns
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_custom_x_col_y_col_parameters(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Custom column names work."""
+        mock_clean.return_value = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95],
+            "dist_num": [1],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95]
+        })
+
+        result = spatial_join_districts(
+            crime_df,
+            district_gdf=None,
+            x_col="custom_lon",
+            y_col="custom_lat"
+        )
+
+        # Verify clean_coordinates was called with custom columns (positional args)
+        mock_clean.assert_called_once()
+        call_args = mock_clean.call_args[0]
+        assert call_args[1] == "custom_lon"  # x_col is second positional arg
+        assert call_args[2] == "custom_lat"  # y_col is third positional arg
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_provided_district_gdf_used(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Custom district_gdf parameter used when provided."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        crime_gdf = MagicMock()
+        crime_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = crime_gdf
+
+        # Create custom district gdf
+        custom_district_gdf = MagicMock()
+        custom_district_gdf.crs = "EPSG:4326"
+        custom_district_gdf.__getitem__ = lambda self, key: custom_district_gdf
+        custom_district_gdf.columns = ["dist_num", "geometry"]
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "dist_num": [5],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_districts(crime_df, district_gdf=custom_district_gdf)
+
+        assert "joined_dist_num" in result.columns
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_handles_crs_mismatch(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Handles CRS conversion when district_gdf.crs != crime_gdf.crs."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        crime_gdf = MagicMock()
+        crime_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = crime_gdf
+
+        # Create district gdf with different CRS
+        district_gdf = MagicMock()
+        district_gdf.crs = "EPSG:3857"
+        district_gdf.__getitem__ = lambda self, key: district_gdf
+        district_gdf.columns = ["dist_num", "geometry"]
+
+        # Mock to_crs to return self
+        district_gdf.to_crs = lambda crs: district_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "dist_num": [1],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_districts(crime_df, district_gdf=district_gdf)
+
+        assert "joined_dist_num" in result.columns
+
+
+class TestSpatialJoinTracts:
+    """Tests for spatial_join_tracts function."""
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_returns_dataframe_with_tract_columns(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Returns DataFrame with GEOID and/or total_pop columns."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "GEOID": ["42101010100"],
+            "total_pop": [1000],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_tracts(crime_df, tract_gdf=None)
+
+        assert "GEOID" in result.columns
+        assert "total_pop" in result.columns
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_calls_clean_coordinates_internally(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Calls coordinate cleaning before join."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "GEOID": ["42101010100"],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        spatial_join_tracts(crime_df, tract_gdf=None)
+
+        mock_clean.assert_called_once()
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_calls_df_to_geodataframe_internally(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Calls conversion to GeoDataFrame."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "GEOID": ["42101010100"],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        spatial_join_tracts(crime_df, tract_gdf=None)
+
+        mock_to_gdf.assert_called_once()
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_drops_index_right_column(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Drops 'index_right' cleanup column."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "GEOID": ["42101010100"],
+            "total_pop": [1000],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_tracts(crime_df, tract_gdf=None)
+
+        assert "index_right" not in result.columns
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_drops_geometry_column(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Drops 'geometry' column from output."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "GEOID": ["42101010100"],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_tracts(crime_df, tract_gdf=None)
+
+        assert "geometry" not in result.columns
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_custom_x_col_y_col_parameters(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Custom column names work."""
+        mock_clean.return_value = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95]
+        })
+
+        mock_gdf = MagicMock()
+        mock_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = mock_gdf
+
+        mock_joined = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95],
+            "GEOID": ["42101010100"],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95]
+        })
+
+        result = spatial_join_tracts(
+            crime_df,
+            tract_gdf=None,
+            x_col="custom_lon",
+            y_col="custom_lat"
+        )
+
+        # Verify clean_coordinates was called with custom columns (positional args)
+        mock_clean.assert_called_once()
+        call_args = mock_clean.call_args[0]
+        assert call_args[1] == "custom_lon"  # x_col is second positional arg
+        assert call_args[2] == "custom_lat"  # y_col is third positional arg
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_provided_tract_gdf_used(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Custom tract_gdf parameter used when provided."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        crime_gdf = MagicMock()
+        crime_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = crime_gdf
+
+        # Create custom tract gdf
+        custom_tract_gdf = MagicMock()
+        custom_tract_gdf.crs = "EPSG:4326"
+        custom_tract_gdf.__getitem__ = lambda self, key: custom_tract_gdf
+        custom_tract_gdf.columns = ["GEOID", "total_pop", "geometry"]
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "GEOID": ["42101019999"],
+            "total_pop": [500],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_tracts(crime_df, tract_gdf=custom_tract_gdf)
+
+        assert "GEOID" in result.columns
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_handles_crs_mismatch(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Handles CRS conversion when tract_gdf.crs != crime_gdf.crs."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        crime_gdf = MagicMock()
+        crime_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = crime_gdf
+
+        # Create tract gdf with different CRS
+        tract_gdf = MagicMock()
+        tract_gdf.crs = "EPSG:3857"
+        tract_gdf.__getitem__ = lambda self, key: tract_gdf
+        tract_gdf.columns = ["GEOID", "total_pop", "geometry"]
+
+        # Mock to_crs to return self
+        tract_gdf.to_crs = lambda crs: tract_gdf
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "GEOID": ["42101010100"],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_tracts(crime_df, tract_gdf=tract_gdf)
+
+        assert "GEOID" in result.columns
+
+    @patch("analysis.utils.spatial.gpd.sjoin")
+    @patch("analysis.utils.spatial.df_to_geodataframe")
+    @patch("analysis.utils.spatial.clean_coordinates")
+    def test_handles_missing_tract_columns(self, mock_clean, mock_to_gdf, mock_sjoin):
+        """Only available columns selected from tract_gdf."""
+        mock_clean.return_value = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        crime_gdf = MagicMock()
+        crime_gdf.crs = "EPSG:4326"
+        mock_to_gdf.return_value = crime_gdf
+
+        # Create tract gdf without total_pop column
+        tract_gdf = MagicMock()
+        tract_gdf.crs = "EPSG:4326"
+        tract_gdf.__getitem__ = lambda self, key: tract_gdf
+        tract_gdf.columns = ["GEOID", "geometry"]
+
+        mock_joined = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "GEOID": ["42101010100"],
+            "index_right": [0],
+            "geometry": [Point(-75.16, 39.95)]
+        })
+        mock_sjoin.return_value = mock_joined
+
+        crime_df = pd.DataFrame({"point_x": [-75.16], "point_y": [39.95]})
+
+        result = spatial_join_tracts(crime_df, tract_gdf=tract_gdf)
+
+        # Should have GEOID but not total_pop
+        assert "GEOID" in result.columns
+        assert "total_pop" not in result.columns
