@@ -1,6 +1,17 @@
 # Environment variables
 .env
 
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor backup/swap files
+*.swp
+*.swo
+*~
+._*
+
 # External data cache (API-fetched data)
 data/external/.cache/
 data/external/*.parquet
@@ -10,6 +21,9 @@ data/external/*.parquet
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+
+# Logs
+*.log
 
 # Coverage reports
 htmlcov/
@@ -24,6 +38,11 @@ data/processed/crime_incidents_combined.parquet
 .venv/
 -e .github/
 analysis_output.log
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
 # Python bytecode
 *.pyc
 __pycache__/
@@ -42,3 +61,8 @@ web/.next/
 web/out/
 web/.env.local
 web/tsconfig.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
