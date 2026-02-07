@@ -15,7 +15,7 @@
 [████░░░░░░░░░░░░░░░░░] 50% (3/6 phases)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
-Phase 11: Core Modules        [██░░░░░░░░] IN PROGRESS (1/6 plans)
+Phase 11: Core Modules        [███░░░░░░░] IN PROGRESS (2/6 plans)
 Phase 12: API & CLI           [░░░░░░░░░░] Pending
 Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
@@ -56,15 +56,12 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Next Actions
 
-1. Execute Phase 11 Plan 2: Write tests for core data modules (loading, preprocessing, validation)
-2. Execute Phase 11 Plan 3: Write tests for core utilities (spatial, event, classification)
-3. Execute Phase 11 Plan 4: Write tests for models (time_series)
-4. Execute Phase 11 Plan 5: Write tests for models (validation)
-5. Execute Phase 11 Plan 6: Write tests for utils (classification, spatial)
-6. Execute Phase 12: Write tests for API & CLI
-7. Execute Phase 13: Write tests for pipeline & support
-8. Execute Phase 14: Repository cleanup
-9. Execute Phase 15: Quality validation & CI integration
+1. Execute Phase 11 Plan 5: Write tests for data loading module
+2. Execute Phase 11 Plan 6: Write tests for data preprocessing module
+3. Execute Phase 12: Write tests for API & CLI
+4. Execute Phase 13: Write tests for pipeline & support
+5. Execute Phase 14: Repository cleanup
+6. Execute Phase 15: Quality validation & CI integration
 
 **Roadmap:** `.planning/milestones/v1.3-ROADMAP.md`
 **Requirements:** `.planning/REQUIREMENTS.md` (32 requirements across 8 categories)
@@ -116,6 +113,13 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **Fast model training**: Use `n_estimators=10` for RandomForest and XGBoost in tests for fast execution (under 8 seconds for 38 tests).
 - **Optional function exclusions**: `compute_shap_values` not tested (requires optional shap library, not used elsewhere in codebase). Acceptable to exclude optional utilities from coverage targets.
 
+### From Phase 11 Plan 4 (Test Spatial Utilities)
+- **Mock GeoPandas operations**: Use unittest.mock.patch to mock gpd.sjoin and gpd.read_file for fast tests. Spatial joins would take 30+ seconds without mocking. With mocking, 74 tests run in under 2 seconds.
+- **Test spatial workflow logic**: Test spatial join workflow (coordinate cleaning, GeoDataFrame conversion, column renaming, cleanup) rather than testing GeoPandas geometric algorithms. Trust GeoPandas library, test wrapper logic.
+- **Synthetic coordinate data**: Use synthetic Philadelphia coordinates (-75.3 to -74.95 longitude, 39.85 to 40.15 latitude) for deterministic, reproducible tests. No dependency on real data files.
+- **Parametrized boundary testing**: Use @pytest.mark.parametrize for comprehensive edge case testing at coordinate bounds (PHILLY_LON_MIN/MAX, PHILLY_LAT_MIN/MAX).
+- **Accept 94.74% coverage**: Missing 5.26% coverage for unlikely edge cases (when GeoPandas sjoin doesn't produce index_right column, or district boundaries missing dist_num column). These are defensive conditionals that rarely trigger.
+
 ## Known Issues
 
 ### From Phase 10
@@ -128,8 +132,8 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 16:03 UTC
-**Stopped at:** Completed Phase 11 Plan 1 (Classification Model Testing)
+**Last session:** 2026-02-07 16:10 UTC
+**Stopped at:** Completed Phase 11 Plan 4 (Spatial Utilities Testing)
 **Resume file:** None (all tasks complete)
 
 **Completed work:**
@@ -137,8 +141,9 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - Phase 10 Plan 2: Created GitHub Actions workflow with pytest -n4, diff-cover integration, and artifact uploads
 - Phase 10 Plan 3: Measured baseline coverage (0% across 46 modules, 2528 statements), documented per-module breakdown, created prioritized testing roadmap
 - Phase 11 Plan 1: Wrote tests for classification models (38 tests, 91.7% coverage for classification.py)
+- Phase 11 Plan 4: Wrote tests for spatial utilities (74 tests, 94.74% coverage for spatial.py)
 
-**Next step:** Execute Phase 11 Plan 2 (Test Data Loading)
+**Next step:** Execute Phase 11 Plan 5 (Test Data Loading)
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 11 (1/6 plans complete)*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 11 (2/6 plans complete)*
