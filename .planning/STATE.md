@@ -56,9 +56,11 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Next Actions
 
-1. Execute Phase 10 Plan 3: Measure baseline coverage and document gaps
-2. Execute Phase 10 Plan 4: Document testing quality criteria
-3. Execute Phase 11: Write tests for core modules
+1. Execute Phase 11 Plan 1: Write tests for core data modules (loading, preprocessing, validation)
+2. Execute Phase 11 Plan 2: Write tests for core utilities (spatial, event, classification)
+3. Execute Phase 11 Plan 3: Write tests for models (classification, time_series)
+4. Execute Phase 12: Write tests for API & CLI
+5. Execute Phase 13: Write tests for pipeline & support
 4. Execute Phase 12: Write tests for API & CLI
 5. Execute Phase 13: Write tests for pipeline & support
 6. Execute Phase 14: Repository cleanup
@@ -82,23 +84,29 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **Diff coverage threshold 90%**: Set diff-cover to 90% for PR diffs (lower than 95% total). Rationale: Allows incremental improvement without blocking development during early phases.
 - **PR-only diff validation**: Run diff-cover only on pull requests, not on main branch pushes. Rationale: Avoid blocking commits while building coverage baseline.
 
+### From Phase 10 Plan 3 (Baseline Coverage Measurement)
+- **Coverage baseline confirmed at 0%**: All 46 modules (2528 statements) have 0% coverage. Resolves earlier discrepancy between 16% and 60% observations. Accurate baseline established for tracking progress.
+- **Testing priority strategy established**: Categorized modules by impact and frequency of use. High-priority modules (data processing, validation, utilities) should be tested first in Phase 11. Medium-priority modules (API, CLI) in Phase 12. Lower-priority (config, viz) in Phase 13.
+- **Multi-format baseline reports saved**: Terminal (human-readable), JSON (machine-readable), XML (diff-cover integration), and comprehensive BASELINE_SUMMARY.md for progress tracking.
+
 ## Known Issues
 
-### From Phase 10 Plan 1
+### From Phase 10
 - **Python version compatibility**: Tests have Python version incompatibility (Python 3.9 vs 3.14 required), needs resolution for tests to run properly
-- **Current coverage baseline**: ~0% coverage (expected), will improve as tests are written in subsequent phases
+- **Coverage baseline established**: 0% coverage across 46 modules (2528 statements). All modules require tests in Phases 11-13.
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 13:55 UTC
-**Stopped at:** Completed Phase 10 Plan 2 (CI Pipeline with Parallel Tests and Diff-Cover)
+**Last session:** 2026-02-07 13:58 UTC
+**Stopped at:** Completed Phase 10 Plan 3 (Baseline Coverage Measurement)
 **Resume file:** None (all tasks complete)
 
 **Completed work:**
 - Phase 10 Plan 1: Installed pytest-xdist 3.8.0 and diff-cover 10.0.0, configured coverage.py with 95% threshold
 - Phase 10 Plan 2: Created GitHub Actions workflow with pytest -n4, diff-cover integration, and artifact uploads
+- Phase 10 Plan 3: Measured baseline coverage (0% across 46 modules, 2528 statements), documented per-module breakdown, created prioritized testing roadmap
 
-**Next step:** Execute Phase 10 Plan 3 (Measure Baseline Coverage and Document Gaps)
+**Next step:** Execute Phase 11 (Core Module Testing)
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 10 Plan 2 complete*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 10 complete*
