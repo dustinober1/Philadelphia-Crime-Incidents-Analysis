@@ -369,7 +369,45 @@ class TestDataIssueErrorHandling:
 
 
 # =============================================================================
-# Export Seasonality Tests (Task 3)
+# Task 3: File System Error Handling Tests
+# =============================================================================
+
+
+class TestFileSystemErrorHandling:
+    """Test error handling for file system issues."""
+
+    def test_write_json_handles_permission_error(self, tmp_path: Path) -> None:
+        """Verify _write_json raises appropriate error on permission denied."""
+        output_file = tmp_path / "test.json"
+
+        # Mock Path.write_text to raise PermissionError
+        with patch.object(Path, "write_text", side_effect=PermissionError("Permission denied")):
+            with pytest.raises(PermissionError, match="Permission denied"):
+                _write_json(output_file, {"key": "value"})
+
+    def test_ensure_dir_handles_permission_error(self, tmp_path: Path) -> None:
+        """Verify _ensure_dir raises appropriate error on permission denied."""
+        test_dir = tmp_path / "level1" / "level2"
+
+        # Mock Path.mkdir to raise PermissionError
+        with patch.object(Path, "mkdir", side_effect=PermissionError("Permission denied")):
+            with pytest.raises(PermissionError, match="Permission denied"):
+                _ensure_dir(test_dir)
+
+    def test_export_all_handles_unwritable_directory(
+        self, sample_crime_df: pd.DataFrame, tmp_path: Path
+    ) -> None:
+        """Verify export_all raises informative error when output directory not writable."""
+        # Mock load_crime_data to return sample data
+        with patch("pipeline.export_data.load_crime_data", return_value=sample_crime_df):
+            # Mock _write_json to fail
+            with patch("pipeline.export_data._write_json", side_effect=PermissionError("Read-only filesystem")):
+                with pytest.raises(PermissionError, match="Read-only filesystem"):
+                    export_data.export_all(tmp_path / "output")
+
+
+# =============================================================================
+# Export Seasonality Tests
 # =============================================================================
 
 
