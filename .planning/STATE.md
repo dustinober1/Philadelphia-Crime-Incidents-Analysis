@@ -12,12 +12,12 @@
 
 **Progress:**
 ```
-[███████████░░░░░░░░░░] 91% (43/47 summaries complete)
+[████████████░░░░░░░░░] 94% (44/47 summaries complete)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
 Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans) ✓ 81.75% coverage
 Phase 12: API & CLI           [██████████] COMPLETE (8/8 plans) ✓ 88.19% coverage EXCEEDS 80-85% target
-Phase 13: Pipeline & Support  [██░░░░░░░░] In progress (2/7 plans) ✓ 100% refresh_data coverage
+Phase 13: Pipeline & Support  [███░░░░░░░] In progress (3/7 plans) ✓ 85-90% pipeline coverage
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
 Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 ```
@@ -244,3 +244,30 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **Comparison to Phase 11**: Phase 12 achieves 88.19% coverage (vs 81.75% in Phase 11), extending from core modules to API/CLI interfaces
 - **HTML coverage reports**: htmlcov/index.html provides per-module coverage with line-by-line highlighting for visual inspection
 - **Coverage.py warning acceptable**: "Module was never imported" warnings for api/main.py and analysis/cli/main.py are acceptable - modules are functional, just not directly imported by test code
+
+
+### From Phase 13 Plan 3 (Pipeline Error Handling Tests)
+- **Missing dependency testing**: Patch HAS_GEOPANDAS, HAS_PROPHET, HAS_SKLEARN flags to test fallback behavior without installing optional dependencies
+- **Production schema alignment**: Add `hour` column to test DataFrames to match production data schema (real data has hour, dispatch_time, dispatch_date_time)
+- **NaT behavior documentation**: Empty DataFrames create metadata with NaT (Not a Time) values instead of raising errors - documented as known issue in tests
+- **Error type consistency**: Some validation raises AttributeError instead of RuntimeError when wrong types encountered - documented in tests as production code behavior
+- **GeoPandas mocking strategy**: Mock gpd.read_file, gpd.sjoin, and GeoDataFrame operations to avoid file I/O and slow spatial operations (30+ seconds → <1 second)
+- **Error message validation**: Use pytest.raises(match="pattern") to verify errors contain helpful messages, not just that exceptions are raised
+- **28 error handling tests added**: Comprehensive coverage of dependency fallbacks, data issues, file system errors, corrupt artifacts, reproducibility failures, CLI errors, and boundary conditions
+
+
+## Session Continuity
+
+**Last session:** 2026-02-07 19:05 UTC
+**Stopped at:** Completed Phase 13 Plan 03 (Pipeline Error Handling Tests) - 28 tests added, ~85-90% pipeline coverage achieved
+**Resume file:** None (continue with Phase 13 Plan 04)
+
+**Completed work:**
+- Phase 10: Test infrastructure, CI pipeline, baseline coverage measurement (4/4 plans complete)
+- Phase 11: Core module testing (6/6 plans complete) - 81.75% coverage
+- Phase 12: API & CLI testing (8/8 plans complete) - 88.19% coverage
+- Phase 13 Plan 01: Export helper functions and trends tests - 100% refresh_data coverage
+- Phase 13 Plan 02: Refresh validation and reproducibility tests - CLI integration tests
+- Phase 13 Plan 03: Pipeline error handling tests - 28 tests, ~85-90% coverage
+
+**Next step:** Execute Phase 13 Plan 04 (Pipeline Integration Tests) - 4 remaining plans in Phase 13
