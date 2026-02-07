@@ -17,7 +17,7 @@
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
 Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans) ✓ 81.75% coverage
 Phase 12: API & CLI           [██████████] COMPLETE (8/8 plans) ✓ 88.19% coverage EXCEEDS 80-85% target
-Phase 13: Pipeline & Support  [███░░░░░░░] In progress (6/7 plans) ✓ 100% settings & schema coverage
+Phase 13: Pipeline & Support  [███████░░░] In progress (6/7 plans) ✓ 86% visualization coverage
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
 Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 ```
@@ -266,12 +266,24 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **100% schema coverage achieved**: All 4 schema files (chief.py, patrol.py, policy.py, forecasting.py) have 100% test coverage with 47 tests
 - **47 config schema tests added**: Comprehensive coverage of all 11 schema classes across 4 modules with default values, validation constraints, YAML loading, and environment overrides
 
+### From Phase 13 Plan 6 (Visualization Utilities Tests)
+- **Matplotlib Agg backend requirement**: Import `matplotlib.use('Agg')` before any matplotlib imports in test files to prevent display issues in CI/headless environments
+- **Figure resource cleanup**: Always call `plt.close(fig)` after assertions to prevent memory leaks during test runs - critical for test suites with many figure creations
+- **Structure validation over pixel testing**: Test Figure properties (axes count, titles, labels, data presence) rather than pixel-perfect rendering for fast, reliable tests that don't break on matplotlib version changes
+- **rcParams comparison flexibility**: matplotlib returns figsize as list [12.0, 6.0] not tuple (12, 6) - tests must accept both formats or use list comparison
+- **Color validation pattern**: Use `matplotlib.colors.to_rgb()` for consistent color assertions across different matplotlib versions
+- **Empty DataFrame handling**: plot_heatmap raises ValueError for completely empty DataFrames - test documents this behavior rather than expecting graceful handling (which would require defensive code)
+- **Directory creation behavior**: save_figure doesn't create parent directories - test updated to expect FileNotFoundError, validating documented behavior
+- **Optional function exclusions**: plot_shap_summary requires optional shap library - acceptable to exclude from coverage targets since it's not used elsewhere in codebase
+- **100% core coverage achieved**: helpers.py, plots.py, and style.py all have 100% test coverage with 42 tests total
+- **86% overall visualization coverage**: forecast_plots.py at 59.30% (save_path parameter handling and optional functions), but core plotting functions fully covered
+
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 19:19 UTC
-**Stopped at:** Completed Phase 13 Plan 04 (Configuration Settings Tests) - 46 tests added, 100% settings coverage achieved
-**Resume file:** None (continue with Phase 13 Plan 05 or later plans)
+**Last session:** 2026-02-07 20:52 UTC
+**Stopped at:** Completed Phase 13 Plan 06 (Visualization Utilities Tests) - 42 tests added, 86% visualization coverage achieved
+**Resume file:** None (continue with Phase 13 Plan 07 - remaining pipeline/support tests)
 
 **Completed work:**
 - Phase 10: Test infrastructure, CI pipeline, baseline coverage measurement (4/4 plans complete)
@@ -281,6 +293,7 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - Phase 13 Plan 02: Refresh validation and reproducibility tests - CLI integration tests
 - Phase 13 Plan 03: Pipeline error handling tests - 28 tests, ~85-90% coverage
 - Phase 13 Plan 04: Configuration settings tests - 46 tests, 100% settings coverage
-- Phase 13 Plan 05: Configuration schema tests - 47 tests, 100% schema coverage (already complete)
+- Phase 13 Plan 05: Configuration schema tests - 47 tests, 100% schema coverage
+- Phase 13 Plan 06: Visualization utilities tests - 42 tests, 86% visualization coverage ✅
 
-**Next step:** Execute Phase 13 Plan 06 (Visualization Utilities Tests) - 1 remaining plan in Phase 13
+**Next step:** Execute Phase 13 Plan 07 (remaining pipeline/support tests) or continue to Phase 14 (Cleanup)
