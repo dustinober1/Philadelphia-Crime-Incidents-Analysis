@@ -30,17 +30,17 @@ Achieve 95% test coverage across Python codebase (analysis/, api/, pipeline/, CL
 
 ### API Testing (API)
 
-- [ ] **API-01**: All 11 FastAPI router endpoints have integration tests using TestClient
-- [ ] **API-02**: API tests validate request/response contracts and error handling
-- [ ] **API-03**: API tests mock external dependencies and data loaders appropriately
-- [ ] **API-04**: API tests achieve 80-85% overall coverage milestone
+- [x] **API-01**: All 11 FastAPI router endpoints have integration tests using TestClient
+- [x] **API-02**: API tests validate request/response contracts and error handling
+- [x] **API-03**: API tests mock external dependencies and data loaders appropriately
+- [x] **API-04**: API tests achieve 80-85% overall coverage milestone (achieved 88.19%)
 
 ### CLI Testing (CLI)
 
-- [ ] **CLI-01**: All 8 Typer CLI commands have tests using CliRunner
-- [ ] **CLI-02**: CLI tests validate argument parsing and command invocation
-- [ ] **CLI-03**: CLI tests verify output formatting and exit codes
-- [ ] **CLI-04**: CLI tests mock file I/O and external dependencies
+- [x] **CLI-01**: All 8 Typer CLI commands have tests using CliRunner
+- [x] **CLI-02**: CLI tests validate argument parsing and command invocation
+- [x] **CLI-03**: CLI tests verify output formatting and exit codes
+- [x] **CLI-04**: CLI tests mock file I/O and external dependencies
 
 ### Pipeline Testing (PIPE)
 
