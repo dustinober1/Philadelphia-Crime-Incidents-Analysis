@@ -187,6 +187,80 @@ def test_spatial_corridors() -> None:
         assert geom_type in {"LineString", "MultiLineString"}
 
 
+# GeoJSON structure validation tests
+@pytest.mark.parametrize(
+    "endpoint",
+    ["/api/v1/spatial/districts", "/api/v1/spatial/tracts", "/api/v1/spatial/hotspots", "/api/v1/spatial/corridors"],
+)
+def test_spatial_geojson_structure(endpoint: str) -> None:
+    """Parametrized test validating GeoJSON FeatureCollection structure for all spatial endpoints."""
+    response = client.get(endpoint)
+
+    assert response.status_code == 200
+    geojson = response.json()
+
+    # Verify top-level GeoJSON structure
+    assert geojson["type"] == "FeatureCollection"
+    assert isinstance(geojson["features"], list)
+
+    # Verify each feature has required GeoJSON fields
+    for feature in geojson["features"]:
+        assert feature["type"] == "Feature"
+        assert "geometry" in feature
+        assert isinstance(feature["geometry"], dict)
+        assert "type" in feature["geometry"]
+        assert "coordinates" in feature["geometry"]
+        assert "properties" in feature
+        assert isinstance(feature["properties"], dict)
+
+
+def test_spatial_districts_properties() -> None:
+    """Validate district features have dist_num property with valid values."""
+    response = client.get("/api/v1/spatial/districts")
+
+    assert response.status_code == 200
+    geojson = response.json()
+
+    # Verify all district features have dist_num property
+    for feature in geojson["features"]:
+        properties = feature["properties"]
+        assert "dist_num" in properties
+
+        # Verify district numbers are in valid range (1-23)
+        dist_num = properties["dist_num"]
+        assert isinstance(dist_num, int)
+        assert 1 <= dist_num <= 23
+
+
+def test_spatial_hotspots_centroids() -> None:
+    """Validate hotspot features have Point geometry with Philadelphia bounds."""
+    # Philadelphia bounds (approximately)
+    PHILLY_LON_MIN = -75.3
+    PHILLY_LON_MAX = -74.95
+    PHILLY_LAT_MIN = 39.85
+    PHILLY_LAT_MAX = 40.15
+
+    response = client.get("/api/v1/spatial/hotspots")
+
+    assert response.status_code == 200
+    geojson = response.json()
+
+    # Verify all hotspot features have Point geometry
+    for feature in geojson["features"]:
+        geometry = feature["geometry"]
+        assert geometry["type"] == "Point"
+
+        # Verify coordinates are within Philadelphia bounds
+        lon, lat = geometry["coordinates"]
+        assert PHILLY_LON_MIN <= lon <= PHILLY_LON_MAX
+        assert PHILLY_LAT_MIN <= lat <= PHILLY_LAT_MAX
+
+        # Verify intensity property exists
+        properties = feature["properties"]
+        assert "intensity" in properties
+        assert isinstance(properties["intensity"], (int, float))
+
+
 # Forecasting endpoint tests
 
 
@@ -231,3 +305,163 @@ def test_forecasting_classification() -> None:
 
     # Verify importance is a numeric value
     assert isinstance(first_feature["importance"], (int, float))
+
+
+def test_forecasting_time_series_structure() -> None:
+    """Test time series forecast has proper structure with confidence intervals."""
+    response = client.get("/api/v1/forecasting/time-series")
+    assert response.status_code == 200
+
+    payload = response.json()
+
+    # Verify historical data exists
+    assert "historical" in payload
+    assert isinstance(payload["historical"], list)
+    assert len(payload["historical"]) > 0
+
+    # Verify forecast data exists
+    forecast = payload["forecast"]
+    assert isinstance(forecast, list)
+    assert len(forecast) > 0
+
+    # Verify confidence intervals are present in forecast
+    first_forecast = forecast[0]
+    assert "yhat_lower" in first_forecast
+    assert "yhat_upper" in first_forecast
+
+    # Verify confidence intervals are numeric and lower < upper
+    assert isinstance(first_forecast["yhat_lower"], (int, float))
+    assert isinstance(first_forecast["yhat_upper"], (int, float))
+    assert first_forecast["yhat_lower"] <= first_forecast["yhat_upper"]
+
+    # Verify prediction values are numeric
+    assert isinstance(first_forecast["yhat"], (int, float))
+
+    # Verify model metadata exists
+    assert "model" in payload
+    assert isinstance(payload["model"], str)
+    assert len(payload["model"]) > 0
+
+
+def test_forecasting_classification_features() -> None:
+    """Test classification features include expected feature names and importance scores."""
+    response = client.get("/api/v1/forecasting/classification")
+    assert response.status_code == 200
+
+    features = response.json()
+    assert isinstance(features, list)
+    assert len(features) > 0
+
+    # Verify all features have required fields
+    for feature in features:
+        assert "feature" in feature
+        assert "importance" in feature
+        assert isinstance(feature["feature"], str)
+        assert isinstance(feature["importance"], (int, float))
+
+    # Verify importance scores are non-negative
+    importances = [f["importance"] for f in features]
+    assert all(imp >= 0 for imp in importances)
+
+    # Verify temporal coverage - features should include time-based fields
+    feature_names = [f["feature"] for f in features]
+    time_features = ["year", "month", "day_of_week", "hour"]
+    assert any(tf in feature_names for tf in time_features)
+
+
+# Trends endpoint tests
+
+
+def test_trends_monthly() -> None:
+    """Test GET /api/v1/trends/monthly returns monthly trends data."""
+    response = client.get("/api/v1/trends/monthly")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify structure of first row
+    row = data[0]
+    assert "month" in row
+    assert "crime_category" in row
+    assert "count" in row
+
+
+def test_trends_monthly_with_start_year() -> None:
+    """Test GET /api/v1/trends/monthly with start_year filter."""
+    response = client.get("/api/v1/trends/monthly?start_year=2019")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Verify all months are from 2019 onwards
+    for row in data:
+        year = int(row["month"][:4])
+        assert year >= 2019
+
+
+def test_trends_monthly_with_end_year() -> None:
+    """Test GET /api/v1/trends/monthly with end_year filter."""
+    response = client.get("/api/v1/trends/monthly?end_year=2020")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Verify all months are through 2020
+    for row in data:
+        year = int(row["month"][:4])
+        assert year <= 2020
+
+
+def test_trends_monthly_with_year_range() -> None:
+    """Test GET /api/v1/trends/monthly with both start_year and end_year."""
+    response = client.get("/api/v1/trends/monthly?start_year=2018&end_year=2020")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Verify all months are within range
+    for row in data:
+        year = int(row["month"][:4])
+        assert 2018 <= year <= 2020
+
+
+def test_trends_covid() -> None:
+    """Test GET /api/v1/trends/covid returns COVID comparison data."""
+    response = client.get("/api/v1/trends/covid")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify structure
+    row = data[0]
+    assert "period" in row
+    assert "start" in row
+    assert "end" in row
+    assert "count" in row
+
+
+def test_trends_seasonality() -> None:
+    """Test GET /api/v1/trends/seasonality returns seasonality data."""
+    response = client.get("/api/v1/trends/seasonality")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, dict)
+
+    # Verify expected keys exist
+    assert "by_month" in data
+    assert "by_day_of_week" in data
+    assert "by_hour" in data
+
+
+def test_trends_robbery_heatmap() -> None:
+    """Test GET /api/v1/trends/robbery-heatmap returns robbery heatmap data."""
+    response = client.get("/api/v1/trends/robbery-heatmap")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify structure has hour and day_of_week
+    row = data[0]
+    assert "hour" in row
+    assert "day_of_week" in row
+    assert "count" in row
