@@ -1,4 +1,4 @@
-.PHONY: dev-web dev-api export-data refresh-data deploy check-runtime-guardrails clean-pyc clean-imports clean-reports clean-build clean-all check-clean scan-dead-code
+.PHONY: dev-web dev-api export-data refresh-data deploy check-runtime-guardrails clean-pyc clean-imports clean-reports clean-build clean-all clean-unused-files check-clean scan-dead-code
 
 dev-web:
 	cd web && npm run dev
@@ -43,6 +43,30 @@ clean-build:
 
 clean-all: clean-pyc clean-imports clean-reports clean-build
 	@echo "All cleanup operations complete"
+
+# Remove unnecessary files (DS_Store, empty dirs, backups, etc.)
+clean-unused-files:
+	@echo "Removing macOS .DS_Store files..."
+	@find . -name ".DS_Store" -type f -delete
+	@echo ".DS_Store files removed"
+	@echo ""
+	@echo "Removing empty directories..."
+	@if [ -d "Incidents" ]; then rmdir Incidents 2>/dev/null || echo "Note: Incidents/ not empty (skipped)"; fi
+	@if [ -d "notebooks" ]; then rmdir notebooks 2>/dev/null || echo "Note: notebooks/ not empty (skipped)"; fi
+	@echo "Empty directories checked"
+	@echo ""
+	@echo "Removing backup files..."
+	@find .planning/ -name "*.backup" -type f -delete 2>/dev/null || true
+	@find . -name "*.backup" -type f -delete 2>/dev/null || true
+	@echo "Backup files removed"
+	@echo ""
+	@echo "Removing additional cache files..."
+	@rm -rf .cache/ .ruff_cache/
+	@rm -f coverage.json coverage.xml firebase-debug.log
+	@rm -rf web/.next/ web/out/
+	@echo "Additional cache files removed"
+	@echo ""
+	@echo "Unused files cleanup complete"
 
 # Safety gate check
 check-clean:
