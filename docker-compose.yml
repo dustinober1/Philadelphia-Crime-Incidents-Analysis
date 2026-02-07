@@ -1,4 +1,28 @@
 services:
+  pipeline:
+    build:
+      context: .
+      dockerfile: pipeline/Dockerfile
+    command: /app/pipeline/compose_entrypoint.sh
+    environment:
+      PIPELINE_OUTPUT_DIR: /shared/api-data
+      PIPELINE_REFRESH_INTERVAL_SECONDS: "900"
+      PIPELINE_HEALTH_FILE: /tmp/pipeline-refresh.ok
+    volumes:
+      - shared_api_data:/shared/api-data
+      - ./pipeline:/app/pipeline
+      - ./analysis:/app/analysis
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./reports:/app/reports
+      - ./api:/app/api
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /shared/api-data/metadata.json && test -f /tmp/pipeline-refresh.ok"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
   api:
     build:
       context: .
@@ -7,9 +31,52 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - ADMIN_PASSWORD=change-me
-      - ADMIN_TOKEN_SECRET=change-me-token-secret
-      - FIRESTORE_COLLECTION_QUESTIONS=questions
-      - GOOGLE_CLOUD_PROJECT=philly-crime-explorer
+      ADMIN_PASSWORD: change-me
+      ADMIN_TOKEN_SECRET: change-me-token-secret
+      FIRESTORE_COLLECTION_QUESTIONS: questions
+      GOOGLE_CLOUD_PROJECT: local-dev
+      API_DATA_DIR: /app/api/data
+    depends_on:
+      pipeline:
+        condition: service_healthy
     volumes:
       - ./api:/app/api
+      - shared_api_data:/app/api/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import json,sys,urllib.request; d=json.load(urllib.request.urlopen('http://127.0.0.1:8080/api/health', timeout=3)); sys.exit(0 if d.get('ok') else 1)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    command: sh -lc "npm install && npm run dev -- --hostname 0.0.0.0 --port 3000"
+    ports:
+      - "${WEB_PORT:-3001}:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE: http://localhost:8080
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  shared_api_data:
+  web_node_modules:

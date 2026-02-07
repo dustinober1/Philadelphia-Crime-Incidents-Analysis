@@ -7,7 +7,11 @@ from typing import Any
 
 from pydantic import BaseModel, EmailStr, Field
 
-from analysis.config import COLORS
+COLORS = {
+    "Violent": "#E63946",
+    "Property": "#457B9D",
+    "Other": "#A8DADC",
+}
 
 
 class TrendDataPoint(BaseModel):
