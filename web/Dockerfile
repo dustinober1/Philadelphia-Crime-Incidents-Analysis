@@ -3,7 +3,7 @@ FROM node:20-bookworm-slim
 WORKDIR /app
 
 COPY web/package*.json ./
-RUN npm ci
+RUN npm ci --no-audit --no-fund
 
 COPY web ./
 

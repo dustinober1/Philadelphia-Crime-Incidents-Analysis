@@ -1,0 +1,33 @@
+.git
+.gitignore
+.DS_Store
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+
+# Python build artifacts
+**/__pycache__/
+**/*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Node build artifacts
+web/node_modules/
+web/.next/
+web/out/
+
+# Large/generated data and reports not needed in image builds
+data/*.parquet
+data/processed/
+data/raw/
+reports/
+
+# Local/dev files
+.env
+*.log
+tmp/
+.planning/
