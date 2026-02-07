@@ -12,11 +12,11 @@
 
 **Progress:**
 ```
-[██████░░░░░░░░░░░░░░░] 50% (3/6 phases complete, Phase 12 ready to begin)
+[███████░░░░░░░░░░░░░░] 53% (3/6 phases complete, Phase 12: 3/8 plans done)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
 Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans) ✓ 81.75% coverage
-Phase 12: API & CLI           [░░░░░░░░░░] Next
+Phase 12: API & CLI           [████░░░░] IN PROGRESS (4/8 plans) ✓ trends, policy, forecasting, metadata
 Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
 Phase 15: Quality & CI        [░░░░░░░░░░] Pending
@@ -134,6 +134,14 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **HTML coverage reports generated**: htmlcov/ directory contains per-module coverage reports for visual inspection.
 - **Modules below 80% identified**: analysis/models/classification.py (45.12%) and analysis/utils/classification.py (23.53%) need additional tests in future phases.
 
+### From Phase 12 Plan 1-3 (API Endpoint Tests)
+- **Trends endpoint tests**: Comprehensive tests for /annual, /monthly, /covid, /seasonality, /robbery-heatmap endpoints with query parameter validation and error handling
+- **Spatial endpoint tests**: GeoJSON structure validation for /districts, /tracts, /hotspots, /corridors with geometry type checks and coordinate bounds validation
+- **Forecasting endpoint tests**: Time series forecast structure with confidence intervals, classification feature importance with sorted validation
+- **Policy endpoint tests**: 100% coverage achieved for api/routers/policy.py with tests for /retail-theft, /vehicle-crimes, /composition, /events
+- **TestClient error handling pattern**: Use pytest.raises to catch KeyError for missing data instead of verifying HTTP 500 responses (TestClient may propagate exceptions before FastAPI exception handlers convert them)
+- **Data validation focus**: Test data structure, types, and logical consistency rather than specific values (data changes over time)
+
 ## Known Issues
 
 ### From Phase 10
@@ -147,20 +155,18 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 16:30 UTC
-**Stopped at:** Completed Phase 11 Plan 6 (Core Module Coverage Report) - Phase 11 COMPLETE
-**Resume file:** None (Phase 11 complete)
+**Last session:** 2026-02-07 17:34 UTC
+**Stopped at:** Completed Phase 12 Plan 3 (Policy API Endpoints) - 10 tests added, 100% coverage for api/routers/policy.py
+**Resume file:** None (continue with Phase 12 Plan 4)
 
 **Completed work:**
-- Phase 10 Plan 1: Installed pytest-xdist 3.8.0 and diff-cover 10.0.0, configured coverage.py with 95% threshold
-- Phase 10 Plan 2: Created GitHub Actions workflow with pytest -n4, diff-cover integration, and artifact uploads
-- Phase 10 Plan 3: Measured baseline coverage (0% across 46 modules, 2528 statements), documented per-module breakdown, created prioritized testing roadmap
-- Phase 11 Plan 1: Wrote tests for classification models (38 tests, 91.7% coverage for classification.py)
-- Phase 11 Plan 4: Wrote tests for spatial utilities (74 tests, 94.74% coverage for spatial.py)
-- Phase 11 Plan 5: Wrote tests for data loading and cache (23 tests, 95.65% coverage for cache.py, 87.67% for loading.py)
-- Phase 11 Plan 6: Generated comprehensive coverage report for all core modules (81.75% overall, 317 passing tests, HTML reports)
+- Phase 10: Test infrastructure, CI pipeline, baseline coverage measurement (4/4 plans complete)
+- Phase 11: Core module testing (6/6 plans complete) - 81.75% coverage
+- Phase 12 Plan 1: Trends endpoint tests with query validation and error handling
+- Phase 12 Plan 2: Spatial endpoint tests with GeoJSON structure validation
+- Phase 12 Plan 3: Policy endpoint tests with 100% coverage (10 tests)
 
-**Next step:** Execute Phase 12 (API & CLI Testing)
+**Next step:** Execute Phase 12 Plan 4 (Forecasting endpoint tests may already be complete based on git log)
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 11 (5/6 plans complete)*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 12 (3/8 plans complete)*
