@@ -34,6 +34,21 @@ Expected services:
 - Web UI: `http://localhost:${WEB_PORT:-3001}`
 - API health: `http://localhost:8080/api/health`
 
+## Runtime budgets
+
+Default compose startup enforces resource caps:
+
+- `pipeline`: `${PIPELINE_CPU_LIMIT:-1.00}` CPU, `${PIPELINE_MEM_LIMIT:-1536m}` memory
+- `api`: `${API_CPU_LIMIT:-1.00}` CPU, `${API_MEM_LIMIT:-1024m}` memory
+- `web`: `${WEB_CPU_LIMIT:-1.00}` CPU, `${WEB_MEM_LIMIT:-1024m}` memory
+
+To tune locally, edit `.env` and validate rendered limits:
+
+```bash
+docker compose config | rg -n "cpus|mem_limit"
+./scripts/validate_compose_runtime_budget.sh
+```
+
 ## Data contract
 
 - Pipeline writes exports to shared volume path `/shared/api-data`.
@@ -58,6 +73,12 @@ docker compose logs -f pipeline api web
 
 ```bash
 python scripts/validate_local_stack.py
+```
+
+- Benchmark cold vs warm image builds:
+
+```bash
+./scripts/benchmark_container_builds.sh
 ```
 
 ## Reset / clean start
