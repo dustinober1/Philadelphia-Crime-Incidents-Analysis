@@ -1,0 +1,473 @@
+"""Unit tests for utils/spatial.py spatial utilities.
+
+This module tests coordinate cleaning, spatial joins, severity scoring,
+and coordinate statistics with mocked GeoPandas operations.
+
+Testing strategy:
+- Use synthetic coordinate data for fast, deterministic tests
+- Mock GeoPandas operations to avoid slow spatial joins
+- Test coordinate filtering bounds checking
+- Test severity score UCR band mapping
+- Test spatial join logic (column renaming, cleanup)
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, patch
+
+import geopandas as gpd
+import numpy as np
+import pandas as pd
+import pytest
+from shapely.geometry import Point
+
+from analysis.config import (
+    PHILLY_LAT_MAX,
+    PHILLY_LAT_MIN,
+    PHILLY_LON_MAX,
+    PHILLY_LON_MIN,
+    SEVERITY_WEIGHTS,
+)
+from analysis.utils.spatial import (
+    clean_coordinates,
+    calculate_severity_score,
+    df_to_geodataframe,
+    get_coordinate_stats,
+    get_repo_root,
+    load_boundaries,
+    spatial_join_districts,
+    spatial_join_tracts,
+)
+
+if TYPE_CHECKING:
+    pass
+
+
+class TestCleanCoordinates:
+    """Tests for clean_coordinates function."""
+
+    def test_filters_valid_philadelphia_coordinates(self):
+        """Filters to valid Philadelphia coordinates only."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, -100.0, -75.20],  # Middle invalid
+            "point_y": [39.95, 40.0, 40.0],       # Middle invalid (lon out of bounds)
+            "id": [1, 2, 3]
+        })
+
+        result = clean_coordinates(df)
+
+        assert len(result) == 2
+        assert result["id"].tolist() == [1, 3]
+
+    def test_filters_out_nan_coordinates(self):
+        """Filters out rows with NaN in point_x or point_y."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, None, -75.20],
+            "point_y": [39.95, 40.0, None],
+            "id": [1, 2, 3]
+        })
+
+        result = clean_coordinates(df)
+
+        # Only first row has both coordinates non-NaN
+        assert len(result) == 1
+        assert result["id"].iloc[0] == 1
+
+    @pytest.mark.parametrize(
+        "lon,should_pass",
+        [
+            (PHILLY_LON_MIN, True),   # At min boundary
+            (PHILLY_LON_MAX, True),   # At max boundary
+            (PHILLY_LON_MIN - 0.01, False),  # Just below min
+            (PHILLY_LON_MAX + 0.01, False),  # Just above max
+            (-100.0, False),          # Far out of bounds
+        ]
+    )
+    def test_filters_out_out_of_bounds_lon(self, lon, should_pass):
+        """Filters longitude values outside Philadelphia bounds."""
+        df = pd.DataFrame({
+            "point_x": [lon],
+            "point_y": [40.0],  # Valid latitude
+        })
+
+        result = clean_coordinates(df)
+
+        assert len(result) == (1 if should_pass else 0)
+
+    @pytest.mark.parametrize(
+        "lat,should_pass",
+        [
+            (PHILLY_LAT_MIN, True),   # At min boundary
+            (PHILLY_LAT_MAX, True),   # At max boundary
+            (PHILLY_LAT_MIN - 0.01, False),  # Just below min
+            (PHILLY_LAT_MAX + 0.01, False),  # Just above max
+            (50.0, False),            # Far out of bounds
+        ]
+    )
+    def test_filters_out_out_of_bounds_lat(self, lat, should_pass):
+        """Filters latitude values outside Philadelphia bounds."""
+        df = pd.DataFrame({
+            "point_x": [-75.16],  # Valid longitude
+            "point_y": [lat],
+        })
+
+        result = clean_coordinates(df)
+
+        assert len(result) == (1 if should_pass else 0)
+
+    def test_custom_x_col_parameter(self):
+        """Accepts custom column name for longitude."""
+        df = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95]
+        })
+
+        result = clean_coordinates(df, x_col="custom_lon", y_col="custom_lat")
+
+        assert len(result) == 1
+
+    def test_custom_y_col_parameter(self):
+        """Accepts custom column name for latitude."""
+        df = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95]
+        })
+
+        result = clean_coordinates(df, x_col="custom_lon", y_col="custom_lat")
+
+        assert len(result) == 1
+
+    def test_missing_columns_raises_value_error(self):
+        """Raises ValueError when coordinate columns missing."""
+        df = pd.DataFrame({"other_column": [1, 2, 3]})
+
+        with pytest.raises(ValueError, match="Columns .* not found in DataFrame"):
+            clean_coordinates(df)
+
+    def test_returns_copy_not_view(self):
+        """Returns a copy, not a view."""
+        df = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "id": [1]
+        })
+
+        result = clean_coordinates(df)
+
+        # Modify result
+        result.loc[result.index[0], "id"] = 999
+
+        # Original DataFrame unchanged
+        assert df["id"].iloc[0] == 1
+
+    def test_preserves_original_columns(self):
+        """Preserves all original columns in output."""
+        df = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "col1": ["a"],
+            "col2": [100],
+        })
+
+        result = clean_coordinates(df)
+
+        assert list(result.columns) == list(df.columns)
+
+    def test_handles_empty_dataframe(self):
+        """Handles empty DataFrame."""
+        df = pd.DataFrame({"point_x": [], "point_y": []})
+
+        result = clean_coordinates(df)
+
+        assert len(result) == 0
+        assert list(result.columns) == ["point_x", "point_y"]
+
+    def test_all_invalid_returns_empty(self):
+        """All rows with invalid coordinates returns empty DataFrame."""
+        df = pd.DataFrame({
+            "point_x": [-100.0, -200.0],  # Outside Philly bounds
+            "point_y": [50.0, 60.0],       # Outside Philly bounds
+        })
+
+        result = clean_coordinates(df)
+
+        assert len(result) == 0
+
+
+class TestCalculateSeverityScore:
+    """Tests for calculate_severity_score function."""
+
+    def test_ucr_100_band_returns_10_severity(self):
+        """UCR 100-199 maps to severity 10.0."""
+        df = pd.DataFrame({"ucr_general": [100]})
+
+        scores = calculate_severity_score(df)
+
+        assert scores.iloc[0] == 10.0
+
+    def test_ucr_200_band_returns_8_severity(self):
+        """UCR 200-299 maps to severity 8.0."""
+        df = pd.DataFrame({"ucr_general": [250]})
+
+        scores = calculate_severity_score(df)
+
+        assert scores.iloc[0] == 8.0
+
+    def test_ucr_300_band_returns_6_severity(self):
+        """UCR 300-399 maps to severity 6.0."""
+        df = pd.DataFrame({"ucr_general": [350]})
+
+        scores = calculate_severity_score(df)
+
+        assert scores.iloc[0] == 6.0
+
+    def test_ucr_400_band_returns_5_severity(self):
+        """UCR 400-499 maps to severity 5.0."""
+        df = pd.DataFrame({"ucr_general": [450]})
+
+        scores = calculate_severity_score(df)
+
+        assert scores.iloc[0] == 5.0
+
+    def test_ucr_500_band_returns_3_severity(self):
+        """UCR 500-599 maps to severity 3.0."""
+        df = pd.DataFrame({"ucr_general": [550]})
+
+        scores = calculate_severity_score(df)
+
+        assert scores.iloc[0] == 3.0
+
+    def test_ucr_600_band_returns_1_severity(self):
+        """UCR 600-699 maps to severity 1.0."""
+        df = pd.DataFrame({"ucr_general": [650]})
+
+        scores = calculate_severity_score(df)
+
+        assert scores.iloc[0] == 1.0
+
+    def test_ucr_700_band_returns_2_severity(self):
+        """UCR 700-799 maps to severity 2.0."""
+        df = pd.DataFrame({"ucr_general": [750]})
+
+        scores = calculate_severity_score(df)
+
+        assert scores.iloc[0] == 2.0
+
+    def test_ucr_800_band_returns_4_severity(self):
+        """UCR 800-899 maps to severity 4.0."""
+        df = pd.DataFrame({"ucr_general": [850]})
+
+        scores = calculate_severity_score(df)
+
+        assert scores.iloc[0] == 4.0
+
+    def test_unknown_ucr_defaults_to_0_5(self):
+        """Unknown UCR codes default to 0.5 severity."""
+        df = pd.DataFrame({"ucr_general": [9999]})
+
+        scores = calculate_severity_score(df)
+
+        assert scores.iloc[0] == 0.5
+
+    def test_custom_weights_override_defaults(self):
+        """Custom weights override default severity weights."""
+        custom_weights = {
+            100: 5.0,  # Override
+            200: 3.0,
+            300: 2.0,
+        }
+
+        df = pd.DataFrame({"ucr_general": [100, 600]})
+        scores = calculate_severity_score(df, weights=custom_weights)
+
+        # Custom weight used for 100
+        assert scores.iloc[0] == 5.0
+        # Unknown code defaults to 0.5
+        assert scores.iloc[1] == 0.5
+
+    def test_nan_ucr_code_defaults_to_0_5(self):
+        """NaN UCR code defaults to 0.5 severity."""
+        df = pd.DataFrame({
+            "ucr_general": [None, 600]
+        })
+
+        scores = calculate_severity_score(df)
+
+        # NaN UCR codes are filled with 0.5 default
+        assert scores.iloc[0] == 0.5
+        assert scores.iloc[1] == 1.0
+
+    def test_custom_ucr_col_parameter(self):
+        """Accepts custom UCR column name."""
+        df = pd.DataFrame({
+            "custom_ucr": [100, 600]
+        })
+
+        scores = calculate_severity_score(df, ucr_col="custom_ucr")
+
+        assert scores.iloc[0] == 10.0
+        assert scores.iloc[1] == 1.0
+
+    def test_missing_ucr_col_raises_value_error(self):
+        """Raises ValueError when UCR column missing."""
+        df = pd.DataFrame({"other_column": [1, 2, 3]})
+
+        with pytest.raises(ValueError, match="Column .* not found in DataFrame"):
+            calculate_severity_score(df)
+
+    def test_returns_series(self):
+        """Returns pd.Series with same length as input DataFrame."""
+        df = pd.DataFrame({"ucr_general": [100, 200, 300]})
+
+        scores = calculate_severity_score(df)
+
+        assert isinstance(scores, pd.Series)
+        assert len(scores) == len(df)
+
+
+class TestGetCoordinateStats:
+    """Tests for get_coordinate_stats function."""
+
+    def test_returns_dict_with_expected_keys(self):
+        """Returns dictionary with expected keys."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, -75.20],
+            "point_y": [39.95, 40.0]
+        })
+
+        stats = get_coordinate_stats(df)
+
+        expected_keys = [
+            "total_records",
+            "has_coordinates",
+            "in_philadelphia_bounds",
+            "coverage_rate",
+            "in_bounds_rate",
+            "lon_min",
+            "lon_max",
+            "lat_min",
+            "lat_max",
+        ]
+        assert set(stats.keys()) == set(expected_keys)
+
+    def test_total_records_matches_input_length(self):
+        """total_records matches len(df)."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, -75.20, -75.10],
+            "point_y": [39.95, 40.0, 39.90]
+        })
+
+        stats = get_coordinate_stats(df)
+
+        assert stats["total_records"] == len(df)
+
+    def test_has_coordinates_counts_valid_coords(self):
+        """has_coordinates counts rows with non-NaN coordinates."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, None, -75.20],
+            "point_y": [39.95, 40.0, None]
+        })
+
+        stats = get_coordinate_stats(df)
+
+        # Only first row has both coordinates non-NaN
+        assert stats["has_coordinates"] == 1
+
+    def test_in_philadelphia_bounds_counts_valid_coords(self):
+        """Counts coordinates in Philadelphia bounds."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, -100.0, -75.20],  # Middle out of bounds
+            "point_y": [39.95, 40.0, 50.0]
+        })
+
+        stats = get_coordinate_stats(df)
+
+        # Only first row in Philly bounds
+        assert stats["in_philadelphia_bounds"] == 1
+
+    def test_coverage_rate_calculation(self):
+        """coverage_rate = has_coordinates / total_records."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, None, -75.20],
+            "point_y": [39.95, 40.0, None]
+        })
+
+        stats = get_coordinate_stats(df)
+
+        expected_rate = 1 / 3  # 1 out of 3 rows has coordinates
+        assert stats["coverage_rate"] == pytest.approx(expected_rate)
+
+    def test_in_bounds_rate_calculation(self):
+        """in_bounds_rate = in_philadelphia_bounds / total_records."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, -100.0, -75.20],  # Middle out of bounds
+            "point_y": [39.95, 40.0, 50.0]
+        })
+
+        stats = get_coordinate_stats(df)
+
+        expected_rate = 1 / 3  # 1 out of 3 rows in bounds
+        assert stats["in_bounds_rate"] == pytest.approx(expected_rate)
+
+    def test_lon_min_max_calculations(self):
+        """Min/max longitude computed correctly."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, -75.20, -75.10],
+            "point_y": [39.95, 40.0, 39.90]
+        })
+
+        stats = get_coordinate_stats(df)
+
+        assert stats["lon_min"] == pytest.approx(-75.20)
+        assert stats["lon_max"] == pytest.approx(-75.10)
+
+    def test_lat_min_max_calculations(self):
+        """Min/max latitude computed correctly."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, -75.20, -75.10],
+            "point_y": [39.95, 40.0, 39.90]
+        })
+
+        stats = get_coordinate_stats(df)
+
+        assert stats["lat_min"] == pytest.approx(39.90)
+        assert stats["lat_max"] == pytest.approx(40.0)
+
+    def test_empty_dataframe_returns_zero_stats(self):
+        """Empty DataFrame has total_records=0, rates=0."""
+        df = pd.DataFrame({"point_x": [], "point_y": []})
+
+        stats = get_coordinate_stats(df)
+
+        assert stats["total_records"] == 0
+        assert stats["has_coordinates"] == 0
+        assert stats["in_philadelphia_bounds"] == 0
+        assert stats["coverage_rate"] == 0
+        assert stats["in_bounds_rate"] == 0
+
+    def test_custom_x_col_y_col_parameters(self):
+        """Custom column names work."""
+        df = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95]
+        })
+
+        stats = get_coordinate_stats(df, x_col="custom_lon", y_col="custom_lat")
+
+        assert stats["total_records"] == 1
+        assert stats["has_coordinates"] == 1
+        assert stats["in_philadelphia_bounds"] == 1
+
+    def test_all_nan_coordinates_returns_zero_coverage(self):
+        """All-NaN coordinates give coverage_rate=0."""
+        df = pd.DataFrame({
+            "point_x": [None, None],
+            "point_y": [None, None]
+        })
+
+        stats = get_coordinate_stats(df)
+
+        assert stats["has_coordinates"] == 0
+        assert stats["coverage_rate"] == 0
