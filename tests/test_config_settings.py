@@ -173,3 +173,60 @@ class TestGlobalConfigYamlLoading:
         assert config.output_format == "png"  # Default
         assert config.fast_sample_frac == 0.1  # Default
         assert config.cache_enabled is True  # Default
+
+
+class TestEnvironmentVariableOverrides:
+    """Test environment variable configuration overrides."""
+
+    def test_global_config_env_override_output_dir(self, tmp_path, monkeypatch):
+        """Verify CRIME_OUTPUT_DIR overrides YAML and default."""
+        custom_dir = str(tmp_path / "custom_output")
+        monkeypatch.setenv("CRIME_OUTPUT_DIR", custom_dir)
+
+        config = GlobalConfig()
+        assert str(config.output_dir) == custom_dir
+
+    def test_global_config_env_override_dpi(self, monkeypatch):
+        """Verify CRIME_DPI overrides other sources."""
+        monkeypatch.setenv("CRIME_DPI", "500")
+
+        config = GlobalConfig()
+        assert config.dpi == 500
+
+    def test_global_config_env_override_output_format(self, monkeypatch):
+        """Verify CRIME_OUTPUT_FORMAT overrides."""
+        monkeypatch.setenv("CRIME_OUTPUT_FORMAT", "svg")
+
+        config = GlobalConfig()
+        assert config.output_format == "svg"
+
+    def test_global_config_env_override_fast_sample_frac(self, monkeypatch):
+        """Verify CRIME_FAST_SAMPLE_FRAC overrides."""
+        monkeypatch.setenv("CRIME_FAST_SAMPLE_FRAC", "0.75")
+
+        config = GlobalConfig()
+        assert config.fast_sample_frac == 0.75
+
+    def test_global_config_env_override_cache_enabled(self, monkeypatch):
+        """Verify CRIME_CACHE_ENABLED overrides (boolean parsing)."""
+        # Test "false" string
+        monkeypatch.setenv("CRIME_CACHE_ENABLED", "false")
+
+        config = GlobalConfig()
+        assert config.cache_enabled is False
+
+    def test_global_config_env_override_log_level(self, monkeypatch):
+        """Verify CRIME_LOG_LEVEL overrides."""
+        monkeypatch.setenv("CRIME_LOG_LEVEL", "ERROR")
+
+        config = GlobalConfig()
+        assert config.log_level == "ERROR"
+
+    def test_base_config_env_overrides_work(self, monkeypatch):
+        """Verify env vars work for BaseConfig too."""
+        monkeypatch.setenv("CRIME_DPI", "250")
+        monkeypatch.setenv("CRIME_OUTPUT_FORMAT", "pdf")
+
+        config = BaseConfig()
+        assert config.dpi == 250
+        assert config.output_format == "pdf"
