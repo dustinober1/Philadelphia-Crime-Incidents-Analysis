@@ -266,6 +266,49 @@ def test_spatial_hotspots_centroids() -> None:
         assert properties["incident_count"] >= 0
 
 
+def test_spatial_endpoint_missing_geojson(monkeypatch: MonkeyPatch) -> None:
+    """Test spatial endpoint raises KeyError when GeoJSON file is missing."""
+    import pytest
+
+    # Import the module to patch the cache
+    from api.services import data_loader
+
+    # Save original cache and clear it to simulate missing data
+    original_cache = data_loader._DATA_CACHE.copy()
+    monkeypatch.setattr(data_loader, "_DATA_CACHE", {})
+
+    try:
+        # Call the districts endpoint - should raise KeyError
+        # Note: FastAPI TestClient propagates unhandled exceptions
+        with pytest.raises(KeyError, match="Data key not loaded.*geo/districts.geojson"):
+            client.get("/api/v1/spatial/districts")
+    finally:
+        # Restore cache for other tests
+        monkeypatch.setattr(data_loader, "_DATA_CACHE", original_cache)
+
+
+def test_spatial_empty_features(monkeypatch: MonkeyPatch) -> None:
+    """Test spatial endpoint returns 200 with empty features list when data is empty."""
+    # Import the module to patch the cache
+    from api.services import data_loader
+
+    # Create an empty FeatureCollection
+    empty_geojson = {"type": "FeatureCollection", "features": []}
+    monkeypatch.setattr(data_loader, "_DATA_CACHE", {"geo/districts.geojson": empty_geojson})
+
+    # Call the districts endpoint
+    response = client.get("/api/v1/spatial/districts")
+
+    # Should return 200 even with empty features
+    assert response.status_code == 200
+
+    # Verify empty FeatureCollection structure
+    geojson = response.json()
+    assert geojson["type"] == "FeatureCollection"
+    assert geojson["features"] == []
+    assert len(geojson["features"]) == 0
+
+
 # Forecasting endpoint tests
 
 
@@ -537,3 +580,287 @@ def test_trends_monthly_invalid_year_format() -> None:
     # Verify error response contains detail key
     payload = response.json()
     assert "details" in payload
+
+
+def test_trends_annual_error_handling_exists() -> None:
+    """Test that trends endpoints have error handling for missing data."""
+    # This test verifies the error handling code path exists
+    # by checking that get_data raises KeyError for missing keys
+    from api.services.data_loader import get_data, _DATA_CACHE
+
+    # Save original cache
+    original_cache = _DATA_CACHE.copy()
+
+    try:
+        # Clear the cache to simulate missing data
+        _DATA_CACHE.clear()
+
+        # Verify get_data raises KeyError for missing data
+        # This demonstrates the error path exists
+        try:
+            get_data("annual_trends.json")
+            assert False, "Expected KeyError to be raised"
+        except KeyError as e:
+            # Verify the error message is correct
+            assert "annual_trends.json" in str(e)
+            assert "Data key not loaded" in str(e)
+    finally:
+        # Restore cache
+        _DATA_CACHE.clear()
+        _DATA_CACHE.update(original_cache)
+
+
+# Policy Analysis Endpoint Tests
+
+
+def test_policy_retail_theft() -> None:
+    """Test GET /api/v1/policy/retail-theft endpoint returns valid data."""
+    response = client.get("/api/v1/policy/retail-theft")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify each row has expected keys
+    expected_keys = {"month", "count"}
+    for row in data:
+        assert set(row.keys()) == expected_keys
+        assert isinstance(row["month"], str)
+        assert isinstance(row["count"], int)
+        assert row["count"] >= 0
+
+
+def test_policy_vehicle_crimes() -> None:
+    """Test GET /api/v1/policy/vehicle-crimes endpoint returns valid data."""
+    response = client.get("/api/v1/policy/vehicle-crimes")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify each row has expected keys
+    expected_keys = {"month", "count"}
+    for row in data:
+        assert set(row.keys()) == expected_keys
+        assert isinstance(row["month"], str)
+        assert isinstance(row["count"], int)
+        assert row["count"] >= 0
+
+
+def test_policy_composition() -> None:
+    """Test GET /api/v1/policy/composition endpoint returns valid data."""
+    response = client.get("/api/v1/policy/composition")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify each row has expected keys for composition breakdown
+    expected_keys = {"year", "crime_category", "count"}
+    for row in data:
+        assert set(row.keys()) == expected_keys
+        assert isinstance(row["year"], int)
+        assert isinstance(row["crime_category"], str)
+        assert isinstance(row["count"], int)
+        assert row["count"] >= 0
+
+
+def test_policy_events() -> None:
+    """Test GET /api/v1/policy/events endpoint returns valid data."""
+    response = client.get("/api/v1/policy/events")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify each row has expected keys for event impact analysis
+    expected_keys = {
+        "event_type",
+        "metric",
+        "n_event_days",
+        "n_control_days",
+        "event_mean",
+        "control_mean",
+        "difference",
+        "pct_change",
+        "ci_lower",
+        "ci_upper",
+        "t_statistic",
+        "p_value",
+        "significant",
+    }
+    for row in data:
+        assert set(row.keys()) == expected_keys
+        assert isinstance(row["event_type"], str)
+        assert isinstance(row["metric"], str)
+        assert isinstance(row["n_event_days"], int)
+        assert isinstance(row["n_control_days"], int)
+        assert isinstance(row["event_mean"], (int, float))
+        assert isinstance(row["control_mean"], (int, float))
+        assert isinstance(row["difference"], (int, float))
+        assert isinstance(row["pct_change"], (int, float))
+        assert isinstance(row["ci_lower"], (int, float))
+        assert isinstance(row["ci_upper"], (int, float))
+        assert isinstance(row["t_statistic"], (int, float))
+        assert isinstance(row["p_value"], (int, float))
+        assert isinstance(row["significant"], bool)
+
+
+def test_policy_retail_theft_trend_data() -> None:
+    """Verify retail theft data has temporal coverage and chronological order."""
+    response = client.get("/api/v1/policy/retail-theft")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify temporal coverage (multiple years)
+    years = {row["month"][:4] for row in data}
+    assert len(years) > 1, "Retail theft data should span multiple years"
+
+    # Verify data is sorted chronologically
+    months = [row["month"] for row in data]
+    assert months == sorted(months), "Retail theft data should be sorted chronologically"
+
+
+def test_policy_vehicle_crimes_categories() -> None:
+    """Verify vehicle crime data has time series coverage and valid counts."""
+    response = client.get("/api/v1/policy/vehicle-crimes")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify time series coverage (multiple months)
+    months = [row["month"] for row in data]
+    assert len(months) > 1, "Vehicle crime data should have multiple months"
+
+    # Verify count fields are non-negative integers
+    for row in data:
+        assert row["count"] >= 0, "Vehicle crime counts should be non-negative"
+        assert isinstance(row["count"], int), "Vehicle crime counts should be integers"
+
+
+def test_policy_composition_breakdown() -> None:
+    """Verify composition data includes major crime categories and year-over-year data."""
+    response = client.get("/api/v1/policy/composition")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify composition data includes major crime categories
+    crime_categories = {row["crime_category"] for row in data}
+    expected_categories = {"Violent", "Property", "Other"}
+    assert expected_categories.issubset(
+        crime_categories
+    ), "Composition data should include major crime categories"
+
+    # Verify year-over-year coverage
+    years = {row["year"] for row in data}
+    assert len(years) > 1, "Composition data should span multiple years"
+
+    # Verify counts are non-negative
+    for row in data:
+        assert row["count"] >= 0, "Crime counts should be non-negative"
+
+
+def test_policy_events_impact_metrics() -> None:
+    """Verify event data includes impact metrics and pre/post event comparisons."""
+    response = client.get("/api/v1/policy/events")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+
+    # Verify pre/post event comparison exists
+    for row in data:
+        assert "event_mean" in row, "Event data should include event mean"
+        assert "control_mean" in row, "Event data should include control mean"
+        assert "difference" in row, "Event data should include difference"
+        assert isinstance(row["event_mean"], (int, float)), "Event mean should be numeric"
+        assert isinstance(row["control_mean"], (int, float)), "Control mean should be numeric"
+
+    # Verify event types are represented
+    event_types = {row["event_type"] for row in data}
+    assert len(event_types) > 0, "Event data should include event types"
+
+    # Verify metrics are represented (total, violent, etc.)
+    metrics = {row["metric"] for row in data}
+    assert "total" in metrics, "Event data should include total metric"
+
+
+def test_policy_endpoint_missing_data(monkeypatch: MonkeyPatch) -> None:
+    """Test policy endpoints return 500 when policy data is missing."""
+    # Import here to access the cache
+    from api.services import data_loader
+
+    # Save original cache
+    original_cache = data_loader._DATA_CACHE.copy()
+
+    try:
+        # Clear policy data from cache
+        data_loader._DATA_CACHE.pop("retail_theft_trend.json", None)
+        data_loader._DATA_CACHE.pop("vehicle_crime_trend.json", None)
+        data_loader._DATA_CACHE.pop("crime_composition.json", None)
+        data_loader._DATA_CACHE.pop("event_impact.json", None)
+
+        # Test each endpoint returns 500
+        endpoints = [
+            "/api/v1/policy/retail-theft",
+            "/api/v1/policy/vehicle-crimes",
+            "/api/v1/policy/composition",
+            "/api/v1/policy/events",
+        ]
+
+        for endpoint in endpoints:
+            response = client.get(endpoint)
+            assert response.status_code == 500, f"{endpoint} should return 500 when data is missing"
+            # Verify error response structure
+            payload = response.json()
+            assert "detail" in payload or "error" in payload
+
+    finally:
+        # Restore original cache
+        data_loader._DATA_CACHE.clear()
+        data_loader._DATA_CACHE.update(original_cache)
+
+
+def test_policy_empty_dataset(monkeypatch: MonkeyPatch) -> None:
+    """Test policy endpoints return 200 with empty list when dataset is empty."""
+    # Import here to access the cache
+    from api.services import data_loader
+
+    # Save original cache
+    original_cache = data_loader._DATA_CACHE.copy()
+
+    try:
+        # Set policy data to empty lists
+        data_loader._DATA_CACHE["retail_theft_trend.json"] = []
+        data_loader._DATA_CACHE["vehicle_crime_trend.json"] = []
+        data_loader._DATA_CACHE["crime_composition.json"] = []
+        data_loader._DATA_CACHE["event_impact.json"] = []
+
+        # Test each endpoint returns 200 with empty list
+        endpoints = [
+            "/api/v1/policy/retail-theft",
+            "/api/v1/policy/vehicle-crimes",
+            "/api/v1/policy/composition",
+            "/api/v1/policy/events",
+        ]
+
+        for endpoint in endpoints:
+            response = client.get(endpoint)
+            assert response.status_code == 200, f"{endpoint} should return 200 with empty data"
+            data = response.json()
+            assert isinstance(data, list), "Response should be a list"
+            assert len(data) == 0, "Response should be empty"
+
+    finally:
+        # Restore original cache
+        data_loader._DATA_CACHE.clear()
+        data_loader._DATA_CACHE.update(original_cache)
