@@ -1,17 +1,18 @@
 # Project State
 
-## Current Status
+## Current Position
 
-- **Current phase:** Milestone complete (`v1.0 Local Containerized Dev`)
-- **Next action:** Start next milestone definition (`$gsd-new-milestone`)
-- **Roadmap coverage:** v1 shipped (12/12 requirements complete)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: February 7, 2026 — Milestone v1.1 started
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated February 7, 2026)
 
 **Core value:** One `docker compose up` command reliably brings up the complete stack locally with small, resource-constrained containers.
-**Current focus:** Planning next milestone requirements and roadmap
+**Current focus:** Define v1.1 requirements and create roadmap phases
 
 ## Milestone Snapshot
 
@@ -27,4 +28,4 @@ See: `.planning/PROJECT.md` (updated February 7, 2026)
 - Phase execution records remain in `.planning/phases/` as historical implementation detail.
 
 ---
-*State updated: February 7, 2026 after v1.0 milestone completion*
+*State updated: February 7, 2026 after starting v1.1 milestone*

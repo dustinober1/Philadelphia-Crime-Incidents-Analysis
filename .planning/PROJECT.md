@@ -1,8 +1,17 @@
-# Crime Incidents Philadelphia - Local Containerized Dev
+# Crime Incidents Philadelphia
 
 ## Current State
 
 Shipped `v1.0 Local Containerized Dev` on February 7, 2026. The project now has a compose-first local runtime with explicit service boundaries (`web`, `api`, `pipeline`), dependency-gated startup health, resource budget controls, and operational recovery/profile guardrails.
+
+## Current Milestone: v1.1 Local Workflow Enhancements
+
+**Goal:** Improve local runtime confidence and machine-fit behavior without changing the compose-first default path.
+
+**Target features:**
+- Automated post-start smoke checks for API endpoint and data artifact readiness.
+- Runtime-mode presets for low-power laptop usage vs high-performance local analysis usage.
+- Guardrails to keep default `docker compose up` behavior stable while enabling optional profile tuning.
 
 ## What This Is
 
@@ -29,8 +38,9 @@ One `docker compose up` command reliably brings up the complete stack locally wi
 
 ### Active
 
-- [ ] Add automated local smoke checks that run after compose startup to verify endpoint and artifact readiness
-- [ ] Add per-profile presets for low-power laptop mode vs high-performance local analysis mode
+- [ ] Developer can run automated post-start smoke checks that verify API endpoint readiness and expected artifact availability after compose startup — v1.1
+- [ ] Developer can choose low-power vs high-performance local runtime presets through clear compose profile conventions and documented resource defaults — v1.1
+- [ ] Default startup path remains `docker compose up` while optional preset modes are explicitly documented and validated — v1.1
 
 ### Out of Scope
 
@@ -41,12 +51,6 @@ One `docker compose up` command reliably brings up the complete stack locally wi
 ## Context
 
 This is a brownfield monorepo with existing analysis, pipeline, API, and frontend layers. Current architecture remains batch-first data generation with API-serving cached artifacts and a static-first frontend consuming API endpoints. Milestone v1.0 hardened local packaging and runtime ergonomics without changing the project's core product boundaries.
-
-## Next Milestone Goals
-
-- Add automated post-start smoke checks for API/data readiness.
-- Add explicit runtime-mode presets for constrained vs high-performance local machines.
-- Preserve default compose startup behavior while extending advanced profile ergonomics.
 
 ## Constraints
 
@@ -65,4 +69,4 @@ This is a brownfield monorepo with existing analysis, pipeline, API, and fronten
 | Success criterion is one-command startup (`docker compose up`) | Clear, observable definition of done | ✓ Good |
 
 ---
-*Last updated: February 7, 2026 after v1.0 milestone completion*
+*Last updated: February 7, 2026 after starting v1.1 milestone*
