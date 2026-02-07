@@ -10,8 +10,14 @@ data/external/*.parquet
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+
+# Coverage reports
 htmlcov/
 .coverage
+.coverage.*
+coverage.xml
+coverage.json
+*.cover
 
 # Existing entries
 data/processed/crime_incidents_combined.parquet
