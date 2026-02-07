@@ -76,7 +76,71 @@ docker compose config | rg -n "cpus|mem_limit"
 - Interval controlled by `PIPELINE_REFRESH_INTERVAL_SECONDS` (default `900`).
 - On refresh failure, pipeline keeps prior artifacts and retries on the next interval.
 
-## Troubleshooting
+## Recovery playbooks
+
+### Failure mode: API never becomes healthy after startup
+
+Symptom:
+- `docker compose ps` shows `pipeline` unhealthy or `api` waiting/restarting.
+
+Recovery steps:
+
+```bash
+docker compose logs --tail=200 pipeline api
+docker compose restart pipeline api
+docker compose ps
+```
+
+Expected recovery signal:
+- `pipeline` and `api` both report `healthy`.
+
+### Failure mode: stale shared-volume exports break API data contract
+
+Symptom:
+- `curl http://localhost:8080/api/health` reports missing exports or stale metadata.
+
+Recovery steps:
+
+```bash
+./scripts/reset_local_stack.sh
+docker compose up -d --build
+```
+
+Expected recovery signal:
+- API health returns `{\"ok\": true}` and no missing exports.
+
+### Failure mode: dependency or Docker cache drift after local code changes
+
+Symptom:
+- Service starts but behavior does not reflect recent dependency or image changes.
+
+Recovery steps:
+
+```bash
+docker compose down
+docker compose build --no-cache pipeline api web
+docker compose up -d
+```
+
+Expected recovery signal:
+- Rebuilt images start cleanly and health checks pass.
+
+## Post-recovery validation checklist
+
+Run these after any recovery flow:
+
+```bash
+docker compose ps
+curl http://localhost:8080/api/health
+python scripts/validate_local_stack.py --skip-startup
+```
+
+Expected signals:
+- `pipeline` and `api` are `healthy`; `web` is `running` or `healthy`.
+- API health payload includes `"ok": true`.
+- Validator reports endpoint and export checks passed.
+
+## Troubleshooting and diagnostics
 
 - Stream logs:
 
@@ -84,7 +148,7 @@ docker compose config | rg -n "cpus|mem_limit"
 docker compose logs -f pipeline api web
 ```
 
-- Validate stack contract end-to-end:
+- Validate stack contract end-to-end (startup + readiness checks):
 
 ```bash
 python scripts/validate_local_stack.py
@@ -98,14 +162,14 @@ python scripts/validate_local_stack.py
 
 ## Reset / clean start
 
-Remove all running services and local volumes:
+Preferred scripted reset:
 
 ```bash
-docker compose down -v
+./scripts/reset_local_stack.sh
 ```
 
-Then bring the stack back:
+Optional deeper reset with dangling image prune:
 
 ```bash
-docker compose up -d --build
+./scripts/reset_local_stack.sh --prune-images
 ```

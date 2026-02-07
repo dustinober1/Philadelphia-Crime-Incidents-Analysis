@@ -248,6 +248,26 @@ docker compose config | rg -n "cpus|mem_limit"
 
 For troubleshooting, reset, and contract details, see `docs/local-compose.md`.
 
+### Recovery and Reset (Local Compose)
+
+Common recovery commands:
+
+```bash
+docker compose logs --tail=200 pipeline api web
+./scripts/reset_local_stack.sh
+docker compose up -d --build
+```
+
+Post-recovery validation checklist:
+
+```bash
+docker compose ps
+curl http://localhost:8080/api/health
+python scripts/validate_local_stack.py --skip-startup
+```
+
+For scenario-specific playbooks, see `docs/local-compose.md`.
+
 ### Required Server Env (Cloud Run)
 
 Set these on the API service:

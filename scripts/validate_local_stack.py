@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 import sys
@@ -50,17 +51,54 @@ def wait_for_http_ok(url: str, timeout_seconds: int = 120) -> None:
     raise RuntimeError(f"Timed out waiting for URL: {url}; last_error={last_error}")
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Validate local compose stack health and endpoint readiness. "
+            "By default this script starts/rebuilds the stack first."
+        )
+    )
+    parser.add_argument(
+        "--skip-startup",
+        action="store_true",
+        help="Do not run `docker compose up -d --build`; only validate running services.",
+    )
+    parser.add_argument(
+        "--api-health-url",
+        default="http://127.0.0.1:8080/api/health",
+        help="API health endpoint URL to validate.",
+    )
+    parser.add_argument(
+        "--web-url",
+        default="http://127.0.0.1:3001",
+        help="Web URL to validate.",
+    )
+    parser.add_argument(
+        "--timeout-seconds",
+        type=int,
+        default=120,
+        help="Max seconds to wait for each endpoint.",
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
     run(["docker", "compose", "config"])
-    run(["docker", "compose", "up", "-d", "--build"])
-    health = wait_for_health("http://127.0.0.1:8080/api/health")
-    wait_for_http_ok("http://127.0.0.1:3001")
+    if not args.skip_startup:
+        run(["docker", "compose", "up", "-d", "--build"])
+
+    health = wait_for_health(args.api_health_url, timeout_seconds=args.timeout_seconds)
+    wait_for_http_ok(args.web_url, timeout_seconds=args.timeout_seconds)
 
     missing = health.get("missing_exports", [])
     if missing:
         raise RuntimeError(f"API reports missing exports: {missing}")
 
     print("Local compose stack validation passed")
+    print(f"- API health: {args.api_health_url}")
+    print(f"- Web endpoint: {args.web_url}")
+    print("- Required API exports: present")
     return 0
 
 
