@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 if ! command -v docker >/dev/null 2>&1; then
-  echo "docker is required" >&2
+  echo "[runtime-mode] docker is required" >&2
   exit 1
 fi
 
@@ -25,7 +25,7 @@ expected_for() {
     high-performance:api) echo "2 2147483648" ;;
     high-performance:web) echo "2 2147483648" ;;
     *)
-      echo "unsupported mode/service: $mode $service" >&2
+      echo "[runtime-mode] unsupported mode/service: $mode $service" >&2
       return 1
       ;;
   esac
@@ -65,12 +65,12 @@ check_mode() {
     actual_mem="$(extract_value "$rendered" "$service" "mem_limit")"
 
     if [[ -z "$actual_cpus" || -z "$actual_mem" ]]; then
-      echo "missing runtime limits for mode=$mode service=$service" >&2
+      echo "[runtime-mode] missing runtime limits for mode=$mode service=$service" >&2
       return 1
     fi
 
     if [[ "$actual_cpus" != "$expected_cpus" || "$actual_mem" != "$expected_mem" ]]; then
-      echo "runtime mismatch for mode=$mode service=$service" >&2
+      echo "[runtime-mode] runtime mismatch for mode=$mode service=$service" >&2
       echo "expected cpus=$expected_cpus mem_limit=$expected_mem" >&2
       echo "actual   cpus=$actual_cpus mem_limit=$actual_mem" >&2
       return 1

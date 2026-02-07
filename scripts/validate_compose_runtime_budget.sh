@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 if ! command -v docker >/dev/null 2>&1; then
-  echo "docker is required" >&2
+  echo "[runtime-budget] docker is required" >&2
   exit 1
 fi
 
@@ -24,7 +24,7 @@ check_service_budget() {
   ')
 
   if [ -z "$block" ]; then
-    echo "Missing service block for $service" >&2
+    echo "[runtime-budget] missing service block for $service" >&2
     return 1
   fi
 
@@ -32,7 +32,7 @@ check_service_budget() {
   actual_mem=$(printf "%s\n" "$block" | awk '/^[[:space:]]+mem_limit:/{print $2; exit}' | tr -d '"')
 
   if [ "$actual_cpus" != "$expected_cpus" ] || [ "$actual_mem" != "$expected_mem" ]; then
-    echo "Default runtime budget mismatch for $service" >&2
+    echo "[runtime-budget] default runtime budget mismatch for $service" >&2
     echo "expected cpus=$expected_cpus mem_limit=$expected_mem" >&2
     echo "actual   cpus=$actual_cpus mem_limit=$actual_mem" >&2
     return 1

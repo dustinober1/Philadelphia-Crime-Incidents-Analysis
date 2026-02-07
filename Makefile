@@ -1,4 +1,4 @@
-.PHONY: dev-web dev-api export-data refresh-data deploy
+.PHONY: dev-web dev-api export-data refresh-data deploy check-runtime-guardrails
 
 dev-web:
 	cd web && npm run dev
@@ -14,3 +14,6 @@ refresh-data:
 
 deploy:
 	firebase deploy && gcloud run deploy philly-crime-api --source api/ --region us-east1 --allow-unauthenticated
+
+check-runtime-guardrails:
+	./scripts/validate_runtime_guardrails.sh
