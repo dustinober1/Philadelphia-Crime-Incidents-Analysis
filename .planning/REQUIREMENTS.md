@@ -44,21 +44,21 @@ Explicitly excluded for this milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SMOKE-01 | TBD | Pending |
-| SMOKE-02 | TBD | Pending |
-| SMOKE-03 | TBD | Pending |
-| SMOKE-04 | TBD | Pending |
-| SMOKE-05 | TBD | Pending |
-| PRESET-01 | TBD | Pending |
-| PRESET-02 | TBD | Pending |
-| PRESET-03 | TBD | Pending |
-| PRESET-04 | TBD | Pending |
+| SMOKE-01 | Phase 4 | Pending |
+| SMOKE-02 | Phase 4 | Pending |
+| SMOKE-03 | Phase 4 | Pending |
+| SMOKE-04 | Phase 4 | Pending |
+| SMOKE-05 | Phase 4 | Pending |
+| PRESET-01 | Phase 5 | Pending |
+| PRESET-02 | Phase 5 | Pending |
+| PRESET-03 | Phase 5 | Pending |
+| PRESET-04 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9 ⚠️
+- Mapped to phases: 9
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: February 7, 2026*
-*Last updated: February 7, 2026 after v1.1 scope approval*
+*Last updated: February 7, 2026 after v1.1 roadmap creation*

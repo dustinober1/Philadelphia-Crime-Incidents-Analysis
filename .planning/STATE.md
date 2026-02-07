@@ -2,17 +2,17 @@
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 4 (ready to discuss)
 Plan: —
-Status: Defining requirements
-Last activity: February 7, 2026 — Milestone v1.1 started
+Status: Roadmap approved pending commit
+Last activity: February 7, 2026 — Drafted v1.1 roadmap phases 4-6
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated February 7, 2026)
 
 **Core value:** One `docker compose up` command reliably brings up the complete stack locally with small, resource-constrained containers.
-**Current focus:** Define v1.1 requirements and create roadmap phases
+**Current focus:** Begin Phase 4 planning (`Smoke-Check Productization`)
 
 ## Milestone Snapshot
 
@@ -28,4 +28,4 @@ See: `.planning/PROJECT.md` (updated February 7, 2026)
 - Phase execution records remain in `.planning/phases/` as historical implementation detail.
 
 ---
-*State updated: February 7, 2026 after starting v1.1 milestone*
+*State updated: February 7, 2026 after drafting v1.1 roadmap*
