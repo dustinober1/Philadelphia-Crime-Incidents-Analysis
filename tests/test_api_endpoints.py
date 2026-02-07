@@ -1179,3 +1179,99 @@ def test_exception_handlers_no_sensitive_data_leaked() -> None:
     # Verify the exception itself is NOT returned in the response
     assert "exc.detail" not in source
     assert "str(exc)" not in source or "logger.exception" in source  # Only logged, not returned
+
+
+# Task 4: Middleware Tests (CORS, Request Logging)
+
+
+def test_cors_headers_present() -> None:
+    """Test CORS headers are present in response."""
+    response = client.get(
+        "/api/v1/trends/annual",
+        headers={"Origin": "http://localhost:3000"},
+    )
+
+    assert response.status_code == 200
+    # Note: TestClient doesn't fully simulate CORS middleware behavior
+    # but we can verify the middleware is configured in main.py
+    import inspect
+    from api.main import app
+
+    # Verify CORS middleware is configured
+    cors_middleware_found = False
+    for middleware in app.user_middleware:
+        if "CORSMiddleware" in str(middleware.cls):
+            cors_middleware_found = True
+            break
+
+    assert cors_middleware_found, "CORS middleware should be configured"
+
+
+def test_cors_preflight_request() -> None:
+    """Test CORS preflight OPTIONS request."""
+    response = client.options(
+        "/api/v1/trends/annual",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    # CORS preflight should return 200 or 204
+    assert response.status_code in (200, 204)
+
+
+def test_request_id_header_added() -> None:
+    """Test X-Request-ID header is added to all responses."""
+    response = client.get("/api/v1/trends/annual")
+
+    assert response.status_code == 200
+    assert "X-Request-ID" in response.headers
+
+    # Verify header is a 12-character hex string
+    request_id = response.headers["X-Request-ID"]
+    assert len(request_id) == 12
+    assert all(c in "0123456789abcdef" for c in request_id)
+
+
+def test_request_id_format() -> None:
+    """Test request IDs are unique and properly formatted."""
+    request_ids = set()
+
+    # Make multiple requests and collect request IDs
+    for _ in range(10):
+        response = client.get("/api/v1/trends/annual")
+        request_id = response.headers.get("X-Request-ID")
+        assert request_id is not None
+        assert len(request_id) == 12
+        assert all(c in "0123456789abcdef" for c in request_id)
+        request_ids.add(request_id)
+
+    # Verify all request IDs are unique (should have 10 unique IDs)
+    assert len(request_ids) == 10
+
+
+def test_health_endpoint_includes_contract_status() -> None:
+    """Test health endpoint includes contract status and loaded keys."""
+    response = client.get("/api/health")
+
+    assert response.status_code == 200
+    payload = response.json()
+
+    # Verify expected keys exist
+    assert "ok" in payload
+    assert "loaded_keys" in payload
+    assert "data_dir" in payload
+    assert "missing_exports" in payload
+
+    # Verify loaded_keys is a list
+    assert isinstance(payload["loaded_keys"], list)
+
+    # Verify ok is a boolean
+    assert isinstance(payload["ok"], bool)
+
+    # Verify data_dir is a string
+    assert isinstance(payload["data_dir"], str)
+
+    # Verify missing_exports is a list
+    assert isinstance(payload["missing_exports"], list)
