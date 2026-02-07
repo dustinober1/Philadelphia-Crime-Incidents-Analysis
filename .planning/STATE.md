@@ -12,9 +12,9 @@
 
 **Progress:**
 ```
-[█░░░░░░░░░░░░░░░░░░░] 17% (1/6 phases)
+[██░░░░░░░░░░░░░░░░░░] 33% (2/6 phases)
 
-Phase 10: Infrastructure     [████████████] Plan 4/4 complete
+Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
 Phase 11: Core Modules        [░░░░░░░░░░] Pending
 Phase 12: API & CLI           [░░░░░░░░░░] Pending
 Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
@@ -56,11 +56,13 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Next Actions
 
-1. Execute Phase 11: Write tests for core modules
-2. Execute Phase 12: Write tests for API & CLI
-3. Execute Phase 13: Write tests for pipeline & support
-4. Execute Phase 14: Repository cleanup
-5. Execute Phase 15: Quality validation & CI integration
+1. Execute Phase 10 Plan 3: Measure baseline coverage and document gaps
+2. Execute Phase 10 Plan 4: Document testing quality criteria
+3. Execute Phase 11: Write tests for core modules
+4. Execute Phase 12: Write tests for API & CLI
+5. Execute Phase 13: Write tests for pipeline & support
+6. Execute Phase 14: Repository cleanup
+7. Execute Phase 15: Quality validation & CI integration
 
 **Roadmap:** `.planning/milestones/v1.3-ROADMAP.md`
 **Requirements:** `.planning/REQUIREMENTS.md` (32 requirements across 8 categories)
@@ -75,11 +77,10 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **Parallel mode required**: Enable parallel=true in [tool.coverage.run] for pytest-xdist compatibility
 - **Multi-format reports**: Configure XML (for diff-cover), terminal-missing, and HTML reports for different use cases
 
-### From Phase 10 Plan 4 (Testing Quality Criteria)
-- **Fixture-based quality tracking**: Use documentation and fixture markers (strict_assertions, behavior_focused, coverage_report) rather than automated enforcement. Rationale: Developer education more effective than automated checks; fixtures enable future automation if needed.
-- **Documentation-first approach**: Create comprehensive quality criteria before adding enforcement fixtures. Rationale: Developers must understand WHY quality matters before following standards.
-- **Behavior-focused testing**: Test WHAT code does, not HOW it does it. Prevents breaking tests on refactoring.
-- **Meaningful assertions required**: Every test must have at least one assertion checking expected behavior. Prevents coverage gaming (hitting lines without validation).
+### From Phase 10 Plan 2 (CI Pipeline with diff-cover)
+- **Explicit CI worker count**: Use -n4 for GitHub Actions (not -nauto) for predictable resource allocation. Rationale: CI containers have variable CPU detection, explicit count prevents resource issues.
+- **Diff coverage threshold 90%**: Set diff-cover to 90% for PR diffs (lower than 95% total). Rationale: Allows incremental improvement without blocking development during early phases.
+- **PR-only diff validation**: Run diff-cover only on pull requests, not on main branch pushes. Rationale: Avoid blocking commits while building coverage baseline.
 
 ## Known Issues
 
@@ -89,17 +90,15 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 13:54 UTC
-**Stopped at:** Completed Phase 10 Plan 4 (Testing Quality Criteria)
+**Last session:** 2026-02-07 13:55 UTC
+**Stopped at:** Completed Phase 10 Plan 2 (CI Pipeline with Parallel Tests and Diff-Cover)
 **Resume file:** None (all tasks complete)
 
 **Completed work:**
 - Phase 10 Plan 1: Installed pytest-xdist 3.8.0 and diff-cover 10.0.0, configured coverage.py with 95% threshold
-- Phase 10 Plan 2: Created GitHub Actions workflow with diff-cover integration
-- Phase 10 Plan 3: Measured baseline coverage (16% current, 95% target)
-- Phase 10 Plan 4: Created testing quality criteria document with behavior-focused guidelines
+- Phase 10 Plan 2: Created GitHub Actions workflow with pytest -n4, diff-cover integration, and artifact uploads
 
-**Next step:** Execute Phase 11 (Core Module Testing)
+**Next step:** Execute Phase 10 Plan 3 (Measure Baseline Coverage and Document Gaps)
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 10 Plan 1 complete*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 10 Plan 2 complete*
