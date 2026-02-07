@@ -1,6 +1,29 @@
 # Crime Incidents Philadelphia
 
-## Current Milestone: v1.2 Deferred Workflow Enhancements
+## Current Milestone: Pending Definition (Post-v1.2)
+
+**Goal:** Define and execute the next milestone after shipping v1.2 deferred workflow enhancements.
+
+## Current State
+
+Shipped `v1.2 Deferred Workflow Enhancements` on February 7, 2026.
+
+Current delivered baseline:
+- Compose-first local stack remains the default startup path (`docker compose up -d --build`).
+- Validation now supports machine-readable output (`--format json|yaml`) with timing metadata and CI-friendly exit semantics.
+- Extended API validation now supports high-value endpoint checks (`--extended`) with data-integrity and performance threshold checks.
+- Runtime recommendation flow now supports host-aware preset guidance (`--recommend`) and auto mode selection (`--mode auto`).
+
+## Next Milestone Goals
+
+- Define v2 requirements and roadmap from deferred scope and newly surfaced operator priorities.
+- Decide delivery order for: metrics export, API contract validation, historical integrity checks, and dynamic runtime adaptation.
+- Close deferred workflow enhancement gaps around standardized error messaging and full preset-consistency validation.
+
+<details>
+<summary>Archived Context Through v1.2 Completion</summary>
+
+## Previous Current Milestone: v1.2 Deferred Workflow Enhancements
 
 **Goal:** Address deferred workflow enhancements (LWF-03 to LWF-05) to further improve local development experience and system capabilities.
 
@@ -9,7 +32,7 @@
 - Implement LWF-03, LWF-04, and LWF-05 requirements
 - Enhance local development productivity and system usability
 
-## Current State
+## Previous Current State
 
 Shipped `v1.1 Local Workflow Enhancements` on February 7, 2026.
 
@@ -18,22 +41,6 @@ Current delivered baseline:
 - Canonical smoke-check workflow validates readiness and export health after startup.
 - Optional runtime presets (`low-power`, `high-performance`) are available without changing default behavior.
 - Canonical runtime guardrail entrypoint (`make check-runtime-guardrails`) protects preset/default regression safety.
-
-<details>
-<summary>Archived Context Through v1.1 Completion</summary>
-
-## Previous Current State
-
-Shipped `v1.0 Local Containerized Dev` on February 7, 2026. The project now has a compose-first local runtime with explicit service boundaries (`web`, `api`, `pipeline`), dependency-gated startup health, resource budget controls, and operational recovery/profile guardrails.
-
-## Previous Current Milestone: v1.1 Local Workflow Enhancements
-
-**Goal:** Improve local runtime confidence and machine-fit behavior without changing the compose-first default path.
-
-**Target features:**
-- Automated post-start smoke checks for API endpoint and data artifact readiness.
-- Runtime-mode presets for low-power laptop usage vs high-performance local analysis usage.
-- Guardrails to keep default `docker compose up` behavior stable while enabling optional profile tuning.
 
 ## What This Is
 
@@ -57,28 +64,28 @@ One `docker compose up` command reliably brings up the complete stack locally wi
 - ✓ Container images are minimized for size using slim/multi-stage builds where practical — v1.0
 - ✓ Runtime resource limits are enforced for CPU and memory per service in local compose configuration — v1.0
 - ✓ Local startup/docs make local-only operation the default development path — v1.0
+- ✓ Developer can run automated post-start smoke checks that verify API endpoint readiness and expected artifact availability after compose startup — v1.1
+- ✓ Developer can choose low-power vs high-performance local runtime presets through clear compose profile conventions and documented resource defaults — v1.1
+- ✓ Default startup path remains `docker compose up` while optional preset modes are explicitly documented and validated — v1.1
 
 ### Active
 
-- [ ] Developer can run automated post-start smoke checks that verify API endpoint readiness and expected artifact availability after compose startup — v1.1
-- [ ] Developer can choose low-power vs high-performance local runtime presets through clear compose profile conventions and documented resource defaults — v1.1
-- [ ] Default startup path remains `docker compose up` while optional preset modes are explicitly documented and validated — v1.1
+- [ ] Define next milestone requirements (`$gsd-new-milestone`)
 
 ### Out of Scope
 
 - Cloud hosting and deployment targets (Cloud Run/Firebase/prod infra) — explicitly excluded by scope change to local-only hosting
-- Non-local runtime environments and remote managed services — explicitly excluded to reduce complexity for this milestone
-- Work not required for local containerized operation — excluded until local-first workflow is complete
+- Non-local runtime environments and remote managed services — explicitly excluded to reduce complexity for current local workflow scope
 
 ## Context
 
-This is a brownfield monorepo with existing analysis, pipeline, API, and frontend layers. Current architecture remains batch-first data generation with API-serving cached artifacts and a static-first frontend consuming API endpoints. Milestone v1.0 hardened local packaging and runtime ergonomics without changing the project's core product boundaries.
+This is a brownfield monorepo with existing analysis, pipeline, API, and frontend layers. Current architecture remains batch-first data generation with API-serving cached artifacts and a static-first frontend consuming API endpoints.
 
 ## Constraints
 
-- **Hosting**: Local development only — no non-local hosting in this scope
+- **Hosting**: Local development only — no non-local hosting in current scope
 - **Runtime Footprint**: Low memory/CPU and small image sizes — to keep local runs lightweight
-- **Orchestration**: Docker Compose command parity — single-command bring-up is mandatory
+- **Orchestration**: Docker Compose command parity — single-command bring-up remains mandatory
 - **Architecture**: Preserve existing service boundaries — avoid regressions in analysis/API/frontend capabilities
 
 ## Key Decisions
@@ -86,11 +93,11 @@ This is a brownfield monorepo with existing analysis, pipeline, API, and fronten
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Local-only hosting for this scope | Reduce delivery complexity and optimize developer workflow | ✓ Good |
-| Multi-container approach is allowed/expected | System has distinct services that should remain separately operable | ✓ Good |
-| Optimize for both image size and runtime resources | Keep local development fast and practical on modest machines | ✓ Good |
-| Success criterion is one-command startup (`docker compose up`) | Clear, observable definition of done | ✓ Good |
+| Keep default startup unchanged while adding optional workflow/preset tooling | Preserve operator muscle memory and reduce rollout risk | ✓ Good |
+| Add machine-readable and extended validation as opt-in flags | Avoid regressing baseline startup verification path | ✓ Good |
+| Introduce resource-aware recommendation before dynamic auto-tuning | Deliver predictable behavior before runtime adaptivity complexity | ✓ Good |
 
 </details>
 
 ---
-*Last updated: February 6, 2026 after v1.2 milestone initialization*
+*Last updated: February 7, 2026 after v1.2 milestone completion*

@@ -1,5 +1,30 @@
 # Project Milestones: Crime Incidents Philadelphia
 
+## v1.2 Deferred Workflow Enhancements (Shipped: 2026-02-07)
+
+**Delivered:** Machine-readable validation output, extended high-value API endpoint checks, and host-aware smart runtime preset recommendations.
+
+**Phases completed:** 7-9 (3 plans total)
+
+**Key accomplishments:**
+- Added structured smoke-check outputs (`human`, `json`, `yaml`) with timing metadata and automation-friendly exit behavior.
+- Added extended endpoint validation path with endpoint-type integrity checks and performance thresholds.
+- Added cross-platform resource detection and runtime recommendation engine for auto-mode compose workflows.
+- Extended operator documentation for structured output, extended checks, and host-aware runtime guidance.
+- Closed all mapped v1.2 milestone requirements with passing milestone audit (`12/12`).
+
+**Stats:**
+- 17 files created/modified
+- 1364 lines added, 416 removed
+- 3 phases, 3 plans, 51 tracked work items
+- 1 day from milestone kickoff to archive readiness
+
+**Git range:** `docs: start milestone v1.2 Deferred Workflow Enhancements` (`1b62780`) → `feat(roadmap): create v1.2 milestone roadmap with phases 7-9` (`088950c`)
+
+**What's next:** Define the next milestone via `$gsd-new-milestone` (fresh requirements + roadmap).
+
+---
+
 ## v1.1 Local Workflow Enhancements (Shipped: 2026-02-07)
 
 **Delivered:** Canonical post-start smoke checks, optional runtime presets, and regression guardrails while preserving default compose startup behavior.
