@@ -18,7 +18,7 @@
 - [x] **PRESET-01**: Developer can run a documented low-power runtime mode that applies explicit reduced CPU/memory limits for pipeline, API, and web services.
 - [x] **PRESET-02**: Developer can run a documented high-performance runtime mode that applies explicit increased CPU/memory limits for heavier local analysis workflows.
 - [x] **PRESET-03**: Default startup command (`docker compose up -d --build`) remains unchanged and still uses the documented baseline runtime budget values.
-- [ ] **PRESET-04**: Automated validation checks verify both preset render behavior and default-mode regression safety.
+- [x] **PRESET-04**: Automated validation checks verify both preset render behavior and default-mode regression safety.
 
 ## v2 Requirements
 
@@ -52,7 +52,7 @@ Explicitly excluded for this milestone.
 | PRESET-01 | Phase 5 | Complete |
 | PRESET-02 | Phase 5 | Complete |
 | PRESET-03 | Phase 5 | Complete |
-| PRESET-04 | Phase 6 | Pending |
+| PRESET-04 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 9 total
@@ -61,4 +61,4 @@ Explicitly excluded for this milestone.
 
 ---
 *Requirements defined: February 7, 2026*
-*Last updated: February 7, 2026 after Phase 5 completion*
+*Last updated: February 7, 2026 after Phase 6 completion*
