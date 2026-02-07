@@ -52,24 +52,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ORCH-01 | Unmapped | Pending |
-| ORCH-02 | Unmapped | Pending |
-| ORCH-03 | Unmapped | Pending |
-| FOOT-01 | Unmapped | Pending |
-| FOOT-02 | Unmapped | Pending |
-| FOOT-03 | Unmapped | Pending |
-| CONF-01 | Unmapped | Pending |
-| CONF-02 | Unmapped | Pending |
-| CONF-03 | Unmapped | Pending |
-| DEVX-01 | Unmapped | Pending |
-| DEVX-02 | Unmapped | Pending |
-| DEVX-03 | Unmapped | Pending |
+| ORCH-01 | Phase 1 | Pending |
+| ORCH-02 | Phase 1 | Pending |
+| ORCH-03 | Phase 1 | Pending |
+| CONF-01 | Phase 1 | Pending |
+| CONF-02 | Phase 1 | Pending |
+| CONF-03 | Phase 1 | Pending |
+| FOOT-01 | Phase 2 | Pending |
+| FOOT-02 | Phase 2 | Pending |
+| FOOT-03 | Phase 2 | Pending |
+| DEVX-01 | Phase 3 | Pending |
+| DEVX-02 | Phase 3 | Pending |
+| DEVX-03 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: February 7, 2026*
-*Last updated: February 7, 2026 after initial definition*
+*Last updated: February 7, 2026 after roadmap creation*
