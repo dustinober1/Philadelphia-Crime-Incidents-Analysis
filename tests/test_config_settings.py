@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+import yaml
 from pydantic import ValidationError
 
 from analysis.config.settings import BaseConfig, GlobalConfig
@@ -93,3 +94,82 @@ class TestBaseConfigDefaults:
         """Verify version defaults to "v1.0"."""
         config = BaseConfig()
         assert config.version == "v1.0"
+
+
+class TestGlobalConfigYamlLoading:
+    """Test GlobalConfig loading from YAML files."""
+
+    def test_global_config_loads_from_yaml(self, tmp_path, monkeypatch):
+        """Verify GlobalConfig loads values from global.yaml."""
+        # Create config directory and YAML file
+        config_dir = tmp_path / "config"
+        config_dir.mkdir()
+        config_file = config_dir / "global.yaml"
+
+        config_data = {
+            "output_dir": str(tmp_path / "custom_reports"),
+            "dpi": 150,
+            "output_format": "svg",
+            "fast_sample_frac": 0.5,
+            "cache_enabled": False,
+            "log_level": "DEBUG",
+        }
+
+        with open(config_file, "w") as f:
+            yaml.dump(config_data, f)
+
+        # Change to tmp_path so config/global.yaml is found
+        monkeypatch.chdir(tmp_path)
+
+        config = GlobalConfig()
+        assert config.dpi == 150
+        assert config.output_format == "svg"
+        assert config.fast_sample_frac == 0.5
+        assert config.cache_enabled is False
+        assert config.log_level == "DEBUG"
+
+    def test_global_config_yaml_overrides_defaults(self, tmp_path, monkeypatch):
+        """Verify YAML values override defaults."""
+        config_dir = tmp_path / "config"
+        config_dir.mkdir()
+        config_file = config_dir / "global.yaml"
+
+        config_data = {"dpi": 200, "output_format": "pdf"}
+        with open(config_file, "w") as f:
+            yaml.dump(config_data, f)
+
+        monkeypatch.chdir(tmp_path)
+
+        config = GlobalConfig()
+        assert config.dpi == 200  # Overridden
+        assert config.output_format == "pdf"  # Overridden
+        assert config.fast_sample_frac == 0.1  # Default preserved
+
+    def test_global_config_missing_yaml_uses_defaults(self, tmp_path, monkeypatch):
+        """Verify no error when YAML missing (uses defaults)."""
+        # Create empty tmp_path with no config directory
+        monkeypatch.chdir(tmp_path)
+
+        # Should not raise an error
+        config = GlobalConfig()
+        assert config.dpi == 300  # Default
+        assert config.output_format == "png"  # Default
+
+    def test_global_config_yaml_partial_config(self, tmp_path, monkeypatch):
+        """Verify partial YAML uses defaults for unspecified fields."""
+        config_dir = tmp_path / "config"
+        config_dir.mkdir()
+        config_file = config_dir / "global.yaml"
+
+        # Only specify one field
+        config_data = {"dpi": 400}
+        with open(config_file, "w") as f:
+            yaml.dump(config_data, f)
+
+        monkeypatch.chdir(tmp_path)
+
+        config = GlobalConfig()
+        assert config.dpi == 400  # From YAML
+        assert config.output_format == "png"  # Default
+        assert config.fast_sample_frac == 0.1  # Default
+        assert config.cache_enabled is True  # Default
