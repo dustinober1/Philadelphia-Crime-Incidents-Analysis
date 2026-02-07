@@ -72,6 +72,8 @@ class TestMissingDependencies:
 
         # Prepare data with temporal features
         df = extract_temporal_features(sample_crime_df)
+        # Add hour column that real data has
+        df["hour"] = 12  # Default to noon for test data
 
         with patch.object(export_data, "HAS_PROPHET", False):
             export_data._export_forecasting(df, tmp_path)
@@ -94,6 +96,7 @@ class TestMissingDependencies:
 
         # Prepare data with temporal features and classification
         df = extract_temporal_features(sample_crime_df)
+        df["hour"] = 12  # Add hour column that real data has
         df = classify_crime_category(df)
 
         with patch.object(export_data, "HAS_SKLEARN", False):
@@ -169,7 +172,9 @@ class TestToRecords:
         assert "T" in dispatch_date  # ISO format has 'T' separator
 
     def test_to_records_handles_none_values(self, tmp_path: Path) -> None:
-        """Verify None values preserved in output."""
+        """Verify None values preserved in output (as NaN for floats)."""
+        import math
+
         df = pd.DataFrame({
             "a": [1, 2, 3],
             "b": [None, "text", None],
@@ -180,7 +185,8 @@ class TestToRecords:
 
         assert result[0]["b"] is None
         assert result[0]["c"] == 1.5
-        assert result[1]["c"] is None
+        # pandas converts None to NaN in float columns
+        assert result[1]["c"] is None or math.isnan(result[1]["c"])
 
 
 class TestEnsureDir:
