@@ -1,0 +1,49 @@
+/Users/dustinober/Library/Python/3.9/lib/python/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] filterwarnings=' in config file pyproject.toml
+  warn(
+Name                                       Stmts   Miss  Cover   Missing
+------------------------------------------------------------------------
+analysis/artifact_manager.py                  28     28  0.00%   3-121
+analysis/cli/chief.py                        164    164  0.00%   11-350
+analysis/cli/forecasting.py                  133    133  0.00%   11-266
+analysis/cli/main.py                          28     28  0.00%   19-113
+analysis/cli/patrol.py                       221    221  0.00%   12-430
+analysis/cli/policy.py                       165    165  0.00%   12-357
+analysis/config.py                            10     10  0.00%   3-26
+analysis/config/schemas/chief.py              20     20  0.00%   3-49
+analysis/config/schemas/forecasting.py        15     15  0.00%   3-40
+analysis/config/schemas/patrol.py             32     32  0.00%   3-77
+analysis/config/schemas/policy.py             30     30  0.00%   3-76
+analysis/config/settings.py                   30     30  0.00%   3-94
+analysis/config_loader.py                     56     56  0.00%   3-108
+analysis/data/cache.py                        15     15  0.00%   12-49
+analysis/data/loading.py                      55     55  0.00%   19-218
+analysis/data/preprocessing.py                25     25  0.00%   16-150
+analysis/data/validation.py                   64     64  0.00%   18-230
+analysis/event_utils.py                       66     66  0.00%   3-231
+analysis/models/classification.py             70     70  0.00%   11-278
+analysis/models/time_series.py                48     48  0.00%   11-181
+analysis/models/validation.py                 60     60  0.00%   11-280
+analysis/phase2_config_loader.py              70     70  0.00%   3-171
+analysis/phase3_config_loader.py              31     31  0.00%   3-53
+analysis/report_utils.py                      47     47  0.00%   1-95
+analysis/spatial_utils.py                     75     75  0.00%   10-343
+analysis/utils/classification.py              13     13  0.00%   18-67
+analysis/utils/spatial.py                     69     69  0.00%   18-372
+analysis/utils/temporal.py                    14     14  0.00%   20-75
+analysis/validate_phase3.py                  106    106  0.00%   3-196
+analysis/visualization/forecast_plots.py     146    146  0.00%   11-500
+analysis/visualization/helpers.py              9      9  0.00%   16-61
+analysis/visualization/plots.py               38     38  0.00%   17-167
+analysis/visualization/style.py               19     19  0.00%   17-54
+api/main.py                                   61     61  0.00%   3-153
+api/routers/forecasting.py                    11     11  0.00%   3-21
+api/routers/metadata.py                        8      8  0.00%   3-16
+api/routers/policy.py                         17     17  0.00%   3-31
+api/routers/questions.py                     163    163  0.00%   3-249
+api/routers/spatial.py                        17     17  0.00%   3-31
+api/routers/trends.py                         30     30  0.00%   3-48
+pipeline/export_data.py                      197    197  0.00%   3-372
+pipeline/refresh_data.py                      52     52  0.00%   3-110
+------------------------------------------------------------------------
+TOTAL                                       2528   2528  0.00%
+Coverage failure: total of 0.00 is less than fail-under=95.00
