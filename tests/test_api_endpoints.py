@@ -105,3 +105,82 @@ def test_error_payload_shape_for_http_errors() -> None:
     payload = response.json()
     assert payload["error"] == "http_error"
     assert "status must be answered or pending" in payload["message"]
+
+
+# Spatial endpoint tests
+def test_spatial_districts() -> None:
+    """Test GET /api/v1/spatial/districts returns valid GeoJSON."""
+    response = client.get("/api/v1/spatial/districts")
+
+    assert response.status_code == 200
+    geojson = response.json()
+
+    # Verify GeoJSON structure
+    assert isinstance(geojson, dict)
+    assert geojson.get("type") == "FeatureCollection"
+    assert "features" in geojson
+    assert isinstance(geojson["features"], list)
+
+    # Verify feature structure
+    if len(geojson["features"]) > 0:
+        feature = geojson["features"][0]
+        assert "geometry" in feature
+        assert "properties" in feature
+        assert feature.get("type") == "Feature"
+
+
+def test_spatial_tracts() -> None:
+    """Test GET /api/v1/spatial/tracts returns valid GeoJSON."""
+    response = client.get("/api/v1/spatial/tracts")
+
+    assert response.status_code == 200
+    geojson = response.json()
+
+    # Verify GeoJSON FeatureCollection structure
+    assert geojson.get("type") == "FeatureCollection"
+    assert isinstance(geojson.get("features"), list)
+
+    # Verify features have Polygon or MultiPolygon geometry
+    if len(geojson["features"]) > 0:
+        feature = geojson["features"][0]
+        geometry = feature.get("geometry", {})
+        geom_type = geometry.get("type")
+        assert geom_type in {"Polygon", "MultiPolygon"}
+
+
+def test_spatial_hotspots() -> None:
+    """Test GET /api/v1/spatial/hotspots returns valid GeoJSON."""
+    response = client.get("/api/v1/spatial/hotspots")
+
+    assert response.status_code == 200
+    geojson = response.json()
+
+    # Verify GeoJSON FeatureCollection structure
+    assert geojson.get("type") == "FeatureCollection"
+    assert isinstance(geojson.get("features"), list)
+
+    # Verify features have Point geometry (hotspot centroids)
+    if len(geojson["features"]) > 0:
+        feature = geojson["features"][0]
+        geometry = feature.get("geometry", {})
+        assert geometry.get("type") == "Point"
+        assert "coordinates" in geometry
+
+
+def test_spatial_corridors() -> None:
+    """Test GET /api/v1/spatial/corridors returns valid GeoJSON."""
+    response = client.get("/api/v1/spatial/corridors")
+
+    assert response.status_code == 200
+    geojson = response.json()
+
+    # Verify GeoJSON FeatureCollection structure
+    assert geojson.get("type") == "FeatureCollection"
+    assert isinstance(geojson.get("features"), list)
+
+    # Verify features have LineString or MultiLineString geometry
+    if len(geojson["features"]) > 0:
+        feature = geojson["features"][0]
+        geometry = feature.get("geometry", {})
+        geom_type = geometry.get("type")
+        assert geom_type in {"LineString", "MultiLineString"}
