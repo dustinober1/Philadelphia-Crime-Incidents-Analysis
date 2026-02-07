@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Local Containerized Dev** — Phases 1-3 shipped February 7, 2026. Full archive: `.planning/milestones/v1.0-ROADMAP.md`
-- ◆ **v1.1 Local Workflow Enhancements** — Phase 4 completed February 7, 2026; phases 5-6 planned.
+- ◆ **v1.1 Local Workflow Enhancements** — Phases 4-5 completed February 7, 2026; phase 6 planned.
 
 ## Current Milestone: v1.1 Local Workflow Enhancements
 
@@ -14,7 +14,7 @@
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
 | 4 | ✅ Smoke-Check Productization | Make post-start readiness validation canonical and reliable | SMOKE-01, SMOKE-02, SMOKE-03, SMOKE-04, SMOKE-05 | 4 |
-| 5 | Runtime Preset Modes | Introduce low-power and high-performance runtime modes without changing defaults | PRESET-01, PRESET-02, PRESET-03 | 4 |
+| 5 | ✅ Runtime Preset Modes | Introduce low-power and high-performance runtime modes without changing defaults | PRESET-01, PRESET-02, PRESET-03 | 4 |
 | 6 | Preset and Regression Guardrails | Ensure preset behavior and default-mode safety remain stable over time | PRESET-04 | 4 |
 
 ## Phase Details
@@ -35,6 +35,7 @@
 ### Phase 5: Runtime Preset Modes
 
 **Goal:** Add explicit low-power and high-performance runtime mode presets while preserving default behavior.
+**Status:** Complete (verified February 7, 2026)
 **Depends on:** Phase 4
 **Requirements:** PRESET-01, PRESET-02, PRESET-03
 
