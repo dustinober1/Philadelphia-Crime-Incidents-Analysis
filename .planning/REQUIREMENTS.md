@@ -7,9 +7,9 @@
 
 ### Orchestration
 
-- [ ] **ORCH-01**: Developer can start required local services (`web`, `api`, `pipeline`, and supporting services) with one `docker compose up` command from repository root.
-- [ ] **ORCH-02**: Each major service boundary (`web`, `api`, `pipeline`) runs in its own container so services can be started, stopped, and debugged independently.
-- [ ] **ORCH-03**: Local startup uses health checks and dependency gating so services wait for required dependencies before accepting traffic.
+- [x] **ORCH-01**: Developer can start required local services (`web`, `api`, `pipeline`, and supporting services) with one `docker compose up` command from repository root.
+- [x] **ORCH-02**: Each major service boundary (`web`, `api`, `pipeline`) runs in its own container so services can be started, stopped, and debugged independently.
+- [x] **ORCH-03**: Local startup uses health checks and dependency gating so services wait for required dependencies before accepting traffic.
 
 ### Runtime Footprint
 
@@ -19,9 +19,9 @@
 
 ### Local Config and Data Contract
 
-- [ ] **CONF-01**: Project provides a reproducible local environment variable contract (documented variables and example file) required for compose startup.
-- [ ] **CONF-02**: Pipeline and API share an explicit, documented artifact path/volume contract so freshly exported data is what API serves locally.
-- [ ] **CONF-03**: Local default startup path does not require cloud credentials or hosted cloud services for baseline functionality.
+- [x] **CONF-01**: Project provides a reproducible local environment variable contract (documented variables and example file) required for compose startup.
+- [x] **CONF-02**: Pipeline and API share an explicit, documented artifact path/volume contract so freshly exported data is what API serves locally.
+- [x] **CONF-03**: Local default startup path does not require cloud credentials or hosted cloud services for baseline functionality.
 
 ### Developer UX
 
@@ -52,12 +52,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ORCH-01 | Phase 1 | Pending |
-| ORCH-02 | Phase 1 | Pending |
-| ORCH-03 | Phase 1 | Pending |
-| CONF-01 | Phase 1 | Pending |
-| CONF-02 | Phase 1 | Pending |
-| CONF-03 | Phase 1 | Pending |
+| ORCH-01 | Phase 1 | Complete |
+| ORCH-02 | Phase 1 | Complete |
+| ORCH-03 | Phase 1 | Complete |
+| CONF-01 | Phase 1 | Complete |
+| CONF-02 | Phase 1 | Complete |
+| CONF-03 | Phase 1 | Complete |
 | FOOT-01 | Phase 2 | Pending |
 | FOOT-02 | Phase 2 | Pending |
 | FOOT-03 | Phase 2 | Pending |
@@ -72,4 +72,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: February 7, 2026*
-*Last updated: February 7, 2026 after roadmap creation*
+*Last updated: February 7, 2026 after Phase 1 completion*
