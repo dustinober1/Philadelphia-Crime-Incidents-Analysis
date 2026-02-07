@@ -12,11 +12,11 @@
 
 **Progress:**
 ```
-[███████░░░░░░░░░░░░░░] 53% (3/6 phases complete, Phase 12: 6/8 plans done)
+[███████░░░░░░░░░░░░░░] 53% (3/6 phases complete, Phase 12: 7/8 plans done)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
 Phase 11: Core Modules        [██████████] COMPLETE (6/6 plans) ✓ 81.75% coverage
-Phase 12: API & CLI           [███████░░] IN PROGRESS (6/8 plans) ✓ trends, spatial, policy, forecasting, metadata, questions
+Phase 12: API & CLI           [███████░░] IN PROGRESS (7/8 plans) ✓ trends, spatial, policy, forecasting, metadata, questions, main
 Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
 Phase 15: Quality & CI        [░░░░░░░░░░] Pending
@@ -168,9 +168,9 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 17:34 UTC
-**Stopped at:** Completed Phase 12 Plan 4 (Forecasting API Endpoints) - 7 tests added, 100% coverage for api/routers/forecasting.py
-**Resume file:** None (continue with Phase 12 Plan 5)
+**Last session:** 2026-02-07 17:28 UTC
+**Stopped at:** Completed Phase 12 Plan 6 (CLI Main Commands) - 10 tests added, 100% coverage for analysis/cli/main.py
+**Resume file:** None (continue with Phase 12 Plan 7)
 
 **Completed work:**
 - Phase 10: Test infrastructure, CI pipeline, baseline coverage measurement (4/4 plans complete)
@@ -179,14 +179,23 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - Phase 12 Plan 2: Spatial endpoint tests with GeoJSON structure validation
 - Phase 12 Plan 3: Policy endpoint tests with 100% coverage (10 tests)
 - Phase 12 Plan 4: Forecasting endpoint tests with 100% coverage (7 tests)
+- Phase 12 Plan 6: CLI main commands tests with 100% coverage (10 tests)
 
-**Next step:** Execute Phase 12 Plan 5 (Questions API Endpoints)
+**Next step:** Execute Phase 12 Plan 7 (CLI Group Commands)
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 12 (4/8 plans complete)*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 12 (7/8 plans complete)*
 
 
 ### From Phase 12 Plan 1 (Trends API Endpoints)
 - **TestClient error handling pattern**: Test error handling by testing underlying functions (get_data) directly instead of via TestClient, because TestClient does not propagate unhandled exceptions (KeyError) the same way as real HTTP requests
 - **Data structure validation over specific values**: Tests validate response structure (expected keys, data types) rather than asserting specific data values to make tests resilient to data changes
 - **Query parameter test coverage**: Test with valid parameters, edge cases (start > end returns empty), and validation errors (422 for non-integer year)
+
+### From Phase 12 Plan 6 (CLI Main Commands)
+- **CLI testing with CliRunner**: Use typer.testing.CliRunner to invoke CLI commands programmatically for integration testing
+- **Combined task execution**: All CLI main tests created in single atomic commit since tasks were interdependent (all in one file)
+- **Rich output validation**: Validate textual structure (tables, panels) rather than ANSI codes since CliRunner may not preserve terminal formatting
+- **100% coverage achieved**: analysis/cli/main.py fully covered (28 statements) with 10 tests across 3 test classes
+- **Exit code verification**: All CLI commands tested for successful execution (exit_code == 0)
+- **Output content validation**: Tests check for expected text content (data sources, analysis areas, version info)
