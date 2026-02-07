@@ -1,5 +1,6 @@
 """FastAPI endpoint smoke tests for web conversion API."""
 
+import pytest
 from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
 
@@ -184,3 +185,49 @@ def test_spatial_corridors() -> None:
         geometry = feature.get("geometry", {})
         geom_type = geometry.get("type")
         assert geom_type in {"LineString", "MultiLineString"}
+
+
+# Forecasting endpoint tests
+
+
+def test_forecasting_time_series() -> None:
+    """Test GET /api/v1/forecasting/time-series returns valid forecast data."""
+    response = client.get("/api/v1/forecasting/time-series")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert isinstance(payload, dict)
+
+    # Verify expected top-level keys exist
+    assert "historical" in payload
+    assert "forecast" in payload
+    assert "model" in payload
+
+    # Verify forecast data is a list
+    assert isinstance(payload["forecast"], list)
+    assert len(payload["forecast"]) > 0
+
+    # Verify forecast items have date/value structure with confidence intervals
+    first_forecast = payload["forecast"][0]
+    assert "ds" in first_forecast  # date field
+    assert "yhat" in first_forecast  # prediction
+    assert "yhat_lower" in first_forecast  # lower confidence bound
+    assert "yhat_upper" in first_forecast  # upper confidence bound
+
+
+def test_forecasting_classification() -> None:
+    """Test GET /api/v1/forecasting/classification returns feature importance data."""
+    response = client.get("/api/v1/forecasting/classification")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert isinstance(payload, list)
+    assert len(payload) > 0
+
+    # Verify each row has feature and importance fields
+    first_feature = payload[0]
+    assert "feature" in first_feature
+    assert "importance" in first_feature
+
+    # Verify importance is a numeric value
+    assert isinstance(first_feature["importance"], (int, float))
