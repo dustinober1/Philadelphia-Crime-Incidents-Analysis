@@ -1,5 +1,14 @@
 # Crime Incidents Philadelphia
 
+## Current Milestone: v1.2 Deferred Workflow Enhancements
+
+**Goal:** Address deferred workflow enhancements (LWF-03 to LWF-05) to further improve local development experience and system capabilities.
+
+**Target features:**
+- Complete remaining workflow enhancements deferred from previous milestones
+- Implement LWF-03, LWF-04, and LWF-05 requirements
+- Enhance local development productivity and system usability
+
 ## Current State
 
 Shipped `v1.1 Local Workflow Enhancements` on February 7, 2026.
@@ -9,15 +18,6 @@ Current delivered baseline:
 - Canonical smoke-check workflow validates readiness and export health after startup.
 - Optional runtime presets (`low-power`, `high-performance`) are available without changing default behavior.
 - Canonical runtime guardrail entrypoint (`make check-runtime-guardrails`) protects preset/default regression safety.
-
-## Next Milestone Goals
-
-To be defined with `$gsd-new-milestone`.
-
-Recommended starting goals:
-- Define new requirements for deferred workflow enhancements (`LWF-03`..`LWF-05`) and any product-facing scope updates.
-- Reconfirm core value and scope boundaries before selecting next phases.
-- Produce a fresh roadmap linked to the new milestone version.
 
 <details>
 <summary>Archived Context Through v1.1 Completion</summary>
@@ -93,4 +93,4 @@ This is a brownfield monorepo with existing analysis, pipeline, API, and fronten
 </details>
 
 ---
-*Last updated: February 7, 2026 after v1.1 milestone completion*
+*Last updated: February 6, 2026 after v1.2 milestone initialization*
