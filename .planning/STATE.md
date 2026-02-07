@@ -12,10 +12,10 @@
 
 **Progress:**
 ```
-[███░░░░░░░░░░░░░░░░░░] 39% (2.33/6 phases)
+[████░░░░░░░░░░░░░░░░░] 50% (3/6 phases)
 
 Phase 10: Infrastructure     [██████████] COMPLETE (4/4 plans)
-Phase 11: Core Modules        [██░░░░░░░░] IN PROGRESS (2/6 plans)
+Phase 11: Core Modules        [███░░░░░░░] IN PROGRESS (3/6 plans)
 Phase 12: API & CLI           [░░░░░░░░░░] Pending
 Phase 13: Pipeline & Support  [░░░░░░░░░░] Pending
 Phase 14: Cleanup             [░░░░░░░░░░] Pending
@@ -101,6 +101,14 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - **Prophet testing without training**: Test Prophet configuration and data preparation without calling Prophet.fit() (slow, non-deterministic)
 - **Coverage tool compatibility**: pytest-cov has compatibility issues with numpy/pandas versions causing TypeError during coverage collection. Tests pass, coverage estimated from partial runs.
 
+### From Phase 11 Plan 3 (Test Model Validation)
+- **Mock heavy statistical dependencies**: Mock `statsmodels.stats.diagnostic.acorr_ljungbox` at actual import path to test error handling without installing slow dependency
+- **sklearn NaN handling**: sklearn.metrics functions raise `ValueError` on NaN input, don't filter automatically. Tests should verify error handling.
+- **Fast model training for tests**: Use `n_estimators=5` for RandomForest and LinearRegression for fast CV/walk-forward tests
+- **MASE testing**: Test MASE (Mean Absolute Scaled Error) with known synthetic data: constant series produces infinite MASE, diff series produces calculable ratio
+- **pytest-cov/xdist interaction**: Tests fail when run with coverage and xdist together. Run with `--no-cov` for testing, measure coverage separately.
+- **Mock patch path best practice**: Patch functions at their import location (`statsmodels.stats.diagnostic.acorr_ljungbox`) not where they're used (`analysis.models.validation`)
+
 ## Known Issues
 
 ### From Phase 10
@@ -113,8 +121,8 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 
 ## Session Continuity
 
-**Last session:** 2026-02-07 16:03 UTC
-**Stopped at:** Completed Phase 11 Plan 2 (Time Series Model Testing)
+**Last session:** 2026-02-07 16:02 UTC
+**Stopped at:** Completed Phase 11 Plan 3 (Model Validation Testing)
 **Resume file:** None (all tasks complete)
 
 **Completed work:**
@@ -123,8 +131,9 @@ Phase 15: Quality & CI        [░░░░░░░░░░] Pending
 - Phase 10 Plan 3: Measured baseline coverage (0% across 46 modules, 2528 statements), documented per-module breakdown, created prioritized testing roadmap
 - Phase 11 Plan 1: Wrote tests for data loading (31 tests, 78% coverage for loading.py)
 - Phase 11 Plan 2: Wrote tests for time series models (40 tests, 87% coverage for time_series.py)
+- Phase 11 Plan 3: Wrote tests for model validation (53 tests, 89.39% coverage for validation.py)
 
-**Next step:** Execute Phase 11 Plan 3 (Test Classification Models)
+**Next step:** Execute Phase 11 Plan 4 (Test Spatial Utilities)
 
 ---
-*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 11 (2/6 plans complete)*
+*State updated: February 7, 2026 — v1.3 milestone in progress, Phase 11 (3/6 plans complete)*
