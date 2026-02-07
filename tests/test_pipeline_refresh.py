@@ -81,3 +81,124 @@ class TestValidateArtifactsSuccess:
 
         # Should not raise any exception
         _validate_artifacts(tmp_path)
+
+
+class TestValidateArtifactsFailure:
+    """Tests for _validate_artifacts failure cases."""
+
+    def test_validate_artifacts_raises_missing_files(self, tmp_path: Path) -> None:
+        """Should raise RuntimeError when required files are missing."""
+        # Create only metadata.json to trigger missing file error
+        (tmp_path / "metadata.json").write_text(json.dumps({
+            "total_incidents": 100000,
+            "date_start": "2006-01-01",
+            "date_end": "2024-12-31",
+            "last_updated": "2025-01-15T10:30:00Z",
+            "source": "Philadelphia Police Department",
+            "colors": {"crime": "#FF5733"},
+        }))
+
+        with pytest.raises(RuntimeError, match="Missing required export files"):
+            _validate_artifacts(tmp_path)
+
+    def test_validate_artifacts_raises_invalid_metadata_keys(self, tmp_path: Path) -> None:
+        """Should raise RuntimeError when metadata.json missing required keys."""
+        # Create all files with invalid metadata
+        for file_path in _REQUIRED_FILES:
+            full_path = tmp_path / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            if file_path == "metadata.json":
+                full_path.write_text(json.dumps({"total_incidents": 100000}))  # Missing required keys
+            elif file_path == "annual_trends.json":
+                full_path.write_text(json.dumps([{"year": 2020, "incidents": 10000}]))
+            elif file_path == "forecast.json":
+                full_path.write_text(json.dumps({
+                    "historical": [{"date": "2023-01-01", "value": 100}],
+                    "forecast": [{"date": "2024-01-01", "value": 110}],
+                }))
+            else:
+                full_path.write_text("{}")
+
+        with pytest.raises(RuntimeError, match="metadata.json is missing required keys"):
+            _validate_artifacts(tmp_path)
+
+    def test_validate_artifacts_raises_invalid_annual_trends(self, tmp_path: Path) -> None:
+        """Should raise RuntimeError when annual_trends.json is not a list."""
+        # Create all files with invalid annual_trends
+        for file_path in _REQUIRED_FILES:
+            full_path = tmp_path / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            if file_path == "metadata.json":
+                full_path.write_text(json.dumps({
+                    "total_incidents": 100000,
+                    "date_start": "2006-01-01",
+                    "date_end": "2024-12-31",
+                    "last_updated": "2025-01-15T10:30:00Z",
+                    "source": "Philadelphia Police Department",
+                    "colors": {"crime": "#FF5733"},
+                }))
+            elif file_path == "annual_trends.json":
+                full_path.write_text(json.dumps({"not": "a list"}))  # Not a list
+            elif file_path == "forecast.json":
+                full_path.write_text(json.dumps({
+                    "historical": [{"date": "2023-01-01", "value": 100}],
+                    "forecast": [{"date": "2024-01-01", "value": 110}],
+                }))
+            else:
+                full_path.write_text("{}")
+
+        with pytest.raises(RuntimeError, match="annual_trends.json must be a non-empty list"):
+            _validate_artifacts(tmp_path)
+
+    def test_validate_artifacts_raises_empty_annual_trends(self, tmp_path: Path) -> None:
+        """Should raise RuntimeError when annual_trends.json is empty list."""
+        # Create all files with empty annual_trends
+        for file_path in _REQUIRED_FILES:
+            full_path = tmp_path / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            if file_path == "metadata.json":
+                full_path.write_text(json.dumps({
+                    "total_incidents": 100000,
+                    "date_start": "2006-01-01",
+                    "date_end": "2024-12-31",
+                    "last_updated": "2025-01-15T10:30:00Z",
+                    "source": "Philadelphia Police Department",
+                    "colors": {"crime": "#FF5733"},
+                }))
+            elif file_path == "annual_trends.json":
+                full_path.write_text(json.dumps([]))  # Empty list
+            elif file_path == "forecast.json":
+                full_path.write_text(json.dumps({
+                    "historical": [{"date": "2023-01-01", "value": 100}],
+                    "forecast": [{"date": "2024-01-01", "value": 110}],
+                }))
+            else:
+                full_path.write_text("{}")
+
+        with pytest.raises(RuntimeError, match="annual_trends.json must be a non-empty list"):
+            _validate_artifacts(tmp_path)
+
+    def test_validate_artifacts_raises_invalid_forecast_structure(self, tmp_path: Path) -> None:
+        """Should raise RuntimeError when forecast.json missing historical/forecast."""
+        # Create all files with invalid forecast structure
+        for file_path in _REQUIRED_FILES:
+            full_path = tmp_path / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            if file_path == "metadata.json":
+                full_path.write_text(json.dumps({
+                    "total_incidents": 100000,
+                    "date_start": "2006-01-01",
+                    "date_end": "2024-12-31",
+                    "last_updated": "2025-01-15T10:30:00Z",
+                    "source": "Philadelphia Police Department",
+                    "colors": {"crime": "#FF5733"},
+                }))
+            elif file_path == "annual_trends.json":
+                full_path.write_text(json.dumps([{"year": 2020, "incidents": 10000}]))
+            elif file_path == "forecast.json":
+                full_path.write_text(json.dumps({"only": "historical"}))  # Missing forecast key
+            else:
+                full_path.write_text("{}")
+
+        with pytest.raises(RuntimeError, match="forecast.json must contain historical and forecast fields"):
+            _validate_artifacts(tmp_path)
