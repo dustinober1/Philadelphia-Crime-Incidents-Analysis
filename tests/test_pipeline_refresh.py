@@ -326,3 +326,124 @@ class TestAssertReproducible:
 
         # Verify export_all was called twice
         assert mock_export.call_count == 2
+
+
+class TestRefreshCliRun:
+    """Tests for refresh CLI run command."""
+
+    @patch("pipeline.refresh_data.export_all")
+    def test_refresh_run_creates_exports(self, mock_export: patch, tmp_path: Path) -> None:
+        """Should create exports when run command invoked."""
+        def mock_export_func(output_dir: Path) -> Path:
+            _create_minimal_valid_files(output_dir)
+            return output_dir
+
+        mock_export.side_effect = mock_export_func
+
+        result = runner.invoke(app, ["--output-dir", str(tmp_path)])
+
+        assert result.exit_code == 0
+        assert "Validated exports:" in result.stdout
+        assert str(tmp_path) in result.stdout
+        mock_export.assert_called_once()
+
+    @patch("pipeline.refresh_data.export_all")
+    def test_refresh_run_validates_artifacts(self, mock_export: patch, tmp_path: Path) -> None:
+        """Should validate artifacts after export."""
+        def mock_export_func(output_dir: Path) -> Path:
+            _create_minimal_valid_files(output_dir)
+            return output_dir
+
+        mock_export.side_effect = mock_export_func
+
+        result = runner.invoke(app, ["--output-dir", str(tmp_path)])
+
+        assert result.exit_code == 0
+        # Validation passes (no error message in stdout)
+        assert "Validated exports:" in result.stdout
+
+    @patch("pipeline.refresh_data.export_all")
+    def test_refresh_run_custom_output_dir(self, mock_export: patch, tmp_path: Path) -> None:
+        """Should use custom output directory when specified."""
+        custom_dir = tmp_path / "custom_output"
+
+        def mock_export_func(output_dir: Path) -> Path:
+            _create_minimal_valid_files(output_dir)
+            return output_dir
+
+        mock_export.side_effect = mock_export_func
+
+        result = runner.invoke(app, ["--output-dir", str(custom_dir)])
+
+        assert result.exit_code == 0
+        assert str(custom_dir) in result.stdout
+        mock_export.assert_called_once()
+
+    @patch("pipeline.refresh_data.export_all")
+    @patch("pipeline.refresh_data._assert_reproducible")
+    def test_refresh_run_with_verify_reproducibility(self, mock_repro: patch, mock_export: patch, tmp_path: Path) -> None:
+        """Should run reproducibility check when flag provided."""
+        def mock_export_func(output_dir: Path) -> Path:
+            _create_minimal_valid_files(output_dir)
+            return output_dir
+
+        mock_export.side_effect = mock_export_func
+
+        result = runner.invoke(app, ["--output-dir", str(tmp_path), "--verify-reproducibility"])
+
+        assert result.exit_code == 0
+        assert "Validated exports:" in result.stdout
+        assert "Reproducibility check passed" in result.stdout
+        mock_repro.assert_called_once()
+
+
+# =============================================================================
+# Task 4: Corrupt Artifact Detection Tests
+# =============================================================================
+
+
+class TestCorruptArtifactDetection:
+    """Test detection of corrupt or malformed export artifacts."""
+
+    def test_validate_artifacts_raises_invalid_json(self, tmp_path: Path) -> None:
+        """Verify error when JSON file is malformed."""
+        # Create minimal files for all but one
+        _create_minimal_valid_files(tmp_path)
+
+        # Corrupt metadata.json with invalid JSON
+        (tmp_path / "metadata.json").write_text('{"invalid": json}')
+
+        # Current behavior: JSONDecodeError is raised (not converted to RuntimeError)
+        with pytest.raises(json.JSONDecodeError):
+            _validate_artifacts(tmp_path)
+
+    def test_validate_artifacts_raises_wrong_type_metadata(self, tmp_path: Path) -> None:
+        """Verify error when metadata.json is not a dict."""
+        # Create minimal files
+        _create_minimal_valid_files(tmp_path)
+
+        # Write metadata as a list instead of dict
+        (tmp_path / "metadata.json").write_text(json.dumps(["not", "a", "dict"]))
+
+        # Current behavior: AttributeError on list.keys() (not ideal but that's what happens)
+        with pytest.raises(AttributeError, match="keys"):
+            _validate_artifacts(tmp_path)
+
+    def test_validate_artifacts_raises_missing_nested_keys(self, tmp_path: Path) -> None:
+        """Verify RuntimeError when nested keys missing (e.g., forecast.historical)."""
+        # Create minimal files
+        _create_minimal_valid_files(tmp_path)
+
+        # Write forecast without required nested keys
+        (tmp_path / "forecast.json").write_text(json.dumps({"historical": [], "other": "data"}))
+
+        with pytest.raises(RuntimeError, match="forecast.json must contain historical and forecast fields"):
+            _validate_artifacts(tmp_path)
+
+    def test_load_json_handles_invalid_json(self, tmp_path: Path) -> None:
+        """Verify _load_json raises JSONDecodeError for malformed JSON."""
+        test_file = tmp_path / "invalid.json"
+        test_file.write_text('{"malformed": json}')
+
+        with pytest.raises(json.JSONDecodeError):
+            _load_json(test_file)
