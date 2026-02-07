@@ -471,3 +471,180 @@ class TestGetCoordinateStats:
 
         assert stats["has_coordinates"] == 0
         assert stats["coverage_rate"] == 0
+
+
+class TestDfToGeodataframe:
+    """Tests for df_to_geodataframe function."""
+
+    def test_returns_geodataframe(self):
+        """Returns gpd.GeoDataFrame."""
+        df = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        result = df_to_geodataframe(df)
+
+        assert isinstance(result, gpd.GeoDataFrame)
+
+    def test_geometry_column_created(self):
+        """Creates 'geometry' column with Point objects."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, -75.20],
+            "point_y": [39.95, 40.0]
+        })
+
+        result = df_to_geodataframe(df)
+
+        assert "geometry" in result.columns
+        assert all(isinstance(geom, Point) for geom in result["geometry"] if geom is not None)
+
+    def test_default_crs_is_epsg_4326(self):
+        """Default CRS is EPSG:4326 (WGS84)."""
+        df = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        result = df_to_geodataframe(df)
+
+        assert result.crs == "EPSG:4326"
+
+    def test_custom_crs_parameter(self):
+        """Custom CRS parameter works."""
+        df = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95]
+        })
+
+        result = df_to_geodataframe(df, crs="EPSG:3857")
+
+        assert result.crs == "EPSG:3857"
+
+    def test_nan_coordinates_create_none_geometry(self):
+        """NaN coordinates result in None geometry."""
+        df = pd.DataFrame({
+            "point_x": [-75.16, None, -75.20],
+            "point_y": [39.95, 40.0, None]
+        })
+
+        result = df_to_geodataframe(df)
+
+        # First row has valid geometry
+        assert result["geometry"].iloc[0] is not None
+        # Second and third rows have None geometry
+        assert result["geometry"].iloc[1] is None
+        assert result["geometry"].iloc[2] is None
+
+    def test_custom_x_col_y_col_parameters(self):
+        """Custom column names work."""
+        df = pd.DataFrame({
+            "custom_lon": [-75.16],
+            "custom_lat": [39.95]
+        })
+
+        result = df_to_geodataframe(df, x_col="custom_lon", y_col="custom_lat")
+
+        assert isinstance(result, gpd.GeoDataFrame)
+        assert "geometry" in result.columns
+
+    def test_preserves_original_columns(self):
+        """Preserves all original columns in output."""
+        df = pd.DataFrame({
+            "point_x": [-75.16],
+            "point_y": [39.95],
+            "col1": ["a"],
+            "col2": [100],
+        })
+
+        result = df_to_geodataframe(df)
+
+        assert "col1" in result.columns
+        assert "col2" in result.columns
+        assert result["col1"].iloc[0] == "a"
+        assert result["col2"].iloc[0] == 100
+
+
+class TestLoadBoundaries:
+    """Tests for load_boundaries function."""
+
+    @patch("analysis.utils.spatial.gpd.read_file")
+    @patch("pathlib.Path.exists")
+    def test_load_police_districts_returns_geodataframe(self, mock_exists, mock_read):
+        """Returns gpd.GeoDataFrame for police districts."""
+        # Mock file exists
+        mock_exists.return_value = True
+
+        # Mock GeoDataFrame
+        mock_gdf = MagicMock(spec=gpd.GeoDataFrame)
+        mock_read.return_value = mock_gdf
+
+        result = load_boundaries("police_districts")
+
+        assert result == mock_gdf
+        mock_read.assert_called_once()
+
+    @patch("analysis.utils.spatial.gpd.read_file")
+    @patch("pathlib.Path.exists")
+    def test_load_census_tracts_returns_geodataframe(self, mock_exists, mock_read):
+        """Returns gpd.GeoDataFrame for census tracts."""
+        # Mock file exists
+        mock_exists.return_value = True
+
+        # Mock GeoDataFrame
+        mock_gdf = MagicMock(spec=gpd.GeoDataFrame)
+        mock_read.return_value = mock_gdf
+
+        result = load_boundaries("census_tracts")
+
+        assert result == mock_gdf
+        mock_read.assert_called_once()
+
+    @patch("analysis.utils.spatial.gpd.read_file")
+    @patch("pathlib.Path.exists")
+    def test_load_census_tracts_pop_alias(self, mock_exists, mock_read):
+        """'census_tracts_pop' alias works."""
+        # Mock file exists
+        mock_exists.return_value = True
+
+        # Mock GeoDataFrame
+        mock_gdf = MagicMock(spec=gpd.GeoDataFrame)
+        mock_read.return_value = mock_gdf
+
+        result = load_boundaries("census_tracts_pop")
+
+        assert result == mock_gdf
+
+    def test_unknown_boundary_raises_value_error(self):
+        """Raises ValueError for unknown boundary name."""
+        with pytest.raises(ValueError, match="Unknown boundary name"):
+            load_boundaries("unknown_boundary")
+
+    @patch("pathlib.Path.exists")
+    def test_file_not_found_raises_file_not_found_error(self, mock_exists):
+        """Raises FileNotFoundError when boundary file missing."""
+        # Mock file not exists
+        mock_exists.return_value = False
+
+        with pytest.raises(FileNotFoundError, match="Boundary file not found"):
+            load_boundaries("police_districts")
+
+    @patch("analysis.utils.spatial.gpd.read_file")
+    @patch("pathlib.Path.exists")
+    def test_mock_file_path_uses_repo_root(self, mock_exists, mock_read):
+        """File path constructed from repo root."""
+        # Mock file exists
+        mock_exists.return_value = True
+
+        # Mock GeoDataFrame
+        mock_gdf = MagicMock(spec=gpd.GeoDataFrame)
+        mock_read.return_value = mock_gdf
+
+        load_boundaries("police_districts")
+
+        # Get the call arguments
+        call_args = mock_read.call_args
+        file_path = call_args[0][0]
+
+        # Verify path contains expected components
+        assert "police_districts.geojson" in str(file_path)
