@@ -276,13 +276,8 @@ class TestGeopandasImport:
 class TestFileNotFoundError:
     """Tests for FileNotFoundError handling in loading functions."""
 
-    def test_internal_function_raises_file_not_found(self):
-        """Internal _load_crime_data_parquet raises FileNotFoundError for missing file."""
-        # This tests the error path in the internal cached function
-        # We can't easily mock CRIME_DATA_PATH because the function is cached,
-        # but we can verify the code path exists
-        # The function should have error handling for FileNotFoundError
-        # We can verify this by checking the source code has the error handling
+    def test_load_crime_data_raises_file_not_found(self):
+        """Verify load_crime_data has FileNotFoundError handling in source code."""
         import inspect
 
         from analysis.data.loading import _load_crime_data_parquet
@@ -290,3 +285,148 @@ class TestFileNotFoundError:
         source = inspect.getsource(_load_crime_data_parquet)
         assert "FileNotFoundError" in source
         assert "Crime data not found" in source
+        assert "CRIME_DATA_PATH.exists()" in source
+
+    def test_load_boundaries_raises_file_not_found(self):
+        """Verify load_boundaries has FileNotFoundError handling in source code."""
+        import inspect
+
+        from analysis.data.loading import _load_boundaries_geojson
+
+        source = inspect.getsource(_load_boundaries_geojson)
+        assert "FileNotFoundError" in source
+        assert "Boundary data not found" in source
+        assert "file_path.exists()" in source
+
+    def test_internal_function_raises_file_not_found(self):
+        """Internal _load_crime_data_parquet checks file existence before reading."""
+        import inspect
+
+        from analysis.data.loading import _load_crime_data_parquet
+
+        source = inspect.getsource(_load_crime_data_parquet)
+        # Verify the function has the file existence check
+        assert "if not CRIME_DATA_PATH.exists():" in source
+        assert "raise FileNotFoundError" in source
+
+
+class TestDatetimeParsing:
+    """Tests for datetime parsing from different data types."""
+
+    def test_dispatch_date_parsed_from_category_dtype(self):
+        """dispatch_date is parsed correctly when stored as category dtype in parquet."""
+        # Create a DataFrame with dispatch_date as category dtype
+        import numpy as np
+
+        dates = ["2020-01-01", "2020-01-02", "2020-01-03"]
+        df = pd.DataFrame({"dispatch_date": pd.Categorical(dates)})
+
+        # Mock read_parquet to return our test DataFrame
+        mock_parquet_df = df
+
+        with patch("pandas.read_parquet", return_value=mock_parquet_df):
+            # Need to bypass cache by calling directly or using unique parameters
+            result = _load_crime_data_parquet(clean=False)
+
+            # Verify dispatch_date was parsed to datetime
+            assert pd.api.types.is_datetime64_any_dtype(result["dispatch_date"])
+
+    def test_dispatch_date_parsed_from_string_dtype(self):
+        """dispatch_date is parsed correctly when stored as string dtype."""
+        # Create a DataFrame with dispatch_date as string dtype
+        dates = ["2020-01-01", "2020-01-02", "2020-01-03"]
+        df = pd.DataFrame({"dispatch_date": dates})
+
+        with patch("pandas.read_parquet", return_value=df):
+            result = _load_crime_data_parquet(clean=False)
+
+            # Verify dispatch_date was parsed to datetime
+            assert pd.api.types.is_datetime64_any_dtype(result["dispatch_date"])
+
+    def test_dispatch_date_with_invalid_values(self):
+        """dispatch_date parsing handles invalid values with errors='coerce'."""
+        # Create a DataFrame with some invalid dates
+        dates = ["2020-01-01", "invalid_date", "2020-01-03"]
+        df = pd.DataFrame({"dispatch_date": dates})
+
+        with patch("pandas.read_parquet", return_value=df):
+            result = _load_crime_data_parquet(clean=False)
+
+            # Verify dispatch_date was parsed to datetime
+            assert pd.api.types.is_datetime64_any_dtype(result["dispatch_date"])
+            # Verify invalid dates became NaT (invalid_date becomes NaT)
+            assert result["dispatch_date"].isna().sum() >= 1
+
+
+class TestCleanParameter:
+    """Tests for clean parameter behavior."""
+
+    def test_clean_false_preserves_null_dates(self):
+        """clean=False preserves rows with null dispatch_date."""
+        # Create a DataFrame with some null dates
+        dates = ["2020-01-01", None, "2020-01-03", None]
+        df = pd.DataFrame({
+            "dispatch_date": dates,
+            "other_col": [1, 2, 3, 4]
+        })
+
+        with patch("pandas.read_parquet", return_value=df):
+            result = _load_crime_data_parquet(clean=False)
+
+            # All rows should be preserved
+            assert len(result) == 4
+
+    def test_clean_true_drops_null_dates(self):
+        """clean=True drops rows with null dispatch_date."""
+        # Create a DataFrame with some null dates
+        dates = ["2020-01-01", None, "2020-01-03", None]
+        df = pd.DataFrame({
+            "dispatch_date": dates,
+            "other_col": [1, 2, 3, 4]
+        })
+
+        with patch("pandas.read_parquet", return_value=df):
+            result = _load_crime_data_parquet(clean=True)
+
+            # Only rows with non-null dates should remain
+            assert len(result) == 2
+            assert result["dispatch_date"].notna().all()
+
+
+class TestBoundaryNameValidation:
+    """Tests for boundary name validation in load_boundaries."""
+
+    def test_invalid_boundary_name_raises_value_error(self):
+        """Invalid boundary name raises ValueError."""
+        from analysis.data.loading import _load_boundaries_geojson
+
+        with pytest.raises(ValueError, match="Unknown boundary"):
+            _load_boundaries_geojson("invalid_boundary_name")
+
+    def test_boundary_name_case_sensitivity(self):
+        """Boundary name matching is case-sensitive."""
+        from analysis.data.loading import _load_boundaries_geojson
+
+        # Lowercase should fail (valid names are lowercase)
+        with pytest.raises(ValueError, match="Unknown boundary"):
+            _load_boundaries_geojson("Police_Districts")
+
+    def test_valid_boundary_names_accepted(self):
+        """Valid boundary names are accepted without ValueError."""
+        from analysis.data.loading import _load_boundaries_geojson
+
+        # Valid boundary names should not raise ValueError
+        # They may raise FileNotFoundError if files don't exist, but that's different
+        try:
+            _load_boundaries_geojson("police_districts")
+        except ValueError:
+            pytest.fail("Valid boundary name 'police_districts' raised ValueError")
+        except FileNotFoundError:
+            pass  # Expected if file doesn't exist
+
+        try:
+            _load_boundaries_geojson("census_tracts")
+        except ValueError:
+            pytest.fail("Valid boundary name 'census_tracts' raised ValueError")
+        except FileNotFoundError:
+            pass  # Expected if file doesn't exist
