@@ -1275,3 +1275,166 @@ def test_health_endpoint_includes_contract_status() -> None:
 
     # Verify missing_exports is a list
     assert isinstance(payload["missing_exports"], list)
+
+
+# Task 5: Questions Router Edge Case Tests
+
+
+def test_question_text_too_long(monkeypatch: MonkeyPatch) -> None:
+    """Test question text longer than 1000 characters is rejected."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    # Create question text with >1000 characters
+    long_text = "This is a test question. " * 50  # ~1050 characters
+
+    response = client.post(
+        "/api/v1/questions",
+        json={
+            "name": "Test User",
+            "email": "test@example.com",
+            "question_text": long_text,
+            "honeypot": "",
+        },
+    )
+
+    assert response.status_code == 422
+    # Pydantic validates length before custom validation
+    payload = response.json()
+    assert payload["error"] == "validation_error" or payload["error"] == "http_error"
+
+
+def test_question_text_contains_url(monkeypatch: MonkeyPatch) -> None:
+    """Test question text containing URL is rejected."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    response = client.post(
+        "/api/v1/questions",
+        json={
+            "name": "Test User",
+            "email": "test@example.com",
+            "question_text": "Check http://example.com for more info",
+            "honeypot": "",
+        },
+    )
+
+    assert response.status_code == 422
+    assert "URLs are not allowed" in response.json()["message"]
+
+
+def test_question_text_all_caps_spam(monkeypatch: MonkeyPatch) -> None:
+    """Test all-caps question text is rejected as spam."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    response = client.post(
+        "/api/v1/questions",
+        json={
+            "name": "Test User",
+            "email": "test@example.com",
+            "question_text": "THIS IS DEFINITELY SPAM CLICK HERE NOW",
+            "honeypot": "",
+        },
+    )
+
+    assert response.status_code == 422
+    assert "Likely spam content" in response.json()["message"]
+
+
+def test_honeypot_field_success(monkeypatch: MonkeyPatch) -> None:
+    """Test honeypot field returns success without storing question."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    response = client.post(
+        "/api/v1/questions",
+        json={
+            "name": "Bot",
+            "email": "bot@example.com",
+            "question_text": "I filled the honeypot",
+            "honeypot": "bot-detected",
+        },
+    )
+
+    # Should return success to not tip off bots
+    assert response.status_code == 200
+    payload = response.json()
+    assert "ok" in payload
+    assert payload["ok"] is True
+
+    # Verify question was NOT stored (no id returned)
+    assert "id" not in payload
+
+
+def test_delete_question_removes_from_storage(monkeypatch: MonkeyPatch) -> None:
+    """Test DELETE removes question from in-memory storage."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    # Create a question
+    question_id = _submit_question()
+
+    # Verify question exists in storage
+    assert question_id in questions._IN_MEMORY
+
+    # Login as admin
+    login = client.post("/api/v1/questions/admin/session", json={"password": "test-password"})
+    token = login.json()["token"]
+
+    # Delete the question
+    response = client.delete(
+        f"/api/v1/questions/{question_id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["ok"] is True
+
+    # Verify question was removed from storage
+    assert question_id not in questions._IN_MEMORY
+
+
+def test_empty_question_text_rejected(monkeypatch: MonkeyPatch) -> None:
+    """Test empty question text is rejected."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    response = client.post(
+        "/api/v1/questions",
+        json={
+            "name": "Test User",
+            "email": "test@example.com",
+            "question_text": "   ",  # Only whitespace
+            "honeypot": "",
+        },
+    )
+
+    assert response.status_code == 422
+    assert "question_text must be 1-1000 characters" in response.json()["message"]
+
+
+def test_question_text_with_www_url(monkeypatch: MonkeyPatch) -> None:
+    """Test question text containing www URL is rejected."""
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
+    monkeypatch.setenv("ADMIN_TOKEN_SECRET", "test-token-secret")
+    _reset_questions_state()
+
+    response = client.post(
+        "/api/v1/questions",
+        json={
+            "name": "Test User",
+            "email": "test@example.com",
+            "question_text": "Visit www.example.com for info",
+            "honeypot": "",
+        },
+    )
+
+    assert response.status_code == 422
+    assert "URLs are not allowed" in response.json()["message"]
