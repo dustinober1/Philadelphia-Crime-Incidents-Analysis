@@ -51,8 +51,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      ADMIN_PASSWORD: change-me
-      ADMIN_TOKEN_SECRET: change-me-token-secret
+      # SECURITY: These must be set externally (e.g., in a local .env file that is gitignored) before production deployment.
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set before production deployment}"
+      ADMIN_TOKEN_SECRET: "${ADMIN_TOKEN_SECRET:?ADMIN_TOKEN_SECRET must be set before production deployment}"
       FIRESTORE_COLLECTION_QUESTIONS: questions
       GOOGLE_CLOUD_PROJECT: local-dev
       API_DATA_DIR: /app/api/data

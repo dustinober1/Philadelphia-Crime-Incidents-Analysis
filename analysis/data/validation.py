@@ -20,13 +20,9 @@ from __future__ import annotations
 from datetime import datetime
 
 import pandas as pd
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError, field_validator
 
-# Coordinate bounds for Philadelphia
-PHILLY_LON_MIN = -75.3
-PHILLY_LON_MAX = -74.95
-PHILLY_LAT_MIN = 39.85
-PHILLY_LAT_MAX = 40.15
+from analysis.config import PHILLY_LAT_MAX, PHILLY_LAT_MIN, PHILLY_LON_MAX, PHILLY_LON_MIN
 
 
 class CrimeIncidentValidator(BaseModel):
@@ -145,20 +141,37 @@ def validate_crime_data(
             df.sample(n=sample_size_actual, random_state=42) if len(df) > sample_size_actual else df
         )
 
+    sample_for_validation = sample.rename(columns=str)
+    sample_for_validation = sample_for_validation.where(
+        pd.notna(sample_for_validation),
+        None,
+    )
+    records = sample_for_validation.to_dict(orient="records")
+    sample_index = sample.index.to_list()
+
     errors = []
-    for idx, row in sample.iterrows():
-        try:
-            # Convert row to dict and validate
-            row_dict = {str(k): v for k, v in row.to_dict().items()}
-            # Handle NaN values for optional fields
-            for key, value in row_dict.items():
-                if pd.isna(value):
-                    row_dict[key] = None
-            CrimeIncidentValidator(**row_dict)
-        except ValidationError as e:
-            errors.append((idx, str(e)))
-        except Exception as e:
-            errors.append((idx, f"Unexpected error: {e}"))
+    try:
+        TypeAdapter(list[CrimeIncidentValidator]).validate_python(records)
+    except ValidationError as e:
+        errors_by_row: dict[object, list[str]] = {}
+        for error in e.errors():
+            loc = error.get("loc", ())
+            row_pos = loc[0] if loc else "unknown"
+            field_path = ".".join(str(part) for part in loc[1:]) if len(loc) > 1 else ""
+            error_message = error.get("msg", "Validation error")
+            if field_path:
+                error_message = f"{field_path}: {error_message}"
+
+            if isinstance(row_pos, int) and 0 <= row_pos < len(sample_index):
+                row_idx: object = sample_index[row_pos]
+            else:
+                row_idx = row_pos
+
+            errors_by_row.setdefault(row_idx, []).append(error_message)
+
+        errors = [(idx, "; ".join(messages)) for idx, messages in errors_by_row.items()]
+    except Exception as e:
+        errors.append(("batch", f"Unexpected error: {e}"))
 
     if errors:
         error_msg = "\n".join(
@@ -203,12 +216,10 @@ def validate_coordinates(
         >>> valid_df = validate_coordinates(df)
         >>> print(f"Valid coordinates: {len(valid_df)} / {len(df)}")
     """
-    result = df.copy()
-
     # Check columns exist
-    if x_col not in result.columns:
+    if x_col not in df.columns:
         raise ValueError(f"Column '{x_col}' not found in DataFrame")
-    if y_col not in result.columns:
+    if y_col not in df.columns:
         raise ValueError(f"Column '{y_col}' not found in DataFrame")
 
     # Filter valid coordinates
@@ -216,15 +227,15 @@ def validate_coordinates(
     lat_min, lat_max = lat_bounds
 
     valid_mask = (
-        (result[x_col].notna())
-        & (result[y_col].notna())
-        & (result[x_col] >= lon_min)
-        & (result[x_col] <= lon_max)
-        & (result[y_col] >= lat_min)
-        & (result[y_col] <= lat_max)
+        (df[x_col].notna())
+        & (df[y_col].notna())
+        & (df[x_col] >= lon_min)
+        & (df[x_col] <= lon_max)
+        & (df[y_col] >= lat_min)
+        & (df[y_col] <= lat_max)
     )
 
-    return result[valid_mask].copy()
+    return df.loc[valid_mask]
 
 
 __all__ = [

@@ -10,13 +10,18 @@ of working directory.
 
 import sys
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import StandardScaler
+
+if TYPE_CHECKING:
+    from shap import Explainer
+    from xgboost import XGBClassifier
 
 # Ensure absolute path resolution
 MODULE_DIR = Path(__file__).parent.absolute()
@@ -87,7 +92,7 @@ def train_random_forest(
     min_samples_leaf: int = 2,
     random_state: int = 42,
     scale_features: bool = True,
-) -> tuple[Any, StandardScaler | None]:
+) -> tuple[RandomForestClassifier, StandardScaler | None]:
     """
     Train Random Forest classifier with sensible defaults.
 
@@ -104,8 +109,6 @@ def train_random_forest(
     Returns:
         Tuple of (trained_model, scaler) where scaler is None if scale_features=False
     """
-    from sklearn.ensemble import RandomForestClassifier
-
     scaler = None
     X_train_processed = X_train
 
@@ -137,7 +140,7 @@ def train_xgboost(
     learning_rate: float = 0.1,
     random_state: int = 42,
     scale_features: bool = False,
-) -> tuple[Any, StandardScaler | None]:
+) -> tuple["XGBClassifier", StandardScaler | None]:
     """
     Train XGBoost classifier with sensible defaults.
 
@@ -153,7 +156,7 @@ def train_xgboost(
     Returns:
         Tuple of (trained_model, scaler) where scaler is None if scale_features=False
     """
-    import xgboost as xgb
+    from xgboost import XGBClassifier
 
     scaler = None
     X_train_processed = X_train
@@ -164,7 +167,7 @@ def train_xgboost(
             scaler.fit_transform(X_train), columns=X_train.columns, index=X_train.index
         )
 
-    model = xgb.XGBClassifier(
+    model = XGBClassifier(
         n_estimators=n_estimators,
         max_depth=max_depth,
         learning_rate=learning_rate,
@@ -179,7 +182,7 @@ def train_xgboost(
 
 
 def extract_feature_importance(
-    model: Any, feature_names: list[str], top_n: int | None = None
+    model: RandomForestClassifier, feature_names: list[str], top_n: int | None = None
 ) -> pd.DataFrame:
     """
     Extract and rank feature importances from trained model.
@@ -202,7 +205,11 @@ def extract_feature_importance(
     return importance_df.reset_index(drop=True)
 
 
-def compute_shap_values(model: Any, X: pd.DataFrame, sample_size: int | None = 100) -> Any:
+def compute_shap_values(
+    model: "RandomForestClassifier | XGBClassifier",
+    X: pd.DataFrame,
+    sample_size: int | None = 100,
+) -> "Explainer":
     """
     Compute SHAP values for model interpretability.
 
@@ -212,16 +219,16 @@ def compute_shap_values(model: Any, X: pd.DataFrame, sample_size: int | None = 1
         sample_size: Number of samples to use (None = all, can be slow)
 
     Returns:
-        SHAP values object
+        SHAP explainer configured for the provided model
     """
-    import shap
+    from shap import Explainer
 
     X_sample = X if sample_size is None else X.sample(min(sample_size, len(X)), random_state=42)
 
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_sample)
+    explainer = Explainer(model)
+    _ = explainer(X_sample)
 
-    return shap_values
+    return explainer
 
 
 def evaluate_classifier(

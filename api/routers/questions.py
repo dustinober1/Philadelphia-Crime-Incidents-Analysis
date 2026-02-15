@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import logging
 import os
 import re
 import secrets
@@ -23,12 +24,23 @@ from api.models.schemas import (
 )
 
 router = APIRouter(prefix="/questions", tags=["questions"])
+logger = logging.getLogger(__name__)
 
+# In-memory rate limiting is a lightweight fallback for development/single-instance use.
+# TODO: Replace with Redis-backed shared rate limiting for production scalability.
 _RATE_LIMIT: dict[str, deque[float]] = defaultdict(deque)
+# These module-level defaults avoid inline magic numbers.
+# TODO: Move these operational tunables into centralized app configuration.
 _RATE_LIMIT_WINDOW = 60 * 60
 _RATE_LIMIT_MAX = 5
 _ADMIN_SESSION_TTL_SECONDS = 60 * 60
 
+# Cache at import time to avoid repeated per-request environment lookups and keep
+# lookup timing consistent during token signature validation.
+_ADMIN_TOKEN_SECRET = os.getenv("ADMIN_TOKEN_SECRET", "").strip()
+
+# Global mutable state is a deliberate simplicity trade-off for local development.
+# Production systems should prefer FastAPI dependency injection or app.state.
 _IN_MEMORY: dict[str, dict[str, Any]] = {}
 _FIRESTORE_CLIENT = None
 
@@ -45,6 +57,9 @@ def _get_firestore_client() -> Any:
             firebase_admin.initialize_app(credentials.ApplicationDefault())
         _FIRESTORE_CLIENT = firestore.client()
     except Exception:
+        logger.exception(
+            "Failed to initialize Firestore client; falling back to in-memory question storage."
+        )
         _FIRESTORE_CLIENT = False
     return _FIRESTORE_CLIENT
 
@@ -55,7 +70,7 @@ def _enforce_rate_limit(client_ip: str) -> None:
     while entries and now - entries[0] > _RATE_LIMIT_WINDOW:
         entries.popleft()
     if len(entries) >= _RATE_LIMIT_MAX:
-        raise HTTPException(status_code=429, detail="Rate limit exceeded (5/hour)")
+        raise HTTPException(status_code=429, detail=f"Rate limit exceeded ({_RATE_LIMIT_MAX}/hour)")
     entries.append(now)
 
 
@@ -64,7 +79,10 @@ def _sign_admin_payload(payload: str, secret: str) -> str:
 
 
 def _get_admin_secret(name: str) -> str:
-    value = os.getenv(name, "").strip()
+    if name == "ADMIN_TOKEN_SECRET":
+        value = _ADMIN_TOKEN_SECRET
+    else:
+        value = os.getenv(name, "").strip()
     if not value:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -93,7 +111,7 @@ def _validate_admin_token(token: str) -> bool:
     except (TypeError, ValueError):
         return False
 
-    secret = os.getenv("ADMIN_TOKEN_SECRET", "").strip()
+    secret = _ADMIN_TOKEN_SECRET
     if not secret:
         return False
     expected_signature = _sign_admin_payload(payload, secret)
