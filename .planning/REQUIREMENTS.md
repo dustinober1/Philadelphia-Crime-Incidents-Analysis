@@ -42,6 +42,16 @@
 
 | Requirement | Phase | Status | Notes |
 |-------------|-------|--------|-------|
-| NAV-01 | TBD | Pending | |
-| NAV-02 | TBD | Pending | |
-| ... | ... | ... | ... |
+| NAV-01 | 1 | Pending | |
+| NAV-02 | 1 | Pending | |
+| NAV-03 | 1 | Pending | |
+| NAV-04 | 1 | Pending | |
+| DATA-01 | 2 | Pending | |
+| DATA-02 | 2 | Pending | |
+| DATA-03 | 2 | Pending | |
+| DATA-04 | 2 | Pending | |
+| DATA-05 | 2 | Pending | |
+| DATA-06 | 2 | Pending | |
+| PERF-01 | 3 | Pending | |
+| PERF-02 | 3 | Pending | |
+| PERF-03 | 3 | Pending | |
