@@ -1,11 +1,15 @@
 "use client";
 
-import Map, { FullscreenControl, Layer, NavigationControl, Popup, Source } from "react-map-gl/mapbox";
+import Map, { FullscreenControl, NavigationControl } from "react-map-gl/mapbox";
 import { useMemo, useState } from "react";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { GeoJson } from "@/lib/api";
+import { MapPopup } from "@/components/maps/MapPopup";
+import { ChoroplethLayer } from "@/components/maps/ChoroplethLayer";
+import { HeatmapLayer } from "@/components/HeatmapLayer";
+import { Layer, Source } from "react-map-gl/mapbox";
 
 type PopupState = {
   lngLat: { lng: number; lat: number };
@@ -29,6 +33,14 @@ export function MapContainer({
   const [popup, setPopup] = useState<PopupState | null>(null);
 
   const polygonData = useMemo(() => (activePolygon === "districts" ? districts : tracts), [activePolygon, districts, tracts]);
+  const valueProperty = useMemo(() => (activePolygon === "districts" ? "severity_score" : "crime_rate"), [activePolygon]);
+
+  // Generate interactive layer IDs dynamically
+  const interactiveLayerIds = useMemo(() => {
+    const layers = [`polygon-${activePolygon}-fill`];
+    if (showHotspots) layers.push("hotspots-circles");
+    return layers;
+  }, [activePolygon, showHotspots]);
 
   return (
     <div className="space-y-3">
@@ -43,7 +55,7 @@ export function MapContainer({
         style={{ width: "100%", height: 620 }}
         mapStyle="mapbox://styles/mapbox/light-v11"
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-        interactiveLayerIds={["polygon-layer", "hotspot-layer"]}
+        interactiveLayerIds={interactiveLayerIds}
         onClick={(event) => {
           const feature = event.features?.[0];
           if (feature) {
@@ -57,40 +69,20 @@ export function MapContainer({
         <NavigationControl position="top-left" />
         <FullscreenControl position="top-left" />
 
-        <Source id="polygons" type="geojson" data={polygonData}>
-          <Layer
-            id="polygon-layer"
-            type="fill"
-            paint={{
-              "fill-color": [
-                "interpolate",
-                ["linear"],
-                ["coalesce", ["get", activePolygon === "districts" ? "severity_score" : "crime_rate"], 0],
-                0,
-                "#dbeafe",
-                30,
-                "#60a5fa",
-                70,
-                "#1d4ed8",
-              ],
-              "fill-opacity": 0.45,
-            }}
-          />
-          <Layer id="polygon-outline" type="line" paint={{ "line-color": "#334155", "line-width": 1 }} />
-        </Source>
+        <ChoroplethLayer
+          id={`polygon-${activePolygon}`}
+          data={polygonData}
+          valueProperty={valueProperty}
+          colorScheme="blue"
+        />
 
         {showHotspots && (
-          <Source id="hotspots" type="geojson" data={hotspots}>
-            <Layer
-              id="hotspot-layer"
-              type="circle"
-              paint={{
-                "circle-color": "#dc2626",
-                "circle-radius": ["interpolate", ["linear"], ["coalesce", ["get", "incident_count"], 0], 10, 4, 1200, 14],
-                "circle-opacity": 0.8,
-              }}
-            />
-          </Source>
+          <HeatmapLayer
+            id="hotspots"
+            data={hotspots}
+            countProperty="incident_count"
+            color="#dc2626"
+          />
         )}
 
         {showCorridors && (
@@ -100,9 +92,12 @@ export function MapContainer({
         )}
 
         {popup && (
-          <Popup longitude={popup.lngLat.lng} latitude={popup.lngLat.lat} onClose={() => setPopup(null)} closeOnClick={false}>
-            <pre className="max-w-xs whitespace-pre-wrap text-xs">{JSON.stringify(popup.properties, null, 2)}</pre>
-          </Popup>
+          <MapPopup
+            feature={{ properties: popup.properties }}
+            longitude={popup.lngLat.lng}
+            latitude={popup.lngLat.lat}
+            onClose={() => setPopup(null)}
+          />
         )}
       </Map>
     </div>
