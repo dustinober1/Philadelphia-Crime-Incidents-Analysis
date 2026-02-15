@@ -1,20 +1,86 @@
 @import "tailwindcss";
 
 :root {
+  /* Crime category colors */
   --violent: #e63946;
   --property: #457b9d;
   --other: #a8dadc;
+  
+  /* Core palette */
   --bg: #f8fafc;
   --text: #111827;
   --muted: #4b5563;
+  
+  /* Spacing scale (mobile-first with comfortable touch targets) */
+  --spacing-touch-min: 44px; /* Minimum touch target size */
+  --spacing-section: clamp(2rem, 5vw, 4rem);
+  --spacing-stack: clamp(1rem, 2.5vw, 1.5rem);
+  
+  /* Typography scale (responsive and readable) */
+  --font-size-base: clamp(1rem, 1vw + 0.875rem, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 1.5vw + 0.875rem, 1.5rem);
+  --font-size-xl: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+  --line-height-readable: 1.6;
+  --line-height-heading: 1.2;
+  
+  /* Interactive elements */
+  --focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  --transition-base: 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
   background: radial-gradient(circle at top right, #dbeafe 0%, var(--bg) 45%);
   color: var(--text);
   font-family: "Source Sans 3", "Segoe UI", sans-serif;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-readable);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Touch-friendly interactive elements */
+a, button {
+  min-height: 44px; /* Ensure comfortable touch targets */
+  transition: all var(--transition-base);
+}
+
+a:focus-visible, button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 0.25rem;
+}
+
+/* Improved heading hierarchy */
+h1, h2, h3, h4, h5, h6 {
+  line-height: var(--line-height-heading);
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: var(--font-size-xl);
+}
+
+h2 {
+  font-size: var(--font-size-lg);
+}
+
+/* Readable content blocks */
+p {
+  margin-bottom: 1em;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/* Card component with responsive spacing */
 .card {
-  @apply rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm;
+  @apply rounded-xl border border-slate-200 bg-white/90 shadow-sm;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+/* Utility: Ensure text remains readable on all backgrounds */
+.text-readable {
+  max-width: 65ch;
 }
