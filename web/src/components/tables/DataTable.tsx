@@ -67,7 +67,7 @@ export function DataTable<TData>({
                         onClick={header.column.getToggleSortingHandler()}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
-                            header.column.getToggleSortingHandler()?.(e as any);
+                            header.column.getToggleSortingHandler()?.(e as React.MouseEvent<HTMLDivElement>);
                           }
                         }}
                         role={header.column.getCanSort() ? "button" : undefined}
