@@ -26,6 +26,13 @@ This roadmap derives directly from the v1 requirements in REQUIREMENTS.md, organ
 - User can download crime data in JSON and CSV formats for external analysis
 - User can view citations and transparency information about data sources and origins
 
+**Plans:**
+- [ ] [02-01-PLAN.md](../phases/02-data-presentation-/02-01-PLAN.md) — Enhanced charts with custom tooltips and multi-series support
+- [ ] [02-02-PLAN.md](../phases/02-data-presentation-/02-02-PLAN.md) — Data tables with sorting, filtering, and pagination
+- [ ] [02-03-PLAN.md](../phases/02-data-presentation-/02-03-PLAN.md) — Interactive maps with rich popups and layer controls
+- [ ] [02-04-PLAN.md](../phases/02-data-presentation-/02-04-PLAN.md) — Data download functionality for JSON/CSV export
+- [ ] [02-05-PLAN.md](../phases/02-data-presentation-/02-05-PLAN.md) — Data & Transparency page with downloads and citations
+
 ### Phase 3: Performance & Quality
 **Requirements:** PERF-01, PERF-02, PERF-03
 
