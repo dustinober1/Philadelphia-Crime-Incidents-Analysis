@@ -12,10 +12,10 @@ const DynamicMap = dynamic(() => import("@/components/MapContainer").then((m) =>
 });
 
 export default function MapPage() {
-  const { data: districts } = useSWR("/api/v1/spatial/districts", fetcher);
-  const { data: tracts } = useSWR("/api/v1/spatial/tracts", fetcher);
-  const { data: hotspots } = useSWR("/api/v1/spatial/hotspots", fetcher);
-  const { data: corridors } = useSWR("/api/v1/spatial/corridors", fetcher);
+  const { data: districts, error: districtsError, isLoading: districtsLoading } = useSWR("/api/v1/spatial/districts", fetcher);
+  const { data: tracts, error: tractsError, isLoading: tractsLoading } = useSWR("/api/v1/spatial/tracts", fetcher);
+  const { data: hotspots, error: hotspotsError, isLoading: hotspotsLoading } = useSWR("/api/v1/spatial/hotspots", fetcher);
+  const { data: corridors, error: corridorsError, isLoading: corridorsLoading } = useSWR("/api/v1/spatial/corridors", fetcher);
 
   // Metadata for GeoJSON downloads
   const metadata = {
@@ -24,14 +24,57 @@ export default function MapPage() {
     processing_notes: "GeoJSON format for GIS applications - Aggregated from Philadelphia Police Department data",
   };
 
-  if (!districts || !tracts || !hotspots || !corridors) {
-    return <p>Loading map layers...</p>;
+  // Check for errors
+  const hasError = districtsError || tractsError || hotspotsError || corridorsError;
+  const isLoading = districtsLoading || tractsLoading || hotspotsLoading || corridorsLoading;
+
+  if (hasError) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold">Interactive Map</h1>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <h2 className="mb-2 font-semibold">Error Loading Map Data</h2>
+          <p className="text-sm">
+            Failed to load spatial data layers. Please check that the API is running and try again.
+          </p>
+          {districtsError && <p className="mt-2 text-xs">Districts: {districtsError.message}</p>}
+          {tractsError && <p className="mt-2 text-xs">Tracts: {tractsError.message}</p>}
+          {hotspotsError && <p className="mt-2 text-xs">Hotspots: {hotspotsError.message}</p>}
+          {corridorsError && <p className="mt-2 text-xs">Corridors: {corridorsError.message}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading || !districts || !tracts || !hotspots || !corridors) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold">Interactive Map</h1>
+        <div className="flex items-center gap-3 rounded-lg border bg-white p-6">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+          <p className="text-slate-600">Loading map layers (districts, tracts, hotspots, corridors)...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-bold">Interactive Map</h1>
-      <p className="text-sm text-slate-600">Toggle district and tract polygon layers, overlay hotspots and vehicle corridors, and click features for details.</p>
+      
+      <div className="rounded-lg border bg-blue-50 p-4 text-sm text-blue-900">
+        <h2 className="mb-2 font-semibold">Map Layer Controls</h2>
+        <ul className="space-y-1 text-blue-800">
+          <li><strong>District Severity:</strong> Shows police districts colored by crime severity score (0-100)</li>
+          <li><strong>Tract Rates:</strong> Displays census tracts colored by crime rate per 1,000 residents</li>
+          <li><strong>Hotspots:</strong> Crime concentration points sized by incident count</li>
+          <li><strong>Corridors:</strong> High-activity transportation corridors with elevated crime</li>
+        </ul>
+        <p className="mt-3 text-xs italic">
+          Click any map feature to view detailed statistics, trends, and comparisons to city averages.
+        </p>
+      </div>
+
       <DynamicMap districts={districts} tracts={tracts} hotspots={hotspots} corridors={corridors} />
       
       <div className="rounded-lg bg-white p-4 shadow-sm">
