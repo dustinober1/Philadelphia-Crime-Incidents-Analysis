@@ -1,5 +1,3 @@
-import type { TooltipProps } from "recharts";
-
 interface CustomTooltipProps {
   active?: boolean;
   payload?: Array<{
@@ -7,7 +5,7 @@ interface CustomTooltipProps {
     value?: number;
     color?: string;
     dataKey?: string;
-    payload?: any;
+    payload?: Record<string, unknown>;
   }>;
   label?: string | number;
   historicalAverage?: number;
@@ -42,7 +40,7 @@ export function CustomTooltip({
     
     // Access previous value from the same series
     // This assumes payload structure from Recharts
-    const prevValue = (payload[0].payload as any)?.previousValue;
+    const prevValue = (payload[0].payload as Record<string, unknown>)?.previousValue as number | undefined;
     
     if (prevValue === undefined || prevValue === null || prevValue === 0) {
       return null;
