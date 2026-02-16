@@ -47,9 +47,9 @@ This roadmap derives directly from the v1 requirements in REQUIREMENTS.md, organ
 - [x] [03-03-PLAN.md](../phases/03-performance-quality/03-03-PLAN.md) — Filter integration into Trends and Map pages
 - [x] [03-04-PLAN.md](../phases/03-performance-quality/03-04-PLAN.md) — Data storytelling components (narratives, insights)
 - [x] [03-05-PLAN.md](../phases/03-performance-quality/03-05-PLAN.md) — Narrative integration across all data pages
-- [ ] [03-06-PLAN.md](../phases/03-performance-quality/03-06-PLAN.md) — District-scoped trend exports and API endpoints (Gap Closure)
-- [ ] [03-07-PLAN.md](../phases/03-performance-quality/03-07-PLAN.md) — Frontend district filter integration for trends (Gap Closure)
-- [ ] [03-08-PLAN.md](../phases/03-performance-quality/03-08-PLAN.md) — Narrative integration for all Trends charts (Gap Closure)
+- [x] [03-06-PLAN.md](../phases/03-performance-quality/03-06-PLAN.md) — District-scoped trend exports and API endpoints (Gap Closure)
+- [x] [03-07-PLAN.md](../phases/03-performance-quality/03-07-PLAN.md) — Frontend district filter integration for trends (Gap Closure)
+- [x] [03-08-PLAN.md](../phases/03-performance-quality/03-08-PLAN.md) — Narrative integration for all Trends charts (Gap Closure)
 
 ## Validation
 
