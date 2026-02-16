@@ -60,12 +60,48 @@ export interface FeatureImportance {
 
 export type GeoJson = FeatureCollection<Geometry, GeoJsonProperties>;
 
+// Spatial API shapes
+export interface SpatialPoint {
+  lat: number;
+  lng: number;
+  district?: number;
+  crime_category?: string;
+  dispatch_date?: string;
+  text_general_code?: string;
+}
+
+export interface HotspotData {
+  lat: number;
+  lng: number;
+  intensity: number;
+}
+
+export interface DistrictData {
+  district: number;
+  count: number;
+  violent: number;
+  property: number;
+  other: number;
+}
+
 export function useAnnualTrends() {
   return useSWR<TrendRow[]>("/api/v1/trends/annual", fetcher);
 }
 
 export function useMonthlyTrends() {
   return useSWR<TrendRow[]>("/api/v1/trends/monthly", fetcher);
+}
+
+export function useSpatialData() {
+  return useSWR<SpatialPoint[]>("/api/v1/spatial/incidents", fetcher);
+}
+
+export function useHotspots() {
+  return useSWR<HotspotData[]>("/api/v1/spatial/hotspots", fetcher);
+}
+
+export function useDistrictStats() {
+  return useSWR<DistrictData[]>("/api/v1/spatial/districts", fetcher);
 }
 
 export function useMetadata() {
