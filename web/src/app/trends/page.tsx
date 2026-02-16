@@ -142,11 +142,22 @@ export default function TrendsPage() {
     const insights: Insight[] = [];
 
     const districtCount = filters.districts.length;
-    if (districtCount > 0) {
+    if (districtCount === 1) {
       insights.push({
         icon: "stable",
         type: "neutral",
-        text: `Filtered to ${districtCount} district${districtCount === 1 ? "" : "s"} for comparison against citywide patterns.`,
+        text: `Showing District ${filters.districts[0]} data. Annual and monthly charts reflect district-specific trends.`,
+      });
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: "COVID comparison and seasonality charts show citywide patterns (inherently citywide analyses).",
+      });
+    } else if (districtCount > 1) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `${districtCount} districts selected. Showing citywide data filtered client-side.`,
       });
     }
 
@@ -168,7 +179,7 @@ export default function TrendsPage() {
     }
 
     return insights;
-  }, [annualSeries.length, filters.categories.length, filters.districts.length]);
+  }, [annualSeries.length, filters.categories.length, filters.districts]);
 
   const monthlySeries = useMemo(() => {
     const byMonth = new Map<string, { month: string; Violent: number; Property: number; Other: number }>();
@@ -264,7 +275,7 @@ export default function TrendsPage() {
         <a href="/api/v1/trends/monthly" className="text-sm text-blue-700 underline">Download data</a>
       </ChartCard>
 
-      <ChartCard title="COVID comparison" description="Pre, during, and post-pandemic totals.">
+      <ChartCard title="COVID comparison" description="Pre, during, and post-pandemic totals (citywide).">
         <div className="h-64">
           <TrendChart
             data={covid}
@@ -277,16 +288,18 @@ export default function TrendsPage() {
           />
         </div>
         <p className="text-sm text-slate-600">Date ranges: Pre (2006-01-01 to 2020-02-29), During (2020-03-01 to 2021-12-31), Post (2022-01-01 onward).</p>
+        <p className="text-xs text-slate-500 italic">This analysis compares pandemic periods at citywide level.</p>
         <a href="/api/v1/trends/covid" className="text-sm text-blue-700 underline">Download data</a>
       </ChartCard>
 
-      <ChartCard title="Seasonality" description="Crime counts by month, day-of-week, and hour.">
+      <ChartCard title="Seasonality" description="Crime counts by month, day-of-week, and hour (citywide).">
         <pre className="overflow-auto rounded bg-slate-50 p-3 text-xs">{JSON.stringify(seasonality, null, 2)}</pre>
         <p className="text-sm text-slate-600">Insight: Hourly concentration increases in evening windows and on weekend days.</p>
+        <p className="text-xs text-slate-500 italic">Seasonality patterns are analyzed at citywide level.</p>
         <a href="/api/v1/trends/seasonality" className="text-sm text-blue-700 underline">Download data</a>
       </ChartCard>
 
-      <ChartCard title="Robbery hour x day heatmap" description="Robbery counts by hour and weekday.">
+      <ChartCard title="Robbery hour x day heatmap" description="Robbery counts by hour and weekday (citywide).">
         <div className="overflow-auto">
           <table className="w-full border-collapse text-xs">
             <thead>
@@ -313,6 +326,7 @@ export default function TrendsPage() {
           </table>
         </div>
         <p className="text-sm text-slate-600">Insight: Peak robbery intensity clusters around evening commuter and nightlife hours.</p>
+        <p className="text-xs text-slate-500 italic">Temporal heatmap patterns are analyzed at citywide level.</p>
         <a href="/api/v1/trends/robbery-heatmap" className="text-sm text-blue-700 underline">Download data</a>
       </ChartCard>
     </div>
