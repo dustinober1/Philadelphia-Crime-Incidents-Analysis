@@ -13,6 +13,7 @@ import { generateNarrative } from "@/lib/narratives";
 import type { Insight, Narrative } from "@/lib/narratives";
 import type { FilterState } from "@/lib/types";
 import { fetcher } from "@/lib/api";
+import type { GeoJson } from "@/lib/api";
 
 const DynamicMap = dynamic(() => import("@/components/MapContainer").then((m) => m.MapContainer), {
   ssr: false,
@@ -144,7 +145,7 @@ export default function MapPage() {
     }
 
     const districtEntries = (filteredDistricts?.features ?? [])
-      .map((feature) => {
+      .map((feature: GeoJson["features"][number]) => {
         const props = (feature as { properties?: Record<string, unknown> }).properties;
         const distNum = props?.dist_num;
         const severity = toFiniteNumber(props?.severity_score);
@@ -153,13 +154,17 @@ export default function MapPage() {
           severity,
         };
       })
-      .filter((row): row is { district: string; severity: number } =>
-        typeof row.district === "string" && row.severity !== null,
+      .filter(
+        (row: { district: string | null; severity: number | null }): row is { district: string; severity: number } =>
+          typeof row.district === "string" && row.severity !== null,
       );
 
     if (districtEntries.length > 0) {
-      const maxRow = districtEntries.reduce((a, b) => (a.severity >= b.severity ? a : b));
-      const severityValues = districtEntries.map((row) => row.severity);
+      const maxRow = districtEntries.reduce(
+        (a: { district: string; severity: number }, b: { district: string; severity: number }) =>
+          a.severity >= b.severity ? a : b,
+      );
+      const severityValues = districtEntries.map((row: { district: string; severity: number }) => row.severity);
       const med = median(severityValues);
 
       const severityType: Insight["type"] = maxRow.severity >= 70 ? "concern" : maxRow.severity <= 30 ? "positive" : "neutral";
@@ -173,11 +178,11 @@ export default function MapPage() {
     }
 
     const hotspotCounts = (hotspots.features ?? [])
-      .map((feature) => {
+      .map((feature: GeoJson["features"][number]) => {
         const props = (feature as { properties?: Record<string, unknown> }).properties;
         return toFiniteNumber(props?.incident_count);
       })
-      .filter((value): value is number => value !== null);
+      .filter((value: number | null): value is number => value !== null);
 
     if (hotspotCounts.length > 0) {
       const top = Math.max(...hotspotCounts);
@@ -218,11 +223,11 @@ export default function MapPage() {
 
   const hotspotNarrative: Narrative | null = useMemo(() => {
     const hotspotCounts = (hotspots.features ?? [])
-      .map((feature) => {
+      .map((feature: GeoJson["features"][number]) => {
         const props = (feature as { properties?: Record<string, unknown> }).properties;
         return toFiniteNumber(props?.incident_count);
       })
-      .filter((value): value is number => value !== null);
+      .filter((value: number | null): value is number => value !== null);
 
     if (hotspotCounts.length < 2) return null;
 
