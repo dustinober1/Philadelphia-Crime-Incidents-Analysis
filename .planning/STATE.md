@@ -85,6 +85,7 @@ None identified
 | DOWNLOAD-CATEGORIZATION | Download grouping strategy | Group by analysis type (Trend/Spatial/Policy) | 02-05 | 2026-02-16 |
 | DATA-NAVIGATION-PLACEMENT | Data page navigation location | Secondary links in nav and footer | 02-05 | 2026-02-16 |
 | PERF-FILTERING-TYPING | Filtering typing strategy | applyFilters accepts Partial<CrimeIncident> for aggregate endpoints | 03-02 | 2026-02-16 |
+| PERF-NARRATIVE-RULES | Narrative generation approach | Threshold-based rule engine (stable/moderate/significant) | 03-04 | 2026-02-16 |
 
 ## Session Continuity
 
