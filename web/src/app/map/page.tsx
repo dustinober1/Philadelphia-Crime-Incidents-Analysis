@@ -91,6 +91,21 @@ export default function MapPage() {
   const hasError = districtsError || tractsError || hotspotsError || corridorsError;
   const isLoading = districtsLoading || tractsLoading || hotspotsLoading || corridorsLoading;
 
+  const filteredDistricts = useMemo(() => {
+    if (!districts || filters.districts.length === 0) return districts;
+
+    const districtSet = new Set(filters.districts.map((value) => String(value)));
+
+    return {
+      ...districts,
+      features: districts.features.filter((feature: { properties?: Record<string, unknown> }) => {
+        const distNum = feature.properties?.dist_num;
+        if (typeof distNum !== "string") return false;
+        return districtSet.has(distNum);
+      }),
+    };
+  }, [districts, filters.districts]);
+
   if (hasError) {
     return (
       <div className="space-y-4">
@@ -108,21 +123,6 @@ export default function MapPage() {
       </div>
     );
   }
-
-  const filteredDistricts = useMemo(() => {
-    if (!districts || filters.districts.length === 0) return districts;
-
-    const districtSet = new Set(filters.districts.map((value) => String(value)));
-
-    return {
-      ...districts,
-      features: districts.features.filter((feature: { properties?: Record<string, unknown> }) => {
-        const distNum = feature.properties?.dist_num;
-        if (typeof distNum !== "string") return false;
-        return districtSet.has(distNum);
-      }),
-    };
-  }, [districts, filters.districts]);
 
   if (isLoading || !districts || !tracts || !hotspots || !corridors) {
     return (

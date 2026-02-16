@@ -1,4 +1,4 @@
-import type { CrimeCategory, CrimeIncident, FilterOptions, FilterState } from "./types";
+import type { CrimeCategory, CrimeIncident, FilterState } from "./types";
 
 export type { CrimeCategory, CrimeIncident, FilterOptions, FilterState } from "./types";
 
