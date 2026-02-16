@@ -1,12 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import useSWR from "swr";
 
 import { ChartCard } from "@/components/ChartCard";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
-import { TrendChart } from "@/components/charts/TrendChart";
 import { fetcher, useAnnualTrends, useMonthlyTrends } from "@/lib/api";
+
+const TrendChart = dynamic(
+  () => import("@/components/charts/TrendChart").then((mod) => ({ default: mod.TrendChart })),
+  {
+    loading: () => <div className="h-72 animate-pulse rounded bg-slate-100" />,
+    ssr: false,
+  },
+);
 
 type AnnualSeriesRow = {
   year: number;
