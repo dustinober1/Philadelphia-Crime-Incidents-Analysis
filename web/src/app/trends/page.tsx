@@ -204,6 +204,53 @@ export default function TrendsPage() {
     return Array.from(byMonth.values());
   }, [monthly.data]);
 
+  const monthlyInsights: Insight[] = useMemo(() => {
+    const insights: Insight[] = [];
+
+    if (monthlySeries.length === 0) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: "No monthly data available for the selected filters.",
+      });
+      return insights;
+    }
+
+    // Find the most recent month
+    const latest = monthlySeries[monthlySeries.length - 1];
+    const previous = monthlySeries.length > 1 ? monthlySeries[monthlySeries.length - 2] : null;
+
+    if (previous) {
+      const latestTotal = (latest.Violent ?? 0) + (latest.Property ?? 0) + (latest.Other ?? 0);
+      const prevTotal = (previous.Violent ?? 0) + (previous.Property ?? 0) + (previous.Other ?? 0);
+      const change = latestTotal - prevTotal;
+      const pctChange = prevTotal > 0 ? (change / prevTotal) * 100 : 0;
+
+      if (Math.abs(pctChange) > 10) {
+        insights.push({
+          icon: change > 0 ? "up" : "down",
+          type: change > 0 ? "concern" : "positive",
+          text: `${latest.month}: ${Math.abs(pctChange).toFixed(1)}% ${change > 0 ? "increase" : "decrease"} vs prior month (${Math.abs(change)} incidents).`,
+        });
+      } else {
+        insights.push({
+          icon: "stable",
+          type: "neutral",
+          text: `${latest.month}: Stable month-over-month trend with ${pctChange.toFixed(1)}% change.`,
+        });
+      }
+    }
+
+    // Seasonality insight
+    insights.push({
+      icon: "stable",
+      type: "neutral",
+      text: "Monthly totals show seasonal patterns with mid-summer and late-fall peaks typical of urban crime cycles.",
+    });
+
+    return insights;
+  }, [monthlySeries]);
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Crime Trends</h1>
@@ -271,7 +318,11 @@ export default function TrendsPage() {
             showXLabels={false}
           />
         </div>
-        <p className="text-sm text-slate-600">Insight: Seasonal variability recurs year-over-year with mid-summer and late-fall lifts.</p>
+
+        <div className="mt-4">
+          <InsightBox title="Monthly Insights" insights={monthlyInsights} />
+        </div>
+
         <a href="/api/v1/trends/monthly" className="text-sm text-blue-700 underline">Download data</a>
       </ChartCard>
 
