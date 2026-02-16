@@ -95,6 +95,20 @@ def _export_trends(df: Any, output_dir: Path) -> None:
     ).sort_values(["month", "crime_category"])
     _write_json(output_dir / "monthly_trends.json", _to_records(monthly))
 
+    # District-scoped annual trends (includes dc_dist)
+    annual_district = _group_size_to_records_frame(
+        categorized.groupby(["year", "crime_category", "dc_dist"], observed=False)
+    ).sort_values(["year", "crime_category", "dc_dist"])
+    _write_json(output_dir / "annual_trends_district.json", _to_records(annual_district))
+
+    # District-scoped monthly trends (includes dc_dist)
+    monthly_district = _group_size_to_records_frame(
+        categorized.assign(
+            month=categorized["dispatch_date"].dt.to_period("M").dt.to_timestamp()
+        ).groupby(["month", "crime_category", "dc_dist"], observed=False)
+    ).sort_values(["month", "crime_category", "dc_dist"])
+    _write_json(output_dir / "monthly_trends_district.json", _to_records(monthly_district))
+
     pre = categorized[categorized["dispatch_date"] < "2020-03-01"]
     during = categorized[
         (categorized["dispatch_date"] >= "2020-03-01")
