@@ -10,6 +10,7 @@ from typing import Any
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 REQUIRED_EXPORTS = [
     "annual_trends.json",
+    "annual_trends_district.json",  # District-scoped annual trends (03-06)
     "classification_features.json",
     "covid_comparison.json",
     "crime_composition.json",
@@ -17,6 +18,7 @@ REQUIRED_EXPORTS = [
     "forecast.json",
     "metadata.json",
     "monthly_trends.json",
+    "monthly_trends_district.json",  # District-scoped monthly trends (03-06)
     "retail_theft_trend.json",
     "robbery_heatmap.json",
     "seasonality.json",
