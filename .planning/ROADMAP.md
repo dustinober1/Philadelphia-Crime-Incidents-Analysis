@@ -41,6 +41,13 @@ This roadmap derives directly from the v1 requirements in REQUIREMENTS.md, organ
 - User can filter displayed data by custom date ranges, police districts, and crime types
 - User can read narrative explanations and data-driven insights alongside visualizations
 
+**Plans:**
+- [ ] [03-01-PLAN.md](../phases/03-performance-quality/03-01-PLAN.md) — Next.js upgrade and streaming SSR with code splitting
+- [ ] [03-02-PLAN.md](../phases/03-performance-quality/03-02-PLAN.md) — Advanced filtering infrastructure (types, utilities, hooks, UI)
+- [ ] [03-03-PLAN.md](../phases/03-performance-quality/03-03-PLAN.md) — Filter integration into Trends and Map pages
+- [ ] [03-04-PLAN.md](../phases/03-performance-quality/03-04-PLAN.md) — Data storytelling components (narratives, insights)
+- [ ] [03-05-PLAN.md](../phases/03-performance-quality/03-05-PLAN.md) — Narrative integration across all data pages
+
 ## Validation
 
 **Coverage Check:** All 12 v1 requirements are mapped to exactly one phase:
