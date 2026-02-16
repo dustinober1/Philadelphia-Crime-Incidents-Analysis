@@ -310,6 +310,95 @@ export default function TrendsPage() {
     ];
   }, [covid]);
 
+  const seasonalityInsights: Insight[] = useMemo(() => {
+    const insights: Insight[] = [];
+
+    if (!seasonality) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: "Seasonality data not available.",
+      });
+      return insights;
+    }
+
+    // Peak month analysis
+    const byMonth = (seasonality as { by_month?: Array<{ month: number; count: number }> }).by_month ?? [];
+    if (byMonth.length > 0) {
+      const peakMonth = byMonth.reduce((a, b) => a.count >= b.count ? a : b);
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      insights.push({
+        icon: peakMonth.count > byMonth.reduce((s, r) => s + r.count, 0) / byMonth.length ? "up" : "stable",
+        type: "neutral",
+        text: `Peak month: ${monthNames[peakMonth.month - 1] ?? peakMonth.month} with ${peakMonth.count.toLocaleString()} incidents.`,
+      });
+    }
+
+    // Peak hour analysis
+    const byHour = (seasonality as { by_hour?: Array<{ hour: number; count: number }> }).by_hour ?? [];
+    if (byHour.length > 0) {
+      const peakHour = byHour.reduce((a, b) => a.count >= b.count ? a : b);
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `Peak hour: ${peakHour.hour}:00 with ${peakHour.count.toLocaleString()} incidents.`,
+      });
+    }
+
+    // Peak day analysis
+    const byDow = (seasonality as { by_day_of_week?: Array<{ day_of_week: number; count: number }> }).by_day_of_week ?? [];
+    if (byDow.length > 0) {
+      const peakDay = byDow.reduce((a, b) => a.count >= b.count ? a : b);
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `Peak day: ${dayNames[peakDay.day_of_week] ?? peakDay.day_of_week} with ${peakDay.count.toLocaleString()} incidents.`,
+      });
+    }
+
+    return insights;
+  }, [seasonality]);
+
+  const robberyInsights: Insight[] = useMemo(() => {
+    const insights: Insight[] = [];
+
+    if (!robberyHeat || robberyHeat.length === 0) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: "Robbery heatmap data not available.",
+      });
+      return insights;
+    }
+
+    // Find peak hour/day combination
+    const peak = robberyHeat.reduce((a: RobberyCell, b: RobberyCell) => a.count >= b.count ? a : b);
+
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    insights.push({
+      icon: peak.count > 50 ? "up" : "stable",
+      type: peak.count > 50 ? "concern" : "neutral",
+      text: `Peak robbery time: ${dayNames[peak.day_of_week] ?? peak.day_of_week} ${peak.hour}:00 with ${peak.count.toLocaleString()} incidents.`,
+    });
+
+    // Evening concentration
+    const eveningHours = robberyHeat.filter((c: RobberyCell) => c.hour >= 18 && c.hour <= 23);
+    const eveningTotal = eveningHours.reduce((s: number, c: RobberyCell) => s + c.count, 0);
+    const total = robberyHeat.reduce((s: number, c: RobberyCell) => s + c.count, 0);
+    const eveningPct = total > 0 ? (eveningTotal / total) * 100 : 0;
+
+    if (eveningPct > 25) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `${eveningPct.toFixed(0)}% of robberies occur during evening hours (6 PM - midnight).`,
+      });
+    }
+
+    return insights;
+  }, [robberyHeat]);
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Crime Trends</h1>
@@ -408,8 +497,11 @@ export default function TrendsPage() {
 
       <ChartCard title="Seasonality" description="Crime counts by month, day-of-week, and hour (citywide).">
         <pre className="overflow-auto rounded bg-slate-50 p-3 text-xs">{JSON.stringify(seasonality, null, 2)}</pre>
-        <p className="text-sm text-slate-600">Insight: Hourly concentration increases in evening windows and on weekend days.</p>
-        <p className="text-xs text-slate-500 italic">Seasonality patterns are analyzed at citywide level.</p>
+
+        <div className="mt-4">
+          <InsightBox title="Seasonality Insights" insights={seasonalityInsights} />
+        </div>
+
         <a href="/api/v1/trends/seasonality" className="text-sm text-blue-700 underline">Download data</a>
       </ChartCard>
 
@@ -439,8 +531,11 @@ export default function TrendsPage() {
             </tbody>
           </table>
         </div>
-        <p className="text-sm text-slate-600">Insight: Peak robbery intensity clusters around evening commuter and nightlife hours.</p>
-        <p className="text-xs text-slate-500 italic">Temporal heatmap patterns are analyzed at citywide level.</p>
+
+        <div className="mt-4">
+          <InsightBox title="Robbery Pattern Insights" insights={robberyInsights} />
+        </div>
+
         <a href="/api/v1/trends/robbery-heatmap" className="text-sm text-blue-700 underline">Download data</a>
       </ChartCard>
     </div>
