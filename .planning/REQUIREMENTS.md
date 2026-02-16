@@ -3,18 +3,18 @@
 ## v1 Requirements
 
 ### Navigation & Layout
-- [ ] NAV-01: Responsive design that works on mobile/tablet/desktop
-- [ ] NAV-02: Clear navigation with header nav and dropdowns for analysis sections
-- [ ] NAV-03: Mobile-friendly touch interactions
-- [ ] NAV-04: About page with methodology and data limitations
+- [x] NAV-01: Responsive design that works on mobile/tablet/desktop
+- [x] NAV-02: Clear navigation with header nav and dropdowns for analysis sections
+- [x] NAV-03: Mobile-friendly touch interactions
+- [x] NAV-04: About page with methodology and data limitations
 
 ### Data Presentation
-- [ ] DATA-01: Basic charts (line, bar, area) for crime trends
-- [ ] DATA-02: Data tables with tabular presentation and sorting
-- [ ] DATA-03: Interactive maps for spatial crime patterns exploration
-- [ ] DATA-04: Multiple visualization types (heatmaps, choropleths, time series)
-- [ ] DATA-05: Data download links for JSON/CSV export
-- [ ] DATA-06: Data sources cited with transparency about origins
+- [x] DATA-01: Basic charts (line, bar, area) for crime trends
+- [x] DATA-02: Data tables with tabular presentation and sorting
+- [x] DATA-03: Interactive maps for spatial crime patterns exploration
+- [x] DATA-04: Multiple visualization types (heatmaps, choropleths, time series)
+- [x] DATA-05: Data download links for JSON/CSV export
+- [x] DATA-06: Data sources cited with transparency about origins
 
 ### Performance & Quality
 - [ ] PERF-01: Fast loading under 3 seconds initial load time
@@ -42,16 +42,16 @@
 
 | Requirement | Phase | Status | Notes |
 |-------------|-------|--------|-------|
-| NAV-01 | 1 | Pending | |
-| NAV-02 | 1 | Pending | |
-| NAV-03 | 1 | Pending | |
-| NAV-04 | 1 | Pending | |
-| DATA-01 | 2 | Pending | |
-| DATA-02 | 2 | Pending | |
-| DATA-03 | 2 | Pending | |
-| DATA-04 | 2 | Pending | |
-| DATA-05 | 2 | Pending | |
-| DATA-06 | 2 | Pending | |
+| NAV-01 | 1 | Complete | |
+| NAV-02 | 1 | Complete | |
+| NAV-03 | 1 | Complete | |
+| NAV-04 | 1 | Complete | |
+| DATA-01 | 2 | Complete | |
+| DATA-02 | 2 | Complete | |
+| DATA-03 | 2 | Complete | |
+| DATA-04 | 2 | Complete | |
+| DATA-05 | 2 | Complete | |
+| DATA-06 | 2 | Complete | |
 | PERF-01 | 3 | Pending | |
 | PERF-02 | 3 | Pending | |
 | PERF-03 | 3 | Pending | |
