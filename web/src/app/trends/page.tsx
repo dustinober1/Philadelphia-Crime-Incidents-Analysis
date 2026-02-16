@@ -1,12 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 
 import { ChartCard } from "@/components/ChartCard";
-import { DateRangeFilter } from "@/components/DateRangeFilter";
-import { fetcher, useAnnualTrends, useMonthlyTrends } from "@/lib/api";
+import { AdvancedFilters } from "@/components/filters/AdvancedFilters";
+import { useFilteredData } from "@/hooks/useFilteredData";
+import type { FilterState } from "@/lib/types";
+import { fetcher } from "@/lib/api";
 
 const TrendChart = dynamic(
   () => import("@/components/charts/TrendChart").then((mod) => ({ default: mod.TrendChart })),
@@ -23,6 +26,28 @@ type AnnualSeriesRow = {
   Other: number;
 };
 
+function getInitialFilters(searchParams: URLSearchParams): FilterState {
+  const start = searchParams.get("start");
+  const end = searchParams.get("end");
+  const districts =
+    searchParams
+      .get("districts")
+      ?.split(",")
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value) && value > 0) ?? [];
+  const categories =
+    searchParams
+      .get("categories")
+      ?.split(",")
+      .filter((value) => value.length > 0) as FilterState["categories"]; // runtime-validated by AdvancedFilters
+
+  return {
+    dateRange: start && end ? { start, end } : null,
+    districts,
+    categories: categories ?? [],
+  };
+}
+
 type RobberyCell = {
   hour: number;
   day_of_week: number;
@@ -30,17 +55,53 @@ type RobberyCell = {
 };
 
 export default function TrendsPage() {
-  const { data: annual = [] } = useAnnualTrends();
-  const { data: monthly = [] } = useMonthlyTrends();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [filters, setFilters] = useState<FilterState>(() => getInitialFilters(searchParams));
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (filters.dateRange?.start && filters.dateRange?.end) {
+      params.set("start", filters.dateRange.start);
+      params.set("end", filters.dateRange.end);
+    } else {
+      params.delete("start");
+      params.delete("end");
+    }
+
+    if (filters.districts.length > 0) {
+      params.set("districts", filters.districts.join(","));
+    } else {
+      params.delete("districts");
+    }
+
+    if (filters.categories.length > 0) {
+      params.set("categories", filters.categories.join(","));
+    } else {
+      params.delete("categories");
+    }
+
+    const queryString = params.toString();
+    const nextUrl = queryString.length > 0 ? `${pathname}?${queryString}` : pathname;
+    const currentUrl = searchParams.toString().length > 0 ? `${pathname}?${searchParams.toString()}` : pathname;
+
+    if (nextUrl !== currentUrl) {
+      router.replace(nextUrl, { scroll: false });
+    }
+  }, [filters, pathname, router, searchParams]);
+
+  const annual = useFilteredData("/api/v1/trends/annual", filters);
+  const monthly = useFilteredData("/api/v1/trends/monthly", filters);
+
   const { data: covid = [] } = useSWR("/api/v1/trends/covid", fetcher);
   const { data: seasonality } = useSWR("/api/v1/trends/seasonality", fetcher);
   const { data: robberyHeat = [] } = useSWR("/api/v1/trends/robbery-heatmap", fetcher);
-  const [startYear, setStartYear] = useState(2015);
-  const [endYear, setEndYear] = useState(2025);
 
   const annualSeries = useMemo(() => {
     const byYear = new Map<number, AnnualSeriesRow>();
-    annual.forEach((row) => {
+    annual.data.forEach((row) => {
       const year = Number(row.year);
       if (!byYear.has(year)) {
         byYear.set(year, { year, Violent: 0, Property: 0, Other: 0 });
@@ -57,16 +118,14 @@ export default function TrendsPage() {
       }
     });
     return Array.from(byYear.values()).sort((a, b) => a.year - b.year);
-  }, [annual]);
+  }, [annual.data]);
 
   const monthlySeries = useMemo(() => {
-    const filtered = monthly.filter((row) => {
-      const year = Number(String(row.month).slice(0, 4));
-      return year >= startYear && year <= endYear;
-    });
     const byMonth = new Map<string, { month: string; Violent: number; Property: number; Other: number }>();
-    filtered.forEach((row) => {
-      const month = String(row.month).slice(0, 7);
+    monthly.data.forEach((row) => {
+      const monthValue = row.month;
+      if (!monthValue) return;
+      const month = String(monthValue).slice(0, 7);
       if (!byMonth.has(month)) {
         byMonth.set(month, { month, Violent: 0, Property: 0, Other: 0 });
       }
@@ -82,11 +141,18 @@ export default function TrendsPage() {
       }
     });
     return Array.from(byMonth.values());
-  }, [monthly, startYear, endYear]);
+  }, [monthly.data]);
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Crime Trends</h1>
+
+      <AdvancedFilters
+        filters={filters}
+        onChange={setFilters}
+        resultCount={annual.filteredCount}
+        totalCount={annual.totalCount}
+      />
 
       <ChartCard title="Annual trends" description="Violent, Property, and Other incidents by year.">
         <div className="h-72" aria-label="Annual trends chart">
@@ -107,7 +173,6 @@ export default function TrendsPage() {
       </ChartCard>
 
       <ChartCard title="Monthly trends" description="Monthly totals with date range filtering.">
-        <DateRangeFilter start={startYear} end={endYear} onStart={setStartYear} onEnd={setEndYear} />
         <div className="h-72" aria-label="Monthly trends chart">
           <TrendChart
             data={monthlySeries}
