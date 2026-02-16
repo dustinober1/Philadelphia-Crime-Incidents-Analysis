@@ -8,7 +8,21 @@ import type { FilterState, TrendRow } from "@/lib/types";
 import { applyFilters } from "@/lib/filters";
 
 export function useFilteredData(endpoint: string, filters: FilterState) {
-  const { data, error, isLoading } = useSWR<TrendRow[]>(endpoint, fetcher);
+  // Build query params for district filtering
+  const params = new URLSearchParams();
+  const selectedDistrict = filters.districts.length === 1 ? filters.districts[0] : null;
+
+  if (selectedDistrict !== null) {
+    params.set("district", String(selectedDistrict));
+  }
+
+  const queryString = params.toString();
+  const url = queryString ? `${endpoint}?${queryString}` : endpoint;
+
+  // SWR key includes district so changing district triggers refetch
+  const swrKey = url;
+
+  const { data, error, isLoading } = useSWR<TrendRow[]>(swrKey, fetcher);
 
   const filteredData = useMemo(() => {
     if (!data) return [];

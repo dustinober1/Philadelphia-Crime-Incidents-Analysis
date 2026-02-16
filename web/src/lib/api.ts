@@ -16,6 +16,7 @@ export interface TrendRow {
   month?: string;
   crime_category?: "Violent" | "Property" | "Other" | string;
   count: number;
+  dc_dist?: number; // PPD district number (1-23), present in district-scoped responses
 }
 
 export interface MetadataResponse {
