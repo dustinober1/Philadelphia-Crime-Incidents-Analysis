@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems, Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import { ChevronDown, Menu as MenuIcon, X } from "lucide-react";
 import clsx from "clsx";
@@ -15,6 +16,22 @@ import {
 
 export function Navbar() {
   const pathname = usePathname();
+  const [preservedQuery, setPreservedQuery] = useState("");
+
+  useEffect(() => {
+    const current = new URLSearchParams(window.location.search);
+    const preserved = new URLSearchParams();
+    for (const key of ["start", "end", "districts", "categories"]) {
+      const value = current.get(key);
+      if (value) preserved.set(key, value);
+    }
+    setPreservedQuery(preserved.toString());
+  }, []);
+  const withPreservedQuery = (href: string) => {
+    if (preservedQuery.length === 0) return href;
+    if (href !== "/trends" && href !== "/map") return href;
+    return `${href}?${preservedQuery}`;
+  };
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -29,7 +46,7 @@ export function Navbar() {
           {primaryLinks.map((link) => (
             <Link
               key={link.href}
-              href={link.href}
+              href={withPreservedQuery(link.href)}
               className={clsx(
                 "rounded px-4 py-2 text-sm font-medium transition-colors",
                 isActiveRoute(pathname, link.href, true)
@@ -62,7 +79,7 @@ export function Navbar() {
               {analysisGroup.items.map((item) => (
                 <MenuItem key={item.href}>
                   <Link
-                    href={item.href}
+                    href={withPreservedQuery(item.href)}
                     className={clsx(
                       "block px-4 py-2 text-sm transition-colors",
                       isActiveRoute(pathname, item.href)
@@ -81,7 +98,7 @@ export function Navbar() {
           {secondaryLinks.map((link) => (
             <Link
               key={link.href}
-              href={link.href}
+              href={withPreservedQuery(link.href)}
               className={clsx(
                 "rounded px-4 py-2 text-sm font-medium transition-colors",
                 isActiveRoute(pathname, link.href, true)
@@ -119,7 +136,7 @@ export function Navbar() {
                 {primaryLinks.map((link) => (
                   <Link
                     key={link.href}
-                    href={link.href}
+                    href={withPreservedQuery(link.href)}
                     className={clsx(
                       "block rounded px-4 py-3 text-base font-medium transition-colors",
                       isActiveRoute(pathname, link.href, true)
@@ -139,7 +156,7 @@ export function Navbar() {
                   {analysisGroup.items.map((item) => (
                     <Link
                       key={item.href}
-                      href={item.href}
+                      href={withPreservedQuery(item.href)}
                       className={clsx(
                         "block rounded px-4 py-3 text-base font-medium transition-colors",
                         isActiveRoute(pathname, item.href)
@@ -156,7 +173,7 @@ export function Navbar() {
                 {secondaryLinks.map((link) => (
                   <Link
                     key={link.href}
-                    href={link.href}
+                    href={withPreservedQuery(link.href)}
                     className={clsx(
                       "block rounded px-4 py-3 text-base font-medium transition-colors",
                       isActiveRoute(pathname, link.href, true)
