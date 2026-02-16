@@ -1,0 +1,10 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "id": 1, "label": "Sample hotspot" },
+      "geometry": { "type": "Point", "coordinates": [ -75.1652, 39.9526 ] }
+    }
+  ]
+}
