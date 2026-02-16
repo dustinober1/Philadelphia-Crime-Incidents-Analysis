@@ -11,7 +11,7 @@ import { InsightBox } from "@/components/data-story/InsightBox";
 import { AdvancedFilters } from "@/components/filters/AdvancedFilters";
 import { useFilteredData } from "@/hooks/useFilteredData";
 import { generateNarrative } from "@/lib/narratives";
-import type { Insight } from "@/lib/narratives";
+import type { Insight, Narrative } from "@/lib/narratives";
 import type { FilterState } from "@/lib/types";
 import { fetcher } from "@/lib/api";
 
@@ -251,6 +251,65 @@ export default function TrendsPage() {
     return insights;
   }, [monthlySeries]);
 
+  const covidNarrative: Narrative | null = useMemo(() => {
+    if (!covid || covid.length < 3) return null;
+
+    const pre = covid.find((p: { period: string; count: number; start?: string; end?: string }) => p.period === "Pre");
+    const during = covid.find((p: { period: string; count: number; start?: string; end?: string }) => p.period === "During");
+    const post = covid.find((p: { period: string; count: number; start?: string; end?: string }) => p.period === "Post");
+
+    if (!pre || !during || !post) return null;
+
+    // Compare pre to during (pandemic impact)
+    const preToDuring = during.count - pre.count;
+    const preToDuringPct = pre.count > 0 ? (preToDuring / pre.count) * 100 : 0;
+
+    // Compare during to post (recovery)
+    const duringToPost = post.count - during.count;
+    const duringToPostPct = during.count > 0 ? (duringToPost / during.count) * 100 : 0;
+
+    // Generate narrative based on the largest change
+    if (Math.abs(preToDuringPct) > Math.abs(duringToPostPct)) {
+      return generateNarrative({
+        current: during.count,
+        previous: pre.count,
+        label: "Pandemic period crime",
+      });
+    } else {
+      return generateNarrative({
+        current: post.count,
+        previous: during.count,
+        label: "Post-pandemic crime",
+      });
+    }
+  }, [covid]);
+
+  const covidInsights: Insight[] = useMemo(() => {
+    if (!covid || covid.length < 3) return [];
+
+    const pre = covid.find((p: { period: string; count: number; start?: string; end?: string }) => p.period === "Pre");
+    const during = covid.find((p: { period: string; count: number; start?: string; end?: string }) => p.period === "During");
+    const post = covid.find((p: { period: string; count: number; start?: string; end?: string }) => p.period === "Post");
+
+    return [
+      {
+        icon: "stable",
+        type: "neutral",
+        text: `Pre-pandemic: ${(pre?.count ?? 0).toLocaleString()} incidents (${pre?.start ?? ""} to ${pre?.end ?? ""})`,
+      },
+      {
+        icon: "stable",
+        type: "neutral",
+        text: `During pandemic: ${(during?.count ?? 0).toLocaleString()} incidents`,
+      },
+      {
+        icon: "stable",
+        type: "neutral",
+        text: `Post-pandemic: ${(post?.count ?? 0).toLocaleString()} incidents (2022 onward)`,
+      },
+    ];
+  }, [covid]);
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Crime Trends</h1>
@@ -338,8 +397,12 @@ export default function TrendsPage() {
             showXLabels={true}
           />
         </div>
-        <p className="text-sm text-slate-600">Date ranges: Pre (2006-01-01 to 2020-02-29), During (2020-03-01 to 2021-12-31), Post (2022-01-01 onward).</p>
-        <p className="text-xs text-slate-500 italic">This analysis compares pandemic periods at citywide level.</p>
+
+        <div className="mt-4 space-y-3">
+          {covidNarrative && <NarrativeCard narrative={covidNarrative} title="COVID Impact Analysis" />}
+          <InsightBox title="Period Breakdown" insights={covidInsights} />
+        </div>
+
         <a href="/api/v1/trends/covid" className="text-sm text-blue-700 underline">Download data</a>
       </ChartCard>
 
