@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import useSWR from "swr";
 
 import { fetcher } from "@/lib/api";
@@ -35,6 +36,12 @@ export function Footer() {
           
           {/* External links with touch-friendly spacing */}
           <div className="mt-2 flex flex-wrap gap-4">
+            <Link
+              className="inline-flex min-h-[44px] items-center text-blue-700 underline underline-offset-2 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              href="/data"
+            >
+              Data
+            </Link>
             <a
               className="inline-flex min-h-[44px] items-center text-blue-700 underline underline-offset-2 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               href="https://github.com"

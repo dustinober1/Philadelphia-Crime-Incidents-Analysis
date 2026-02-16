@@ -38,6 +38,7 @@ export const analysisGroup: NavGroup = {
  */
 export const secondaryLinks: NavItem[] = [
   { href: "/questions", label: "Q&A" },
+  { href: "/data", label: "Data & Transparency" },
   { href: "/about", label: "About" },
 ];
 
