@@ -15,7 +15,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.544.0",
     "mapbox-gl": "^3.14.0",
-    "next": "15.5.2",
+    "next": "15.5.12",
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "react-map-gl": "^8.0.4",
@@ -30,7 +30,7 @@
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "eslint": "^9.33.0",
-    "eslint-config-next": "15.5.2",
+    "eslint-config-next": "15.5.12",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.9.2"
   }
