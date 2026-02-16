@@ -6,7 +6,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 
 import { DownloadButton } from "@/components/DownloadButton";
+import { NarrativeCard } from "@/components/data-story/NarrativeCard";
+import { InsightBox } from "@/components/data-story/InsightBox";
 import { AdvancedFilters } from "@/components/filters/AdvancedFilters";
+import { generateNarrative } from "@/lib/narratives";
+import type { Insight, Narrative } from "@/lib/narratives";
 import type { FilterState } from "@/lib/types";
 import { fetcher } from "@/lib/api";
 
@@ -106,6 +110,133 @@ export default function MapPage() {
     };
   }, [districts, filters.districts]);
 
+  function toFiniteNumber(value: unknown): number | null {
+    if (typeof value === "number") return Number.isFinite(value) ? value : null;
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+  }
+
+  function median(values: number[]): number | null {
+    if (values.length === 0) return null;
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    if (sorted.length % 2 === 0) {
+      return (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+    return sorted[mid];
+  }
+
+  const spatialInsights: Insight[] = useMemo(() => {
+    const insights: Insight[] = [];
+
+    const displayedDistrictCount = filteredDistricts?.features?.length ?? 0;
+    const totalDistrictCount = districts?.features?.length ?? 0;
+
+    if (filters.districts.length > 0) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `Displaying ${displayedDistrictCount} of ${totalDistrictCount} districts based on your district filter.`,
+      });
+    }
+
+    const districtEntries = (filteredDistricts?.features ?? [])
+      .map((feature) => {
+        const props = (feature as { properties?: Record<string, unknown> }).properties;
+        const distNum = props?.dist_num;
+        const severity = toFiniteNumber(props?.severity_score);
+        return {
+          district: typeof distNum === "string" ? distNum : null,
+          severity,
+        };
+      })
+      .filter((row): row is { district: string; severity: number } =>
+        typeof row.district === "string" && row.severity !== null,
+      );
+
+    if (districtEntries.length > 0) {
+      const maxRow = districtEntries.reduce((a, b) => (a.severity >= b.severity ? a : b));
+      const severityValues = districtEntries.map((row) => row.severity);
+      const med = median(severityValues);
+
+      const severityType: Insight["type"] = maxRow.severity >= 70 ? "concern" : maxRow.severity <= 30 ? "positive" : "neutral";
+      const severityIcon: Insight["icon"] = maxRow.severity >= 70 ? "up" : maxRow.severity <= 30 ? "down" : "stable";
+
+      insights.push({
+        icon: severityIcon,
+        type: severityType,
+        text: `Highest district severity score is ${maxRow.severity.toFixed(1)} (District ${maxRow.district})${med !== null ? ` vs median ${med.toFixed(1)}.` : "."}`,
+      });
+    }
+
+    const hotspotCounts = (hotspots.features ?? [])
+      .map((feature) => {
+        const props = (feature as { properties?: Record<string, unknown> }).properties;
+        return toFiniteNumber(props?.incident_count);
+      })
+      .filter((value): value is number => value !== null);
+
+    if (hotspotCounts.length > 0) {
+      const top = Math.max(...hotspotCounts);
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `Hotspots layer contains ${hotspotCounts.length.toLocaleString()} points; the highest-intensity hotspot represents ${top.toLocaleString()} incidents.`,
+      });
+    }
+
+    const corridorCount = corridors.features?.length ?? 0;
+    if (corridorCount > 0) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `Corridors layer shows ${corridorCount.toLocaleString()} high-activity segments that can help contextualize concentration areas.`,
+      });
+    }
+
+    if (filters.dateRange) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `Date range filter is set (${filters.dateRange.start} → ${filters.dateRange.end}). Spatial layers reflect exported aggregates; use trends for time-sliced comparisons.`,
+      });
+    }
+
+    if (filters.categories.length > 0) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `Category filter is set (${filters.categories.join(", ")}). Spatial layers are not category-specific; use trends/policy pages for category narratives.`,
+      });
+    }
+
+    return insights;
+  }, [corridors.features, districts?.features?.length, filters.categories, filters.dateRange, filters.districts.length, filteredDistricts?.features, hotspots.features]);
+
+  const hotspotNarrative: Narrative | null = useMemo(() => {
+    const hotspotCounts = (hotspots.features ?? [])
+      .map((feature) => {
+        const props = (feature as { properties?: Record<string, unknown> }).properties;
+        return toFiniteNumber(props?.incident_count);
+      })
+      .filter((value): value is number => value !== null);
+
+    if (hotspotCounts.length < 2) return null;
+
+    const top = Math.max(...hotspotCounts);
+    const med = median(hotspotCounts);
+    if (med === null) return null;
+
+    return generateNarrative({
+      current: top,
+      previous: med,
+      label: "Hotspot incidents",
+    });
+  }, [hotspots.features]);
+
   if (hasError) {
     return (
       <div className="space-y-4">
@@ -146,6 +277,13 @@ export default function MapPage() {
         resultCount={filteredDistricts?.features?.length}
         totalCount={districts.features.length}
       />
+
+      <div className="space-y-3">
+        <InsightBox title="Spatial Insights" insights={spatialInsights} />
+        {hotspotNarrative && (
+          <NarrativeCard narrative={hotspotNarrative} title="Hotspot concentration" />
+        )}
+      </div>
 
       <div className="rounded-lg border bg-blue-50 p-4 text-sm text-blue-900">
         <h2 className="mb-2 font-semibold">Map Layer Controls</h2>
