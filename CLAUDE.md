@@ -30,7 +30,7 @@ Data Sources (PPD, Census) → Pipeline Service → API Data (shared volume: /ap
 ### Technology Stack
 
 **Backend:**
-- Python 3.14+ (via conda env `crime`)
+- Python 3.13+ (via conda env `crime`)
 - FastAPI with uvicorn server
 - GeoPandas/Pandas for spatial and data processing
 - Pydantic for data validation
@@ -77,6 +77,29 @@ docker compose up -d --build
 - Web UI: `http://localhost:3001` (or `${WEB_PORT:-3001}`)
 - API docs: `http://localhost:8080/docs` (auto-generated OpenAPI docs)
 - API health: `http://localhost:8080/api/health`
+
+### Validation Script Options
+
+The local stack validation script supports multiple output formats:
+
+```bash
+# Human-readable output (default)
+python scripts/validate_local_stack.py
+
+# JSON output (for CI parsing)
+python scripts/validate_local_stack.py --format json
+
+# YAML output (for configuration management)
+python scripts/validate_local_stack.py --format yaml
+
+# Extended API endpoint validation
+python scripts/validate_local_stack.py --extended
+
+# Combine options
+python scripts/validate_local_stack.py --extended --format json
+```
+
+Exit codes: `0` for success, `1` for failure.
 
 ### Runtime Mode Presets (Optional)
 
@@ -176,8 +199,8 @@ make dev-api          # FastAPI with uvicorn --reload
 make export-data      # python -m pipeline.export_data --output-dir api/data
 make refresh-data     # python -m pipeline.refresh_data --output-dir api/data
 
-# Deployment
-make deploy           # firebase deploy && gcloud run deploy
+# Deployment (Note: actual commands differ - see Deployment section below)
+make deploy           # firebase deploy && gcloud run deploy (simplified)
 
 # Cleanup
 make clean-all        # Remove all caches, build artifacts, reports
@@ -213,7 +236,7 @@ pytest tests/integration/ -m integration
 
 **Testing Configuration (from pyproject.toml):**
 - Parallel execution by default (pytest-xdist with `-nauto`)
-- Coverage required for analysis, api, pipeline modules
+- Coverage required for analysis, api, pipeline modules (currently disabled at 0.0%)
 - Branch coverage enabled (more accurate than line coverage)
 - HTML coverage report generated in `htmlcov/`
 - Markers: `slow` (tests >5s or requiring full datasets), `integration` (end-to-end tests)
@@ -371,6 +394,9 @@ Key fixtures in `conftest.py`:
 - `slow`: Tests that take >5 seconds or require full datasets (deselected with `-m "not slow"`)
 - `integration`: End-to-end integration tests
 
+**Testing Quality Criteria:**
+See `tests/TESTING_QUALITY_CRITERIA.md` for detailed testing standards and quality guidelines.
+
 ## Important Conventions
 
 ### Versioned Outputs
@@ -421,6 +447,11 @@ The project uses strict mypy configuration for API code, but type checking is cu
 - Use Pydantic models for API request/response validation
 - Type hints are required for all function signatures (strict mode)
 
+**MyPy Exclusions (from pyproject.toml):**
+- `analysis/` - Completely excluded (legacy code)
+- `reports/`, `scripts/`, `web/` - Excluded
+- Most test files - Excluded except `test_api_endpoints.py` and `test_pipeline_export.py`
+
 ### Web Conventions
 
 - Use Next.js App Router (not Pages Router)
@@ -444,6 +475,10 @@ gcloud config set project <GCP_PROJECT_ID>
 echo -n "<admin-password>" | gcloud secrets create ADMIN_PASSWORD --data-file=-
 echo -n "<random-token-secret>" | gcloud secrets create ADMIN_TOKEN_SECRET --data-file=-
 
+# If secrets already exist, add new versions
+echo -n "<admin-password>" | gcloud secrets versions add ADMIN_PASSWORD --data-file=-
+echo -n "<random-token-secret>" | gcloud secrets versions add ADMIN_TOKEN_SECRET --data-file=-
+
 # Deploy via Cloud Build
 gcloud builds submit --project <GCP_PROJECT_ID> --config cloudbuild.yaml .
 ```
@@ -458,6 +493,27 @@ cd web && npm ci && npm run build && cd ..
 firebase deploy --only hosting --project <FIREBASE_PROJECT_ID>
 ```
 
+### Rollback Procedures
+
+**Roll back API traffic:**
+```bash
+# List available revisions
+gcloud run revisions list --service philly-crime-api --region us-east1
+
+# Roll back to specific revision
+gcloud run services update-traffic philly-crime-api --region us-east1 --to-revisions <REVISION_NAME>=100
+```
+
+**Roll back hosting:**
+```bash
+# Checkout previous good commit
+git checkout <PREVIOUS_GOOD_COMMIT>
+
+# Rebuild and deploy
+cd web && npm ci && npm run build && cd ..
+firebase deploy --only hosting --project <FIREBASE_PROJECT_ID>
+```
+
 ### Required Environment Variables (Cloud Run)
 
 - `GOOGLE_CLOUD_PROJECT` - GCP project ID
@@ -467,6 +523,13 @@ firebase deploy --only hosting --project <FIREBASE_PROJECT_ID>
 - `ADMIN_TOKEN_SECRET` - Secret Manager secret for JWT tokens
 
 **Important:** Admin auth secrets are server-only. Do not use `NEXT_PUBLIC_*` for admin credentials.
+
+## Known Limitations
+
+- Forecast output quality depends on historical reporting consistency and may drift when data schema changes
+- Spatial exports require boundary and corridor files in `data/boundaries/`; missing files reduce map fidelity
+- Q&A admin auth uses bearer tokens without MFA; deploy behind stronger IAM controls for higher-security environments
+- The `docs/` directory referenced in older documentation does not exist; use `.planning/` for project documentation instead
 
 ## Troubleshooting
 
@@ -485,6 +548,21 @@ firebase deploy --only hosting --project <FIREBASE_PROJECT_ID>
 **Pipeline not refreshing:**
 - Check pipeline health file: `docker compose exec pipeline cat /tmp/pipeline-refresh.ok`
 - Check logs: `docker compose logs --tail=100 pipeline`
+
+**Recovery and reset:**
+```bash
+# View logs for all services
+docker compose logs --tail=200 pipeline api web
+
+# Reset stack (clear volumes and rebuild)
+./scripts/reset_local_stack.sh
+docker compose up -d --build
+
+# Post-recovery validation
+docker compose ps
+curl http://localhost:8080/api/health
+python scripts/validate_local_stack.py --skip-startup
+```
 
 ### Import Errors in CLI
 
@@ -519,10 +597,9 @@ conda env create -f environment.yml
 ## Documentation References
 
 - **README.md** - User-facing project overview and quickstart
-- **docs/MIGRATION.md** - v1.0 notebook to v1.1 CLI migration guide
-- **docs/local-compose.md** - Local Compose troubleshooting
+- **tests/TESTING_QUALITY_CRITERIA.md** - Detailed testing standards and quality guidelines
+- **scripts/api_endpoints.md** - API endpoint documentation
 - **config/*.yaml** - Analysis configuration documentation
-- **.planning/** - Project planning documents (PROJECT.md, ROADMAP.md, phase plans)
 
 ## Project Planning (.planning/)
 
@@ -533,7 +610,9 @@ The `.planning/` directory contains structured project planning:
 - **ROADMAP.md** - Development phases and milestones
 - **STATE.md** - Current project state and progress
 - **phases/** - Individual phase plans, research, and summaries
-- **codebase/** - Architecture documentation (STRUCTURE.md, CONVENTIONS.md, etc.)
-- **research/** - Research outputs (STACK.md, FEATURES.md, PITFALLS.md)
+- **codebase/** - Architecture documentation (STRUCTURE.md, CONVENTIONS.md, ARCHITECTURE.md, TESTING.md, etc.)
+- **research/** - Research outputs (STACK.md, FEATURES.md, PITFALLS.md, ARCHITECTURE.md, SUMMARY.md)
+
+**Note:** The `docs/` directory referenced in older documentation (MIGRATION.md, local-compose.md, resource-detection.md) does not exist. Use `.planning/` for project documentation instead.
 
 When planning new features, reference the ROADMAP.md to understand the current phase and upcoming work.
