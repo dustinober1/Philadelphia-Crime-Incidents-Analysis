@@ -6,8 +6,12 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 
 import { ChartCard } from "@/components/ChartCard";
+import { NarrativeCard } from "@/components/data-story/NarrativeCard";
+import { InsightBox } from "@/components/data-story/InsightBox";
 import { AdvancedFilters } from "@/components/filters/AdvancedFilters";
 import { useFilteredData } from "@/hooks/useFilteredData";
+import { generateNarrative } from "@/lib/narratives";
+import type { Insight } from "@/lib/narratives";
 import type { FilterState } from "@/lib/types";
 import { fetcher } from "@/lib/api";
 
@@ -120,6 +124,52 @@ export default function TrendsPage() {
     return Array.from(byYear.values()).sort((a, b) => a.year - b.year);
   }, [annual.data]);
 
+  // Narrative insights derived from filtered annual series
+  const annualNarratives = useMemo(() => {
+    if (annualSeries.length < 2) return [];
+
+    const latest = annualSeries[annualSeries.length - 1];
+    const previous = annualSeries[annualSeries.length - 2];
+
+    return [
+      generateNarrative({ current: latest.Violent, previous: previous.Violent, label: "Violent Crime" }),
+      generateNarrative({ current: latest.Property, previous: previous.Property, label: "Property Crime" }),
+      generateNarrative({ current: latest.Other, previous: previous.Other, label: "Other Incidents" }),
+    ];
+  }, [annualSeries]);
+
+  const filterInsights: Insight[] = useMemo(() => {
+    const insights: Insight[] = [];
+
+    const districtCount = filters.districts.length;
+    if (districtCount > 0) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `Filtered to ${districtCount} district${districtCount === 1 ? "" : "s"} for comparison against citywide patterns.`,
+      });
+    }
+
+    const categoryCount = filters.categories.length;
+    if (categoryCount > 0) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: `Viewing ${categoryCount} selected crime categor${categoryCount === 1 ? "y" : "ies"} in the time series.`,
+      });
+    }
+
+    if (annualSeries.length < 2) {
+      insights.push({
+        icon: "stable",
+        type: "neutral",
+        text: "Select a broader date range to enable year-over-year comparison narratives.",
+      });
+    }
+
+    return insights;
+  }, [annualSeries.length, filters.categories.length, filters.districts.length]);
+
   const monthlySeries = useMemo(() => {
     const byMonth = new Map<string, { month: string; Violent: number; Property: number; Other: number }>();
     monthly.data.forEach((row) => {
@@ -168,7 +218,31 @@ export default function TrendsPage() {
             showXLabels={true}
           />
         </div>
-        <p className="text-sm text-slate-600">Insight: Property incidents drive total volume while violent incidents fluctuate in narrower bands.</p>
+
+        {/* Narrative analysis */}
+        <div className="mt-4 space-y-3">
+          <h3 className="text-sm font-semibold text-slate-700">Year-over-Year Analysis</h3>
+
+          {annualNarratives.length > 0 ? (
+            annualNarratives.map((narrative, idx) => (
+              <NarrativeCard key={idx} narrative={narrative} title={idx === 0 ? "Violent Crime" : idx === 1 ? "Property Crime" : "Other Incidents"} />
+            ))
+          ) : (
+            <InsightBox
+              title="Not enough data for comparison"
+              insights={[
+                {
+                  icon: "stable",
+                  type: "neutral",
+                  text: "Widen your date range or clear filters so at least two years are available for year-over-year narratives.",
+                },
+              ]}
+            />
+          )}
+
+          {filterInsights.length > 0 && <InsightBox title="Current filter context" insights={filterInsights} />}
+        </div>
+
         <a href="/api/v1/trends/annual" className="text-sm text-blue-700 underline">Download data</a>
       </ChartCard>
 
