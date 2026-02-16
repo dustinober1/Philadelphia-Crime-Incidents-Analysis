@@ -53,3 +53,34 @@ export interface EventRow {
   difference?: number;
   [key: string]: string | number | undefined;
 }
+
+/**
+ * Advanced filtering types
+ */
+
+export type CrimeCategory = "Violent" | "Property" | "Other";
+
+export interface FilterState {
+  dateRange:
+    | {
+        start: string; // ISO date string
+        end: string; // ISO date string
+      }
+    | null;
+  districts: number[]; // PPD district numbers (1-23)
+  categories: CrimeCategory[];
+}
+
+export interface FilterOptions {
+  availableDistricts: number[];
+  availableCategories: string[];
+}
+
+export interface CrimeIncident {
+  dispatch_date: string;
+  dispatch_time: string;
+  district?: number;
+  crime_category: string;
+  text_general_code?: string;
+  point?: { lat: number; lng: number };
+}
